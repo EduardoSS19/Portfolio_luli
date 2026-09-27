@@ -11,8 +11,8 @@ export function ObraCard({ titulo, imagem, descricao, detalhe, categoria, catego
       className={`obra reveal-${categoria} ${visivel ? 'visivel' : ''} ${invertido ? 'invertido' : ''}`}
       onClick={() => setExpandido(!expandido)}
     >
-      <div className="obra-imagem">
-        <img src={imagem} alt={titulo} />
+      <div className={`obra-imagem ${imagem ? '' : 'obra-imagem-placeholder'}`}>
+        {imagem ? <img src={imagem} alt={titulo} /> : <span>Imagem da obra</span>}
       </div>
       <div className="obra-texto">
         <span className="categoria-legenda">{categoriaNome}</span>

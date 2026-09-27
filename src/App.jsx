@@ -6,27 +6,35 @@ import { Sobre } from './components/Sobre.jsx'
 import { SecaoCategoria } from './components/SecaoCategoria.jsx'
 import { Referencias } from './components/Referencias.jsx'
 import { Footer } from './components/Footer.jsx'
-import { categorias as categoriasIniciais } from './data/obras.js'
-import { referencias as referenciasIniciais } from './data/referencias.js'
-import { bioParagrafos, fotoLuisa } from './data/sobre.js'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
 
+const perfilInicial = {
+  nome: 'Nome da artista',
+  frase: 'Arte · Pesquisa · Experimentação',
+  foto: '',
+  bio: ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.'],
+  instagram: '',
+  email: '',
+  formulario: '',
+}
+
 export default function App() {
   const [conteudo, setConteudo] = useState({
-    categorias: categoriasIniciais,
-    referencias: referenciasIniciais,
-    sobre: { nome: 'Luísa Becker', foto: fotoLuisa, bio: bioParagrafos },
+    categorias: [],
+    referencias: [],
+    frames: [],
+    sobre: null,
   })
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
-  const sobre = conteudo.sobre
+  const sobre = conteudo.sobre ?? perfilInicial
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
-    { titulo: 'Referências', chave: 'referencias' },
-    { titulo: 'Contato', chave: 'contato' },
-  ], [categorias])
+    ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
+    ...(sobre.email || sobre.formulario ? [{ titulo: 'Contato', chave: 'contato' }] : []),
+  ], [categorias, referencias.length, sobre.email, sobre.formulario])
   const secaoAtiva = useSecaoAtiva(secoesNav)
   const [animando, setAnimando] = useState(null)
   const anteriorRef = useRef(secaoAtiva)
@@ -41,14 +49,15 @@ export default function App() {
       })
       .then(data => {
         setConteudo(atual => ({
-          categorias: Array.isArray(data.categorias) ? data.categorias : atual.categorias,
-          referencias: Array.isArray(data.referencias) ? data.referencias : atual.referencias,
-          sobre: data.sobre && Array.isArray(data.sobre.bio) ? data.sobre : atual.sobre,
+          categorias: Array.isArray(data.categorias) ? data.categorias : [],
+          referencias: Array.isArray(data.referencias) ? data.referencias : [],
+          frames: Array.isArray(data.frames) ? data.frames : [],
+          sobre: data.sobre && Array.isArray(data.sobre.bio) ? data.sobre : null,
         }))
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
-          console.warn('Não foi possível carregar o conteúdo do Django; usando os dados locais.', error)
+          console.warn('Não foi possível carregar o conteúdo do Django.', error)
         }
       })
 
@@ -73,8 +82,8 @@ export default function App() {
 
   return (
     <div>
-      <FundoFantasma secaoAtiva={secaoAtiva} secoes={secoesNav} />
-      <Hero nome={sobre.nome} frase="Cerâmica · Glitch Art · Gravura · Desenho" />
+      <FundoFantasma frames={conteudo.frames} secaoAtiva={secaoAtiva} secoes={secoesNav} />
+      <Hero nome={sobre.nome} frase={sobre.frase} />
       <Nav
         categorias={secoesNav}
         categoriaAtiva={secaoAtiva}
@@ -85,9 +94,9 @@ export default function App() {
       {categorias.map(cat => (
         <SecaoCategoria key={cat.titulo} titulo={cat.titulo} chave={cat.chave} obras={cat.obras} />
       ))}
-      <Referencias referencias={referencias} />
-      <Contato />
-      <Footer nome={sobre.nome} />
+      {referencias.length > 0 && <Referencias referencias={referencias} />}
+      <Contato endpoint={sobre.formulario} email={sobre.email} />
+      <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} />
     </div>
   )
 }

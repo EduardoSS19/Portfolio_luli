@@ -1,10 +1,10 @@
-export function Footer({ nome }) {
+export function Footer({ nome, instagram, email }) {
   return (
     <footer className="rodape">
       <p>{nome}</p>
       <div className="rodape-links">
-        <a href="https://instagram.com/SEU_USUARIO" target="_blank" rel="noreferrer">Instagram</a>
-        <a href="mailto:email@exemplo.com">Contato</a>
+        {instagram && <a href={instagram} target="_blank" rel="noreferrer">Instagram</a>}
+        {email && <a href={`mailto:${email}`}>Contato</a>}
       </div>
       <small>© {new Date().getFullYear()} — Todos os direitos reservados</small>
     </footer>

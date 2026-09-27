@@ -1,8 +1,6 @@
 import { useState } from 'react'
 
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/SEU_ID_AQUI' // troque pelo endpoint real
-
-export function Contato() {
+export function Contato({ endpoint, email }) {
   const [enviando, setEnviando] = useState(false)
   const [status, setStatus] = useState(null)
 
@@ -14,7 +12,7 @@ export function Contato() {
     const dados = new FormData(e.target)
 
     try {
-      const resposta = await fetch(FORMSPREE_ENDPOINT, {
+      const resposta = await fetch(endpoint, {
         method: 'POST',
         body: dados,
         headers: { Accept: 'application/json' },
@@ -32,10 +30,12 @@ export function Contato() {
     }
   }
 
+  if (!endpoint && !email) return null
+
   return (
     <section id="Contato" className="secao">
       <h2>Contato</h2>
-      <form className="form-contato" onSubmit={lidarEnvio}>
+      {endpoint ? <form className="form-contato" onSubmit={lidarEnvio}>
         <label>
           Nome
           <input type="text" name="nome" required />
@@ -53,7 +53,7 @@ export function Contato() {
         </button>
         {status === 'sucesso' && <p className="form-status sucesso">Mensagem enviada! Obrigada pelo contato.</p>}
         {status === 'erro' && <p className="form-status erro">Algo deu errado — tente novamente.</p>}
-      </form>
+      </form> : <a className="contato-email" href={`mailto:${email}`}>{email}</a>}
     </section>
   )
 }

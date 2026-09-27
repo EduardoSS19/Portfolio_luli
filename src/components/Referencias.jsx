@@ -1,4 +1,6 @@
 export function Referencias({ referencias }) {
+  if (referencias.length === 0) return null
+
   return (
     <section id="Referências" className="secao">
       <h2>Referências</h2>

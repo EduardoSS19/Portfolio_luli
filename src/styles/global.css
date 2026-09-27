@@ -90,6 +90,14 @@ nav button.anim-glitch{ animation: glitchIn 0.5s steps(2, end); }
   object-fit:cover;
   display:block;
 }
+.obra-imagem-placeholder{
+  display:grid;
+  place-items:center;
+  color:rgba(234,242,251,0.4);
+  text-transform:uppercase;
+  font-size:0.75rem;
+  letter-spacing:1px;
+}
 
 .obra-texto{
   display:flex;
@@ -307,6 +315,7 @@ nav button.anim-glitch{ animation: glitchIn 0.5s steps(2, end); }
   padding:0.75rem 1.5rem; font-weight:bold; cursor:pointer; transition:opacity 0.2s;
 }
 .form-contato button:disabled{ opacity:0.6; cursor:default; }
+.contato-email{ color:var(--azul-claro); }
 .form-status{ font-size:0.9rem; margin-top:0.5rem; }
 .form-status.sucesso{ color:#8fd19e; }
 .form-status.erro{ color:#e08a8a; }
