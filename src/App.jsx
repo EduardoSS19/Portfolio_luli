@@ -8,6 +8,7 @@ import { Referencias } from './components/Referencias.jsx'
 import { Footer } from './components/Footer.jsx'
 import { categorias as categoriasIniciais } from './data/obras.js'
 import { referencias as referenciasIniciais } from './data/referencias.js'
+import { bioParagrafos, fotoLuisa } from './data/sobre.js'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
 
@@ -15,9 +16,11 @@ export default function App() {
   const [conteudo, setConteudo] = useState({
     categorias: categoriasIniciais,
     referencias: referenciasIniciais,
+    sobre: { nome: 'Luísa Becker', foto: fotoLuisa, bio: bioParagrafos },
   })
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
+  const sobre = conteudo.sobre
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
@@ -40,6 +43,7 @@ export default function App() {
         setConteudo(atual => ({
           categorias: Array.isArray(data.categorias) ? data.categorias : atual.categorias,
           referencias: Array.isArray(data.referencias) ? data.referencias : atual.referencias,
+          sobre: data.sobre && Array.isArray(data.sobre.bio) ? data.sobre : atual.sobre,
         }))
       })
       .catch(error => {
@@ -70,20 +74,20 @@ export default function App() {
   return (
     <div>
       <FundoFantasma secaoAtiva={secaoAtiva} secoes={secoesNav} />
-      <Hero nome="Luísa Becker" frase="Cerâmica · Glitch Art · Gravura · Desenho" />
+      <Hero nome={sobre.nome} frase="Cerâmica · Glitch Art · Gravura · Desenho" />
       <Nav
         categorias={secoesNav}
         categoriaAtiva={secaoAtiva}
         animando={animando}
         aoSelecionar={selecionarCategoria}
       />
-      <Sobre />
+      <Sobre perfil={sobre} />
       {categorias.map(cat => (
         <SecaoCategoria key={cat.titulo} titulo={cat.titulo} chave={cat.chave} obras={cat.obras} />
       ))}
       <Referencias referencias={referencias} />
       <Contato />
-      <Footer nome="Luísa Becker" />
+      <Footer nome={sobre.nome} />
     </div>
   )
 }

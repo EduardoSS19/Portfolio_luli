@@ -1,6 +1,17 @@
 from django.contrib import admin
 
-from .models import Category, Reference, ReferenceLink, Work
+from .models import ArtistProfile, Category, Reference, ReferenceLink, Work
+
+
+@admin.register(ArtistProfile)
+class ArtistProfileAdmin(admin.ModelAdmin):
+    fields = ("name", "photo", "photo_url", "bio")
+
+    def has_add_permission(self, request):
+        return not ArtistProfile.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class WorkInline(admin.StackedInline):

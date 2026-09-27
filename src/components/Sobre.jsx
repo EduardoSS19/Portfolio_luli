@@ -1,16 +1,14 @@
-import { bioParagrafos, fotoLuisa } from '../data/sobre.js'
-
-export function Sobre() {
+export function Sobre({ perfil }) {
   return (
     <section id="Início" className="secao sobre-secao">
       <div className="obra">
         <div className="obra-imagem">
-          <img src={fotoLuisa} alt="Luísa Becker" />
+          <img src={perfil.foto} alt={perfil.nome} />
         </div>
         <div className="obra-texto">
           <span className="categoria-legenda">Início</span>
-          <h2>Luísa Becker</h2>
-          {bioParagrafos.map((p, i) => <p key={i}>{p}</p>)}
+          <h2>{perfil.nome}</h2>
+          {perfil.bio.map((paragrafo, index) => <p key={index}>{paragrafo}</p>)}
         </div>
       </div>
     </section>

@@ -23,6 +23,8 @@ O site abre em `http://localhost:5173`; o painel fica em `http://localhost:8000/
 
 O Django Admin permite editar categorias, obras, referências e links. Cada obra aceita upload de imagem (`jpg`, `jpeg`, `png` ou `webp`); também é possível manter uma URL alternativa.
 
+O item Perfil do portfólio controla o nome, a foto e a biografia exibidos em Sobre, no topo do site e no rodapé. Separe os parágrafos da biografia com uma linha em branco.
+
 Localmente, os uploads ficam em `media/`. Em produção, crie uma conta Cloudinary e informe `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` e `CLOUDINARY_API_SECRET` nas variáveis do serviço Render. O Blueprint solicita esses valores durante a configuração inicial; eles não devem ser adicionados ao Git.
 
 ## Publicação no Render

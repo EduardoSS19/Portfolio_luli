@@ -2,6 +2,26 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 
 
+class ArtistProfile(models.Model):
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    name = models.CharField("nome", max_length=120)
+    photo = models.ImageField(
+        "foto enviada",
+        upload_to="sobre/%Y/%m/",
+        blank=True,
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+    )
+    photo_url = models.CharField("URL alternativa da foto", max_length=500, blank=True)
+    bio = models.TextField("biografia (separe os parágrafos com linha em branco)")
+
+    class Meta:
+        verbose_name = "perfil do portfólio"
+        verbose_name_plural = "perfil do portfólio"
+
+    def __str__(self):
+        return self.name
+
+
 class Category(models.Model):
     title = models.CharField("título", max_length=100)
     key = models.SlugField("chave", max_length=50, unique=True)
