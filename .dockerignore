@@ -10,3 +10,4 @@ dist
 staticfiles
 media
 *.sqlite3
+public

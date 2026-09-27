@@ -10,6 +10,5 @@ media
 *.sqlite3
 __pycache__/
 *.py[cod]
-public/fundo/frame-teste-*.png
-public/fundo/*.png.png
+public/
 .DS_Store
