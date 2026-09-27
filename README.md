@@ -21,7 +21,9 @@ npm.cmd run dev
 
 O site abre em `http://localhost:5173`; o painel fica em `http://localhost:8000/admin/`. O Vite encaminha as chamadas `/api/` para o Django.
 
-O Django Admin permite editar categorias, obras, referências e links. As imagens são cadastradas como URLs ou caminhos de arquivos publicados em `public/`.
+O Django Admin permite editar categorias, obras, referências e links. Cada obra aceita upload de imagem (`jpg`, `jpeg`, `png` ou `webp`); também é possível manter uma URL alternativa.
+
+Localmente, os uploads ficam em `media/`. Em produção, crie uma conta Cloudinary e informe `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` e `CLOUDINARY_API_SECRET` nas variáveis do serviço Render. O Blueprint solicita esses valores durante a configuração inicial; eles não devem ser adicionados ao Git.
 
 ## Publicação no Render
 

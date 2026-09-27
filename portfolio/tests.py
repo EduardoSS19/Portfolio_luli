@@ -1,5 +1,10 @@
+from io import BytesIO
+
+from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 from .models import Category, Reference, Work
 
@@ -61,6 +66,56 @@ class PortfolioApiTests(TestCase):
             response.json()["categorias"][0]["obras"][0]["imagem"],
             "/static/gaiola.jpg",
         )
+
+    def test_uploaded_image_url_is_returned(self):
+        category = Category.objects.create(title="Desenho", key="desenho")
+        Work.objects.create(
+            category=category,
+            title="Gaiola",
+            image="obras/2026/09/gaiola.webp",
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(
+            response.json()["categorias"][0]["obras"][0]["imagem"],
+            "/media/obras/2026/09/gaiola.webp",
+        )
+
+    def test_uploaded_image_is_saved_and_served(self):
+        category = Category.objects.create(title="Desenho", key="desenho")
+        image_bytes = BytesIO()
+        Image.new("RGB", (1, 1), color="black").save(image_bytes, format="PNG")
+        uploaded_image = SimpleUploadedFile(
+            "gaiola.png",
+            image_bytes.getvalue(),
+            content_type="image/png",
+        )
+        work = Work.objects.create(
+            category=category,
+            title="Gaiola",
+            image=uploaded_image,
+        )
+        self.addCleanup(work.image.storage.delete, work.image.name)
+
+        self.assertTrue(work.image.storage.exists(work.image.name))
+        self.assertEqual(work.image.url, f"/media/{work.image.name}")
+
+    def test_admin_work_form_has_file_upload_input(self):
+        category = Category.objects.create(title="Desenho", key="desenho")
+        Work.objects.create(category=category, title="Gaiola")
+        admin_user = get_user_model().objects.create_superuser(
+            username="testadmin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(
+            reverse("admin:portfolio_category_change", args=[category.pk])
+        )
+
+        self.assertContains(response, 'type="file"')
 
     def test_healthcheck_returns_ok(self):
         response = self.client.get(reverse("healthcheck"))

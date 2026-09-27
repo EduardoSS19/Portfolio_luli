@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import FileExtensionValidator
 
 
 class Category(models.Model):
@@ -24,7 +25,13 @@ class Work(models.Model):
         verbose_name="categoria",
     )
     title = models.CharField("título", max_length=150)
-    image_url = models.CharField("URL ou caminho da imagem", max_length=500, blank=True)
+    image = models.ImageField(
+        "imagem enviada",
+        upload_to="obras/%Y/%m/",
+        blank=True,
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+    )
+    image_url = models.CharField("URL alternativa da imagem", max_length=500, blank=True)
     description = models.TextField("descrição", blank=True)
     detail = models.TextField("detalhes", blank=True)
     position = models.PositiveIntegerField("ordem", default=0)

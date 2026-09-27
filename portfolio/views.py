@@ -6,6 +6,16 @@ from django.views.decorators.http import require_GET
 from .models import Category, Reference, Work
 
 
+def _work_image_url(work):
+    if work.image:
+        return work.image.url
+
+    image_url = work.image_url
+    if image_url.startswith("/") and not image_url.startswith(("/static/", "/media/")):
+        return f"/static{image_url}"
+    return image_url
+
+
 @require_GET
 def portfolio_data(request):
     categories = Category.objects.filter(is_active=True).prefetch_related(
@@ -22,12 +32,7 @@ def portfolio_data(request):
                     "obras": [
                         {
                             "titulo": work.title,
-                            "imagem": (
-                                f"/static{work.image_url}"
-                                if work.image_url.startswith("/")
-                                and not work.image_url.startswith("/static/")
-                                else work.image_url
-                            ),
+                            "imagem": _work_image_url(work),
                             "descricao": work.description,
                             "detalhe": work.detail,
                         }

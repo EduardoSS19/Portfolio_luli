@@ -3,10 +3,10 @@ from django.contrib import admin
 from .models import Category, Reference, ReferenceLink, Work
 
 
-class WorkInline(admin.TabularInline):
+class WorkInline(admin.StackedInline):
     model = Work
     extra = 0
-    fields = ("title", "image_url", "description", "detail", "position", "is_active")
+    fields = ("title", "image", "image_url", "description", "detail", "position", "is_active")
 
 
 @admin.register(Category)
