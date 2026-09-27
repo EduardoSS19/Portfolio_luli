@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Luísa Becker
 
 Um portfólio dedicado a práticas que atravessam matéria, imagem e experimentação. Cerâmica, Glitch Art, Gravura e Desenho convivem aqui como diferentes caminhos de pesquisa e criação. Um tempo especial dedicado a fazer algo para minha amada, com a cara dela. 
@@ -14,3 +15,6 @@ Um portfólio dedicado a práticas que atravessam matéria, imagem e experimenta
 O site reúne obras, biografia e referências em uma experiência visual única. As imagens e os textos são organizados pelo painel editorial, permitindo atualizar o conteúdo sem alterar o código do site.
 
 Construído com React, Vite e Django.
+=======
+
+>>>>>>> 64c479d4d3b7a245803bad7341153599f90abfc6
