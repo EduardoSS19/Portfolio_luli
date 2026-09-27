@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-// Encapsula a lógica de "esse elemento já entrou na tela?".
-// Qualquer componente pode reutilizar isso sem repetir a lógica de Observer.
-export function useScrollReveal(threshold = 0.15) {
+export function useScrollReveal(threshold = 0) {
   const ref = useRef(null)
   const [visivel, setVisivel] = useState(false)
 
@@ -12,16 +10,13 @@ export function useScrollReveal(threshold = 0.15) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisivel(true)
-          observer.unobserve(elemento) // revela uma vez só
-        }
+        setVisivel(entry.isIntersecting)
       },
       { threshold }
     )
 
     observer.observe(elemento)
-    return () => observer.disconnect() // cleanup, evita vazamento de memória
+    return () => observer.disconnect()
   }, [threshold])
 
   return [ref, visivel]
