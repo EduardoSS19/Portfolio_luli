@@ -1,4 +1,9 @@
 node_modules
 dist
 .env
+.venv
+staticfiles
+db.sqlite3
+__pycache__/
+*.py[cod]
 .DS_Store
