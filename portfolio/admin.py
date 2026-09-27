@@ -1,17 +1,33 @@
 from django.contrib import admin
 
-from .models import ArtistProfile, Category, Reference, ReferenceLink, Work
+from .models import ArtistProfile, BackgroundFrame, Category, Reference, ReferenceLink, Work
 
 
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
-    fields = ("name", "photo", "photo_url", "bio")
+    fields = (
+        "name",
+        "tagline",
+        "photo",
+        "photo_url",
+        "bio",
+        "instagram_url",
+        "contact_email",
+        "contact_form_url",
+    )
 
     def has_add_permission(self, request):
         return not ArtistProfile.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(BackgroundFrame)
+class BackgroundFrameAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "position", "is_active")
+    list_editable = ("position", "is_active")
+    ordering = ("position", "id")
 
 
 class WorkInline(admin.StackedInline):

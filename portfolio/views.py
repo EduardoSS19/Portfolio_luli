@@ -4,7 +4,7 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 
-from .models import ArtistProfile, Category, Reference, Work
+from .models import ArtistProfile, BackgroundFrame, Category, Reference, Work
 
 
 def _image_url(uploaded_image, fallback):
@@ -24,13 +24,18 @@ def portfolio_data(request):
     )
     references = Reference.objects.filter(is_active=True).prefetch_related("links")
     profile = ArtistProfile.objects.first()
+    frames = BackgroundFrame.objects.filter(is_active=True)
 
     return JsonResponse(
         {
             "sobre": (
                 {
                     "nome": profile.name,
+                    "frase": profile.tagline,
                     "foto": _image_url(profile.photo, profile.photo_url),
+                    "instagram": profile.instagram_url,
+                    "email": profile.contact_email,
+                    "formulario": profile.contact_form_url,
                     "bio": [
                         paragraph.strip()
                         for paragraph in profile.bio.replace("\r\n", "\n").split("\n\n")
@@ -40,6 +45,7 @@ def portfolio_data(request):
                 if profile
                 else None
             ),
+            "frames": [frame.image.url for frame in frames],
             "categorias": [
                 {
                     "titulo": category.title,

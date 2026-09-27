@@ -5,6 +5,7 @@ from django.core.validators import FileExtensionValidator
 class ArtistProfile(models.Model):
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     name = models.CharField("nome", max_length=120)
+    tagline = models.CharField("frase de apresentação", max_length=255, blank=True)
     photo = models.ImageField(
         "foto enviada",
         upload_to="sobre/%Y/%m/",
@@ -13,6 +14,9 @@ class ArtistProfile(models.Model):
     )
     photo_url = models.CharField("URL alternativa da foto", max_length=500, blank=True)
     bio = models.TextField("biografia (separe os parágrafos com linha em branco)")
+    instagram_url = models.URLField("Instagram", max_length=500, blank=True)
+    contact_email = models.EmailField("e-mail de contato", blank=True)
+    contact_form_url = models.URLField("endpoint do formulário", max_length=500, blank=True)
 
     class Meta:
         verbose_name = "perfil do portfólio"
@@ -20,6 +24,24 @@ class ArtistProfile(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BackgroundFrame(models.Model):
+    image = models.ImageField(
+        "imagem enviada",
+        upload_to="fundos/%Y/%m/",
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+    )
+    position = models.PositiveIntegerField("ordem", default=0)
+    is_active = models.BooleanField("publicado", default=True)
+
+    class Meta:
+        ordering = ("position", "id")
+        verbose_name = "imagem de fundo"
+        verbose_name_plural = "imagens de fundo"
+
+    def __str__(self):
+        return f"Imagem de fundo {self.position + 1}"
 
 
 class Category(models.Model):

@@ -7,7 +7,7 @@ from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from .models import ArtistProfile, Category, Reference, Work
+from .models import ArtistProfile, BackgroundFrame, Category, Reference, Work
 
 
 class PortfolioApiTests(TestCase):
@@ -15,6 +15,7 @@ class PortfolioApiTests(TestCase):
         Category.objects.all().delete()
         Reference.objects.all().delete()
         ArtistProfile.objects.all().delete()
+        BackgroundFrame.objects.all().delete()
 
     def test_portfolio_endpoint_returns_frontend_shape(self):
         category = Category.objects.create(title="Desenho", key="desenho")
@@ -29,9 +30,14 @@ class PortfolioApiTests(TestCase):
         reference.links.create(text="Site", url="https://example.com")
         ArtistProfile.objects.create(
             name="Luísa Becker",
+            tagline="Cerâmica e desenho",
             photo_url="/sobre/luisa.jpg",
             bio="Primeiro parágrafo.\n\nSegundo parágrafo.",
+            instagram_url="https://instagram.com/artista",
+            contact_email="artista@example.com",
+            contact_form_url="https://formspree.io/f/example",
         )
+        BackgroundFrame.objects.create(image="fundos/2026/09/frame.webp")
 
         response = self.client.get(reverse("portfolio-data"))
 
@@ -39,9 +45,14 @@ class PortfolioApiTests(TestCase):
         self.assertEqual(response.json(), {
             "sobre": {
                 "nome": "Luísa Becker",
+                "frase": "Cerâmica e desenho",
                 "foto": "/static/sobre/luisa.jpg",
+                "instagram": "https://instagram.com/artista",
+                "email": "artista@example.com",
+                "formulario": "https://formspree.io/f/example",
                 "bio": ["Primeiro parágrafo.", "Segundo parágrafo."],
             },
+            "frames": ["/media/fundos/2026/09/frame.webp"],
             "categorias": [{
                 "titulo": "Desenho",
                 "chave": "desenho",
@@ -66,7 +77,7 @@ class PortfolioApiTests(TestCase):
 
         response = self.client.get(reverse("portfolio-data"))
 
-        self.assertEqual(response.json(), {"sobre": None, "categorias": [], "referencias": []})
+        self.assertEqual(response.json(), {"sobre": None, "frames": [], "categorias": [], "referencias": []})
 
     def test_admin_profile_form_has_photo_upload_and_bio(self):
         profile = ArtistProfile.objects.create(name="Luísa Becker", bio="Biografia.")
@@ -84,6 +95,18 @@ class PortfolioApiTests(TestCase):
         self.assertContains(response, 'type="file"')
         self.assertContains(response, 'name="name"')
         self.assertContains(response, 'name="bio"')
+
+    def test_background_frames_can_be_uploaded_in_admin(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="testadmin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse("admin:portfolio_backgroundframe_add"))
+
+        self.assertContains(response, 'type="file"')
 
     def test_local_image_path_uses_static_prefix(self):
         category = Category.objects.create(title="Desenho", key="desenho")
@@ -172,3 +195,31 @@ class PortfolioApiTests(TestCase):
             "http://127.0.0.1:5173/",
             fetch_redirect_response=False,
         )
+
+
+class PortfolioSeedTests(TestCase):
+    def test_seed_keeps_categories_and_uses_editable_placeholders(self):
+        categories = list(Category.objects.order_by("position"))
+
+        self.assertEqual(
+            [(category.title, category.key) for category in categories],
+            [
+                ("Cerâmica", "ceramica"),
+                ("Glitch Art", "glitch"),
+                ("Gravura", "escultura"),
+                ("Desenho", "desenho"),
+            ],
+        )
+        for category in categories:
+            works = list(category.works.all())
+            self.assertEqual(len(works), 1)
+            self.assertEqual(works[0].title, "Obra de exemplo")
+            self.assertIn("Lorem ipsum", works[0].description)
+            self.assertFalse(works[0].image)
+            self.assertFalse(works[0].image_url)
+
+        self.assertFalse(Reference.objects.exists())
+        profile = ArtistProfile.objects.get(pk=1)
+        self.assertEqual(profile.name, "Nome da artista")
+        self.assertFalse(profile.photo)
+        self.assertFalse(BackgroundFrame.objects.exists())
