@@ -4,4 +4,4 @@ export const bioParagrafos = [
   'Fluente na língua inglesa, trabalha atualmente na PanAmerican — The International School of Porto Alegre.',
 ]
 
-export const fotoLuisa = '/sobre/luisa.jpg'
+export const fotoLuisa = `${import.meta.env.BASE_URL}sobre/luisa.jpg`

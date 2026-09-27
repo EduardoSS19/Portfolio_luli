@@ -2,13 +2,14 @@ import { useMemo } from 'react'
 
 // Por enquanto, repetindo o mesmo frame de teste 6 vezes —
 // quando tiver frames variados, troque cada linha por um arquivo diferente.
+const basePublica = import.meta.env.BASE_URL
 const frames = [
-  '/fundo/frame-01.png',
-  '/fundo/frame-02.png',
-  '/fundo/frame-03.png',
-  '/fundo/frame-04.png',
-  '/fundo/frame-05.png',
-  '/fundo/frame-06.png',
+  `${basePublica}fundo/frame-01.png`,
+  `${basePublica}fundo/frame-02.png`,
+  `${basePublica}fundo/frame-03.png`,
+  `${basePublica}fundo/frame-04.png`,
+  `${basePublica}fundo/frame-05.png`,
+  `${basePublica}fundo/frame-06.png`,
 ]
 
 export function FundoFantasma({ secaoAtiva, secoes }) {

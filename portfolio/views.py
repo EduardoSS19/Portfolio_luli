@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.models import Prefetch
 from django.http import FileResponse, Http404, JsonResponse
+from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 
 from .models import ArtistProfile, Category, Reference, Work
@@ -77,6 +78,9 @@ def healthcheck(request):
 
 @require_GET
 def frontend(request):
+    if settings.DEBUG:
+        return redirect("http://127.0.0.1:5173/")
+
     index_file = settings.FRONTEND_DIST / "index.html"
     if not index_file.is_file():
         raise Http404("Frontend ainda não compilado.")

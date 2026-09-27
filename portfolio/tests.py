@@ -3,6 +3,7 @@ from io import BytesIO
 from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -161,3 +162,13 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
+
+    @override_settings(DEBUG=True)
+    def test_debug_root_redirects_to_vite(self):
+        response = self.client.get(reverse("frontend"))
+
+        self.assertRedirects(
+            response,
+            "http://127.0.0.1:5173/",
+            fetch_redirect_response=False,
+        )
