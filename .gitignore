@@ -1,10 +1,15 @@
 node_modules
 dist
 .env
+.env.*
+!.env.example
 .venv
+.vscode/
 staticfiles
 media
-db.sqlite3
+*.sqlite3
 __pycache__/
 *.py[cod]
+public/fundo/frame-teste-*.png
+public/fundo/*.png.png
 .DS_Store
