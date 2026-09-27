@@ -8,11 +8,14 @@ services:
     name: portfolio-site
     runtime: docker
     plan: free
-    preDeployCommand: python manage.py migrate --noinput
     healthCheckPath: /api/health/
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
       - key: DEBUG
         value: "false"
       - key: CLOUDINARY_CLOUD_NAME

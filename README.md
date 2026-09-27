@@ -29,12 +29,10 @@ Arquivos locais em `public/` podem ser selecionados para upload no Admin, mas a 
 
 ## Publicação no Render
 
-O arquivo `render.yaml` descreve o serviço Django/React e o banco PostgreSQL. Para publicar, envie o repositório ao GitHub, crie um Blueprint no Render e conecte esse repositório. O Render constrói o frontend, roda as migrações e publica site, API e painel no mesmo domínio.
+O arquivo `render.yaml` descreve o serviço Django/React e o banco PostgreSQL. Para publicar, envie o repositório ao GitHub, crie um Blueprint no Render e conecte esse repositório. O container aplica as migrações ao iniciar e publica site, API e painel no mesmo domínio.
 
-Depois do primeiro deploy, crie o usuário do painel pelo Shell do serviço no Render:
+O plano Free serve para teste: o serviço web pode dormir quando ocioso, e o Postgres gratuito expira após 30 dias. Faça upgrade do banco antes de cadastrar conteúdo que precise permanecer.
 
-```bash
-python manage.py createsuperuser
-```
+No primeiro start do serviço, as migrations rodam e o superusuário é criado com a senha informada pelo Blueprint em `DJANGO_SUPERUSER_PASSWORD`. O comando é idempotente: em reinícios seguintes não troca a senha de uma conta já criada.
 
 O banco começa com as categorias e placeholders definidos pelas migrações. A pasta `dist/` é gerada durante a construção da imagem e não precisa ser versionada.

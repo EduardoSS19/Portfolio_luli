@@ -1,7 +1,10 @@
 from io import BytesIO
+import os
+from unittest.mock import patch
 
 from PIL import Image
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import TestCase
 from django.test import override_settings
 from django.urls import reverse
@@ -223,3 +226,32 @@ class PortfolioSeedTests(TestCase):
         self.assertEqual(profile.name, "Nome da artista")
         self.assertFalse(profile.photo)
         self.assertFalse(BackgroundFrame.objects.exists())
+
+
+class SetupAdminCommandTests(TestCase):
+    def test_creates_admin_from_environment(self):
+        with patch.dict(os.environ, {
+            "DJANGO_SUPERUSER_USERNAME": "bootstrap-admin",
+            "DJANGO_SUPERUSER_PASSWORD": "bootstrap-password",
+        }, clear=False):
+            call_command("setup_admin")
+
+        admin_user = get_user_model().objects.get(username="bootstrap-admin")
+        self.assertTrue(admin_user.is_superuser)
+        self.assertTrue(admin_user.check_password("bootstrap-password"))
+
+    def test_existing_admin_password_is_not_reset(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="bootstrap-admin",
+            email="",
+            password="original-password",
+        )
+
+        with patch.dict(os.environ, {
+            "DJANGO_SUPERUSER_USERNAME": "bootstrap-admin",
+            "DJANGO_SUPERUSER_PASSWORD": "different-password",
+        }, clear=False):
+            call_command("setup_admin")
+
+        admin_user.refresh_from_db()
+        self.assertTrue(admin_user.check_password("original-password"))

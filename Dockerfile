@@ -19,4 +19,4 @@ COPY --from=frontend-build /app/dist ./frontend/dist
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 10000
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:10000"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py setup_admin && exec gunicorn config.wsgi:application --bind 0.0.0.0:10000"]
