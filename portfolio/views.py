@@ -4,7 +4,7 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_GET
 
-from .models import ArtistProfile, BackgroundFrame, Category, Reference, Work
+from .models import ArtistProfile, BackgroundFrame, Category, Reference, SocialLink, Work
 
 
 def _image_url(uploaded_image, fallback):
@@ -20,11 +20,15 @@ def _image_url(uploaded_image, fallback):
 @require_GET
 def portfolio_data(request):
     categories = Category.objects.filter(is_active=True).prefetch_related(
-        Prefetch("works", queryset=Work.objects.filter(is_active=True))
+        Prefetch(
+            "works",
+            queryset=Work.objects.filter(is_active=True).prefetch_related("gallery_images"),
+        )
     )
     references = Reference.objects.filter(is_active=True).prefetch_related("links")
     profile = ArtistProfile.objects.first()
     frames = BackgroundFrame.objects.filter(is_active=True)
+    social_links = SocialLink.objects.filter(is_active=True)
 
     return JsonResponse(
         {
@@ -46,6 +50,10 @@ def portfolio_data(request):
                 else None
             ),
             "frames": [frame.image.url for frame in frames],
+            "redes": [
+                {"titulo": social.title, "url": social.url}
+                for social in social_links
+            ],
             "categorias": [
                 {
                     "titulo": category.title,
@@ -54,6 +62,17 @@ def portfolio_data(request):
                         {
                             "titulo": work.title,
                             "imagem": _image_url(work.image, work.image_url),
+                            "imagens": [
+                                *(
+                                    [_image_url(work.image, work.image_url)]
+                                    if work.image or work.image_url
+                                    else []
+                                ),
+                                *[
+                                    image.image.url
+                                    for image in work.gallery_images.all()
+                                ],
+                            ],
                             "descricao": work.description,
                             "detalhe": work.detail,
                         }

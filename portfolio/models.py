@@ -26,6 +26,21 @@ class ArtistProfile(models.Model):
         return self.name
 
 
+class SocialLink(models.Model):
+    title = models.CharField("rede social", max_length=40)
+    url = models.URLField("URL", max_length=500)
+    position = models.PositiveIntegerField("ordem", default=0)
+    is_active = models.BooleanField("publicado", default=True)
+
+    class Meta:
+        ordering = ("position", "id")
+        verbose_name = "link de rede social"
+        verbose_name_plural = "links de redes sociais"
+
+    def __str__(self):
+        return self.title
+
+
 class BackgroundFrame(models.Model):
     image = models.ImageField(
         "imagem enviada",
@@ -86,6 +101,29 @@ class Work(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class WorkImage(models.Model):
+    work = models.ForeignKey(
+        Work,
+        on_delete=models.CASCADE,
+        related_name="gallery_images",
+        verbose_name="obra",
+    )
+    image = models.ImageField(
+        "imagem",
+        upload_to="obras/%Y/%m/",
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+    )
+    position = models.PositiveIntegerField("ordem", default=0)
+
+    class Meta:
+        ordering = ("position", "id")
+        verbose_name = "imagem adicional da obra"
+        verbose_name_plural = "imagens adicionais das obras"
+
+    def __str__(self):
+        return f"{self.work} — imagem {self.position + 1}"
 
 
 class Reference(models.Model):

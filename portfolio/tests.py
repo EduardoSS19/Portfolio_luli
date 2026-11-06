@@ -10,7 +10,15 @@ from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from .models import ArtistProfile, BackgroundFrame, Category, Reference, Work
+from .models import (
+    ArtistProfile,
+    BackgroundFrame,
+    Category,
+    Reference,
+    SocialLink,
+    Work,
+    WorkImage,
+)
 
 
 class PortfolioApiTests(TestCase):
@@ -41,6 +49,7 @@ class PortfolioApiTests(TestCase):
             contact_form_url="https://formspree.io/f/example",
         )
         BackgroundFrame.objects.create(image="fundos/2026/09/frame.webp")
+        SocialLink.objects.create(title="Behance", url="https://behance.net/artista")
 
         response = self.client.get(reverse("portfolio-data"))
 
@@ -56,12 +65,14 @@ class PortfolioApiTests(TestCase):
                 "bio": ["Primeiro parágrafo.", "Segundo parágrafo."],
             },
             "frames": ["/media/fundos/2026/09/frame.webp"],
+            "redes": [{"titulo": "Behance", "url": "https://behance.net/artista"}],
             "categorias": [{
                 "titulo": "Desenho",
                 "chave": "desenho",
                 "obras": [{
                     "titulo": "Gaiola",
                     "imagem": "/static/gaiola.jpg",
+                    "imagens": ["/static/gaiola.jpg"],
                     "descricao": "Grafite",
                     "detalhe": "A3",
                 }],
@@ -80,7 +91,10 @@ class PortfolioApiTests(TestCase):
 
         response = self.client.get(reverse("portfolio-data"))
 
-        self.assertEqual(response.json(), {"sobre": None, "frames": [], "categorias": [], "referencias": []})
+        self.assertEqual(
+            response.json(),
+            {"sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
+        )
 
     def test_admin_profile_form_has_photo_upload_and_bio(self):
         profile = ArtistProfile.objects.create(name="Luísa Becker", bio="Biografia.")
@@ -146,6 +160,27 @@ class PortfolioApiTests(TestCase):
         self.assertEqual(
             response.json()["categorias"][0]["obras"][0]["imagem"],
             "/media/obras/2026/09/gaiola.webp",
+        )
+
+    def test_work_gallery_images_are_returned_in_order(self):
+        category = Category.objects.create(title="Desenho", key="desenho")
+        work = Work.objects.create(
+            category=category,
+            title="Gaiola",
+            image_url="/gaiola.jpg",
+        )
+        WorkImage.objects.create(work=work, image="obras/2026/09/detalhe.webp", position=1)
+        WorkImage.objects.create(work=work, image="obras/2026/09/processo.webp", position=0)
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(
+            response.json()["categorias"][0]["obras"][0]["imagens"],
+            [
+                "/static/gaiola.jpg",
+                "/media/obras/2026/09/processo.webp",
+                "/media/obras/2026/09/detalhe.webp",
+            ],
         )
 
     def test_uploaded_image_is_saved_and_served(self):

@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import ArtistProfile, BackgroundFrame, Category, Reference, ReferenceLink, Work
+from .models import (
+    ArtistProfile,
+    BackgroundFrame,
+    Category,
+    Reference,
+    ReferenceLink,
+    SocialLink,
+    Work,
+    WorkImage,
+)
 
 
 @admin.register(ArtistProfile)
@@ -23,6 +32,14 @@ class ArtistProfileAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(SocialLink)
+class SocialLinkAdmin(admin.ModelAdmin):
+    list_display = ("title", "url", "position", "is_active")
+    list_editable = ("position", "is_active")
+    ordering = ("position", "id")
+    search_fields = ("title", "url")
+
+
 @admin.register(BackgroundFrame)
 class BackgroundFrameAdmin(admin.ModelAdmin):
     list_display = ("__str__", "position", "is_active")
@@ -42,6 +59,15 @@ class CategoryAdmin(admin.ModelAdmin):
     list_editable = ("position", "is_active")
     search_fields = ("title", "key")
     inlines = (WorkInline,)
+
+
+@admin.register(WorkImage)
+class WorkImageAdmin(admin.ModelAdmin):
+    list_display = ("work", "position", "image")
+    list_filter = ("work__category",)
+    list_select_related = ("work", "work__category")
+    ordering = ("work__category__position", "work__position", "position", "id")
+    search_fields = ("work__title",)
 
 
 class ReferenceLinkInline(admin.TabularInline):
