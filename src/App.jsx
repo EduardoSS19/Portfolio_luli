@@ -24,6 +24,7 @@ export default function App() {
     categorias: [],
     referencias: [],
     frames: [],
+    redes: [],
     sobre: null,
   })
   const categorias = conteudo.categorias
@@ -33,11 +34,22 @@ export default function App() {
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
-    ...(sobre.email || sobre.formulario ? [{ titulo: 'Contato', chave: 'contato' }] : []),
-  ], [categorias, referencias.length, sobre.email, sobre.formulario])
+    { titulo: 'Contato', chave: 'contato' },
+  ], [categorias, referencias.length])
   const secaoAtiva = useSecaoAtiva(secoesNav)
   const [animando, setAnimando] = useState(null)
+  const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
   const anteriorRef = useRef(secaoAtiva)
+
+  useEffect(() => {
+    function atualizarBotaoTopo() {
+      setMostrarVoltarTopo(window.scrollY > 560)
+    }
+
+    atualizarBotaoTopo()
+    window.addEventListener('scroll', atualizarBotaoTopo, { passive: true })
+    return () => window.removeEventListener('scroll', atualizarBotaoTopo)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -52,6 +64,7 @@ export default function App() {
           categorias: Array.isArray(data.categorias) ? data.categorias : [],
           referencias: Array.isArray(data.referencias) ? data.referencias : [],
           frames: Array.isArray(data.frames) ? data.frames : [],
+          redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && Array.isArray(data.sobre.bio) ? data.sobre : null,
         }))
       })
@@ -70,7 +83,7 @@ export default function App() {
       anteriorRef.current = secaoAtiva
       if (sec) {
         setAnimando(sec.chave)
-        const timer = setTimeout(() => setAnimando(null), 550)
+        const timer = setTimeout(() => setAnimando(null), 1000)
         return () => clearTimeout(timer)
       }
     }
@@ -80,9 +93,17 @@ export default function App() {
     document.getElementById(titulo)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  function voltarAoTopo() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.scrollTo(0, 0)
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
-    <div>
-      <FundoFantasma frames={conteudo.frames} secaoAtiva={secaoAtiva} secoes={secoesNav} />
+    <div className="site-shell">
+      <FundoFantasma frames={conteudo.frames} />
       <Hero nome={sobre.nome} frase={sobre.frase} />
       <Nav
         categorias={secoesNav}
@@ -91,12 +112,28 @@ export default function App() {
         aoSelecionar={selecionarCategoria}
       />
       <Sobre perfil={sobre} />
-      {categorias.map(cat => (
-        <SecaoCategoria key={cat.titulo} titulo={cat.titulo} chave={cat.chave} obras={cat.obras} />
+      {categorias.map((cat, indice) => (
+        <SecaoCategoria
+          key={cat.titulo}
+          titulo={cat.titulo}
+          chave={cat.chave}
+          obras={cat.obras}
+          indice={indice}
+        />
       ))}
       {referencias.length > 0 && <Referencias referencias={referencias} />}
       <Contato endpoint={sobre.formulario} email={sobre.email} />
-      <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} />
+      <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
+      <button
+        type="button"
+        className={`voltar-topo ${mostrarVoltarTopo ? 'visivel' : ''}`}
+        aria-label="Voltar ao topo"
+        onClick={voltarAoTopo}
+        tabIndex={mostrarVoltarTopo ? 0 : -1}
+        aria-hidden={!mostrarVoltarTopo}
+      >
+        <span aria-hidden="true">↑</span>
+      </button>
     </div>
   )
 }

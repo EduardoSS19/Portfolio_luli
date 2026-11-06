@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useScrollReveal } from '../hooks/useScrollReveal.js'
 
 export function Contato({ endpoint, email }) {
   const [enviando, setEnviando] = useState(false)
   const [status, setStatus] = useState(null)
+  const [ref, visivel] = useScrollReveal()
 
   async function lidarEnvio(e) {
     e.preventDefault()
@@ -30,11 +32,12 @@ export function Contato({ endpoint, email }) {
     }
   }
 
-  if (!endpoint && !email) return null
-
   return (
-    <section id="Contato" className="secao">
-      <h2>Contato</h2>
+    <section ref={ref} id="Contato" className={`secao secao-contato ${visivel ? 'visivel' : ''}`}>
+      <header className="secao-cabecalho">
+        <span className="secao-indice">VAMOS CONVERSAR</span>
+        <h2>Contato</h2>
+      </header>
       {endpoint ? <form className="form-contato" onSubmit={lidarEnvio}>
         <label>
           Nome
@@ -53,7 +56,16 @@ export function Contato({ endpoint, email }) {
         </button>
         {status === 'sucesso' && <p className="form-status sucesso">Mensagem enviada! Obrigada pelo contato.</p>}
         {status === 'erro' && <p className="form-status erro">Algo deu errado — tente novamente.</p>}
-      </form> : <a className="contato-email" href={`mailto:${email}`}>{email}</a>}
+      </form> : email ? (
+        <div className="contato-chamada">
+          <p>Para projetos, perguntas ou uma boa conversa sobre arte:</p>
+          <a className="contato-email" href={`mailto:${email}`}>{email}</a>
+        </div>
+      ) : (
+        <p className="contato-indisponivel">
+          As informações de contato serão adicionadas em breve. Você pode falar comigo pelas redes sociais abaixo.
+        </p>
+      )}
     </section>
   )
 }

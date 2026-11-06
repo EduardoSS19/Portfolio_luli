@@ -1,7 +1,11 @@
+import { useScrollReveal } from '../hooks/useScrollReveal.js'
+
 export function Sobre({ perfil }) {
+  const [ref, visivel] = useScrollReveal()
+
   return (
     <section id="Início" className="secao sobre-secao">
-      <div className="obra">
+      <div ref={ref} className={`obra sobre-entrada ${visivel ? 'visivel' : ''}`}>
         <div className={`obra-imagem ${perfil.foto ? '' : 'obra-imagem-placeholder'}`}>
           {perfil.foto
             ? <img src={perfil.foto} alt={perfil.nome} />
