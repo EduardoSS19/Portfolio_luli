@@ -28,13 +28,63 @@ def _image_url(uploaded_image, fallback):
     return image_url
 
 
+def _work_data(work):
+    images = (
+        [_image_url(work.image, work.image_url)]
+        if work.image or work.image_url
+        else []
+    )
+    images.extend(image.image.url for image in work.gallery_images.all())
+
+    media = []
+    if work.image or work.image_url:
+        media.append((-1, 0, {
+            "tipo": "imagem",
+            "src": _image_url(work.image, work.image_url),
+        }))
+
+    media.extend(
+        (
+            image.position,
+            image.pk,
+            {"tipo": "imagem", "src": image.image.url},
+        )
+        for image in work.gallery_images.all()
+    )
+    media.extend(
+        (
+            video.position,
+            video.pk,
+            {
+                "tipo": "youtube",
+                "videoId": video.video_id,
+                "titulo": video.video_title,
+                "miniatura": video.thumbnail_url,
+            },
+        )
+        for video in work.youtube_videos.all()
+    )
+
+    return {
+        "titulo": work.title,
+        "imagem": images[0] if images else "",
+        "imagens": images,
+        "midias": [item[2] for item in sorted(media, key=lambda item: (item[0], item[1]))],
+        "descricao": work.description,
+        "detalhe": work.detail,
+    }
+
+
 @require_GET
 @ensure_csrf_cookie
 def portfolio_data(request):
     categories = Category.objects.filter(is_active=True).prefetch_related(
         Prefetch(
             "works",
-            queryset=Work.objects.filter(is_active=True).prefetch_related("gallery_images"),
+            queryset=Work.objects.filter(is_active=True).prefetch_related(
+                "gallery_images",
+                "youtube_videos",
+            ),
         )
     )
     references = Reference.objects.filter(is_active=True).prefetch_related("links")
@@ -70,26 +120,7 @@ def portfolio_data(request):
                 {
                     "titulo": category.title,
                     "chave": category.key,
-                    "obras": [
-                        {
-                            "titulo": work.title,
-                            "imagem": _image_url(work.image, work.image_url),
-                            "imagens": [
-                                *(
-                                    [_image_url(work.image, work.image_url)]
-                                    if work.image or work.image_url
-                                    else []
-                                ),
-                                *[
-                                    image.image.url
-                                    for image in work.gallery_images.all()
-                                ],
-                            ],
-                            "descricao": work.description,
-                            "detalhe": work.detail,
-                        }
-                        for work in category.works.all()
-                    ],
+                    "obras": [_work_data(work) for work in category.works.all()],
                 }
                 for category in categories
             ],

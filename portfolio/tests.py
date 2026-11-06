@@ -1,7 +1,7 @@
 from io import BytesIO
 import json
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from PIL import Image
 from django.core import mail
@@ -20,7 +20,9 @@ from .models import (
     SocialLink,
     Work,
     WorkImage,
+    WorkVideo,
 )
+from .youtube import YouTubeMetadataError, extract_youtube_video_id, fetch_youtube_video_metadata
 
 
 class PortfolioApiTests(TestCase):
@@ -75,6 +77,7 @@ class PortfolioApiTests(TestCase):
                     "titulo": "Gaiola",
                     "imagem": "/static/gaiola.jpg",
                     "imagens": ["/static/gaiola.jpg"],
+                    "midias": [{"tipo": "imagem", "src": "/static/gaiola.jpg"}],
                     "descricao": "Grafite",
                     "detalhe": "A3",
                 }],
@@ -294,6 +297,66 @@ class PortfolioApiTests(TestCase):
             ],
         )
 
+    def test_video_only_work_returns_a_youtube_media_card(self):
+        category = Category.objects.create(title="Vídeo", key="video")
+        work = Work.objects.create(category=category, title="Movimento")
+        WorkVideo.objects.create(
+            work=work,
+            youtube_url="https://youtu.be/AbCdEf01234",
+            video_id="AbCdEf01234",
+            video_title="Movimento em argila",
+            thumbnail_url="https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+        portfolio_work = response.json()["categorias"][0]["obras"][0]
+
+        self.assertEqual(portfolio_work["imagem"], "")
+        self.assertEqual(portfolio_work["imagens"], [])
+        self.assertEqual(portfolio_work["midias"], [{
+            "tipo": "youtube",
+            "videoId": "AbCdEf01234",
+            "titulo": "Movimento em argila",
+            "miniatura": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        }])
+
+    def test_work_media_combines_images_and_youtube_videos_in_order(self):
+        category = Category.objects.create(title="Vídeo", key="video")
+        work = Work.objects.create(
+            category=category,
+            title="Processo",
+            image_url="/capa.jpg",
+        )
+        WorkImage.objects.create(
+            work=work,
+            image="obras/detalhe.webp",
+            position=1,
+        )
+        WorkVideo.objects.create(
+            work=work,
+            youtube_url="https://youtu.be/AbCdEf01234",
+            video_id="AbCdEf01234",
+            video_title="Processo em vídeo",
+            thumbnail_url="https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+            position=0,
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(
+            response.json()["categorias"][0]["obras"][0]["midias"],
+            [
+                {"tipo": "imagem", "src": "/static/capa.jpg"},
+                {
+                    "tipo": "youtube",
+                    "videoId": "AbCdEf01234",
+                    "titulo": "Processo em vídeo",
+                    "miniatura": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+                },
+                {"tipo": "imagem", "src": "/media/obras/detalhe.webp"},
+            ],
+        )
+
     def test_uploaded_image_is_saved_and_served(self):
         category = Category.objects.create(title="Desenho", key="desenho")
         image_bytes = BytesIO()
@@ -328,6 +391,37 @@ class PortfolioApiTests(TestCase):
         )
 
         self.assertContains(response, 'type="file"')
+
+    def test_admin_video_form_fetches_youtube_metadata(self):
+        category = Category.objects.create(title="Vídeo", key="video")
+        work = Work.objects.create(category=category, title="Movimento")
+        admin_user = get_user_model().objects.create_superuser(
+            username="video-admin",
+            email="admin@example.com",
+            password="test-password",
+        )
+        self.client.force_login(admin_user)
+
+        metadata = {
+            "video_id": "AbCdEf01234",
+            "title": "Movimento no YouTube",
+            "thumbnail_url": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        }
+        with patch("portfolio.admin.fetch_youtube_video_metadata", return_value=metadata):
+            response = self.client.post(
+                reverse("admin:portfolio_workvideo_add"),
+                {
+                    "work": work.pk,
+                    "youtube_url": "https://youtu.be/AbCdEf01234",
+                    "position": 0,
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        video = WorkVideo.objects.get(work=work)
+        self.assertEqual(video.video_id, metadata["video_id"])
+        self.assertEqual(video.video_title, metadata["title"])
+        self.assertEqual(video.thumbnail_url, metadata["thumbnail_url"])
 
     def test_healthcheck_returns_ok(self):
         response = self.client.get(reverse("healthcheck"))
@@ -401,3 +495,46 @@ class SetupAdminCommandTests(TestCase):
 
         admin_user.refresh_from_db()
         self.assertTrue(admin_user.check_password("original-password"))
+
+
+class YouTubeIntegrationTests(TestCase):
+    def test_extracts_video_ids_from_youtube_links(self):
+        self.assertEqual(
+            extract_youtube_video_id("https://www.youtube.com/watch?v=AbCdEf01234"),
+            "AbCdEf01234",
+        )
+        self.assertEqual(
+            extract_youtube_video_id("https://youtu.be/AbCdEf01234"),
+            "AbCdEf01234",
+        )
+
+    def test_rejects_non_youtube_links(self):
+        with self.assertRaises(YouTubeMetadataError):
+            extract_youtube_video_id("https://example.com/video")
+
+    @override_settings(YOUTUBE_API_KEY="test-api-key")
+    def test_fetches_unlisted_video_metadata(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "items": [{
+                "status": {"embeddable": True, "privacyStatus": "unlisted"},
+                "snippet": {
+                    "title": "Processo artístico",
+                    "thumbnails": {
+                        "high": {"url": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg"},
+                    },
+                },
+            }],
+        }).encode()
+
+        with patch("portfolio.youtube.urlopen", return_value=response) as urlopen:
+            metadata = fetch_youtube_video_metadata(
+                "https://youtu.be/AbCdEf01234"
+            )
+
+        self.assertEqual(metadata, {
+            "video_id": "AbCdEf01234",
+            "title": "Processo artístico",
+            "thumbnail_url": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        })
+        self.assertIn("test-api-key", urlopen.call_args.args[0].full_url)

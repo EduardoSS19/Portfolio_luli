@@ -12,6 +12,7 @@ export function ObraCard({
   titulo,
   imagem,
   imagens: imagensDaObra = [],
+  midias: midiasDaObra = [],
   descricao,
   detalhe,
   categoria,
@@ -24,6 +25,7 @@ export function ObraCard({
   const [direcao, setDirecao] = useState(1)
   const [focoAberto, setFocoAberto] = useState(false)
   const [focoFechando, setFocoFechando] = useState(false)
+  const [videoAtivoId, setVideoAtivoId] = useState(null)
   const [ref, visivel] = useScrollReveal()
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
@@ -37,7 +39,14 @@ export function ObraCard({
   const detalhesPendentesRef = useRef(false)
   const detalhesFixadosRef = useRef(null)
   const overflowAnteriorRef = useRef('')
-  const imagens = imagensDaObra.length ? imagensDaObra : imagem ? [imagem] : []
+  const midias = midiasDaObra.length
+    ? midiasDaObra
+    : (imagensDaObra.length ? imagensDaObra : imagem ? [imagem] : [])
+      .map(src => typeof src === 'string' ? { tipo: 'imagem', src } : src)
+  const indicesImagem = midias
+    .map((midia, indice) => midia.tipo === 'imagem' ? indice : -1)
+    .filter(indice => indice >= 0)
+  const midiaAtiva = midias[indiceImagem]
 
   function centralizarCard(ajusteAltura = 0) {
     const card = ref.current
@@ -55,7 +64,7 @@ export function ObraCard({
   }
 
   function centralizarAoClicarCard(event) {
-    if (event.target.closest('.obra-zoom-trigger, .obra-detalhe-botao')) return
+    if (event.target.closest('.obra-zoom-trigger, .obra-video-trigger, .obra-detalhe-botao')) return
     centralizarCard()
   }
 
@@ -169,6 +178,7 @@ export function ObraCard({
   }
 
   async function focarImagem(event) {
+    if (midiaAtiva?.tipo !== 'imagem') return
     if (arrasteConcluidoRef.current) {
       arrasteConcluidoRef.current = false
       return
@@ -183,7 +193,16 @@ export function ObraCard({
 
   function navegarImagem(direcao) {
     setDirecao(direcao)
-    setIndiceImagem(indiceAtual => (indiceAtual + direcao + imagens.length) % imagens.length)
+    setVideoAtivoId(null)
+    setIndiceImagem(indiceAtual => (indiceAtual + direcao + midias.length) % midias.length)
+  }
+
+  function navegarImagemFoco(direcao) {
+    if (indicesImagem.length < 2) return
+    const indiceAtual = indicesImagem.indexOf(indiceImagem)
+    const proximo = (indiceAtual + direcao + indicesImagem.length) % indicesImagem.length
+    setDirecao(direcao)
+    setIndiceImagem(indicesImagem[proximo])
   }
 
   function iniciarArrasteFoco(event) {
@@ -194,8 +213,8 @@ export function ObraCard({
     if (inicioArrasteFocoRef.current === null) return
     const distancia = event.clientX - inicioArrasteFocoRef.current
     inicioArrasteFocoRef.current = null
-    if (Math.abs(distancia) > 42 && imagens.length > 1) {
-      navegarImagem(distancia < 0 ? 1 : -1)
+    if (Math.abs(distancia) > 42 && indicesImagem.length > 1) {
+      navegarImagemFoco(distancia < 0 ? 1 : -1)
     }
   }
 
@@ -248,11 +267,12 @@ export function ObraCard({
   function selecionarMiniatura(indice) {
     if (indice === indiceImagem) return
     setDirecao(indice > indiceImagem ? 1 : -1)
+    setVideoAtivoId(null)
     setIndiceImagem(indice)
   }
 
   function iniciarArraste(event) {
-    if (imagens.length < 2 || event.target.closest('.carrossel-seta, .carrossel-indice')) return
+    if (midias.length < 2 || event.target.closest('.carrossel-seta, .carrossel-indice')) return
     arrasteConcluidoRef.current = false
     inicioArrasteRef.current = { x: event.clientX, y: event.clientY }
     if (event.target instanceof Element && 'setPointerCapture' in event.target) {
@@ -261,7 +281,7 @@ export function ObraCard({
   }
 
   function finalizarArraste(event) {
-    if (imagens.length < 2 || inicioArrasteRef.current === null) return
+    if (midias.length < 2 || inicioArrasteRef.current === null) return
     const distanciaX = event.clientX - inicioArrasteRef.current.x
     const distanciaY = event.clientY - inicioArrasteRef.current.y
     inicioArrasteRef.current = null
@@ -281,46 +301,77 @@ export function ObraCard({
       >
         <div className="obra-galeria">
           <div
-            className={`obra-imagem ${imagens.length ? '' : 'obra-imagem-placeholder'} ${imagens.length > 1 ? 'tem-carrossel' : ''}`}
-            onPointerDown={imagens.length > 1 ? iniciarArraste : undefined}
-            onPointerUp={imagens.length > 1 ? finalizarArraste : undefined}
-            onPointerCancel={imagens.length > 1 ? () => { inicioArrasteRef.current = null } : undefined}
-            onLostPointerCapture={imagens.length > 1 ? () => { inicioArrasteRef.current = null } : undefined}
+            className={`obra-imagem ${midias.length ? '' : 'obra-imagem-placeholder'} ${midias.length > 1 ? 'tem-carrossel' : ''}`}
+            onPointerDown={midias.length > 1 ? iniciarArraste : undefined}
+            onPointerUp={midias.length > 1 ? finalizarArraste : undefined}
+            onPointerCancel={midias.length > 1 ? () => { inicioArrasteRef.current = null } : undefined}
+            onLostPointerCapture={midias.length > 1 ? () => { inicioArrasteRef.current = null } : undefined}
           >
-            {imagens.length ? (
+            {midiaAtiva ? (
               <>
-                <button
-                  ref={imagemRef}
-                  type="button"
-                  className="obra-zoom-trigger"
-                  aria-label={`Ampliar obra ${titulo}, imagem ${indiceImagem + 1} de ${imagens.length}`}
-                  onClick={focarImagem}
-                >
-                  <img
-                    key={imagens[indiceImagem]}
-                    src={imagens[indiceImagem]}
-                    alt={`${titulo} — imagem ${indiceImagem + 1} de ${imagens.length}`}
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                  />
-                  <span className="obra-zoom-label" aria-hidden="true">↗</span>
-                </button>
-                {tipoDeArte === 'glitch' && (
+                {midiaAtiva.tipo === 'imagem' ? (
                   <>
-                    <img className="glitch-camada glitch-ciano" src={imagens[indiceImagem]} alt="" aria-hidden="true" draggable="false" />
-                    <img className="glitch-camada glitch-magenta" src={imagens[indiceImagem]} alt="" aria-hidden="true" draggable="false" />
+                    <button
+                      ref={imagemRef}
+                      type="button"
+                      className="obra-zoom-trigger"
+                      aria-label={`Ampliar obra ${titulo}, imagem ${indicesImagem.indexOf(indiceImagem) + 1} de ${indicesImagem.length}`}
+                      onClick={focarImagem}
+                    >
+                      <img
+                        key={midiaAtiva.src}
+                        src={midiaAtiva.src}
+                        alt={`${titulo} — imagem ${indicesImagem.indexOf(indiceImagem) + 1} de ${indicesImagem.length}`}
+                        loading="lazy"
+                        decoding="async"
+                        draggable="false"
+                      />
+                      <span className="obra-zoom-label" aria-hidden="true">↗</span>
+                    </button>
+                    {tipoDeArte === 'glitch' && (
+                      <>
+                        <img className="glitch-camada glitch-ciano" src={midiaAtiva.src} alt="" aria-hidden="true" draggable="false" />
+                        <img className="glitch-camada glitch-magenta" src={midiaAtiva.src} alt="" aria-hidden="true" draggable="false" />
+                      </>
+                    )}
                   </>
+                ) : videoAtivoId === midiaAtiva.videoId ? (
+                  <iframe
+                    key={midiaAtiva.videoId}
+                    className="obra-video-player"
+                    src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+                    title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="obra-video-trigger"
+                    aria-label={`Reproduzir vídeo ${midiaAtiva.titulo || titulo}`}
+                    onClick={() => setVideoAtivoId(midiaAtiva.videoId)}
+                  >
+                    <img
+                      src={midiaAtiva.miniatura}
+                      alt={`Miniatura do vídeo ${midiaAtiva.titulo || titulo}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="obra-video-play" aria-hidden="true">▶</span>
+                    <span className="obra-video-legenda">ASSISTIR VÍDEO</span>
+                  </button>
                 )}
               </>
             ) : <span>Imagem da obra</span>}
-            {imagens.length > 1 && (
+            {midias.length > 1 && (
               <>
                 <span className="carrossel-indice">
                   <span>VISTA</span>
                   {String(indiceImagem + 1).padStart(2, '0')}
                   <i aria-hidden="true">/</i>
-                  {String(imagens.length).padStart(2, '0')}
+                  {String(midias.length).padStart(2, '0')}
                 </span>
                 <button
                   type="button"
@@ -341,18 +392,19 @@ export function ObraCard({
               </>
             )}
           </div>
-          {imagens.length > 1 && (
-            <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem de ${titulo}`}>
-              {imagens.map((src, index) => (
+          {midias.length > 1 && (
+            <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
+              {midias.map((midia, index) => (
                 <button
                   type="button"
-                  key={`${src}-${index}`}
+                  key={`${midia.tipo}-${midia.src || midia.videoId}-${index}`}
                   className={index === indiceImagem ? 'ativa' : ''}
-                  aria-label={`Mostrar imagem ${index + 1} de ${titulo}`}
+                  aria-label={`Mostrar ${midia.tipo === 'youtube' ? 'vídeo' : 'imagem'} ${index + 1} de ${titulo}`}
                   aria-current={index === indiceImagem ? 'true' : undefined}
                   onClick={() => selecionarMiniatura(index)}
                 >
-                  <img src={src} alt="" loading="lazy" decoding="async" />
+                  <img src={midia.tipo === 'youtube' ? midia.miniatura : midia.src} alt="" loading="lazy" decoding="async" />
+                  {midia.tipo === 'youtube' && <i aria-hidden="true">▶</i>}
                   <span>{String(index + 1).padStart(2, '0')}</span>
                 </button>
               ))}
@@ -406,13 +458,13 @@ export function ObraCard({
           <button type="button" className="obra-focus-fechar" aria-label="Fechar visualização" onClick={() => void fecharFoco()}>
             <span aria-hidden="true">×</span>
           </button>
-          {imagens.length > 1 && (
+          {indicesImagem.length > 1 && (
             <>
               <button
                 type="button"
                 className="obra-focus-seta obra-focus-anterior"
                 aria-label={`Imagem anterior de ${titulo}`}
-                onClick={() => navegarImagem(-1)}
+                onClick={() => navegarImagemFoco(-1)}
               >
                 <span aria-hidden="true">←</span>
               </button>
@@ -420,19 +472,19 @@ export function ObraCard({
                 type="button"
                 className="obra-focus-seta obra-focus-proxima"
                 aria-label={`Próxima imagem de ${titulo}`}
-                onClick={() => navegarImagem(1)}
+                onClick={() => navegarImagemFoco(1)}
               >
                 <span aria-hidden="true">→</span>
               </button>
               <span className="obra-focus-contagem" aria-live="polite">
-                {String(indiceImagem + 1).padStart(2, '0')} <i aria-hidden="true">/</i> {String(imagens.length).padStart(2, '0')}
+                {String(indicesImagem.indexOf(indiceImagem) + 1).padStart(2, '0')} <i aria-hidden="true">/</i> {String(indicesImagem.length).padStart(2, '0')}
               </span>
             </>
           )}
           <img
             ref={imagemFocoRef}
             className="obra-focus-imagem"
-            src={imagens[indiceImagem]}
+            src={midiaAtiva?.src}
             alt={`${titulo} — visualização ampliada`}
             draggable="false"
             onPointerDown={iniciarArrasteFoco}

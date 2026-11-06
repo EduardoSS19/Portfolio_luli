@@ -127,6 +127,7 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     EMAIL_HOST_USER or ("webmaster@localhost" if DEBUG else ""),
 )
 EMAIL_TIMEOUT = 15
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
 
 if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise ImproperlyConfigured("EMAIL_USE_TLS e EMAIL_USE_SSL não podem estar ativos juntos.")

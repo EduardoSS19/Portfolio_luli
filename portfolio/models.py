@@ -126,6 +126,32 @@ class WorkImage(models.Model):
         return f"{self.work} — imagem {self.position + 1}"
 
 
+class WorkVideo(models.Model):
+    work = models.ForeignKey(
+        Work,
+        on_delete=models.CASCADE,
+        related_name="youtube_videos",
+        verbose_name="obra",
+    )
+    youtube_url = models.URLField(
+        "link do YouTube",
+        max_length=500,
+        help_text="Cole o link do vídeo. O título e a miniatura serão buscados pela YouTube Data API.",
+    )
+    video_id = models.CharField("ID do vídeo", max_length=11, editable=False)
+    video_title = models.CharField("título no YouTube", max_length=255, editable=False)
+    thumbnail_url = models.URLField("miniatura do YouTube", max_length=500, editable=False)
+    position = models.PositiveIntegerField("ordem", default=0)
+
+    class Meta:
+        ordering = ("position", "id")
+        verbose_name = "vídeo do YouTube"
+        verbose_name_plural = "vídeos do YouTube"
+
+    def __str__(self):
+        return f"{self.work} — vídeo {self.position + 1}"
+
+
 class Reference(models.Model):
     title = models.CharField("título", max_length=255)
     period = models.CharField("período", max_length=100, blank=True)

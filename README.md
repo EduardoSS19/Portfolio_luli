@@ -30,3 +30,9 @@ O formulário envia as mensagens para o e-mail de contato do perfil. Em desenvol
 - `EMAIL_USE_SSL`: `true` para SSL ou `false` para TLS.
 
 Configure também o e-mail de destino em **Perfil do portfólio → E-mail de contato** no Django Admin. Nunca coloque credenciais SMTP no frontend ou no repositório.
+
+## Vídeos do YouTube
+
+Para cadastrar vídeos no painel, crie uma chave de API no Google Cloud, habilite a **YouTube Data API v3** e configure a chave como `YOUTUBE_API_KEY` no ambiente do Django. Restrinja a chave à YouTube Data API v3 e mantenha-a somente no ambiente do servidor; nunca a publique no frontend ou no repositório.
+
+No Django Admin, use **Vídeos do YouTube** para escolher a obra, colar o link do vídeo e definir sua posição na galeria. Links de vídeos não listados funcionam desde que estejam acessíveis pela API e permitam incorporação. Vídeos podem ser cadastrados em uma obra sem imagens, criando um card independente. A miniatura é exibida no portfólio e o player do YouTube só é carregado quando alguém aperta reproduzir.
