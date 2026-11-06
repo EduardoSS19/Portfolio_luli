@@ -1,11 +1,13 @@
 from io import BytesIO
+import json
 import os
 from unittest.mock import patch
 
 from PIL import Image
+from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import Client, TestCase
 from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -95,6 +97,115 @@ class PortfolioApiTests(TestCase):
             response.json(),
             {"sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
         )
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="portfolio@example.com",
+    )
+    def test_contact_endpoint_sends_message_to_profile_email(self):
+        ArtistProfile.objects.create(
+            name="Luísa Becker",
+            bio="Biografia.",
+            contact_email="artista@example.com",
+        )
+
+        response = self.client.post(
+            reverse("contact"),
+            data=json.dumps({
+                "nome": "Ana",
+                "email": "ana@example.com",
+                "assunto": "Projeto",
+                "mensagem": "Olá, gostaria de conversar.",
+            }),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["artista@example.com"])
+        self.assertEqual(mail.outbox[0].reply_to, ["ana@example.com"])
+        self.assertIn("Olá, gostaria de conversar.", mail.outbox[0].body)
+
+    def test_contact_endpoint_rejects_invalid_email(self):
+        response = self.client.post(
+            reverse("contact"),
+            data={
+                "nome": "Ana",
+                "email": "email-inválido",
+                "mensagem": "Olá.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["erro"], "Informe um endereço de e-mail válido.")
+
+    def test_contact_endpoint_ignores_honeypot_submission(self):
+        response = self.client.post(
+            reverse("contact"),
+            data={
+                "nome": "Spam",
+                "email": "spam@example.com",
+                "mensagem": "Spam.",
+                "website": "https://spam.example",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="portfolio@example.com",
+    )
+    def test_contact_endpoint_accepts_csrf_protected_request(self):
+        ArtistProfile.objects.create(
+            name="Luísa Becker",
+            bio="Biografia.",
+            contact_email="artista@example.com",
+        )
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse("portfolio-data"))
+        csrf_token = client.cookies["csrftoken"].value
+
+        response = client.post(
+            reverse("contact"),
+            data=json.dumps({
+                "nome": "Ana",
+                "email": "ana@example.com",
+                "mensagem": "Olá.",
+            }),
+            content_type="application/json",
+            HTTP_X_CSRFTOKEN=csrf_token,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend",
+        EMAIL_HOST="",
+        DEFAULT_FROM_EMAIL="",
+    )
+    def test_contact_endpoint_reports_missing_smtp_configuration(self):
+        ArtistProfile.objects.create(
+            name="Luísa Becker",
+            bio="Biografia.",
+            contact_email="artista@example.com",
+        )
+
+        response = self.client.post(
+            reverse("contact"),
+            data={
+                "nome": "Ana",
+                "email": "ana@example.com",
+                "mensagem": "Olá.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_admin_profile_form_has_photo_upload_and_bio(self):
         profile = ArtistProfile.objects.create(name="Luísa Becker", bio="Biografia.")

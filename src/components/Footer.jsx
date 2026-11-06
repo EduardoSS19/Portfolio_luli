@@ -1,9 +1,10 @@
 export function Footer({ nome, instagram, email, redes = [] }) {
-  const linksRedes = redes.length
-    ? redes
-    : instagram
-      ? [{ titulo: 'Instagram', url: instagram }]
-      : []
+  const temInstagramNaLista = redes.some(rede => (
+    rede.titulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'instagram'
+  ))
+  const linksRedes = instagram && !temInstagramNaLista
+    ? [{ titulo: 'Instagram', url: instagram }, ...redes]
+    : redes
 
   return (
     <footer className="rodape">

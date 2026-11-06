@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
 
+function lerCookie(nome) {
+  const cookie = document.cookie
+    .split('; ')
+    .find(parte => parte.startsWith(`${nome}=`))
+  return cookie ? decodeURIComponent(cookie.slice(nome.length + 1)) : ''
+}
+
 export function Contato({ endpoint, email }) {
   const [enviando, setEnviando] = useState(false)
   const [status, setStatus] = useState(null)
@@ -11,17 +18,29 @@ export function Contato({ endpoint, email }) {
     setEnviando(true)
     setStatus(null)
 
-    const dados = new FormData(e.target)
+    const formulario = e.currentTarget
+    const dados = new FormData(formulario)
+    const usarApiDoPortfolio = Boolean(email)
 
     try {
-      const resposta = await fetch(endpoint, {
+      const resposta = await fetch(usarApiDoPortfolio ? '/api/contact/' : endpoint, {
         method: 'POST',
-        body: dados,
-        headers: { Accept: 'application/json' },
+        body: usarApiDoPortfolio
+          ? JSON.stringify(Object.fromEntries(dados.entries()))
+          : dados,
+        headers: {
+          Accept: 'application/json',
+          ...(usarApiDoPortfolio
+            ? {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': lerCookie('csrftoken'),
+              }
+            : {}),
+        },
       })
       if (resposta.ok) {
         setStatus('sucesso')
-        e.target.reset()
+        formulario.reset()
       } else {
         setStatus('erro')
       }
@@ -38,34 +57,35 @@ export function Contato({ endpoint, email }) {
         <span className="secao-indice">VAMOS CONVERSAR</span>
         <h2>Contato</h2>
       </header>
-      {endpoint ? <form className="form-contato" onSubmit={lidarEnvio}>
+      <form className="form-contato" onSubmit={lidarEnvio}>
         <label>
           Nome
-          <input type="text" name="nome" required />
+          <input type="text" name="nome" maxLength="120" autoComplete="name" required />
         </label>
         <label>
           E-mail
-          <input type="email" name="email" required />
+          <input type="email" name="email" maxLength="254" autoComplete="email" required />
+        </label>
+        <label>
+          Assunto
+          <input type="text" name="assunto" maxLength="160" />
         </label>
         <label>
           Mensagem
-          <textarea name="mensagem" rows="5" required />
+          <textarea name="mensagem" rows="5" maxLength="10000" required />
         </label>
+        <div className="campo-isca" aria-hidden="true">
+          <label>
+            Site
+            <input type="text" name="website" tabIndex="-1" autoComplete="off" />
+          </label>
+        </div>
         <button type="submit" disabled={enviando}>
           {enviando ? 'Enviando...' : 'Enviar mensagem'}
         </button>
-        {status === 'sucesso' && <p className="form-status sucesso">Mensagem enviada! Obrigada pelo contato.</p>}
-        {status === 'erro' && <p className="form-status erro">Algo deu errado — tente novamente.</p>}
-      </form> : email ? (
-        <div className="contato-chamada">
-          <p>Para projetos, perguntas ou uma boa conversa sobre arte:</p>
-          <a className="contato-email" href={`mailto:${email}`}>{email}</a>
-        </div>
-      ) : (
-        <p className="contato-indisponivel">
-          As informações de contato serão adicionadas em breve. Você pode falar comigo pelas redes sociais abaixo.
-        </p>
-      )}
+        {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Obrigada pelo contato.</p>}
+        {status === 'erro' && <p className="form-status erro" role="alert">Não foi possível enviar agora. Tente novamente mais tarde.</p>}
+      </form>
     </section>
   )
 }

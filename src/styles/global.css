@@ -298,6 +298,13 @@ nav button.anim-inicio,
   border-radius:8px; padding:0.75rem 1rem; color:var(--texto); font-family:inherit; font-size:1rem; resize:vertical;
 }
 .form-contato input:focus, .form-contato textarea:focus{ outline:none; border-color:var(--azul-claro); }
+.campo-isca{
+  position:absolute;
+  left:-10000px;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
 .form-contato button{
   background:var(--azul-claro); color:var(--azul-escuro); border:none; border-radius:24px;
   padding:0.75rem 1.5rem; font-weight:bold; cursor:pointer; transition:opacity 0.2s;
@@ -1190,6 +1197,7 @@ nav button.ativo{
 .secao-contato .secao-cabecalho{ opacity:0; transform:translateY(14px); }
 .secao-cabecalho-referencias.visivel,
 .secao-contato.visivel .secao-cabecalho{ opacity:1; transform:translateY(0); }
+.secao-contato.visivel{ opacity:1; transform:translateY(0); }
 .referencia-item{
   transform:translateY(18px);
   transition-delay:calc(var(--indice-referencia, 0) * 90ms);
