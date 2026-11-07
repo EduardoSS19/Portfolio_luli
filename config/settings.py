@@ -13,9 +13,28 @@ ALLOWED_HOSTS = [
     for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
-render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if render_hostname and render_hostname not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(render_hostname)
+# Hospedagem: Render (antigo) e Railway (domínio gerado + healthcheck da plataforma).
+for extra_host in (
+    os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
+    os.environ.get("RAILWAY_PUBLIC_DOMAIN"),
+    "healthcheck.railway.app",
+):
+    if extra_host and extra_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(extra_host)
+
+# Origens confiáveis para o login do /admin (CSRF), derivadas do ALLOWED_HOSTS.
+# Também aceita extras pela variável CSRF_TRUSTED_ORIGINS (separadas por vírgula).
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    if host in ("localhost", "127.0.0.1", "healthcheck.railway.app", "*"):
+        continue
+    origin = f"https://*{host}" if host.startswith(".") else f"https://{host}"
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(","):
+    origin = origin.strip()
+    if origin and origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -61,7 +80,10 @@ DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=not DEBUG,
+        ssl_require=(
+            not DEBUG
+            and os.environ.get("DATABASE_SSL_REQUIRE", "true").lower() == "true"
+        ),
     )
 }
 
@@ -107,15 +129,17 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
-EMAIL_BACKEND = os.environ.get(
-    "EMAIL_BACKEND",
-    (
-        "django.core.mail.backends.console.EmailBackend"
-        if DEBUG
-        else "django.core.mail.backends.smtp.EmailBackend"
-    ),
-)
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+if RESEND_API_KEY:
+    _default_email_backend = "config.email_backends.ResendEmailBackend"
+elif DEBUG:
+    _default_email_backend = "django.core.mail.backends.console.EmailBackend"
+else:
+    _default_email_backend = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", _default_email_backend)
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
