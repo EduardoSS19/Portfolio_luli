@@ -75,6 +75,7 @@ export default function App() {
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
           preview: data.preview ?? null,
         }))
+        setPrevisualizacao(data.preview ?? null)
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
