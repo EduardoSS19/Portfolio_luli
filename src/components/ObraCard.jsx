@@ -72,7 +72,7 @@ export function ObraCard({
   const focoPendenteRef = useRef(false)
   const focoFechandoRef = useRef(false)
   const focoAbrindoRef = useRef(false)
-  const detalhesPendentesRef = useRef(false)
+  const seguirRef = useRef(0)
   const detalhesFixadosRef = useRef(null)
   const overflowAnteriorRef = useRef('')
   const midias = midiasDaObra.length
@@ -84,19 +84,53 @@ export function ObraCard({
     .filter(indice => indice >= 0)
   const midiaAtiva = midias[indiceImagem]
 
-  function centralizarCard(ajusteAltura = 0) {
+  // Centraliza o card seguindo a posição REAL dele a cada quadro. Assim, se o card
+  // crescer (detalhes abrindo) a rolagem acompanha junto, sem esperar nem "corrigir" depois.
+  function centralizarCard(minimoMs = 0) {
     const card = ref.current
-    if (!card) return false
+    if (!card) return Promise.resolve()
+    cancelAnimationFrame(seguirRef.current)
 
-    const rect = card.getBoundingClientRect()
-    const centroPrevisto = rect.top + (rect.height + ajusteAltura) / 2
-    const destino = window.scrollY + centroPrevisto - window.innerHeight / 2
-    const maximo = document.documentElement.scrollHeight - window.innerHeight
-    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
-    const destinoLimitado = Math.max(0, Math.min(destino, maximo))
-    const precisaRolar = Math.abs(window.scrollY - destinoLimitado) > 2
-    if (precisaRolar) window.scrollTo({ top: destinoLimitado, behavior })
-    return precisaRolar
+    const calcularAlvo = () => {
+      const rect = card.getBoundingClientRect()
+      const maximo = document.documentElement.scrollHeight - window.innerHeight
+      const alvo = window.scrollY + rect.top + rect.height / 2 - window.innerHeight / 2
+      return Math.max(0, Math.min(alvo, maximo))
+    }
+
+    if (reduzirMovimento()) {
+      window.scrollTo({ top: calcularAlvo(), behavior: 'instant' })
+      return Promise.resolve()
+    }
+
+    return new Promise(resolve => {
+      const inicio = performance.now()
+      let interrompido = false
+      const interromper = () => { interrompido = true }
+
+      function finalizar() {
+        window.removeEventListener('wheel', interromper)
+        window.removeEventListener('touchstart', interromper)
+        resolve()
+      }
+
+      function passo(agora) {
+        const decorrido = agora - inicio
+        if (interrompido || decorrido > 1400) return finalizar()
+
+        const falta = calcularAlvo() - window.scrollY
+        if (Math.abs(falta) < 1 && decorrido >= minimoMs) return finalizar()
+
+        const tamanho = Math.max(1, Math.abs(falta) * 0.16)
+        const deslocamento = Math.sign(falta) * Math.min(Math.abs(falta), tamanho)
+        window.scrollTo({ top: window.scrollY + deslocamento, behavior: 'instant' })
+        seguirRef.current = requestAnimationFrame(passo)
+      }
+
+      window.addEventListener('wheel', interromper, { passive: true })
+      window.addEventListener('touchstart', interromper, { passive: true })
+      seguirRef.current = requestAnimationFrame(passo)
+    })
   }
 
   function centralizarAoClicarCard(event) {
@@ -112,32 +146,6 @@ export function ObraCard({
   function fecharDetalhesForaDoHover() {
     if (!detalhe || detalhesFixadosRef.current !== null || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
     setExpandido(false)
-  }
-
-  function aguardarFimDoScroll() {
-    return new Promise(resolve => {
-      let quietTimer
-      let timeout
-      let resolvido = false
-
-      function finalizar() {
-        if (resolvido) return
-        resolvido = true
-        window.clearTimeout(quietTimer)
-        window.clearTimeout(timeout)
-        window.removeEventListener('scroll', aoRolar)
-        resolve()
-      }
-
-      function aoRolar() {
-        window.clearTimeout(quietTimer)
-        quietTimer = window.setTimeout(finalizar, 120)
-      }
-
-      window.addEventListener('scroll', aoRolar, { passive: true })
-      quietTimer = window.setTimeout(finalizar, 150)
-      timeout = window.setTimeout(finalizar, 1400)
-    })
   }
 
   async function abrirFoco() {
@@ -213,23 +221,12 @@ export function ObraCard({
     imagemRef.current?.focus({ preventScroll: true })
   }
 
-  async function alternarDetalhes() {
-    if (detalhesPendentesRef.current) return
-    detalhesPendentesRef.current = true
-
+  function alternarDetalhes() {
     const novoEstado = !expandido
     detalhesFixadosRef.current = novoEstado
-    const conteudoDetalhe = ref.current?.querySelector('.detalhe-inner')
-    const alturaDetalhe = conteudoDetalhe?.scrollHeight ?? 0
-    const ajusteAltura = novoEstado ? alturaDetalhe : -alturaDetalhe
-    const precisaRolar = centralizarCard(ajusteAltura)
-
-    if (precisaRolar && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      await aguardarFimDoScroll()
-    }
-
     setExpandido(novoEstado)
-    detalhesPendentesRef.current = false
+    // Expande e centraliza ao mesmo tempo; a rolagem acompanha o card enquanto ele cresce.
+    void centralizarCard(450)
   }
 
   async function focarImagem(event) {
@@ -241,8 +238,7 @@ export function ObraCard({
     event.preventDefault()
     if (focoPendenteRef.current || dialogRef.current?.open) return
     focoPendenteRef.current = true
-    centralizarCard()
-    await aguardarFimDoScroll()
+    await centralizarCard()
     await abrirFoco()
   }
 
