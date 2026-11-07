@@ -28,6 +28,7 @@ export default function App() {
     sobre: null,
   })
   const [carregando, setCarregando] = useState(true)
+  const [previsualizacao, setPrevisualizacao] = useState(null)
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
@@ -72,6 +73,7 @@ export default function App() {
           frames: Array.isArray(data.frames) ? data.frames : [],
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
+          preview: data.preview ?? null,
         }))
       })
       .catch(error => {
@@ -121,6 +123,11 @@ export default function App() {
 
   return (
     <div className="site-shell">
+      {previsualizacao && (
+        <div className="preview-mode-banner" role="status">
+          Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
+        </div>
+      )}
       <FundoFantasma frames={conteudo.frames} />
       <Hero nome={sobre.nome} frase={sobre.frase} />
       <Nav
