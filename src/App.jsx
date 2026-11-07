@@ -55,7 +55,12 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController()
 
-    fetch('/api/portfolio/', { signal: controller.signal })
+    const previewToken = new URLSearchParams(window.location.search).get('preview_token')
+    const apiUrl = previewToken
+      ? `/api/portfolio/?preview_token=${encodeURIComponent(previewToken)}`
+      : '/api/portfolio/'
+
+    fetch(apiUrl, { signal: controller.signal })
       .then(response => {
         if (!response.ok) throw new Error(`API respondeu ${response.status}`)
         return response.json()
