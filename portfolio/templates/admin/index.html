@@ -1,93 +1,113 @@
 {% extends "admin/base_site.html" %}
 {% load admin_dashboard %}
 
-{% block content_title %}
-<div class="portfolio-welcome">
-  <p class="portfolio-eyebrow">CENTRAL DE GERENCIAMENTO</p>
-  <h1>Bem-vinda ao seu portfólio</h1>
-  <p>Seu espaço para organizar obras, mídias e informações. Você pode editar com tranquilidade: despublicar esconde o conteúdo sem apagá-lo.</p>
-</div>
-{% endblock %}
+{% block content_title %}{% endblock %}
 
 {% block content %}
 {% dashboard_stats as stats %}
-<div class="portfolio-dashboard">
-  <section class="portfolio-stats" aria-label="Resumo do conteúdo">
-    <article class="portfolio-stat portfolio-stat-featured">
-      <span class="portfolio-stat-label">Obras publicadas</span>
+<div class="portfolio-home">
+  <section class="portfolio-welcome">
+    <div class="portfolio-welcome-copy">
+      <p class="portfolio-eyebrow">SEU ESPAÇO CRIATIVO</p>
+      <h1>Olá! Vamos cuidar do seu portfólio? <span aria-hidden="true">✳</span></h1>
+      <p>Este é o seu cantinho para atualizar o site. Escolha uma tarefa abaixo — você não precisa entender de programação para deixar tudo em dia.</p>
+    </div>
+    <a class="portfolio-welcome-link" href="/" target="_blank" rel="noopener">
+      <span aria-hidden="true">↗</span> Ver meu site
+    </a>
+    <div class="portfolio-welcome-art" aria-hidden="true"><span>✳</span><i>✳</i><b>✧</b></div>
+  </section>
+
+  <section class="portfolio-stats" aria-label="Resumo do portfólio">
+    <article class="portfolio-stat portfolio-stat-published">
+      <span class="portfolio-stat-icon" aria-hidden="true">▣</span>
+      <span class="portfolio-stat-label">No ar agora</span>
       <strong>{{ stats.works_published }}</strong>
-      <small>de {{ stats.works_total }} cadastradas</small>
-      <a href="{% url 'admin:portfolio_work_changelist' %}">Gerenciar obras →</a>
+      <small>obras publicadas</small>
+      <a href="{% url 'admin:portfolio_work_changelist' %}?is_active__exact=1">Ver obras →</a>
     </article>
     <article class="portfolio-stat">
-      <span class="portfolio-stat-label">Rascunhos</span>
+      <span class="portfolio-stat-icon" aria-hidden="true">◷</span>
+      <span class="portfolio-stat-label">Guardadas para depois</span>
       <strong>{{ stats.works_draft }}</strong>
-      <small>obras ocultas do site</small>
+      <small>rascunhos privados</small>
       <a href="{% url 'admin:portfolio_work_changelist' %}?is_active__exact=0">Revisar rascunhos →</a>
     </article>
     <article class="portfolio-stat">
-      <span class="portfolio-stat-label">Categorias</span>
+      <span class="portfolio-stat-icon" aria-hidden="true">▤</span>
+      <span class="portfolio-stat-label">Organização</span>
       <strong>{{ stats.categories }}</strong>
-      <small>áreas do portfólio</small>
-      <a href="{% url 'admin:portfolio_category_changelist' %}">Organizar categorias →</a>
+      <small>categorias</small>
+      <a href="{% url 'admin:portfolio_category_changelist' %}">Ver categorias →</a>
     </article>
     <article class="portfolio-stat">
-      <span class="portfolio-stat-label">Mídias extras</span>
+      <span class="portfolio-stat-icon" aria-hidden="true">▶</span>
+      <span class="portfolio-stat-label">Detalhes visuais</span>
       <strong>{{ stats.gallery_images|add:stats.videos }}</strong>
-      <small>{{ stats.gallery_images }} imagens · {{ stats.videos }} vídeos</small>
-      <a href="{% url 'admin:portfolio_workimage_changelist' %}">Gerenciar imagens →</a>
-      <a href="{% url 'admin:portfolio_workvideo_changelist' %}">Gerenciar vídeos →</a>
+      <small>{{ stats.gallery_images }} fotos extras · {{ stats.videos }} vídeos</small>
+      <a href="{% url 'admin:portfolio_workvideo_changelist' %}">Organizar vídeos →</a>
     </article>
   </section>
 
-  <section class="portfolio-quick-actions">
-    <div>
-      <p class="portfolio-eyebrow">ATALHOS</p>
-      <h2>O que você deseja fazer?</h2>
-      <p>As tarefas mais comuns ficam a um clique de distância.</p>
+  <section class="portfolio-start">
+    <div class="portfolio-section-heading">
+      <div><p class="portfolio-eyebrow">POR ONDE COMEÇAR</p><h2>O que você quer fazer hoje?</h2></div>
+      <p>Atalhos simples para as tarefas mais comuns.</p>
     </div>
-    <div class="portfolio-action-list">
+    <div class="portfolio-task-grid">
       {% if perms.portfolio.add_work %}
-      <a class="portfolio-action" href="{% url 'admin:portfolio_work_add' %}"><span class="portfolio-action-icon">＋</span><span><strong>Adicionar uma obra</strong><small>Cadastre uma nova peça ao portfólio</small></span></a>
-      {% endif %}
-      {% if perms.portfolio.add_category %}
-      <a class="portfolio-action" href="{% url 'admin:portfolio_category_add' %}"><span class="portfolio-action-icon">▦</span><span><strong>Criar categoria</strong><small>Organize obras por tipo ou linguagem</small></span></a>
+      <a class="portfolio-task portfolio-task-primary" href="{% url 'admin:portfolio_work_add' %}">
+        <span class="portfolio-task-icon" aria-hidden="true">＋</span><span class="portfolio-task-text"><strong>Adicionar uma obra</strong><small>Fotos, vídeos e descrição em um só lugar</small></span><span class="portfolio-task-arrow">→</span>
+      </a>
       {% endif %}
       {% if perms.portfolio.change_artistprofile %}
-      <a class="portfolio-action" href="{% url 'admin:portfolio_artistprofile_changelist' %}"><span class="portfolio-action-icon">◎</span><span><strong>Editar apresentação</strong><small>Foto, biografia e contato</small></span></a>
+      <a class="portfolio-task" href="{% url 'admin:portfolio_artistprofile_changelist' %}">
+        <span class="portfolio-task-icon" aria-hidden="true">♡</span><span class="portfolio-task-text"><strong>Editar minha apresentação</strong><small>Foto, biografia e informações de contato</small></span><span class="portfolio-task-arrow">→</span>
+      </a>
       {% endif %}
-      <a class="portfolio-action portfolio-action-public" href="/" target="_blank" rel="noopener"><span class="portfolio-action-icon">↗</span><span><strong>Visualizar site</strong><small>Abra o portfólio público em outra aba</small></span></a>
+      {% if perms.portfolio.add_category %}
+      <a class="portfolio-task" href="{% url 'admin:portfolio_category_add' %}">
+        <span class="portfolio-task-icon" aria-hidden="true">▦</span><span class="portfolio-task-text"><strong>Criar uma categoria</strong><small>Separe seus trabalhos por linguagem ou tema</small></span><span class="portfolio-task-arrow">→</span>
+      </a>
+      {% endif %}
+      {% if perms.portfolio.view_backgroundframe %}
+      <a class="portfolio-task" href="{% url 'admin:portfolio_backgroundframe_changelist' %}">
+        <span class="portfolio-task-icon" aria-hidden="true">▧</span><span class="portfolio-task-text"><strong>Trocar imagens de fundo</strong><small>Atualize o clima visual da página</small></span><span class="portfolio-task-arrow">→</span>
+      </a>
+      {% endif %}
     </div>
   </section>
 
-  <section class="portfolio-dashboard-content">
-    <div class="portfolio-dashboard-heading">
-      <div><p class="portfolio-eyebrow">CONTEÚDO</p><h2>Gerencie cada parte do site</h2></div>
-      <span>Resumo atualizado automaticamente</span>
+  <section class="portfolio-library">
+    <div class="portfolio-section-heading">
+      <div><p class="portfolio-eyebrow">SEU CONTEÚDO</p><h2>Organize cada pedacinho do site</h2></div>
+      <p>Entre em uma área para editar, adicionar ou reorganizar informações.</p>
     </div>
-    {% if app_list %}
-      {% for app in app_list %}
-      <section class="module app-{{ app.app_label }}">
-        <table>
-          <caption><a href="{{ app.app_url }}" class="section">{{ app.name }}</a></caption>
-          {% for model in app.models %}
-          <tr class="model-{{ model.object_name|lower }}">
-            {% if model.admin_url %}<th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>{% else %}<th>{{ model.name }}</th>{% endif %}
-            <td>{% if model.add_url %}<a href="{{ model.add_url }}" class="addlink">Adicionar</a>{% else %}&nbsp;{% endif %}</td>
-            <td>{% if model.admin_url %}<a href="{{ model.admin_url }}" class="changelink">Gerenciar</a>{% else %}&nbsp;{% endif %}</td>
-          </tr>
-          {% endfor %}
-        </table>
-      </section>
-      {% endfor %}
-    {% else %}
-      <p>Você não tem permissão para visualizar ou editar conteúdo neste painel.</p>
-    {% endif %}
+    <div class="portfolio-library-grid">
+      {% if perms.portfolio.view_work %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_work_changelist' %}"><span class="portfolio-library-icon">▣</span><strong>Obras</strong><small>Textos, fotos, galerias e publicação</small><span class="portfolio-card-link">Abrir obras →</span></a>
+      {% endif %}
+      {% if perms.portfolio.view_category %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_category_changelist' %}"><span class="portfolio-library-icon">▦</span><strong>Categorias</strong><small>Organize as seções do portfólio</small><span class="portfolio-card-link">Abrir categorias →</span></a>
+      {% endif %}
+      {% if perms.portfolio.view_workvideo %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_workvideo_changelist' %}"><span class="portfolio-library-icon">▶</span><strong>Vídeos</strong><small>Links e miniaturas do YouTube</small><span class="portfolio-card-link">Abrir vídeos →</span></a>
+      {% endif %}
+      {% if perms.portfolio.view_workimage %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_workimage_changelist' %}"><span class="portfolio-library-icon">▧</span><strong>Fotos extras</strong><small>Imagens que aparecem nas galerias</small><span class="portfolio-card-link">Abrir fotos →</span></a>
+      {% endif %}
+      {% if perms.portfolio.view_reference %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_reference_changelist' %}"><span class="portfolio-library-icon">↗</span><strong>Referências</strong><small>Exposições, projetos e links</small><span class="portfolio-card-link">Abrir referências →</span></a>
+      {% endif %}
+      {% if perms.portfolio.view_sociallink %}
+      <a class="portfolio-library-card" href="{% url 'admin:portfolio_sociallink_changelist' %}"><span class="portfolio-library-icon">◎</span><strong>Redes sociais</strong><small>Links que aparecem no rodapé</small><span class="portfolio-card-link">Abrir redes →</span></a>
+      {% endif %}
+    </div>
   </section>
 
-  <aside class="portfolio-help">
-    <strong>Uma dica importante</strong>
-    <span>Use “Publicado” para controlar o que aparece no site. Despublicar não apaga o conteúdo nem suas imagens; você pode publicar novamente quando quiser.</span>
+  <aside class="portfolio-friendly-note">
+    <span class="portfolio-note-icon" aria-hidden="true">♡</span>
+    <div><strong>Pode editar sem medo.</strong><p>Uma obra em rascunho fica escondida do público, mas continua salva aqui. Você pode revisar, gerar uma prévia privada e publicar só quando estiver pronta.</p></div>
   </aside>
 </div>
 {% endblock %}
