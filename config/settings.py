@@ -143,6 +143,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = (
     not DEBUG and os.environ.get("SECURE_SSL_REDIRECT", "true").lower() == "true"
 )
+# Railway's healthcheck uses plain HTTP; do not redirect it to HTTPS.
+# Django matches these regexes against request.path_info with the leading "/" stripped.
+SECURE_REDIRECT_EXEMPT = [r"^api/health/$"]
 SECURE_HSTS_SECONDS = int(
     os.environ.get("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0")
 )
