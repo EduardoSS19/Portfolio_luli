@@ -14,7 +14,7 @@ export function Sobre({ perfil }) {
         <div className="obra-texto">
           <span className="categoria-legenda">Início</span>
           <h2>{perfil.nome}</h2>
-          {perfil.bio.map((paragrafo, index) => <p key={index}>{paragrafo}</p>)}
+          <p className="biografia" style={{ whiteSpace: 'pre-line' }}>{perfil.bio}</p>
         </div>
       </div>
     </section>
