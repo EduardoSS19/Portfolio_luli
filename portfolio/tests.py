@@ -555,12 +555,13 @@ class YouTubeIntegrationTests(TestCase):
 
 class AdminDashboardTests(TestCase):
     def test_dashboard_shows_live_content_counts_and_quick_actions(self):
+        Category.objects.all().delete()
         admin_user = get_user_model().objects.create_superuser(
             username="dashboard-admin",
             email="admin@example.com",
             password="test-password-123",
         )
-        category = Category.objects.create(title="Cerâmica", key="ceramica")
+        category = Category.objects.create(title="Cerâmica teste", key="dashboard-test")
         Work.objects.create(category=category, title="Obra publicada", is_active=True)
         Work.objects.create(category=category, title="Rascunho", is_active=False)
         WorkVideo.objects.create(
@@ -597,3 +598,77 @@ class EditorGroupCommandTests(TestCase):
         call_command("setup_editor_group")
 
         self.assertEqual(Group.objects.filter(name="Editores do portfólio").count(), 1)
+
+
+
+class EditorialWorkflowTests(TestCase):
+    def setUp(self):
+        Category.objects.all().delete()
+        self.admin_user = get_user_model().objects.create_superuser(
+            username="editorial-admin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        self.category = Category.objects.create(title="Categoria de teste", key="workflow-test")
+        self.work = Work.objects.create(
+            category=self.category,
+            title="Obra em revisão",
+            is_active=False,
+        )
+
+    def test_new_work_form_starts_as_draft(self):
+        from portfolio.admin import WorkAdminForm
+
+        form = WorkAdminForm()
+        self.assertFalse(form.fields["is_active"].initial)
+
+    def test_staff_can_generate_preview_for_unpublished_work(self):
+        self.client.force_login(self.admin_user)
+        response = self.client.get(
+            reverse("admin:portfolio_work_preview", args=[self.work.pk])
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("preview_token=", response.url)
+        token = response.url.split("preview_token=", 1)[1]
+        api_response = self.client.get(
+            reverse("portfolio-data"),
+            {"preview_token": token},
+        )
+
+        self.assertEqual(api_response.status_code, 200)
+        payload = api_response.json()
+        self.assertEqual(payload["preview"]["id"], self.work.pk)
+        self.assertEqual(payload["categorias"][0]["obras"][0]["titulo"], "Obra em revisão")
+
+    def test_public_api_hides_categories_without_published_works(self):
+        Category.objects.create(title="Categoria vazia", key="categoria-vazia")
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["categorias"], [])
+
+    def test_preview_keeps_category_visible_for_its_draft(self):
+        self.client.force_login(self.admin_user)
+        preview_response = self.client.get(
+            reverse("admin:portfolio_work_preview", args=[self.work.pk])
+        )
+        token = preview_response.url.split("preview_token=", 1)[1]
+
+        response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["categorias"]), 1)
+        self.assertEqual(response.json()["categorias"][0]["obras"][0]["titulo"], "Obra em revisão")
+
+    def test_anonymous_user_cannot_use_preview_token(self):
+        self.client.force_login(self.admin_user)
+        preview_response = self.client.get(
+            reverse("admin:portfolio_work_preview", args=[self.work.pk])
+        )
+        token = preview_response.url.split("preview_token=", 1)[1]
+        self.client.logout()
+
+        response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
+
+        self.assertEqual(response.status_code, 403)

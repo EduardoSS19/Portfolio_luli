@@ -1,8 +1,12 @@
 from django import forms
 from django.contrib import admin, messages
+from django.core import signing
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Count, Max
 from django.db.models import ImageField as ModelImageField
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import redirect
+from django.urls import path, reverse
 from django.utils.html import format_html
 
 from .models import (
@@ -53,6 +57,9 @@ class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 
+MAX_IMAGE_UPLOAD_SIZE = 15 * 1024 * 1024
+
+
 class MultipleImageField(forms.ImageField):
     """Campo que aceita várias imagens de uma vez (cada uma é validada como imagem)."""
 
@@ -62,9 +69,18 @@ class MultipleImageField(forms.ImageField):
 
     def clean(self, data, initial=None):
         limpar = super().clean
+
+        def validar(arquivo):
+            imagem = limpar(arquivo, initial)
+            if imagem and imagem.size > MAX_IMAGE_UPLOAD_SIZE:
+                raise forms.ValidationError(
+                    "Cada imagem deve ter no máximo 15 MB."
+                )
+            return imagem
+
         if isinstance(data, (list, tuple)):
-            return [limpar(arquivo, initial) for arquivo in data if arquivo]
-        return [limpar(data, initial)] if data else []
+            return [validar(arquivo) for arquivo in data if arquivo]
+        return [validar(data)] if data else []
 
 
 class ImagemSalvaMixin:
@@ -82,6 +98,13 @@ class ImagemSalvaMixin:
                 if not isinstance(self.cleaned_data.get(campo.name), UploadedFile):
                     excluir.add(campo.name)
         return excluir
+
+    def clean(self):
+        cleaned_data = super().clean()
+        for nome, valor in cleaned_data.items():
+            if isinstance(valor, UploadedFile) and valor.size > MAX_IMAGE_UPLOAD_SIZE:
+                self.add_error(nome, "A imagem deve ter no máximo 15 MB.")
+        return cleaned_data
 
 
 class ImagemExistenteForm(ImagemSalvaMixin, forms.ModelForm):
@@ -330,6 +353,15 @@ class WorkAdminForm(ImagemSalvaMixin, forms.ModelForm):
         model = Work
         fields = "__all__"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["is_active"].label = "Publicada no site"
+        self.fields["is_active"].help_text = (
+            "Desmarque para salvar como rascunho. Rascunhos não aparecem no site público."
+        )
+        if not self.instance.pk:
+            self.fields["is_active"].initial = False
+
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
@@ -354,12 +386,47 @@ class WorkAdmin(admin.ModelAdmin):
                 "description": "A imagem principal aparece primeiro no carrossel.",
             },
         ),
-        ("Publicação", {"fields": ("position", "is_active")}),
+        ("Publicação", {"fields": ("position", "is_active", "preview_site")}),
         (
             "Avançado",
             {"fields": ("image_url",), "classes": ("collapse",)},
         ),
     )
+
+    readonly_fields = ("preview_site",)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<path:object_id>/preview/",
+                self.admin_site.admin_view(self.preview_draft),
+                name="portfolio_work_preview",
+            ),
+        ]
+        return custom_urls + urls
+
+    def preview_draft(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        if obj is None:
+            raise Http404("Obra não encontrada.")
+        if not self.has_view_or_change_permission(request, obj):
+            raise Http404("Obra não encontrada.")
+        token = signing.dumps(
+            {"work": obj.pk, "user": request.user.pk},
+            salt="portfolio.work-preview",
+        )
+        return redirect(f"{reverse('frontend')}?preview_token={token}")
+
+    @admin.display(description="Prévia privada")
+    def preview_site(self, obj):
+        if not obj or not obj.pk:
+            return "Salve a obra para gerar uma prévia."
+        return format_html(
+            '<a class="button" href="{}" target="_blank" rel="noopener">'
+            'Visualizar como ficará no site</a>',
+            reverse("admin:portfolio_work_preview", args=[obj.pk]),
+        )
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(_imagens=Count("gallery_images", distinct=True))

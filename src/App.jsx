@@ -28,6 +28,7 @@ export default function App() {
     sobre: null,
   })
   const [carregando, setCarregando] = useState(true)
+  const [previsualizacao, setPrevisualizacao] = useState(null)
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
@@ -55,7 +56,12 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController()
 
-    fetch('/api/portfolio/', { signal: controller.signal })
+    const previewToken = new URLSearchParams(window.location.search).get('preview_token')
+    const apiUrl = previewToken
+      ? `/api/portfolio/?preview_token=${encodeURIComponent(previewToken)}`
+      : '/api/portfolio/'
+
+    fetch(apiUrl, { signal: controller.signal })
       .then(response => {
         if (!response.ok) throw new Error(`API respondeu ${response.status}`)
         return response.json()
@@ -68,6 +74,7 @@ export default function App() {
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
         }))
+        setPrevisualizacao(data.preview ?? null)
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
@@ -116,6 +123,11 @@ export default function App() {
 
   return (
     <div className="site-shell">
+      {previsualizacao && (
+        <div className="preview-mode-banner" role="status">
+          Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
+        </div>
+      )}
       <FundoFantasma frames={conteudo.frames} />
       <Hero nome={sobre.nome} frase={sobre.frase} />
       <Nav

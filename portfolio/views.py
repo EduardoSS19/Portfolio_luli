@@ -3,10 +3,12 @@ import logging
 from smtplib import SMTPException
 
 from django.conf import settings
+from django.core import signing
 from django.core.exceptions import ValidationError
+from django.core.signing import BadSignature, SignatureExpired
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -91,13 +93,37 @@ def _work_data(work):
 @require_GET
 @ensure_csrf_cookie
 def portfolio_data(request):
-    categories = Category.objects.filter(is_active=True).prefetch_related(
+    preview_work = None
+    preview_token = request.GET.get("preview_token")
+    if preview_token:
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return JsonResponse({"erro": "Prévia disponível apenas para a equipe."}, status=403)
+        try:
+            preview_payload = signing.loads(
+                preview_token,
+                salt="portfolio.work-preview",
+                max_age=600,
+            )
+        except (BadSignature, SignatureExpired):
+            return JsonResponse({"erro": "Este link de prévia expirou. Gere outro pelo painel."}, status=403)
+        if preview_payload.get("user") != request.user.pk:
+            return JsonResponse({"erro": "Este link de prévia pertence a outro usuário."}, status=403)
+        preview_work = Work.objects.filter(pk=preview_payload.get("work")).first()
+        if not preview_work:
+            return JsonResponse({"erro": "A obra desta prévia não existe mais."}, status=404)
+
+    works_queryset = Work.objects.filter(is_active=True)
+    categories_queryset = Category.objects.filter(is_active=True, works__is_active=True).distinct()
+    if preview_work:
+        works_queryset = Work.objects.filter(Q(is_active=True) | Q(pk=preview_work.pk))
+        categories_queryset = Category.objects.filter(is_active=True).filter(
+            Q(works__is_active=True) | Q(pk=preview_work.category_id)
+        ).distinct()
+
+    categories = categories_queryset.prefetch_related(
         Prefetch(
             "works",
-            queryset=Work.objects.filter(is_active=True).prefetch_related(
-                "gallery_images",
-                "youtube_videos",
-            ),
+            queryset=works_queryset.prefetch_related("gallery_images", "youtube_videos"),
         )
     )
     references = Reference.objects.filter(is_active=True).prefetch_related("links")
@@ -105,8 +131,7 @@ def portfolio_data(request):
     frames = BackgroundFrame.objects.filter(is_active=True)
     social_links = SocialLink.objects.filter(is_active=True)
 
-    return JsonResponse(
-        {
+    payload = {
             "sobre": (
                 {
                     "nome": profile.name,
@@ -147,7 +172,9 @@ def portfolio_data(request):
                 for reference in references
             ],
         }
-    )
+    if preview_work:
+        payload["preview"] = {"id": preview_work.pk, "titulo": preview_work.title}
+    return JsonResponse(payload)
 
 
 @require_POST
@@ -231,7 +258,7 @@ def healthcheck(request):
 @require_GET
 def frontend(request):
     if settings.DEBUG:
-        return redirect("http://127.0.0.1:5173/")
+        return redirect(f"http://127.0.0.1:5173/{request.META.get('QUERY_STRING') and '?' + request.META['QUERY_STRING'] or ''}")
 
     index_file = settings.FRONTEND_DIST / "index.html"
     if not index_file.is_file():

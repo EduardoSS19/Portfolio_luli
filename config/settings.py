@@ -70,7 +70,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # Prioriza os templates editoriais do projeto sobre os templates padrão
+        # do Django Admin (o app portfolio vem depois de django.contrib.admin).
+        "DIRS": [BASE_DIR / "portfolio" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
