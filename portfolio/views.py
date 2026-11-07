@@ -115,11 +115,9 @@ def portfolio_data(request):
                     "instagram": profile.instagram_url,
                     "email": profile.contact_email,
                     "formulario": profile.contact_form_url,
-                    "bio": [
-                        paragraph.strip()
-                        for paragraph in profile.bio.replace("\r\n", "\n").split("\n\n")
-                        if paragraph.strip()
-                    ],
+                    # Mantém as quebras simples e os parágrafos exatamente como
+                    # foram escritos no painel. O frontend usa white-space: pre-line.
+                    "bio": profile.bio.replace("\r\n", "\n").replace("\r", "\n"),
                 }
                 if profile
                 else None
