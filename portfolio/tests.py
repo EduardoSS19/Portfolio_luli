@@ -555,6 +555,7 @@ class YouTubeIntegrationTests(TestCase):
 
 class AdminDashboardTests(TestCase):
     def test_dashboard_shows_live_content_counts_and_quick_actions(self):
+        Category.objects.all().delete()
         admin_user = get_user_model().objects.create_superuser(
             username="dashboard-admin",
             email="admin@example.com",
@@ -602,6 +603,7 @@ class EditorGroupCommandTests(TestCase):
 
 class EditorialWorkflowTests(TestCase):
     def setUp(self):
+        Category.objects.all().delete()
         self.admin_user = get_user_model().objects.create_superuser(
             username="editorial-admin",
             email="admin@example.com",
