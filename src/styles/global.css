@@ -1316,3 +1316,67 @@ nav button.ativo{
   .obra.arte-desenho .detalhe-wrapper.aberto .detalhe,
   .obra.arte-glitch .detalhe-wrapper.aberto .detalhe{ animation:none; }
 }
+/* ===== Card em foco: destaque mais claro quando está no centro da tela ===== */
+.obra,.obra.invertido{
+  position:relative;
+  transition:
+    border-color 0.6s ease,
+    box-shadow 0.7s ease,
+    background 0.7s ease,
+    transform 0.8s cubic-bezier(.2,.7,.2,1);
+}
+.obra-galeria{
+  filter:saturate(0.88);
+  transition:filter 0.7s ease;
+}
+.obra-imagem::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(5,20,33,0.12),rgba(5,20,33,0.42));
+  opacity:1;
+  transition:opacity 0.7s ease;
+}
+.obra .obra-texto h3,
+.obra .obra-texto p,
+.obra .categoria-legenda{
+  transition:color 0.6s ease;
+}
+.obra:not(.em-foco):not(.foco-ativo) .obra-texto h3{ color:rgba(239,247,255,0.82); }
+
+.obra.em-foco,
+.obra.foco-ativo,
+.obra.invertido.em-foco,
+.obra.invertido.foco-ativo{
+  border-color:rgba(160,212,250,0.62);
+  background:linear-gradient(130deg,rgba(28,78,120,0.78),rgba(13,47,77,0.84));
+  box-shadow:
+    0 34px 80px -34px rgba(0,0,0,0.85),
+    0 0 0 1px rgba(147,200,242,0.22),
+    0 0 70px -12px rgba(110,180,240,0.4);
+  transform:translateY(-4px);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+}
+.obra.em-foco .obra-galeria,
+.obra.foco-ativo .obra-galeria{ filter:saturate(1.1); }
+.obra.em-foco .obra-imagem::after,
+.obra.foco-ativo .obra-imagem::after{ opacity:0; }
+.obra.em-foco .obra-texto h3,
+.obra.foco-ativo .obra-texto h3{ color:#fff; }
+.obra.em-foco .obra-texto p,
+.obra.foco-ativo .obra-texto p{ color:rgba(239,247,255,0.92); }
+.obra.em-foco .categoria-legenda,
+.obra.foco-ativo .categoria-legenda{ color:#b8defa; }
+
+/* ===== Zoom da imagem: transição suave entre a miniatura e a tela cheia ===== */
+.obra-focus-imagem{
+  transform-origin:center;
+  will-change:transform, clip-path;
+}
+.obra-focus::backdrop{
+  animation-duration:0.5s;
+  transition-duration:0.46s;
+}
