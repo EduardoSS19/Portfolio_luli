@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
+// Marca o elemento como visível na primeira vez que ele entra na tela e para de observar.
+// Antes, as animações de entrada rodavam de novo a cada vez que o card saía e voltava,
+// o que pesava muito durante a rolagem.
 export function useScrollReveal(threshold = 0) {
   const ref = useRef(null)
   const [visivel, setVisivel] = useState(false)
@@ -10,7 +13,10 @@ export function useScrollReveal(threshold = 0) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setVisivel(entry.isIntersecting)
+        if (entry.isIntersecting) {
+          setVisivel(true)
+          observer.disconnect()
+        }
       },
       { threshold, rootMargin: '0px 0px -8% 0px' }
     )
