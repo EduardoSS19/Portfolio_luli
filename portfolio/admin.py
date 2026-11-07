@@ -1,10 +1,7 @@
-import json
-
 from django import forms
 from django.contrib import admin, messages
 from django.core import signing
 from django.core.files.uploadedfile import UploadedFile
-from django.db import transaction
 from django.db.models import Count, Max
 from django.db.models import ImageField as ModelImageField
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
