@@ -27,6 +27,14 @@ export function FundoFantasma({ frames }) {
     }
   }, [frames.length])
 
+  useEffect(() => {
+    // Pré-carrega os próximos quadros para a troca não piscar.
+    for (let passo = 1; passo <= 3; passo += 1) {
+      const src = frames[(indice + passo + 2) % frames.length]
+      if (src) new Image().src = src
+    }
+  }, [indice, frames])
+
   if (frames.length === 0) return null
 
   return (
@@ -36,13 +44,11 @@ export function FundoFantasma({ frames }) {
 
         return (
           <div className={`fundo-fantasma-painel painel-${position + 1}`} key={position}>
-            {frames.map((src, index) => (
-              <div
-                key={src}
-                className={`fundo-fantasma-frame ${index === indiceAtivo ? 'ativo' : ''}`}
-                style={{ '--imagem-fundo': `url("${src}")` }}
-              />
-            ))}
+            <div
+              key={frames[indiceAtivo]}
+              className="fundo-fantasma-frame ativo"
+              style={{ '--imagem-fundo': `url("${frames[indiceAtivo]}")` }}
+            />
           </div>
         )
       })}
