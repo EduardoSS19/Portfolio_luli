@@ -16,7 +16,10 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . ./
 COPY --from=frontend-build /app/dist ./frontend/dist
-RUN python manage.py collectstatic --noinput
+# Build static files with the same manifest-based storage used in production.
+# Dummy Cloudinary values satisfy the production settings check; collectstatic
+# writes local static assets and does not upload media.
+RUN DEBUG=false DJANGO_SECRET_KEY=build-only-not-a-secret CLOUDINARY_CLOUD_NAME=build-only CLOUDINARY_API_KEY=0 CLOUDINARY_API_SECRET=build-only python manage.py collectstatic --noinput
 
 EXPOSE 10000
 CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py setup_admin && exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-10000} --workers ${WEB_CONCURRENCY:-2} --timeout 120"]
