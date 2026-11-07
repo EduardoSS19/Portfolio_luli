@@ -107,7 +107,8 @@ class ArtistProfileAdmin(admin.ModelAdmin):
                 "fields": ("name", "tagline", "photo", "photo_url", "bio"),
                 "description": (
                     "Estas informações aparecem na página inicial e na seção Sobre. "
-                    "Prefira uma foto nítida e uma biografia dividida em parágrafos."
+                    "No campo biografia, use Enter para quebrar linhas; o site exibirá "
+                    "as quebras exatamente como você escreveu."
                 ),
             },
         ),
