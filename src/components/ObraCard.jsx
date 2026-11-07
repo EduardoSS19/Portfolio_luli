@@ -1,11 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
+import { useCardEmFoco } from '../hooks/useCardEmFoco.js'
 
 let motionModule
 
 function carregarMotion() {
   motionModule ??= import('https://cdn.jsdelivr.net/npm/motion@12.23.24/+esm')
   return motionModule
+}
+
+const EASE_ABRIR = 'cubic-bezier(0.22, 1, 0.36, 1)'
+const EASE_FECHAR = 'cubic-bezier(0.4, 0, 0.2, 1)'
+const SEM_RECORTE = 'inset(0px 0px 0px 0px)'
+const SEM_TRANSFORMACAO = 'translate(0px, 0px) scale(1)'
+
+const esperar = ms => new Promise(resolve => window.setTimeout(resolve, ms))
+
+function reduzirMovimento() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+// Calcula onde a imagem ampliada deve "nascer": exatamente sobre a miniatura do card.
+// A miniatura usa object-fit: cover, então escalamos para cobrir a caixa inteira
+// e recortamos o excesso com clip-path. Assim não há salto visual entre as duas.
+function calcularQuadroDaMiniatura(imagemFoco, miniatura) {
+  const origem = miniatura.getBoundingClientRect()
+  const destino = imagemFoco.getBoundingClientRect()
+  if (!origem.width || !origem.height || !destino.width || !destino.height) return null
+
+  const escala = Math.max(origem.width / destino.width, origem.height / destino.height)
+  const x = origem.left + origem.width / 2 - (destino.left + destino.width / 2)
+  const y = origem.top + origem.height / 2 - (destino.top + destino.height / 2)
+  const recorteX = Math.max(0, (destino.width - origem.width / escala) / 2)
+  const recorteY = Math.max(0, (destino.height - origem.height / escala) / 2)
+
+  return {
+    transform: `translate(${x}px, ${y}px) scale(${escala})`,
+    clipPath: `inset(${recorteY}px ${recorteX}px ${recorteY}px ${recorteX}px)`,
+  }
 }
 
 export function ObraCard({
@@ -26,7 +59,9 @@ export function ObraCard({
   const [focoAberto, setFocoAberto] = useState(false)
   const [focoFechando, setFocoFechando] = useState(false)
   const [videoAtivoId, setVideoAtivoId] = useState(null)
+  const [focoPreparado, setFocoPreparado] = useState(false)
   const [ref, visivel] = useScrollReveal()
+  const emFoco = useCardEmFoco(ref)
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
   const imagemFocoRef = useRef(null)
@@ -36,6 +71,7 @@ export function ObraCard({
   const inicioArrasteFocoRef = useRef(null)
   const focoPendenteRef = useRef(false)
   const focoFechandoRef = useRef(false)
+  const focoAbrindoRef = useRef(false)
   const detalhesPendentesRef = useRef(false)
   const detalhesFixadosRef = useRef(null)
   const overflowAnteriorRef = useRef('')
@@ -104,55 +140,74 @@ export function ObraCard({
     })
   }
 
-  async function animarFoco(abrindo) {
-    const imagemFoco = imagemFocoRef.current
-    const imagemOrigem = imagemRef.current
-    if (!imagemFoco || !imagemOrigem || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-
-    const origem = imagemOrigem.getBoundingClientRect()
-    const destino = imagemFoco.getBoundingClientRect()
-    const escala = Math.min(origem.width / destino.width, origem.height / destino.height)
-    const x = origem.left + origem.width / 2 - (destino.left + destino.width / 2)
-    const y = origem.top + origem.height / 2 - (destino.top + destino.height / 2)
-
-    try {
-      const { animate } = await carregarMotion()
-      const animacao = animate(
-        imagemFoco,
-        abrindo ? { x: [x, 0], y: [y, 0], scale: [escala, 1] } : { x, y, scale: escala },
-        { duration: abrindo ? 0.62 : 0.48, ease: [0.22, 1, 0.36, 1] },
-      )
-      await Promise.race([
-        animacao.finished.catch(() => {}),
-        new Promise(resolve => window.setTimeout(resolve, 700)),
-      ])
-    } catch (error) {
-      console.warn('Não foi possível animar o foco da obra.', error)
-    }
-  }
-
   async function abrirFoco() {
     const dialog = dialogRef.current
     if (!dialog || dialog.open || focoFechandoRef.current) return
 
     focoPendenteRef.current = false
+    // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
+    flushSync(() => setFocoPreparado(true))
+
+    const imagemFoco = imagemFocoRef.current
+    if (imagemFoco) {
+      await Promise.race([imagemFoco.decode().catch(() => {}), esperar(1500)])
+    }
+    if (dialog.open || focoFechandoRef.current) return
+
     overflowAnteriorRef.current = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    // Esconde a miniatura e abre o dialog no mesmo quadro: sem piscar e sem teletransporte.
+    flushSync(() => setFocoAberto(true))
     dialog.showModal()
-    setFocoAberto(true)
-    window.requestAnimationFrame(() => { void animarFoco(true) })
+
+    const miniatura = imagemRef.current
+    if (!imagemFoco || !miniatura || reduzirMovimento()) return
+    const quadro = calcularQuadroDaMiniatura(imagemFoco, miniatura)
+    if (!quadro) return
+
+    focoAbrindoRef.current = true
+    const animacao = imagemFoco.animate(
+      [
+        { transform: quadro.transform, clipPath: quadro.clipPath },
+        { transform: SEM_TRANSFORMACAO, clipPath: SEM_RECORTE },
+      ],
+      { duration: 640, easing: EASE_ABRIR, fill: 'both' },
+    )
+    await Promise.race([animacao.finished.catch(() => {}), esperar(900)])
+    animacao.cancel()
+    focoAbrindoRef.current = false
   }
 
   async function fecharFoco() {
     const dialog = dialogRef.current
-    if (!dialog?.open || focoFechandoRef.current) return
+    if (!dialog?.open || focoFechandoRef.current || focoAbrindoRef.current) return
 
     focoFechandoRef.current = true
     setFocoFechando(true)
-    await animarFoco(false)
+
+    const imagemFoco = imagemFocoRef.current
+    const miniatura = imagemRef.current
+    const quadro = imagemFoco && miniatura && !reduzirMovimento()
+      ? calcularQuadroDaMiniatura(imagemFoco, miniatura)
+      : null
+
+    let animacao = null
+    if (quadro) {
+      animacao = imagemFoco.animate(
+        [
+          { transform: SEM_TRANSFORMACAO, clipPath: SEM_RECORTE },
+          { transform: quadro.transform, clipPath: quadro.clipPath },
+        ],
+        { duration: 460, easing: EASE_FECHAR, fill: 'both' },
+      )
+      await Promise.race([animacao.finished.catch(() => {}), esperar(700)])
+    }
+
+    // Mostra a miniatura e fecha o dialog no mesmo quadro: a imagem "pousa" no card.
+    flushSync(() => setFocoAberto(false))
     dialog.close()
+    animacao?.cancel()
     document.body.style.overflow = overflowAnteriorRef.current
-    setFocoAberto(false)
     setFocoFechando(false)
     focoFechandoRef.current = false
     imagemRef.current?.focus({ preventScroll: true })
@@ -296,7 +351,7 @@ export function ObraCard({
     <>
       <article
         ref={ref}
-        className={`obra arte-${tipoDeArte} categoria-${categoria} ${visivel ? 'visivel' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        className={`obra arte-${tipoDeArte} categoria-${categoria} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
         onClick={centralizarAoClicarCard}
       >
         <div className="obra-galeria">
@@ -317,6 +372,8 @@ export function ObraCard({
                       className="obra-zoom-trigger"
                       aria-label={`Ampliar obra ${titulo}, imagem ${indicesImagem.indexOf(indiceImagem) + 1} de ${indicesImagem.length}`}
                       onClick={focarImagem}
+                      onPointerEnter={() => setFocoPreparado(true)}
+                      onFocus={() => setFocoPreparado(true)}
                     >
                       <img
                         key={midiaAtiva.src}
@@ -484,7 +541,7 @@ export function ObraCard({
           <img
             ref={imagemFocoRef}
             className="obra-focus-imagem"
-            src={midiaAtiva?.src}
+            src={focoPreparado ? midiaAtiva?.src : undefined}
             alt={`${titulo} — visualização ampliada`}
             draggable="false"
             onPointerDown={iniciarArrasteFoco}
