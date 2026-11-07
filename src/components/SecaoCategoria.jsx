@@ -7,6 +7,8 @@ function tipoDeArte(titulo, chave) {
   if (nome.includes('ceram')) return 'ceramica'
   if (nome.includes('gravura') || nome.includes('escultura')) return 'gravura'
   if (nome.includes('desenho')) return 'desenho'
+  if (nome.includes('fotograf')) return 'fotografia'
+  if (nome.includes('video')) return 'videoarte'
   return 'obra'
 }
 
