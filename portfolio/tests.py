@@ -560,7 +560,7 @@ class AdminDashboardTests(TestCase):
             email="admin@example.com",
             password="test-password-123",
         )
-        category = Category.objects.create(title="Cerâmica", key="ceramica")
+        category = Category.objects.create(title="Cerâmica teste", key="dashboard-test")
         Work.objects.create(category=category, title="Obra publicada", is_active=True)
         Work.objects.create(category=category, title="Rascunho", is_active=False)
         WorkVideo.objects.create(
@@ -607,7 +607,7 @@ class EditorialWorkflowTests(TestCase):
             email="admin@example.com",
             password="test-password-123",
         )
-        self.category = Category.objects.create(title="Cerâmica", key="ceramica")
+        self.category = Category.objects.create(title="Categoria de teste", key="workflow-test")
         self.work = Work.objects.create(
             category=self.category,
             title="Obra em revisão",
