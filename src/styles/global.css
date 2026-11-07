@@ -1316,11 +1316,13 @@ nav button.ativo{
   .obra.arte-desenho .detalhe-wrapper.aberto .detalhe,
   .obra.arte-glitch .detalhe-wrapper.aberto .detalhe{ animation:none; }
 }
-/* ===== Card em foco: destaque mais claro /* ===== Card em foco: destaque mais claro quando está no centro da tela ===== */
+
+
+/* ===== Card em foco: destaque mais claro quando está no centro da tela ===== */
 /* Leve de propósito: só anima opacity e transform (rodam na GPU), sem blur nem filter. */
 .obra,.obra.invertido{
   position:relative;
-  transition:border-color 0.5s ease, transform 0.6s cubic-bezier(.2,.7,.2,1);
+  transition:border-color 0.5s ease;
 }
 .obra::before{
   content:"";
@@ -1351,7 +1353,6 @@ nav button.ativo{
 .obra.invertido.em-foco,
 .obra.invertido.foco-ativo{
   border-color:rgba(160,212,250,0.62);
-  transform:translateY(-4px);
 }
 .obra.em-foco::before,
 .obra.foco-ativo::before{ opacity:1; }
@@ -1406,8 +1407,6 @@ nav button.ativo{
 @media (prefers-reduced-motion: reduce){
   .carregando-anel,.carregando-texto{ animation:none; }
 }
-
-
 
 /* ===== Zoom da imagem: transição suave entre a miniatura e a tela cheia ===== */
 .obra-focus-imagem{
