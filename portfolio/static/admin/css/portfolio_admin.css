@@ -57,3 +57,44 @@
   .portfolio-dashboard-heading { align-items: flex-start; flex-direction: column; }
   #content-main .module th, #content-main .module td { padding: 10px; }
 }
+
+
+/* Ferramentas editoriais: leitura confortável e feedback imediato. */
+.portfolio-character-count {
+  display: block;
+  margin: 5px 0 12px;
+  color: var(--portfolio-muted);
+  font-size: 11px;
+}
+.portfolio-upload-feedback {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.portfolio-upload-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--portfolio-muted);
+  font-size: 11px;
+}
+.portfolio-upload-item img {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--portfolio-border);
+  border-radius: 8px;
+  background: var(--portfolio-paper);
+  object-fit: contain;
+}
+.portfolio-upload-item span {
+  overflow-wrap: anywhere;
+}
+#id_bio, #id_description, #id_detail {
+  min-height: 150px;
+  line-height: 1.65;
+}
+#id_bio { min-height: 260px; }
