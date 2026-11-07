@@ -267,8 +267,8 @@ class WorkVideoInlineForm(WorkVideoFormMixin, forms.ModelForm):
 @admin.register(WorkVideo)
 class WorkVideoAdmin(admin.ModelAdmin):
     form = WorkVideoAdminForm
-    list_display = ("work", "video_title", "position")
-    list_display_links = ("work", "video_title")
+    list_display = ("preview", "work", "video_title", "position")
+    list_display_links = ("preview", "work", "video_title")
     list_per_page = 30
     save_on_top = True
     list_filter = ("work__category",)
@@ -283,6 +283,10 @@ class WorkVideoAdmin(admin.ModelAdmin):
         }),
         ("Organização", {"fields": ("position",)}),
     )
+
+    @admin.display(description="Prévia")
+    def preview(self, obj):
+        return miniatura(None, obj.thumbnail_url, tamanho=96)
 
 
 # ---------------------------------------------------------------------------
