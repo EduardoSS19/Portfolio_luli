@@ -98,3 +98,14 @@
   line-height: 1.65;
 }
 #id_bio { min-height: 260px; }
+
+.preview-mode-banner {
+  position: relative;
+  z-index: 30;
+  padding: 10px 18px;
+  background: #292720;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+}
