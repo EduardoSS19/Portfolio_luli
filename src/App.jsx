@@ -73,7 +73,6 @@ export default function App() {
           frames: Array.isArray(data.frames) ? data.frames : [],
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
-          preview: data.preview ?? null,
         }))
         setPrevisualizacao(data.preview ?? null)
       })
