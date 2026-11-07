@@ -1,23 +1,75 @@
 {% extends "admin/index.html" %}
+{% load admin_dashboard %}
 
 {% block content_title %}
 <div class="portfolio-welcome">
   <p class="portfolio-eyebrow">CENTRAL DE GERENCIAMENTO</p>
   <h1>Bem-vinda ao seu portfólio</h1>
-  <p>Gerencie suas obras, imagens, vídeos e informações. As alterações publicadas aparecem no site.</p>
+  <p>Seu espaço para organizar obras, mídias e informações. Você pode editar com tranquilidade: despublicar esconde o conteúdo sem apagá-lo.</p>
 </div>
 {% endblock %}
 
 {% block content %}
+{% dashboard_stats as stats %}
 <div class="portfolio-dashboard">
-  <div class="portfolio-dashboard-intro">
-    <strong>Comece por aqui</strong>
-    <span>Escolha uma área abaixo para editar o conteúdo do site.</span>
-  </div>
-  {{ block.super }}
-  <div class="portfolio-help">
-    <strong>Dica</strong>
-    <span>Use os campos de publicação para ocultar um conteúdo temporariamente sem apagá-lo. Você pode reativá-lo quando quiser.</span>
-  </div>
+  <section class="portfolio-stats" aria-label="Resumo do conteúdo">
+    <article class="portfolio-stat portfolio-stat-featured">
+      <span class="portfolio-stat-label">Obras publicadas</span>
+      <strong>{{ stats.works_published }}</strong>
+      <small>de {{ stats.works_total }} cadastradas</small>
+      <a href="{% url 'admin:portfolio_work_changelist' %}">Gerenciar obras →</a>
+    </article>
+    <article class="portfolio-stat">
+      <span class="portfolio-stat-label">Rascunhos</span>
+      <strong>{{ stats.works_draft }}</strong>
+      <small>obras ocultas do site</small>
+      <a href="{% url 'admin:portfolio_work_changelist' %}?is_active__exact=0">Revisar rascunhos →</a>
+    </article>
+    <article class="portfolio-stat">
+      <span class="portfolio-stat-label">Categorias</span>
+      <strong>{{ stats.categories }}</strong>
+      <small>áreas do portfólio</small>
+      <a href="{% url 'admin:portfolio_category_changelist' %}">Organizar categorias →</a>
+    </article>
+    <article class="portfolio-stat">
+      <span class="portfolio-stat-label">Mídias extras</span>
+      <strong>{{ stats.gallery_images|add:stats.videos }}</strong>
+      <small>{{ stats.gallery_images }} imagens · {{ stats.videos }} vídeos</small>
+      <a href="{% url 'admin:portfolio_workimage_changelist' %}">Gerenciar imagens →</a>
+    </article>
+  </section>
+
+  <section class="portfolio-quick-actions">
+    <div>
+      <p class="portfolio-eyebrow">ATALHOS</p>
+      <h2>O que você deseja fazer?</h2>
+      <p>As tarefas mais comuns ficam a um clique de distância.</p>
+    </div>
+    <div class="portfolio-action-list">
+      {% if perms.portfolio.add_work %}
+      <a class="portfolio-action" href="{% url 'admin:portfolio_work_add' %}"><span class="portfolio-action-icon">＋</span><span><strong>Adicionar uma obra</strong><small>Cadastre uma nova peça ao portfólio</small></span></a>
+      {% endif %}
+      {% if perms.portfolio.add_category %}
+      <a class="portfolio-action" href="{% url 'admin:portfolio_category_add' %}"><span class="portfolio-action-icon">▦</span><span><strong>Criar categoria</strong><small>Organize obras por tipo ou linguagem</small></span></a>
+      {% endif %}
+      {% if perms.portfolio.change_artistprofile %}
+      <a class="portfolio-action" href="{% url 'admin:portfolio_artistprofile_changelist' %}"><span class="portfolio-action-icon">◎</span><span><strong>Editar apresentação</strong><small>Foto, biografia e contato</small></span></a>
+      {% endif %}
+      <a class="portfolio-action portfolio-action-public" href="/" target="_blank" rel="noopener"><span class="portfolio-action-icon">↗</span><span><strong>Visualizar site</strong><small>Abra o portfólio público em outra aba</small></span></a>
+    </div>
+  </section>
+
+  <section class="portfolio-dashboard-content">
+    <div class="portfolio-dashboard-heading">
+      <div><p class="portfolio-eyebrow">CONTEÚDO</p><h2>Gerencie cada parte do site</h2></div>
+      <span>Resumo atualizado automaticamente</span>
+    </div>
+    {{ block.super }}
+  </section>
+
+  <aside class="portfolio-help">
+    <strong>Uma dica importante</strong>
+    <span>Use “Publicado” para controlar o que aparece no site. Despublicar não apaga o conteúdo nem suas imagens; você pode publicar novamente quando quiser.</span>
+  </aside>
 </div>
 {% endblock %}
