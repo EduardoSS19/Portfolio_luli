@@ -6,16 +6,23 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "local-development-only")
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY precisa estar definida quando DEBUG estiver desativado."
+        )
+    SECRET_KEY = "local-development-only"
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
-# Hospedagem: Render (antigo) e Railway (domínio gerado + healthcheck da plataforma).
+# Domínios públicos no Cloudflare e domínio interno/gerado do Railway.
 for extra_host in (
-    os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
+    "www.lulibecker.com.br",
+    "lulibecker.com.br",
     os.environ.get("RAILWAY_PUBLIC_DOMAIN"),
     "healthcheck.railway.app",
 ):
@@ -123,12 +130,25 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = (
+    not DEBUG and os.environ.get("SECURE_SSL_REDIRECT", "true").lower() == "true"
+)
+SECURE_HSTS_SECONDS = int(
+    os.environ.get("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0")
+)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 

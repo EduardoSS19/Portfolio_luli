@@ -66,7 +66,7 @@ class PortfolioApiTests(TestCase):
                 "instagram": "https://instagram.com/artista",
                 "email": "artista@example.com",
                 "formulario": "https://formspree.io/f/example",
-                "bio": ["Primeiro parágrafo.", "Segundo parágrafo."],
+                "bio": "Primeiro parágrafo.\n\nSegundo parágrafo.",
             },
             "frames": ["/media/fundos/2026/09/frame.webp"],
             "redes": [{"titulo": "Behance", "url": "https://behance.net/artista"}],
@@ -88,6 +88,19 @@ class PortfolioApiTests(TestCase):
                 "links": [{"texto": "Site", "url": "https://example.com"}],
             }],
         })
+
+    def test_bio_preserves_single_and_multiple_manual_line_breaks(self):
+        ArtistProfile.objects.create(
+            name="Luísa Becker",
+            bio="Primeira linha\nSegunda linha\n\nNovo parágrafo",
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(
+            response.json()["sobre"]["bio"],
+            "Primeira linha\nSegunda linha\n\nNovo parágrafo",
+        )
 
     def test_inactive_content_is_not_public(self):
         category = Category.objects.create(title="Oculta", key="oculta", is_active=False)

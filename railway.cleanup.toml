@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python manage.py limpar_cloudinary --apagar --idade-minima-horas 24"
+cronSchedule = "0 4 * * *"
+restartPolicyType = "NEVER"

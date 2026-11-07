@@ -13,7 +13,7 @@ const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
   foto: '',
-  bio: ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.'],
+  bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
   instagram: '',
   email: '',
   formulario: '',
@@ -66,7 +66,7 @@ export default function App() {
           referencias: Array.isArray(data.referencias) ? data.referencias : [],
           frames: Array.isArray(data.frames) ? data.frames : [],
           redes: Array.isArray(data.redes) ? data.redes : [],
-          sobre: data.sobre && Array.isArray(data.sobre.bio) ? data.sobre : null,
+          sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
         }))
       })
       .catch(error => {
