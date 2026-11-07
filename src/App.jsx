@@ -41,6 +41,7 @@ export default function App() {
   const secaoAtiva = useSecaoAtiva(secoesNav)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
+  const [modoGaleria, setModoGaleria] = useState('lista')
   const anteriorRef = useRef(secaoAtiva)
 
   useEffect(() => {
@@ -136,6 +137,15 @@ export default function App() {
         animando={animando}
         aoSelecionar={selecionarCategoria}
       />
+      <div className="galeria-global-controles" role="group" aria-label="Modo de visualização de todas as obras">
+        <span className="galeria-global-legenda">COMO VOCÊ PREFERE EXPLORAR?</span>
+        <button type="button" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => setModoGaleria('lista')}>
+          <span aria-hidden="true">☷</span> Lista
+        </button>
+        <button type="button" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => setModoGaleria('grade')}>
+          <span aria-hidden="true">▦</span> Grade
+        </button>
+      </div>
       <Sobre perfil={sobre} />
       {categorias.map((cat, indice) => (
         <SecaoCategoria
@@ -144,6 +154,8 @@ export default function App() {
           chave={cat.chave}
           obras={cat.obras}
           indice={indice}
+          modoVisualizacao={modoGaleria}
+          indiceInicial={categorias.slice(0, indice).reduce((total, categoria) => total + categoria.obras.length, 0)}
         />
       ))}
       {referencias.length > 0 && <Referencias referencias={referencias} />}

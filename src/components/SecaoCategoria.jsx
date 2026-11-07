@@ -12,7 +12,7 @@ function tipoDeArte(titulo, chave) {
   return 'obra'
 }
 
-export function SecaoCategoria({ titulo, chave, obras, indice = 0 }) {
+export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0 }) {
   const tipo = tipoDeArte(titulo, chave)
   const [cabecalhoRef, cabecalhoVisivel] = useScrollReveal()
 
@@ -26,17 +26,29 @@ export function SecaoCategoria({ titulo, chave, obras, indice = 0 }) {
         <h2>{titulo}</h2>
         <span className="secao-contagem">{String(obras.length).padStart(2, '0')} {obras.length === 1 ? 'obra' : 'obras'}</span>
       </header>
-      <div className="obras-lista">
-        {obras.map((obra, i) => (
-          <ObraCard
-            key={i}
-            {...obra}
-            categoria={chave}
-            categoriaNome={titulo}
-            tipoDeArte={tipo}
-            invertido={i % 2 === 1}
-          />
-        ))}
+      <div className={`obras-lista ${modoVisualizacao === 'grade' ? 'modo-grade' : ''}`}>
+        {obras.map((obra, i) => {
+          const indiceGlobal = indiceInicial + i
+          const linha = Math.floor(indiceGlobal / 3)
+          const coluna = indiceGlobal % 3
+          const ordemCobrinha = linha % 2 === 0 ? coluna : 2 - coluna
+          return (
+            <ObraCard
+              key={obra.titulo || i}
+              {...obra}
+              categoria={chave}
+              categoriaNome={titulo}
+              tipoDeArte={tipo}
+              invertido={modoVisualizacao === 'lista' && i % 2 === 1}
+              modoGrade={modoVisualizacao === 'grade'}
+              indiceGrade={i}
+              estiloGrade={{
+                '--grade-delay': `${((linha * 3 + ordemCobrinha) % 12) * 75}ms`,
+                '--grade-offset': linha % 2 === 0 ? '18px' : '-18px',
+              }}
+            />
+          )
+        })}
       </div>
     </section>
   )

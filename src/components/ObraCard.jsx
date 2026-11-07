@@ -63,6 +63,9 @@ export function ObraCard({
   categoriaNome,
   tipoDeArte = 'obra',
   invertido,
+  modoGrade = false,
+  indiceGrade = 0,
+  estiloGrade,
 }) {
   const [expandido, setExpandido] = useState(false)
   const [indiceImagem, setIndiceImagem] = useState(0)
@@ -70,6 +73,7 @@ export function ObraCard({
   const [focoAberto, setFocoAberto] = useState(false)
   const [focoFechando, setFocoFechando] = useState(false)
   const [videoAtivoId, setVideoAtivoId] = useState(null)
+  const [videoFocoAtivo, setVideoFocoAtivo] = useState(false)
   const [focoPreparado, setFocoPreparado] = useState(false)
   const [ref, visivel] = useScrollReveal()
   const emFoco = useCardEmFoco(ref)
@@ -145,7 +149,11 @@ export function ObraCard({
   }
 
   function centralizarAoClicarCard(event) {
-    if (event.target.closest('.obra-zoom-trigger, .obra-video-trigger, .obra-detalhe-botao')) return
+    if (event.target.closest('button, a, iframe, .obra-focus')) return
+    if (modoGrade) {
+      void abrirFoco()
+      return
+    }
     centralizarCard()
   }
 
@@ -165,7 +173,10 @@ export function ObraCard({
 
     focoPendenteRef.current = false
     // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
-    flushSync(() => setFocoPreparado(true))
+    flushSync(() => {
+      setFocoPreparado(true)
+      setVideoFocoAtivo(false)
+    })
 
     const imagemFoco = imagemFocoRef.current
     if (imagemFoco) {
@@ -228,6 +239,7 @@ export function ObraCard({
     animacao?.cancel()
     document.body.style.overflow = overflowAnteriorRef.current
     setFocoFechando(false)
+    setVideoFocoAtivo(false)
     focoFechandoRef.current = false
     imagemRef.current?.focus({ preventScroll: true })
   }
@@ -358,7 +370,9 @@ export function ObraCard({
     <>
       <article
         ref={ref}
-        className={`obra arte-${tipoDeArte} categoria-${categoria} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        style={modoGrade ? estiloGrade : undefined}
+        data-grade-indice={modoGrade ? indiceGrade : undefined}
         onClick={centralizarAoClicarCard}
       >
         <div className="obra-galeria">
@@ -412,10 +426,11 @@ export function ObraCard({
                   />
                 ) : (
                   <button
+                    ref={imagemRef}
                     type="button"
                     className="obra-video-trigger"
                     aria-label={`Reproduzir vídeo ${midiaAtiva.titulo || titulo}`}
-                    onClick={() => setVideoAtivoId(midiaAtiva.videoId)}
+                    onClick={() => modoGrade ? void abrirFoco() : setVideoAtivoId(midiaAtiva.videoId)}
                   >
                     <img
                       src={midiaAtiva.miniatura}
@@ -426,6 +441,12 @@ export function ObraCard({
                     <span className="obra-video-play" aria-hidden="true">▶</span>
                     <span className="obra-video-legenda">ASSISTIR VÍDEO</span>
                   </button>
+                )}
+                {tipoDeArte === 'glitch' && midiaAtiva.tipo === 'youtube' && (
+                  <>
+                    <img className="glitch-camada glitch-ciano" src={midiaAtiva.miniatura} alt="" aria-hidden="true" draggable="false" />
+                    <img className="glitch-camada glitch-magenta" src={midiaAtiva.miniatura} alt="" aria-hidden="true" draggable="false" />
+                  </>
                 )}
               </>
             ) : <span>Imagem da obra</span>}
@@ -545,16 +566,38 @@ export function ObraCard({
               </span>
             </>
           )}
-          <img
-            ref={imagemFocoRef}
-            className="obra-focus-imagem"
-            src={focoPreparado ? midiaAtiva?.src : undefined}
-            alt={`${titulo} — visualização ampliada`}
-            draggable="false"
-            onPointerDown={iniciarArrasteFoco}
-            onPointerUp={finalizarArrasteFoco}
-            onPointerCancel={() => { inicioArrasteFocoRef.current = null }}
-          />
+          {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
+            <iframe
+              className="obra-focus-video"
+              src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+              title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          ) : (
+            <img
+              ref={imagemFocoRef}
+              className="obra-focus-imagem"
+              src={focoPreparado ? (midiaAtiva?.src || midiaAtiva?.miniatura) : undefined}
+              alt={`${titulo} — visualização ampliada`}
+              draggable="false"
+              onPointerDown={iniciarArrasteFoco}
+              onPointerUp={finalizarArrasteFoco}
+              onPointerCancel={() => { inicioArrasteFocoRef.current = null }}
+            />
+          )}
+          <div className="obra-focus-caption">
+            <span>{categoriaNome}</span>
+            <h2>{titulo}</h2>
+            {descricao && <p>{descricao}</p>}
+            {detalhe && <p className="obra-focus-detalhe">{detalhe}</p>}
+            {midiaAtiva?.tipo === 'youtube' && !videoFocoAtivo && (
+              <button type="button" onClick={() => setVideoFocoAtivo(true)}>
+                <span aria-hidden="true">▶</span> Assistir vídeo
+              </button>
+            )}
+          </div>
         </div>
       </dialog>
     </>
