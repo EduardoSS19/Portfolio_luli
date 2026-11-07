@@ -1,0 +1,23 @@
+{% extends "admin/index.html" %}
+
+{% block content_title %}
+<div class="portfolio-welcome">
+  <p class="portfolio-eyebrow">CENTRAL DE GERENCIAMENTO</p>
+  <h1>Bem-vinda ao seu portfólio</h1>
+  <p>Gerencie suas obras, imagens, vídeos e informações. As alterações publicadas aparecem no site.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="portfolio-dashboard">
+  <div class="portfolio-dashboard-intro">
+    <strong>Comece por aqui</strong>
+    <span>Escolha uma área abaixo para editar o conteúdo do site.</span>
+  </div>
+  {{ block.super }}
+  <div class="portfolio-help">
+    <strong>Dica</strong>
+    <span>Use os campos de publicação para ocultar um conteúdo temporariamente sem apagá-lo. Você pode reativá-lo quando quiser.</span>
+  </div>
+</div>
+{% endblock %}
