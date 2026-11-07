@@ -113,12 +113,12 @@ def portfolio_data(request):
             return JsonResponse({"erro": "A obra desta prévia não existe mais."}, status=404)
 
     works_queryset = Work.objects.filter(is_active=True)
-    categories_queryset = Category.objects.filter(is_active=True)
+    categories_queryset = Category.objects.filter(is_active=True, works__is_active=True).distinct()
     if preview_work:
         works_queryset = Work.objects.filter(Q(is_active=True) | Q(pk=preview_work.pk))
-        categories_queryset = Category.objects.filter(
-            Q(is_active=True) | Q(pk=preview_work.category_id)
-        )
+        categories_queryset = Category.objects.filter(is_active=True).filter(
+            Q(works__is_active=True) | Q(pk=preview_work.category_id)
+        ).distinct()
 
     categories = categories_queryset.prefetch_related(
         Prefetch(
