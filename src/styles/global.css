@@ -1683,3 +1683,30 @@ nav button[class*="anim-video"],
   .obras-lista.modo-grade .obra { opacity:1; transform:none; transition:none; }
   .obra.midia-video .obra-video-trigger img { animation:none !important; }
 }
+
+
+/* Seletor único controla a apresentação de todas as categorias do portfólio. */
+.galeria-global-controles {
+  position: sticky; top: 0; z-index: 9; display: flex; align-items: center;
+  justify-content: center; gap: .55rem; padding: .8rem 1rem;
+  border-bottom: 1px solid rgba(220,238,250,.12); background: rgba(7,22,36,.9);
+  backdrop-filter: blur(16px);
+}
+.galeria-global-legenda {
+  margin-right: .55rem; color: rgba(234,242,251,.58); font-size: .65rem;
+  font-weight: 700; letter-spacing: .14em;
+}
+.galeria-global-controles button {
+  display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .95rem;
+  border: 1px solid rgba(226,241,255,.2); border-radius: 999px;
+  color: rgba(234,242,251,.8); background: rgba(12,34,53,.8);
+  font: inherit; font-size: .82rem; cursor: pointer; transition: .2s ease;
+}
+.galeria-global-controles button:hover { border-color: var(--azul-claro); transform: translateY(-1px); }
+.galeria-global-controles button.ativo {
+  color: #071a2a; background: var(--azul-claro); border-color: var(--azul-claro); font-weight: 750;
+}
+@media (max-width: 600px) {
+  .galeria-global-controles { justify-content: center; flex-wrap: wrap; padding: .65rem .7rem; }
+  .galeria-global-legenda { flex-basis: 100%; margin: 0; text-align: center; font-size: .58rem; }
+}
