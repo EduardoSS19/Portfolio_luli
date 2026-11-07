@@ -4,6 +4,7 @@ import { Hero } from './components/Hero.jsx'
 import { Nav } from './components/Nav.jsx'
 import { Sobre } from './components/Sobre.jsx'
 import { SecaoCategoria } from './components/SecaoCategoria.jsx'
+import { GaleriaGrade } from './components/GaleriaGrade.jsx'
 import { Referencias } from './components/Referencias.jsx'
 import { Footer } from './components/Footer.jsx'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
@@ -32,16 +33,16 @@ export default function App() {
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
+  const [modoGaleria, setModoGaleria] = useState('lista')
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
-    ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
+    ...(modoGaleria === 'lista' ? categorias.map(c => ({ titulo: c.titulo, chave: c.chave })) : []),
     ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
-  ], [categorias, referencias.length])
+  ], [categorias, referencias.length, modoGaleria])
   const secaoAtiva = useSecaoAtiva(secoesNav)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
-  const [modoGaleria, setModoGaleria] = useState('lista')
   const anteriorRef = useRef(secaoAtiva)
 
   useEffect(() => {
@@ -147,17 +148,19 @@ export default function App() {
         </button>
       </div>
       <Sobre perfil={sobre} />
-      {categorias.map((cat, indice) => (
-        <SecaoCategoria
-          key={cat.titulo}
-          titulo={cat.titulo}
-          chave={cat.chave}
-          obras={cat.obras}
-          indice={indice}
-          modoVisualizacao={modoGaleria}
-          indiceInicial={categorias.slice(0, indice).reduce((total, categoria) => total + categoria.obras.length, 0)}
-        />
-      ))}
+      {modoGaleria === 'grade' ? (
+        <GaleriaGrade categorias={categorias} />
+      ) : (
+        categorias.map((cat, indice) => (
+          <SecaoCategoria
+            key={cat.titulo}
+            titulo={cat.titulo}
+            chave={cat.chave}
+            obras={cat.obras}
+            indice={indice}
+          />
+        ))
+      )}
       {referencias.length > 0 && <Referencias referencias={referencias} />}
       <Contato endpoint={sobre.formulario} email={sobre.email} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
