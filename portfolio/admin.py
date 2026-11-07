@@ -100,6 +100,8 @@ def proxima_posicao(queryset):
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
     form = ImagemExistenteForm
+    list_display = ("name", "tagline", "contact_email")
+    list_per_page = 1
     fieldsets = (
         (
             "Apresentação",
@@ -135,9 +137,17 @@ class ArtistProfileAdmin(admin.ModelAdmin):
 @admin.register(SocialLink)
 class SocialLinkAdmin(admin.ModelAdmin):
     list_display = ("title", "url", "position", "is_active")
+    list_display_links = ("title",)
+    list_filter = ("is_active",)
+    list_per_page = 25
+    save_on_top = True
     list_editable = ("position", "is_active")
     ordering = ("position", "id")
     search_fields = ("title", "url")
+    fieldsets = (
+        ("Link", {"fields": ("title", "url")}),
+        ("Organização", {"fields": ("position", "is_active")}),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -175,6 +185,9 @@ class BackgroundFrameAdmin(admin.ModelAdmin):
     list_editable = ("position", "is_active")
     ordering = ("position", "id")
     list_per_page = 40
+    list_filter = ("is_active",)
+    search_fields = ("id",)
+    save_on_top = True
     actions = ("publicar", "despublicar")
 
     @admin.display(description="Imagem")
@@ -256,11 +269,21 @@ class WorkVideoInlineForm(WorkVideoFormMixin, forms.ModelForm):
 class WorkVideoAdmin(admin.ModelAdmin):
     form = WorkVideoAdminForm
     list_display = ("work", "video_title", "position")
+    list_display_links = ("work", "video_title")
+    list_per_page = 30
+    save_on_top = True
     list_filter = ("work__category",)
     list_select_related = ("work", "work__category")
     list_editable = ("position",)
     ordering = ("work__category__position", "work__position", "position", "id")
     search_fields = ("work__title", "video_title", "video_id")
+    fieldsets = (
+        ("Vídeo", {
+            "fields": ("work", "youtube_url"),
+            "description": "Cole o link de um vídeo do YouTube. O título e a miniatura são preenchidos automaticamente ao salvar.",
+        }),
+        ("Organização", {"fields": ("position",)}),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -376,10 +399,22 @@ class WorkInline(admin.StackedInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("title", "key", "position", "is_active")
+    list_display = ("title", "key", "total_obras", "position", "is_active")
+    list_display_links = ("title",)
     list_editable = ("position", "is_active")
+    list_filter = ("is_active",)
     search_fields = ("title", "key")
+    prepopulated_fields = {"key": ("title",)}
+    list_per_page = 30
+    save_on_top = True
     inlines = (WorkInline,)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_total_obras=Count("works", distinct=True))
+
+    @admin.display(description="Obras", ordering="_total_obras")
+    def total_obras(self, obj):
+        return obj._total_obras
 
 
 @admin.register(WorkImage)
@@ -412,6 +447,10 @@ class ReferenceLinkInline(admin.TabularInline):
 @admin.register(Reference)
 class ReferenceAdmin(admin.ModelAdmin):
     list_display = ("title", "period", "position", "is_active")
+    list_display_links = ("title",)
     list_editable = ("position", "is_active")
+    list_filter = ("is_active",)
     search_fields = ("title", "period")
+    list_per_page = 30
+    save_on_top = True
     inlines = (ReferenceLinkInline,)
