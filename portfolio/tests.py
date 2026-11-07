@@ -641,11 +641,25 @@ class EditorialWorkflowTests(TestCase):
         self.assertEqual(payload["preview"]["id"], self.work.pk)
         self.assertEqual(payload["categorias"][0]["obras"][0]["titulo"], "Obra em revisão")
 
-    def test_public_api_does_not_expose_unpublished_work(self):
+    def test_public_api_hides_categories_without_published_works(self):
+        Category.objects.create(title="Categoria vazia", key="categoria-vazia")
         response = self.client.get(reverse("portfolio-data"))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["categorias"], [])
+
+    def test_preview_keeps_category_visible_for_its_draft(self):
+        self.client.force_login(self.admin_user)
+        preview_response = self.client.get(
+            reverse("admin:portfolio_work_preview", args=[self.work.pk])
+        )
+        token = preview_response.url.split("preview_token=", 1)[1]
+
+        response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["categorias"]), 1)
+        self.assertEqual(response.json()["categorias"][0]["obras"][0]["titulo"], "Obra em revisão")
 
     def test_anonymous_user_cannot_use_preview_token(self):
         self.client.force_login(self.admin_user)
