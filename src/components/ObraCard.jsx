@@ -15,6 +15,17 @@ const EASE_FECHAR = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const SEM_RECORTE = 'inset(0px 0px 0px 0px)'
 const SEM_TRANSFORMACAO = 'translate(0px, 0px) scale(1)'
 
+// Safari antigo (< 15.4) não tem <dialog>.showModal(): usamos o atributo "open" como alternativa.
+const dialogAberto = dialog => Boolean(dialog?.hasAttribute('open'))
+function abrirDialog(dialog) {
+  if (typeof dialog.showModal === 'function') dialog.showModal()
+  else dialog.setAttribute('open', '')
+}
+function fecharDialog(dialog) {
+  if (typeof dialog.close === 'function') dialog.close()
+  else dialog.removeAttribute('open')
+}
+
 const esperar = ms => new Promise(resolve => window.setTimeout(resolve, ms))
 
 function reduzirMovimento() {
@@ -150,7 +161,7 @@ export function ObraCard({
 
   async function abrirFoco() {
     const dialog = dialogRef.current
-    if (!dialog || dialog.open || focoFechandoRef.current) return
+    if (!dialog || dialogAberto(dialog) || focoFechandoRef.current) return
 
     focoPendenteRef.current = false
     // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
@@ -160,13 +171,13 @@ export function ObraCard({
     if (imagemFoco) {
       await Promise.race([imagemFoco.decode().catch(() => {}), esperar(1500)])
     }
-    if (dialog.open || focoFechandoRef.current) return
+    if (dialogAberto(dialog) || focoFechandoRef.current) return
 
     overflowAnteriorRef.current = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     // Esconde a miniatura e abre o dialog no mesmo quadro: sem piscar e sem teletransporte.
     flushSync(() => setFocoAberto(true))
-    dialog.showModal()
+    abrirDialog(dialog)
 
     const miniatura = imagemRef.current
     if (!imagemFoco || !miniatura || reduzirMovimento()) return
@@ -188,7 +199,7 @@ export function ObraCard({
 
   async function fecharFoco() {
     const dialog = dialogRef.current
-    if (!dialog?.open || focoFechandoRef.current || focoAbrindoRef.current) return
+    if (!dialogAberto(dialog) || focoFechandoRef.current || focoAbrindoRef.current) return
 
     focoFechandoRef.current = true
     setFocoFechando(true)
@@ -213,7 +224,7 @@ export function ObraCard({
 
     // Mostra a miniatura e fecha o dialog no mesmo quadro: a imagem "pousa" no card.
     flushSync(() => setFocoAberto(false))
-    dialog.close()
+    fecharDialog(dialog)
     animacao?.cancel()
     document.body.style.overflow = overflowAnteriorRef.current
     setFocoFechando(false)
@@ -236,7 +247,7 @@ export function ObraCard({
       return
     }
     event.preventDefault()
-    if (focoPendenteRef.current || dialogRef.current?.open) return
+    if (focoPendenteRef.current || dialogAberto(dialogRef.current)) return
     focoPendenteRef.current = true
     await centralizarCard()
     await abrirFoco()
@@ -295,7 +306,7 @@ export function ObraCard({
   }, [indiceImagem, direcao])
 
   useEffect(() => () => {
-    if (dialogRef.current?.open) dialogRef.current.close()
+    if (dialogAberto(dialogRef.current)) fecharDialog(dialogRef.current)
     if (document.body.style.overflow === 'hidden') {
       document.body.style.overflow = overflowAnteriorRef.current
     }
