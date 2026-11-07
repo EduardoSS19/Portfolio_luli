@@ -186,7 +186,6 @@ class BackgroundFrameAdmin(admin.ModelAdmin):
     ordering = ("position", "id")
     list_per_page = 40
     list_filter = ("is_active",)
-    search_fields = ("id",)
     save_on_top = True
     actions = ("publicar", "despublicar")
 
