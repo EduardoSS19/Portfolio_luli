@@ -1524,3 +1524,16 @@ nav button[class*="anim-video"],
 .modo-leve .obra-imagem::after{ transition:none; }
 .modo-leve .obra-imagem img{ transition:none; }
 .modo-leve .obra-focus{ z-index:1000; background:rgba(3,14,24,0.94); }
+
+
+/* Indicador visível na prévia privada do CMS. */
+.preview-mode-banner {
+  position: relative;
+  z-index: 30;
+  padding: 10px 18px;
+  background: #292720;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+}
