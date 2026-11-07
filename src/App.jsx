@@ -27,6 +27,7 @@ export default function App() {
     redes: [],
     sobre: null,
   })
+  const [carregando, setCarregando] = useState(true)
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
@@ -73,6 +74,9 @@ export default function App() {
           console.warn('Não foi possível carregar o conteúdo do Django.', error)
         }
       })
+      .finally(() => {
+        if (!controller.signal.aborted) setCarregando(false)
+      })
 
     return () => controller.abort()
   }, [])
@@ -99,6 +103,15 @@ export default function App() {
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (carregando) {
+    return (
+      <div className="carregando" role="status" aria-live="polite">
+        <span className="carregando-anel" aria-hidden="true" />
+        <span className="carregando-texto">Carregando</span>
+      </div>
+    )
   }
 
   return (
