@@ -551,3 +551,31 @@ class YouTubeIntegrationTests(TestCase):
             "thumbnail_url": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
         })
         self.assertIn("test-api-key", urlopen.call_args.args[0].full_url)
+
+class AdminDashboardTests(TestCase):
+    def test_dashboard_shows_live_content_counts_and_quick_actions(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="dashboard-admin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        category = Category.objects.create(title="Cerâmica", key="ceramica")
+        Work.objects.create(category=category, title="Obra publicada", is_active=True)
+        Work.objects.create(category=category, title="Rascunho", is_active=False)
+        WorkVideo.objects.create(
+            work=Work.objects.first(),
+            youtube_url="https://youtu.be/AbCdEf01234",
+            video_id="AbCdEf01234",
+            video_title="Vídeo de processo",
+            thumbnail_url="https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse("admin:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Obras publicadas")
+        self.assertContains(response, "Adicionar uma obra")
+        self.assertContains(response, "Visualizar site")
+        self.assertContains(response, "2")
+        self.assertContains(response, "Vídeos")
