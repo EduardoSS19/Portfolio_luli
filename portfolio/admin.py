@@ -100,16 +100,29 @@ def proxima_posicao(queryset):
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
     form = ImagemExistenteForm
-    fields = (
-        "name",
-        "tagline",
-        "photo",
-        "photo_url",
-        "bio",
-        "instagram_url",
-        "contact_email",
-        "contact_form_url",
+    fieldsets = (
+        (
+            "Apresentação",
+            {
+                "fields": ("name", "tagline", "photo", "photo_url", "bio"),
+                "description": (
+                    "Estas informações aparecem na página inicial e na seção Sobre. "
+                    "Prefira uma foto nítida e uma biografia dividida em parágrafos."
+                ),
+            },
+        ),
+        (
+            "Contato e redes",
+            {
+                "fields": ("instagram_url", "contact_email", "contact_form_url"),
+                "description": (
+                    "O e-mail recebe as mensagens enviadas pelo formulário do site. "
+                    "O formulário externo é usado quando não há e-mail configurado."
+                ),
+            },
+        ),
     )
+    save_on_top = True
 
     def has_add_permission(self, request):
         return not ArtistProfile.objects.exists()
