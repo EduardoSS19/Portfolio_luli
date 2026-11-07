@@ -1710,3 +1710,122 @@ nav button[class*="anim-video"],
   .galeria-global-controles { justify-content: center; flex-wrap: wrap; padding: .65rem .7rem; }
   .galeria-global-legenda { flex-basis: 100%; margin: 0; text-align: center; font-size: .58rem; }
 }
+
+
+/* ===== Grade editorial única: sem agrupamento por categorias ===== */
+.galeria-grade-global {
+  width: min(100% - 3rem, 1500px);
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem) 0 4rem;
+}
+.galeria-grade-global .obras-lista.modo-grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(.65rem, 1.35vw, 1.25rem);
+}
+.galeria-grade-global .obra.modo-grade {
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 4 / 5;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #091c2b;
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(.975);
+  transition: opacity .32s ease, transform .42s cubic-bezier(.2,.7,.2,1), border-color .3s ease;
+  transition-delay: 0ms;
+  cursor: zoom-in;
+}
+.galeria-grade-global .obra.modo-grade.visivel {
+  opacity: 1;
+  transform: translate3d(0,0,0) scale(1);
+  animation: gradeEntrada .72s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both;
+}
+@keyframes gradeEntrada {
+  from { opacity: 0; transform: translate3d(var(--grade-offset, 0), 28px, 0) scale(.975); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+.galeria-grade-global .obra.modo-grade .obra-galeria,
+.galeria-grade-global .obra.modo-grade .obra-imagem {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem {
+  aspect-ratio: auto;
+  position: absolute;
+  inset: 0;
+}
+.galeria-grade-global .obra.modo-grade .obra-zoom-trigger,
+.galeria-grade-global .obra.modo-grade .obra-video-trigger {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .8s cubic-bezier(.2,.7,.2,1), filter .5s ease;
+}
+.galeria-grade-global .obra.modo-grade .obra-texto {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: .25rem;
+  min-width: 0;
+  padding: clamp(.8rem, 2vw, 1.4rem);
+  background: linear-gradient(180deg, transparent 0%, rgba(3,14,24,.76) 32%, rgba(3,14,24,.96) 100%);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .28s ease, transform .35s cubic-bezier(.2,.7,.2,1);
+}
+.galeria-grade-global .obra.modo-grade:hover .obra-texto,
+.galeria-grade-global .obra.modo-grade:focus-within .obra-texto {
+  opacity: 1;
+  transform: translateY(0);
+}
+.galeria-grade-global .obra.modo-grade:hover .obra-imagem img,
+.galeria-grade-global .obra.modo-grade:focus-within .obra-imagem img {
+  transform: scale(1.045);
+  filter: brightness(.72);
+}
+.galeria-grade-global .obra.modo-grade .obra-texto h3 {
+  margin: 0;
+  font: 400 clamp(1rem, 1.65vw, 1.45rem)/1.15 Georgia, serif;
+}
+.galeria-grade-global .obra.modo-grade .obra-texto > p {
+  margin: .25rem 0 0;
+  color: rgba(239,247,255,.82);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+.galeria-grade-global .obra.modo-grade .detalhe-wrapper,
+.galeria-grade-global .obra.modo-grade .obra-detalhe-botao {
+  display: none;
+}
+.galeria-grade-global .obra.modo-grade .obra-zoom-label { opacity: 0; }
+.galeria-grade-global .obra.modo-grade .obra-video-legenda { opacity: 0; }
+@media (max-width: 900px) {
+  .galeria-grade-global .obras-lista.modo-grade { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 600px) {
+  .galeria-grade-global { width: calc(100% - 1.25rem); padding-top: 1rem; }
+  .galeria-grade-global .obras-lista.modo-grade { grid-template-columns: repeat(2, minmax(0,1fr)); gap: .45rem; }
+  .galeria-grade-global .obra.modo-grade { aspect-ratio: 3 / 4; }
+  .galeria-grade-global .obra.modo-grade .obra-texto { padding: .65rem; }
+  .galeria-grade-global .obra.modo-grade .obra-texto h3 { font-size: .92rem; }
+  .galeria-grade-global .obra.modo-grade .obra-texto > p { font-size: .68rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.visivel { animation: none !important; opacity: 1; transform: none; transition: none; }
+  .galeria-grade-global .obra.modo-grade .obra-imagem img { transition: none; }
+}
