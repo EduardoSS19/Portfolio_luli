@@ -18,9 +18,22 @@ from .models import ArtistProfile, BackgroundFrame, Category, Reference, SocialL
 logger = logging.getLogger(__name__)
 
 
-def _image_url(uploaded_image, fallback):
+def _otimizada(url, largura, extra=""):
+    """Pede ao Cloudinary uma versão leve: formato moderno, qualidade automática e
+    largura limitada. O arquivo original continua intacto no Cloudinary."""
+    marcador = "/upload/"
+    if "res.cloudinary.com" not in url or marcador not in url:
+        return url
+    antes, depois = url.split(marcador, 1)
+    if depois.startswith(("f_", "q_", "w_", "c_")):
+        return url
+    efeitos = f",{extra}" if extra else ""
+    return f"{antes}{marcador}f_auto,q_auto,w_{largura}{efeitos}/{depois}"
+
+
+def _image_url(uploaded_image, fallback, largura=1400):
     if uploaded_image:
-        return uploaded_image.url
+        return _otimizada(uploaded_image.url, largura)
 
     image_url = fallback
     if image_url.startswith("/") and not image_url.startswith(("/static/", "/media/")):
@@ -34,7 +47,7 @@ def _work_data(work):
         if work.image or work.image_url
         else []
     )
-    images.extend(image.image.url for image in work.gallery_images.all())
+    images.extend(_otimizada(image.image.url, 1400) for image in work.gallery_images.all())
 
     media = []
     if work.image or work.image_url:
@@ -47,7 +60,7 @@ def _work_data(work):
         (
             image.position,
             image.pk,
-            {"tipo": "imagem", "src": image.image.url},
+            {"tipo": "imagem", "src": _otimizada(image.image.url, 1400)},
         )
         for image in work.gallery_images.all()
     )
@@ -98,7 +111,7 @@ def portfolio_data(request):
                 {
                     "nome": profile.name,
                     "frase": profile.tagline,
-                    "foto": _image_url(profile.photo, profile.photo_url),
+                    "foto": _image_url(profile.photo, profile.photo_url, 1000),
                     "instagram": profile.instagram_url,
                     "email": profile.contact_email,
                     "formulario": profile.contact_form_url,
@@ -111,7 +124,7 @@ def portfolio_data(request):
                 if profile
                 else None
             ),
-            "frames": [frame.image.url for frame in frames],
+            "frames": [_otimizada(frame.image.url, 900, "e_saturation:-35") for frame in frames],
             "redes": [
                 {"titulo": social.title, "url": social.url}
                 for social in social_links
