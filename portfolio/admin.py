@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import admin, messages
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Count, Max
+from django.db.models import ImageField as ModelImageField
 from django.utils.html import format_html
 
 from .models import (
@@ -65,6 +67,27 @@ class MultipleImageField(forms.ImageField):
         return [limpar(data, initial)] if data else []
 
 
+class ImagemSalvaMixin:
+    """Não revalida a extensão de imagens que já estão salvas.
+
+    O Cloudinary guarda o nome do arquivo sem ".jpg"/".png". O validador de extensão
+    do modelo reprovava esse nome ao editar qualquer coisa, e o painel pedia para
+    enviar a imagem de novo. Aqui só validamos arquivos recém-enviados.
+    """
+
+    def _get_validation_exclusions(self):
+        excluir = super()._get_validation_exclusions()
+        for campo in self.instance._meta.fields:
+            if isinstance(campo, ModelImageField) and campo.name in self.fields:
+                if not isinstance(self.cleaned_data.get(campo.name), UploadedFile):
+                    excluir.add(campo.name)
+        return excluir
+
+
+class ImagemExistenteForm(ImagemSalvaMixin, forms.ModelForm):
+    pass
+
+
 def proxima_posicao(queryset):
     ultimo = queryset.aggregate(ultimo=Max("position"))["ultimo"]
     return 0 if ultimo is None else ultimo + 1
@@ -76,6 +99,7 @@ def proxima_posicao(queryset):
 
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
+    form = ImagemExistenteForm
     fields = (
         "name",
         "tagline",
@@ -106,7 +130,7 @@ class SocialLinkAdmin(admin.ModelAdmin):
 # Imagens de fundo (com envio de várias de uma vez)
 # ---------------------------------------------------------------------------
 
-class BackgroundFrameForm(forms.ModelForm):
+class BackgroundFrameForm(ImagemSalvaMixin, forms.ModelForm):
     imagens = MultipleImageField(
         label="Enviar várias imagens de uma vez",
         required=False,
@@ -231,6 +255,7 @@ class WorkVideoAdmin(admin.ModelAdmin):
 
 class WorkImageInline(admin.TabularInline):
     model = WorkImage
+    form = ImagemExistenteForm
     extra = 0
     fields = ("preview", "image", "position")
     readonly_fields = ("preview",)
@@ -251,7 +276,7 @@ class WorkVideoInline(admin.TabularInline):
     verbose_name_plural = "vídeos do YouTube (marque “Apagar” para remover)"
 
 
-class WorkAdminForm(forms.ModelForm):
+class WorkAdminForm(ImagemSalvaMixin, forms.ModelForm):
     novas_imagens = MultipleImageField(
         label="Adicionar várias imagens ao carrossel",
         required=False,
@@ -329,6 +354,7 @@ class WorkAdmin(admin.ModelAdmin):
 
 class WorkInline(admin.StackedInline):
     model = Work
+    form = ImagemExistenteForm
     extra = 0
     fields = ("title", "image", "image_url", "description", "detail", "position", "is_active")
     show_change_link = True
@@ -344,6 +370,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(WorkImage)
 class WorkImageAdmin(admin.ModelAdmin):
+    form = ImagemExistenteForm
     list_display = ("preview", "work", "position")
     list_display_links = ("preview", "work")
     list_editable = ("position",)
