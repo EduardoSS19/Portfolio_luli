@@ -43,7 +43,7 @@ export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualiza
               modoGrade={modoVisualizacao === 'grade'}
               indiceGrade={i}
               estiloGrade={{
-                '--grade-delay': `${(indiceGlobal % 12) * 75}ms`,
+                '--grade-delay': `${((linha * 3 + ordemCobrinha) % 12) * 75}ms`,
                 '--grade-offset': linha % 2 === 0 ? '18px' : '-18px',
               }}
             />
