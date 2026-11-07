@@ -11,28 +11,8 @@ Um portfólio dedicado a práticas que atravessam matéria, imagem e experimenta
 
 ## Sobre o portfólio
 
-O site reúne obras, biografia e referências em uma experiência visual única. As imagens e os textos são organizados pelo painel editorial, permitindo atualizar o conteúdo sem alterar o código do site.
+O site reúne obras, biografia e referências em uma experiência visual única. As imagens e os textos são organizados pelo painel editorial, permitindo atualizar o conteúdo sem alterar o código do site, o que da autonomia ao cliente! 
 
 Construído com React, Vite e Django.
-=======
 
-## Contato e redes sociais
-
-O Instagram pode ser configurado no campo **Instagram** do perfil da artista no Django Admin. Links adicionais podem ser gerenciados em **Links de redes sociais**; o Instagram do perfil aparece no rodapé mesmo quando existem outros links cadastrados.
-
-O formulário envia as mensagens para o e-mail de contato do perfil. Em desenvolvimento, o Django usa o backend de console e imprime as mensagens no terminal. Em produção, configure no serviço:
-
-- `EMAIL_HOST`: servidor SMTP.
-- `EMAIL_PORT`: porta SMTP (normalmente `587` para TLS ou `465` para SSL).
-- `EMAIL_HOST_USER` e `EMAIL_HOST_PASSWORD`: credenciais SMTP.
-- `DEFAULT_FROM_EMAIL`: endereço remetente autorizado pelo provedor.
-- `EMAIL_USE_TLS`: `true` para TLS ou `false` para SSL.
-- `EMAIL_USE_SSL`: `true` para SSL ou `false` para TLS.
-
-Configure também o e-mail de destino em **Perfil do portfólio → E-mail de contato** no Django Admin. Nunca coloque credenciais SMTP no frontend ou no repositório.
-
-## Vídeos do YouTube
-
-Para cadastrar vídeos no painel, crie uma chave de API no Google Cloud, habilite a **YouTube Data API v3** e configure a chave como `YOUTUBE_API_KEY` no ambiente do Django. Restrinja a chave à YouTube Data API v3 e mantenha-a somente no ambiente do servidor; nunca a publique no frontend ou no repositório.
-
-No Django Admin, use **Vídeos do YouTube** para escolher a obra, colar o link do vídeo e definir sua posição na galeria. Links de vídeos não listados funcionam desde que estejam acessíveis pela API e permitam incorporação. Vídeos podem ser cadastrados em uma obra sem imagens, criando um card independente. A miniatura é exibida no portfólio e o player do YouTube só é carregado quando alguém aperta reproduzir.
+.
