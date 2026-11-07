@@ -75,7 +75,7 @@ export function ObraCard({
   const [videoAtivoId, setVideoAtivoId] = useState(null)
   const [videoFocoAtivo, setVideoFocoAtivo] = useState(false)
   const [focoPreparado, setFocoPreparado] = useState(false)
-  const [ref, visivel] = useScrollReveal()
+  const [ref, visivel] = useScrollReveal(modoGrade ? 0.14 : 0, modoGrade ? '0px 0px -18% 0px' : '0px 0px -8% 0px')
   const emFoco = useCardEmFoco(ref)
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
@@ -502,7 +502,7 @@ export function ObraCard({
           onMouseEnter={abrirDetalhesNoHover}
           onMouseLeave={fecharDetalhesForaDoHover}
         >
-          <span className="categoria-legenda">{categoriaNome}</span>
+          {!modoGrade && <span className="categoria-legenda">{categoriaNome}</span>}
           <h3>{titulo}</h3>
           {descricao && <p>{descricao}</p>}
 
