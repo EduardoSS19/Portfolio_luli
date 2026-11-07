@@ -19,9 +19,10 @@ ALLOWED_HOSTS = [
     for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
-# Hospedagem: Render (antigo) e Railway (domínio gerado + healthcheck da plataforma).
+# Domínios públicos no Cloudflare e domínio interno/gerado do Railway.
 for extra_host in (
-    os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
+    "www.lulibecker.com.br",
+    "lulibecker.com.br",
     os.environ.get("RAILWAY_PUBLIC_DOMAIN"),
     "healthcheck.railway.app",
 ):
