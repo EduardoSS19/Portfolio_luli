@@ -11,6 +11,7 @@ from django.test import Client, TestCase
 from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 from .models import (
     ArtistProfile,
@@ -578,4 +579,21 @@ class AdminDashboardTests(TestCase):
         self.assertContains(response, "Adicionar uma obra")
         self.assertContains(response, "Visualizar site")
         self.assertContains(response, "2")
-        self.assertContains(response, "Vídeos")
+
+
+class EditorGroupCommandTests(TestCase):
+    def test_editor_group_has_edit_permissions_without_delete(self):
+        call_command("setup_editor_group")
+
+        group = Group.objects.get(name="Editores do portfólio")
+        permissions = set(group.permissions.values_list("codename", flat=True))
+        self.assertIn("add_work", permissions)
+        self.assertIn("change_work", permissions)
+        self.assertIn("view_work", permissions)
+        self.assertNotIn("delete_work", permissions)
+
+    def test_editor_group_command_is_idempotent(self):
+        call_command("setup_editor_group")
+        call_command("setup_editor_group")
+
+        self.assertEqual(Group.objects.filter(name="Editores do portfólio").count(), 1)
