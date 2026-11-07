@@ -258,7 +258,7 @@ def healthcheck(request):
 @require_GET
 def frontend(request):
     if settings.DEBUG:
-        return redirect("http://127.0.0.1:5173/")
+        return redirect(f"http://127.0.0.1:5173/{request.META.get('QUERY_STRING') and '?' + request.META['QUERY_STRING'] or ''}")
 
     index_file = settings.FRONTEND_DIST / "index.html"
     if not index_file.is_file():
