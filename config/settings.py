@@ -143,6 +143,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = (
     not DEBUG and os.environ.get("SECURE_SSL_REDIRECT", "true").lower() == "true"
 )
+SECURE_REDIRECT_EXEMPT = [r"^api/health/$"]
 SECURE_HSTS_SECONDS = int(
     os.environ.get("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0")
 )
