@@ -6,8 +6,14 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "local-development-only")
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY precisa estar definida quando DEBUG estiver desativado."
+        )
+    SECRET_KEY = "local-development-only"
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -129,6 +135,15 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = (
+    not DEBUG and os.environ.get("SECURE_SSL_REDIRECT", "true").lower() == "true"
+)
+SECURE_HSTS_SECONDS = int(
+    os.environ.get("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0")
+)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+X_FRAME_OPTIONS = "DENY"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
