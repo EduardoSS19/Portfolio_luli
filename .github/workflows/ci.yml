@@ -66,3 +66,12 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+      - name: Install cross-browser test runner
+        run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+
+      - name: Install browser engines
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Test responsive gallery across browser engines
+        run: npm run test:e2e
