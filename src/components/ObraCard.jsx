@@ -374,7 +374,7 @@ export function ObraCard({
     <>
       <article
         ref={ref}
-        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midias.some(midia => midia.tipo === 'youtube') ? 'tem-video' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
         style={modoGrade ? estiloGrade : undefined}
         data-grade-indice={modoGrade ? indiceGrade : undefined}
         data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
