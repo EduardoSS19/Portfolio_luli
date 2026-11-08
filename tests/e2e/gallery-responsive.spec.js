@@ -65,7 +65,7 @@ test('a grade mantém todas as categorias e cartões em vários tamanhos, mesmo 
         cards: cards.length,
         broken: cards.filter(card => {
           const rect = card.getBoundingClientRect()
-          return rect.width <= 0 || rect.height <= 0
+          return rect.width < 100 || rect.height < 160
         }).length,
         hidden: cards.filter(card => getComputedStyle(card).display === 'none').length,
         transparent: cards.filter(card => Number.parseFloat(getComputedStyle(card).opacity) < 0.95).length,
