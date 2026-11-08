@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 
 // Detecta qual seção está passando pelo "meio" da tela.
-// rootMargin negativo cria uma faixa fina no centro do viewport:
-// só conta como "intersectando" quando a seção cruza essa faixa.
+// Em navegadores sem IntersectionObserver, mantém uma navegação funcional
+// usando a primeira seção como fallback, sem impedir a renderização do site.
 export function useSecaoAtiva(categorias) {
   const [ativa, setAtiva] = useState(categorias[0]?.titulo)
 
   useEffect(() => {
+    if (typeof IntersectionObserver !== 'function') {
+      setAtiva(categorias[0]?.titulo)
+      return
+    }
+
     const elementos = categorias
       .map(cat => document.getElementById(cat.titulo))
       .filter(Boolean)

@@ -67,7 +67,7 @@ export default function App() {
       .find(item => item.dataset.obraChave === pendente.chave)
     if (card) {
       const novoTopo = card.getBoundingClientRect().top
-      window.scrollBy({ top: novoTopo - pendente.topo, behavior: 'instant' })
+      window.scrollBy({ top: novoTopo - pendente.topo, behavior: 'auto' })
     }
     trocaModoPendenteRef.current = null
   }, [modoGaleria])

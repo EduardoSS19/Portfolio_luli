@@ -3,13 +3,6 @@ import { flushSync } from 'react-dom'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
 import { useCardEmFoco } from '../hooks/useCardEmFoco.js'
 
-let motionModule
-
-function carregarMotion() {
-  motionModule ??= import('https://cdn.jsdelivr.net/npm/motion@12.23.24/+esm')
-  return motionModule
-}
-
 const EASE_ABRIR = 'cubic-bezier(0.22, 1, 0.36, 1)'
 const EASE_FECHAR = 'cubic-bezier(0.4, 0, 0.2, 1)'
 const SEM_RECORTE = 'inset(0px 0px 0px 0px)'
@@ -133,7 +126,7 @@ export function ObraCard({
     }
 
     if (reduzirMovimento()) {
-      window.scrollTo({ top: calcularAlvo(), behavior: 'instant' })
+      window.scrollTo({ top: calcularAlvo(), behavior: 'auto' })
       return Promise.resolve()
     }
 
@@ -157,7 +150,7 @@ export function ObraCard({
 
         const tamanho = Math.max(1, Math.abs(falta) * 0.16)
         const deslocamento = Math.sign(falta) * Math.min(Math.abs(falta), tamanho)
-        window.scrollTo({ top: window.scrollY + deslocamento, behavior: 'instant' })
+        window.scrollTo({ top: window.scrollY + deslocamento, behavior: 'auto' })
         seguirRef.current = requestAnimationFrame(passo)
       }
 
@@ -199,7 +192,7 @@ export function ObraCard({
 
     const imagemFoco = imagemFocoRef.current
     if (imagemFoco) {
-      await Promise.race([imagemFoco.decode().catch(() => {}), esperar(1500)])
+      await Promise.race([typeof imagemFoco.decode === 'function' ? imagemFoco.decode().catch(() => {}) : Promise.resolve(), esperar(1500)])
     }
     if (dialogAberto(dialog) || focoFechandoRef.current) return
 
@@ -210,7 +203,7 @@ export function ObraCard({
     abrirDialog(dialog)
 
     const miniatura = imagemRef.current
-    if (!imagemFoco || !miniatura || reduzirMovimento()) return
+    if (!imagemFoco || !miniatura || typeof imagemFoco.animate !== 'function' || reduzirMovimento()) return
     const quadro = calcularQuadroDaMiniatura(imagemFoco, miniatura)
     if (!quadro) return
 
@@ -241,7 +234,7 @@ export function ObraCard({
       : null
 
     let animacao = null
-    if (quadro) {
+    if (quadro && typeof imagemFoco.animate === 'function') {
       animacao = imagemFoco.animate(
         [
           { transform: SEM_TRANSFORMACAO, clipPath: SEM_RECORTE },
@@ -316,28 +309,24 @@ export function ObraCard({
   }
 
   useEffect(() => {
-    if (!imagemRef.current) return
-    if (animacaoInicialRef.current) {
-      animacaoInicialRef.current = false
-      return
+    const imagem = imagemRef.current
+    if (!imagem || typeof imagem.animate !== 'function' || reduzirMovimento()) return
+
+    // Web Animations API nativa: sem depender de CDN para uma transição não essencial.
+    let animacao
+    try {
+      animacao = imagem.animate(
+        [
+          { opacity: 0.35, transform: `translateX(${direcao * 26}px) scale(1.035)` },
+          { opacity: 1, transform: 'translateX(0) scale(1)' },
+        ],
+        { duration: 480, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+      )
+    } catch {
+      // Sem suporte à animação, a troca de imagem continua normalmente.
     }
 
-    let cancelada = false
-    carregarMotion()
-      .then(({ animate }) => {
-        if (!cancelada && imagemRef.current) {
-          animate(
-            imagemRef.current,
-            { opacity: [0.35, 1], x: [direcao * 26, 0], scale: [1.035, 1] },
-            { duration: 0.48, ease: [0.22, 1, 0.36, 1] },
-          )
-        }
-      })
-      .catch(error => {
-        console.warn('Não foi possível carregar as animações do Motion CDN.', error)
-      })
-
-    return () => { cancelada = true }
+    return () => animacao?.cancel()
   }, [indiceImagem, direcao])
 
   useEffect(() => () => {
