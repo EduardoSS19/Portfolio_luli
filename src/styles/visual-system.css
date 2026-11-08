@@ -638,19 +638,6 @@ nav button.ativo{
   background:rgba(9,31,50,0.82);
 }
 .rodape{ border-color:var(--linha); }
-.contato-chamada,.contato-indisponivel{
-  max-width:42rem;
-  color:rgba(239,247,255,0.72);
-  line-height:1.75;
-}
-.contato-email{
-  display:inline-block;
-  margin-top:0.3rem;
-  font-size:clamp(1.2rem,3vw,1.8rem);
-  text-decoration-color:rgba(147,200,242,0.35);
-  text-underline-offset:0.3em;
-}
-.contato-email:hover{ color:white; }
 .rodape{
   padding-top:3rem;
   background:rgba(4,17,28,0.4);
