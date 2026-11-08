@@ -103,11 +103,13 @@ export function ObraCard({
   const valoresTecnicos = [
     ['Técnica', fichaTecnica.tecnica], ['Material', fichaTecnica.material],
     ['Suporte', fichaTecnica.suporte], ['Ano', fichaTecnica.ano],
-    ['Dimensões', [
-      dimensoes.altura && 'Alt. ' + dimensoes.altura,
-      dimensoes.largura && 'Larg. ' + dimensoes.largura,
-      dimensoes.profundidade && 'Prof. ' + dimensoes.profundidade,
-    ].filter(Boolean).join(' × ') + (dimensoes.unidade ? ' ' + dimensoes.unidade : '')],
+    ['Dimensões', [dimensoes.altura, dimensoes.largura, dimensoes.profundidade].some(Boolean)
+      ? [
+        dimensoes.altura && 'Alt. ' + dimensoes.altura,
+        dimensoes.largura && 'Larg. ' + dimensoes.largura,
+        dimensoes.profundidade && 'Prof. ' + dimensoes.profundidade,
+      ].filter(Boolean).join(' × ') + (dimensoes.unidade ? ' ' + dimensoes.unidade : '')
+      : ''],
     ['Série', fichaTecnica.serie], ['Edição', fichaTecnica.edicao], ['Tiragem', fichaTecnica.tiragem],
     ['Assinatura', fichaTecnica.assinada === true ? 'Assinada' : fichaTecnica.assinada === false ? 'Não assinada' : ''],
     ['Local de criação', fichaTecnica.localCriacao], ['Conservação', fichaTecnica.conservacao],
