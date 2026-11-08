@@ -815,3 +815,36 @@
     animation: gradeEntrada .72s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both !important;
   }
 }
+
+
+/* Ajustes de interação da grade: títulos sob demanda e cards estáveis ao reentrar no viewport. */
+.galeria-grade-global .obra.modo-grade .obra-texto,
+.galeria-grade-global .obra.modo-grade.tem-video .obra-texto,
+.galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto {
+  opacity: 0 !important;
+  transform: translateY(7px) !important;
+  transition: opacity .22s ease, transform .22s ease !important;
+  pointer-events: none;
+}
+.galeria-grade-global .obra.modo-grade:hover .obra-texto,
+.galeria-grade-global .obra.modo-grade:focus-within .obra-texto {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obra.modo-grade:focus-within .obra-texto {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+}
+
+/* A grade não reexecuta animação de entrada ao sair e voltar para a tela.
+   Isso evita o salto visual e o trabalho extra de composição durante a rolagem. */
+.galeria-grade-global .obra.modo-grade,
+.galeria-grade-global .obra.modo-grade.visivel,
+.galeria-grade-global .obra.modo-grade.midia-video,
+.galeria-grade-global .obra.modo-grade.midia-video.visivel {
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+}
