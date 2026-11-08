@@ -1827,8 +1827,6 @@ nav button[class*="anim-video"],
 
 /* ===== Polimento pontual: grade, navegação móvel e troca de visualização ===== */
 .galeria-grade-global .obra.modo-grade {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 360px;
   transition-duration: .24s, .34s, .25s;
 }
 .galeria-grade-global .obra.modo-grade.visivel { animation-duration: .48s; }
@@ -1894,7 +1892,4 @@ nav button[class*="anim-video"],
   .site-nav.menu-aberto .nav-mobile-toggle {
     order: 2; min-height: 2.35rem; padding: .12rem .35rem .12rem .55rem;
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  .galeria-grade-global .obra.modo-grade { content-visibility: visible; }
 }
