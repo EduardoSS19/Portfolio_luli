@@ -509,11 +509,11 @@ export function ObraCard({
         >
           {!modoGrade && <span className="categoria-legenda">{categoriaNome}</span>}
           <h3>{titulo}</h3>
-          {descricao && <p>{descricao}</p>}
+          {descricao && <p style={{ whiteSpace: 'pre-line' }}>{descricao}</p>}
 
           <div className={`detalhe-wrapper ${expandido ? 'aberto' : ''}`}>
             <div className="detalhe-inner">
-              {detalhe && <p className="detalhe">{detalhe}</p>}
+              {detalhe && <p className="detalhe" style={{ whiteSpace: 'pre-line' }}>{detalhe}</p>}
             </div>
           </div>
 
