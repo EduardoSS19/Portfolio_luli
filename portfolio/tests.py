@@ -275,6 +275,35 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(response.json()["sobre"]["foto"], profile.photo.url)
 
+    def test_portfolio_api_includes_only_optional_work_metadata_values(self):
+        category = Category.objects.create(title="Cerâmica", key="ceramica-meta")
+        work = Work.objects.create(
+            category=category,
+            title="Vaso",
+            technique="Torno",
+            material="Argila",
+            year=2024,
+            height="20.00",
+            width="12.50",
+            dimension_unit="cm",
+            price="350.00",
+            currency="BRL",
+            availability="available",
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+        ficha = response.json()["categorias"][0]["obras"][0]["fichaTecnica"]
+
+        self.assertEqual(ficha["tecnica"], "Torno")
+        self.assertEqual(ficha["material"], "Argila")
+        self.assertEqual(ficha["ano"], 2024)
+        self.assertEqual(ficha["dimensoes"]["altura"], "20.00")
+        self.assertEqual(ficha["dimensoes"]["largura"], "12.50")
+        self.assertEqual(ficha["preco"], "350.00")
+        self.assertEqual(ficha["disponibilidade"], "Disponível")
+        self.assertEqual(ficha["suporte"], "")
+        self.assertEqual(ficha["serie"], "")
+
     def test_uploaded_image_url_is_returned(self):
         category = Category.objects.create(title="Desenho", key="desenho")
         Work.objects.create(
