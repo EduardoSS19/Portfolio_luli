@@ -709,28 +709,12 @@
   }
 }
 
-/* O modo leve é ativado automaticamente em navegadores antigos.
-   Não esconder cards esperando animações/IntersectionObserver. */
+/* O modo leve reduz efeitos de fundo e sobrecarga de composição, mas preserva
+   as animações próprias de cada linguagem artística (glitch, desenho, cerâmica etc.). */
 .modo-leve .galeria-grade-global .obra.modo-grade,
 .modo-leve .galeria-grade-global .obra.modo-grade.visivel {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-imagem img,
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger,
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
-.modo-leve .galeria-grade-global .obra.modo-grade .glitch-camada {
-  animation: none !important;
-  clip-path: none !important;
-  transform: none !important;
-  filter: none !important;
-}
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-texto {
-  display: flex !important;
-  opacity: 1 !important;
-  transform: none !important;
+  opacity: 1;
+  transform: none;
 }
 @media (max-width: 600px) {
   .modo-leve .galeria-grade-global .obra.modo-grade,
