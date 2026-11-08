@@ -2160,3 +2160,17 @@ nav button[class*="anim-video"],
 @media (prefers-reduced-motion:reduce) {
   .obra-focus.obra-focus-video-play > span:first-child { transition: none; }
 }
+
+
+/* Carrosséis na grade: preservar a imagem limpa e neutralizar o acento azul do índice.
+   O ajuste é restrito aos cards com mais de uma mídia na grade editorial. */
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel::after {
+  opacity:  0;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel .carrossel-indice {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(5,20,33,.48);
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel .carrossel-indice span {
+  color: rgba(255,255,255,.72);
+}
