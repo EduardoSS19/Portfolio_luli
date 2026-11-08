@@ -36,10 +36,10 @@ export default function App() {
   const [modoGaleria, setModoGaleria] = useState('lista')
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
-    ...(modoGaleria === 'lista' ? categorias.map(c => ({ titulo: c.titulo, chave: c.chave })) : []),
+    ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
-  ], [categorias, referencias.length, modoGaleria])
+  ], [categorias, referencias.length])
   const secaoAtiva = useSecaoAtiva(secoesNav)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
@@ -130,7 +130,15 @@ export default function App() {
   }, [secaoAtiva])
 
   function selecionarCategoria(titulo) {
-    document.getElementById(titulo)?.scrollIntoView({ behavior: 'smooth' })
+    const secao = document.getElementById(titulo)
+    if (secao) {
+      secao.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+    const categoria = categorias.find(item => item.titulo === titulo)
+    const primeiraObra = categoria && [...document.querySelectorAll('.galeria-grade-global .obra')]
+      .find(card => card.classList.contains(`categoria-${categoria.chave}`))
+    primeiraObra?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   function voltarAoTopo() {
