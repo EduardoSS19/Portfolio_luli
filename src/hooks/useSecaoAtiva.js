@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 
 // Detecta qual seção está passando pelo "meio" da tela.
-// Em navegadores sem IntersectionObserver, mantém uma navegação funcional
-// usando a primeira seção como fallback, sem impedir a renderização do site.
-export function useSecaoAtiva(categorias) {
+// Na visualização em grade, observa os cards individuais de cada categoria.
+export function useSecaoAtiva(categorias, modoGaleria = 'lista') {
   const [ativa, setAtiva] = useState(categorias[0]?.titulo)
 
   useEffect(() => {
@@ -13,16 +12,21 @@ export function useSecaoAtiva(categorias) {
     }
 
     const elementos = new Map()
+    const gradeGlobal = modoGaleria === 'grade'
+      ? document.querySelector('.galeria-grade-global')
+      : null
+
     categorias.forEach(categoria => {
       const secao = document.getElementById(categoria.titulo)
       if (secao) {
         elementos.set(secao, categoria.titulo)
         return
       }
+
       // Na grade global não existem seções separadas: cada card continua
       // associado à categoria original para manter a navegação sincronizada.
-      if (!document.querySelector('.galeria-grade-global')) return
-      document.querySelectorAll('.galeria-grade-global .obra').forEach(card => {
+      if (!gradeGlobal) return
+      gradeGlobal.querySelectorAll('.obra').forEach(card => {
         if (card.classList.contains(`categoria-${categoria.chave}`)) {
           elementos.set(card, categoria.titulo)
         }
@@ -31,16 +35,24 @@ export function useSecaoAtiva(categorias) {
 
     const observer = new IntersectionObserver(
       entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) setAtiva(elementos.get(entry.target))
-        })
+        // Usa a entrada mais próxima do centro da viewport quando várias
+        // obras da mesma/diferentes categorias intersectam a faixa central.
+        const visiveis = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => Math.abs(a.boundingClientRect.top + a.boundingClientRect.height / 2 - window.innerHeight / 2)
+            - Math.abs(b.boundingClientRect.top + b.boundingClientRect.height / 2 - window.innerHeight / 2))
+
+        if (visiveis.length) {
+          const titulo = elementos.get(visiveis[0].target)
+          if (titulo) setAtiva(titulo)
+        }
       },
-      { threshold: 0, rootMargin: '-45% 0px -45% 0px' }
+      { threshold: 0, rootMargin: '-160px 0px -160px 0px' }
     )
 
     elementos.forEach((_, elemento) => observer.observe(elemento))
     return () => observer.disconnect()
-  }, [categorias])
+  }, [categorias, modoGaleria])
 
-  return ativa
+  return [ativa, setAtiva]
 }

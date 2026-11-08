@@ -40,7 +40,7 @@ export default function App() {
     ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
   ], [categorias, referencias.length])
-  const secaoAtiva = useSecaoAtiva(secoesNav)
+  const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
   const anteriorRef = useRef(secaoAtiva)
@@ -130,6 +130,9 @@ export default function App() {
   }, [secaoAtiva])
 
   function selecionarCategoria(titulo) {
+    // A seleção explícita deve refletir imediatamente na navegação; o observer
+    // assume novamente o acompanhamento conforme a rolagem continua.
+    definirSecaoAtiva(titulo)
     const secao = document.getElementById(titulo)
     if (secao) {
       secao.scrollIntoView({ behavior: 'smooth' })
