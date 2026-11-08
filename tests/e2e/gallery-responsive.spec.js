@@ -1,21 +1,23 @@
 import { test, expect } from '@playwright/test'
 
+const imagemTeste = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%231e6688%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23f5d6a2%22/%3E%3C/svg%3E'
+
 const categorias = [
   { titulo: 'Glitch Art', chave: 'glitch-art', obras: [
-    { titulo: 'Ruído cromático', imagem: '', descricao: 'Estudo de cor e interferência.' },
-    { titulo: 'Falha de sinal', imagem: '', descricao: 'Composição digital.' },
+    { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTeste }], descricao: 'Estudo de cor e interferência.' },
+    { titulo: 'Falha de sinal', imagem: imagemTeste, descricao: 'Composição digital.' },
   ] },
   { titulo: 'Vídeos', chave: 'videos', obras: [
-    { titulo: 'Movimento I', imagem: '', midias: [{ tipo: 'youtube', videoId: 'abcdefghijk', miniatura: 'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg' }] },
-    { titulo: 'Movimento II', imagem: '', descricao: 'Experimento audiovisual.' },
+    { titulo: 'Movimento I', imagem: '', midias: [{ tipo: 'youtube', videoId: 'abcdefghijk', miniatura: imagemTeste }] },
+    { titulo: 'Movimento II', imagem: imagemTeste, descricao: 'Experimento audiovisual.' },
   ] },
   { titulo: 'Cerâmica', chave: 'ceramica', obras: [
-    { titulo: 'Forma orgânica', imagem: '', descricao: 'Peça de estudo.' },
-    { titulo: 'Vaso azul', imagem: '', descricao: 'Cerâmica experimental.' },
+    { titulo: 'Forma orgânica', imagem: imagemTeste, descricao: 'Peça de estudo.' },
+    { titulo: 'Vaso azul', imagem: imagemTeste, descricao: 'Cerâmica experimental.' },
   ] },
   { titulo: 'Desenhos', chave: 'desenhos', obras: [
-    { titulo: 'Traço I', imagem: '', descricao: 'Desenho em papel.' },
-    { titulo: 'Traço II', imagem: '', descricao: 'Estudo de linha.' },
+    { titulo: 'Traço I', imagem: imagemTeste, descricao: 'Desenho em papel.' },
+    { titulo: 'Traço II', imagem: imagemTeste, descricao: 'Estudo de linha.' },
   ] },
 ]
 
@@ -90,11 +92,21 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
 
 test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
   await abrirPortfolio(page)
-  for (const titulo of ['Glitch Art', 'Vídeos', 'Cerâmica', 'Desenhos']) {
-    const item = page.getByRole('button', { name: titulo, exact: true })
+  const menu = page.locator('.nav-mobile-toggle')
+  if (await menu.isVisible() && await menu.getAttribute('aria-expanded') !== 'true') {
+    await menu.click()
+  }
+  const categoriasTeste = [
+    ['Glitch Art', 'glitch-art'],
+    ['Vídeos', 'videos'],
+    ['Cerâmica', 'ceramica'],
+    ['Desenhos', 'desenhos'],
+  ]
+  for (const [titulo, chave] of categoriasTeste) {
+    const item = page.locator('.nav-links button').filter({ hasText: titulo })
     await expect(item).toBeVisible()
     await item.click()
-    const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${titulo.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\s+/g, '-')}`).first()
+    const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${chave}`).first()
     await expect(primeiroCard).toBeVisible()
     await expect(item).toHaveAttribute('aria-current', 'location')
   }
@@ -121,4 +133,29 @@ test('o modo leve não remove animações artísticas e movimento reduzido conti
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect.poll(() => glitch.evaluate(card => getComputedStyle(card.querySelector('.obra-zoom-trigger img')).animationName)).toBe('none')
+})
+
+
+test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniaturas', async ({ page }) => {
+  await abrirPortfolio(page, true)
+  const cards = page.locator('.galeria-grade-global .obra')
+  await expect(cards).toHaveCount(8)
+  for (let i = 0; i < 8; i++) {
+    const card = cards.nth(i)
+    await expect.poll(() => card.evaluate(el => Number.parseFloat(getComputedStyle(el).opacity))).toBeGreaterThanOrEqual(0.95)
+  }
+  await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
+})
+
+test('a grade não renderiza a faixa de miniaturas e mantém a galeria completa no foco', async ({ page }) => {
+  await abrirPortfolio(page)
+  const card = page.locator('.galeria-grade-global .obra').first()
+  await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
+  await expect(card.locator('.grade-midia-contagem')).toHaveText('+1')
+  await card.locator('.obra-zoom-trigger').click()
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  await expect(dialog).toHaveAttribute('open', '')
+  await expect(dialog.locator('.obra-focus-proxima')).toBeVisible()
+  await dialog.locator('.obra-focus-proxima').click()
+  await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
 })
