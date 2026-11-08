@@ -733,3 +733,233 @@ body.change-form #content-main fieldset.module.collapsed {
 body.change-form #content-main fieldset.module.collapsed > h2 {
   padding-bottom: 19px;
 }
+
+
+/* Ações do formulário: fluxo normal no fim da página, sem barra flutuante. */
+.submit-row,
+body.change-form #content-main .submit-row {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  margin: 28px 0 0 !important;
+  padding: 18px 0 8px !important;
+  border: 0 !important;
+  border-top: 1px solid #3a5261 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body.change-form #content-main .submit-row input,
+body.change-form #content-main .submit-row .deletelink {
+  min-height: 44px;
+  margin: 0 8px 8px 0 !important;
+}
+
+/* Sessões opcionais independentes: cada assunto abre e fecha por conta própria. */
+body.change-form #content-main fieldset.module.collapse {
+  overflow: hidden;
+}
+body.change-form #content-main fieldset.module.collapse > h2 {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  cursor: pointer;
+}
+body.change-form #content-main fieldset.module.collapse > h2::after {
+  content: "＋";
+  margin-left: auto;
+  color: #a9cfc4;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+body.change-form #content-main fieldset.module.collapse.collapsed > h2::after {
+  content: "＋";
+}
+body.change-form #content-main fieldset.module.collapse:not(.collapsed) > h2::after {
+  content: "−";
+}
+body.change-form #content-main fieldset.module.collapse.collapsed {
+  background: linear-gradient(145deg,#102638,#0e2233);
+}
+body.change-form #content-main fieldset.module.collapse.collapsed > h2 {
+  padding-bottom: 19px;
+}
+
+/* Gestão de categorias, obras, imagens e demais cadastros do painel. */
+body.change-list #content {
+  max-width: 1500px;
+}
+body.change-list #content-main {
+  min-width: 0;
+}
+body.change-list #content-main .object-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0 0 18px;
+}
+body.change-list #content-main .object-tools a,
+body.change-list #content-main .addlink,
+body.change-list #content-main .changelink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 9px 15px !important;
+  border: 1px solid #d8c8bb !important;
+  border-radius: 999px !important;
+  color: #493a32 !important;
+  background: #f5ece5 !important;
+  font-weight: 700 !important;
+  text-decoration: none;
+}
+body.change-list #content-main .object-tools a:hover,
+body.change-list #content-main .addlink:hover,
+body.change-list #content-main .changelink:hover {
+  border-color: #b68d75 !important;
+  background: #eee0d5 !important;
+}
+body.change-list #changelist {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 250px;
+  gap: 18px;
+  align-items: start;
+}
+body.change-list #changelist #toolbar,
+body.change-list #changelist .actions,
+body.change-list #changelist .paginator,
+body.change-list #changelist .results {
+  grid-column: 1;
+}
+body.change-list #changelist #changelist-form {
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(65,45,34,.05);
+}
+body.change-list #changelist table thead th {
+  padding: 14px 13px;
+  color: #5a473c;
+  background: #f4ede7;
+  font-size: .78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+body.change-list #changelist table tbody td,
+body.change-list #changelist table tbody th {
+  padding: 13px;
+  border-bottom: 1px solid #f0e9e3;
+  vertical-align: middle;
+}
+body.change-list #changelist table tbody tr:hover {
+  background: #fcf8f4;
+}
+body.change-list #changelist table tbody th a,
+body.change-list #changelist table tbody td a {
+  color: #795640;
+  font-weight: 700;
+}
+body.change-list #changelist #toolbar,
+body.change-list #changelist .actions {
+  padding: 13px 15px;
+  border: 1px solid #e8ddd4;
+  border-radius: 13px;
+  background: #fff;
+}
+body.change-list #changelist #toolbar form,
+body.change-list #changelist .actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+body.change-list #changelist-filter {
+  grid-column: 2;
+  grid-row: 1 / span 8;
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #e8ddd4;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(65,45,34,.04);
+}
+body.change-list #changelist-filter h2 {
+  padding: 5px 4px 13px;
+  color: #493a32;
+  background: transparent;
+  font-size: .95rem;
+}
+body.change-list #changelist-filter h3 {
+  margin: 12px 0 6px;
+  color: #8a6a55;
+  font-size: .75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+body.change-list #changelist-filter li {
+  padding: 5px 3px;
+}
+body.change-list #changelist-filter a {
+  color: #6c5546;
+}
+body.change-list #changelist .paginator {
+  padding: 14px;
+  color: #7c6c62;
+}
+body.change-list #changelist .paginator a {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 6px 10px;
+  border: 1px solid #e8ddd4;
+  border-radius: 8px;
+  background: #fff;
+}
+body.change-form #content-main .inline-group {
+  overflow: hidden;
+  border: 1px solid #e8ddd4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(65,45,34,.04);
+}
+body.change-form #content-main .inline-group h2 {
+  padding: 16px 20px;
+  color: #493a32;
+  background: #f4ede7;
+  font-size: .9rem;
+}
+body.change-form #content-main .inline-group .tabular td,
+body.change-form #content-main .inline-group .tabular th {
+  padding: 12px;
+}
+@media (max-width: 900px) {
+  body.change-list #changelist {
+    display: block;
+  }
+  body.change-list #changelist-filter {
+    margin: 14px 0;
+  }
+}
+@media (max-width: 767px) {
+  body.change-list #content-main .object-tools {
+    justify-content: stretch;
+  }
+  body.change-list #content-main .object-tools li {
+    flex: 1 1 auto;
+  }
+  body.change-list #content-main .object-tools a {
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  body.change-form #content-main .submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 16px !important;
+  }
+}
