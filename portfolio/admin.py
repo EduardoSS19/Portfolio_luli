@@ -391,7 +391,7 @@ class WorkAdmin(admin.ModelAdmin):
         }),
         ("Série e produção", {
             "fields": ("series", "edition", "print_run", "signed", "creation_location", "condition", "exhibitions"),
-            "classes": ("collapse",),
+            "description": "Dados complementares de autoria, produção e histórico. Você pode deixar tudo em branco.",
         }),
         ("Observações adicionais", {"fields": ("detail",)}),
         ("Imagens da obra", {
