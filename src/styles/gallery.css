@@ -727,20 +727,6 @@
   }
 }
 
-/* ===== Grade: cartões sempre visíveis e mídia sem faixa de miniaturas =====
-   A visibilidade do conteúdo não pode depender do callback de IntersectionObserver. */
-.galeria-grade-global .obra.modo-grade {
-  opacity: 1;
-  transform: none;
-}
-.galeria-grade-global .obra.modo-grade.visivel {
-  animation: gradeEntrada .55s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both;
-}
-.galeria-grade-global .obra.modo-grade .carrossel-miniaturas,
-.galeria-grade-global .obra.modo-grade .carrossel-seta,
-.galeria-grade-global .obra.modo-grade .carrossel-indice {
-  display: none !important;
-}
 .galeria-grade-global .obra.modo-grade .grade-midia-contagem {
   position: absolute;
   z-index: 6;
@@ -793,26 +779,6 @@
 
 /* Grade: a entrada é controlada uma única vez pelo hook useScrollReveal({ once: true }).
    As animações da mídia (técnicas artísticas e vídeo) permanecem independentes. */
-/* Ajustes de interação da grade: títulos sob demanda e cards estáveis ao reentrar no viewport. */
-.galeria-grade-global .obra.modo-grade .obra-texto,
-.galeria-grade-global .obra.modo-grade.tem-video .obra-texto,
-.galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto {
-  opacity: 0 !important;
-  transform: translateY(7px) !important;
-  transition: opacity .22s ease, transform .22s ease !important;
-  pointer-events: none;
-}
-.galeria-grade-global .obra.modo-grade:hover .obra-texto,
-.galeria-grade-global .obra.modo-grade:focus-within .obra-texto {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-}
-@media (hover: none), (pointer: coarse) {
-  .galeria-grade-global .obra.modo-grade:focus-within .obra-texto {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-  }
-}
 
 
 
