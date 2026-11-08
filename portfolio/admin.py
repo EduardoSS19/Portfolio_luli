@@ -375,28 +375,41 @@ class WorkAdmin(admin.ModelAdmin):
     search_fields = ("title", "description")
     ordering = ("category__position", "position", "id")
     list_per_page = 30
-    save_on_top = True
+    save_on_top = False
     actions = ("publicar", "despublicar")
     inlines = (WorkImageInline, WorkVideoInline)
     fieldsets = (
         ("Comece por aqui", {
             "fields": ("category", "title", "description"),
-            "description": "Identifique a obra e conte um pouco sobre ela. Os demais detalhes são opcionais.",
+            "description": "Identifique a obra e conte um pouco sobre ela. Os outros detalhes podem ficar em branco.",
         }),
         ("Imagens da obra", {
             "fields": ("image", "novas_imagens"),
-            "description": "A primeira imagem é a capa. Adicione outras fotos para mostrar detalhes e ângulos diferentes.",
+            "description": "Escolha a imagem de capa e, se quiser, adicione outras fotos ao carrossel.",
         }),
-        ("Detalhes opcionais da obra", {
+        ("Ficha técnica", {
             "fields": (
                 "technique", "material", "support", "year",
                 ("height", "width", "depth", "dimension_unit"),
-                "price", "currency", "availability",
-                "series", "edition", "print_run", "signed",
-                "creation_location", "condition", "exhibitions", "detail",
+                "creation_location", "condition",
             ),
             "classes": ("collapse",),
-            "description": "Abra somente se quiser informar ficha técnica, preço, série, produção ou observações. Campos em branco não aparecem no site.",
+            "description": "Técnica, materiais, suporte, ano e dimensões. Preencha apenas o que fizer sentido para esta obra.",
+        }),
+        ("Comercialização", {
+            "fields": ("price", "currency", "availability"),
+            "classes": ("collapse",),
+            "description": "Preço e disponibilidade para venda. Pode deixar esta seção fechada se a obra não estiver à venda.",
+        }),
+        ("Série e produção", {
+            "fields": ("series", "edition", "print_run", "signed", "exhibitions"),
+            "classes": ("collapse",),
+            "description": "Informações sobre séries, edições, tiragem, assinatura e exposições.",
+        }),
+        ("Observações adicionais", {
+            "fields": ("detail",),
+            "classes": ("collapse",),
+            "description": "Qualquer informação complementar que queira compartilhar.",
         }),
         ("Publicação", {"fields": ("position", "is_active", "preview_site")}),
         ("Avançado", {"fields": ("image_url",), "classes": ("collapse",)}),
