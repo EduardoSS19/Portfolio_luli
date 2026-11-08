@@ -571,7 +571,7 @@ export function ObraCard({
             {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
               <iframe
                 className="obra-focus-video"
-                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1&controls=1&playsinline=1`}
                 title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
