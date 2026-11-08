@@ -12,14 +12,14 @@ export function useScrollReveal(threshold = 0, rootMargin = '0px 0px -8% 0px') {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setVisivel(entry.isIntersecting)
+        setVisivel(entry.isIntersecting && entry.intersectionRatio >= threshold)
       },
       { threshold, rootMargin }
     )
 
     observer.observe(elemento)
     return () => observer.disconnect()
-  }, [threshold])
+  }, [threshold, rootMargin])
 
   return [ref, visivel]
 }
