@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react'
 import { FundoFantasma } from './components/FundoFantasma.jsx'
 import { Hero } from './components/Hero.jsx'
 import { Nav } from './components/Nav.jsx'
@@ -44,6 +44,33 @@ export default function App() {
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
   const anteriorRef = useRef(secaoAtiva)
+  const trocaModoPendenteRef = useRef(null)
+
+  function trocarModoGaleria(novoModo) {
+    if (novoModo === modoGaleria) return
+    const cards = [...document.querySelectorAll('.galeria-grade-global .obra, .secao .obra')]
+    const centro = window.innerHeight / 2
+    const cardAtual = cards
+      .map(card => ({ card, rect: card.getBoundingClientRect() }))
+      .filter(({ rect }) => rect.bottom > 0 && rect.top < window.innerHeight)
+      .sort((a, b) => Math.abs((a.rect.top + a.rect.height / 2) - centro) - Math.abs((b.rect.top + b.rect.height / 2) - centro))[0]
+    trocaModoPendenteRef.current = cardAtual?.card.dataset.obraChave
+      ? { chave: cardAtual.card.dataset.obraChave, topo: cardAtual.rect.top }
+      : null
+    setModoGaleria(novoModo)
+  }
+
+  useLayoutEffect(() => {
+    const pendente = trocaModoPendenteRef.current
+    if (!pendente) return
+    const card = [...document.querySelectorAll('.galeria-grade-global .obra, .secao .obra')]
+      .find(item => item.dataset.obraChave === pendente.chave)
+    if (card) {
+      const novoTopo = card.getBoundingClientRect().top
+      window.scrollBy({ top: novoTopo - pendente.topo, behavior: 'instant' })
+    }
+    trocaModoPendenteRef.current = null
+  }, [modoGaleria])
 
   useEffect(() => {
     function atualizarBotaoTopo() {
@@ -138,7 +165,7 @@ export default function App() {
         animando={animando}
         aoSelecionar={selecionarCategoria}
         modoGaleria={modoGaleria}
-        aoTrocarModo={setModoGaleria}
+        aoTrocarModo={trocarModoGaleria}
       />
       <Sobre perfil={sobre} />
       {modoGaleria === 'grade' ? (
