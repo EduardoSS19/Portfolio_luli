@@ -381,7 +381,6 @@
   transform: none !important;
   filter: none;
   clip-path: none !important;
-  animation: none !important;
   transition: filter .2s ease;
 }
 .galeria-grade-global .obra.modo-grade.midia-video .glitch-camada,
