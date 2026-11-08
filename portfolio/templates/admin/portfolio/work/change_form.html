@@ -1,0 +1,32 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block form_top %}
+  {{ block.super }}
+  <section class="work-editor-intro" aria-label="Orientações para editar a obra">
+    <div class="work-editor-intro__eyebrow">ESTÚDIO / PORTFÓLIO</div>
+    <div class="work-editor-intro__content">
+      <div>
+        <h2>{% if add %}Vamos cadastrar uma nova obra{% else %}Vamos cuidar desta obra{% endif %}</h2>
+        <p>Você não precisa preencher tudo. Comece pelo nome, escolha a categoria e adicione boas imagens. Os detalhes técnicos e comerciais são opcionais.</p>
+      </div>
+      <div class="work-editor-intro__steps" aria-label="Etapas sugeridas">
+        <span><b>01</b> Apresentação</span>
+        <span><b>02</b> Detalhes</span>
+        <span><b>03</b> Imagens</span>
+        <span><b>04</b> Publicação</span>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block field_sets %}
+  <div class="work-editor-fields">
+    {{ block.super }}
+  </div>
+{% endblock %}
+
+{% block after_related_objects %}
+  {{ block.super }}
+  <p class="work-editor-footnote">Dica: salve como rascunho se ainda estiver organizando as informações. Você poderá voltar e editar quando quiser.</p>
+{% endblock %}
