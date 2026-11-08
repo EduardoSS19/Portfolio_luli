@@ -2162,18 +2162,33 @@ nav button[class*="anim-video"],
 }
 
 
-/* Mídias da grade: a película editorial é mantida nas visualizações em lista,
-   mas não deve escurecer miniaturas de imagem, carrossel ou vídeo na grade. */
+/* Mídias da grade: a película editorial não deve escurecer as imagens. */
 .galeria-grade-global .obra.modo-grade .obra-imagem::after {
   opacity: 0;
 }
 
-/* Na grade, mantém as miniaturas no fluxo original e oculta apenas os elementos
-   redundantes/visuais do carrossel, sem remover a navegação por gesto. */
-.galeria-grade-global .obra.modo-grade .carrossel-indice {
-  display: none;
+/* Carrosséis da grade: preserva o índice e reserva uma faixa inferior para
+   as miniaturas, mantendo o visual original sem a scrollbar azul. */
+.galeria-grade-global .obra.modo-grade .obra-galeria {
+  position: relative;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+  top: 0;
+  right: 0;
+  bottom: 4.7rem;
+  left: 0;
+  height: auto;
 }
 .galeria-grade-global .obra.modo-grade .carrossel-miniaturas {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 4.7rem;
+  background: linear-gradient(180deg, rgba(5,20,33,.18), rgba(5,20,33,.82));
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -2181,12 +2196,21 @@ nav button[class*="anim-video"],
   display: none;
 }
 
-/* O índice do carrossel permanece discreto, sem o acento azul sobre a imagem. */
+/* Mantém o índice VISTA visível e discreto sobre a imagem principal. */
 .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice {
+  display: flex;
   border-color: rgba(255,255,255,.18);
   background: rgba(5,20,33,.48);
 }
 .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice span {
   color: rgba(255,255,255,.72);
+}
+
+/* No visualizador ampliado, o gesto horizontal troca imagens sem bloquear
+   a rolagem vertical natural da página. */
+.obra-focus-imagem {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
