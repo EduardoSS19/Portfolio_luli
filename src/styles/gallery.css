@@ -709,28 +709,12 @@
   }
 }
 
-/* O modo leve é ativado automaticamente em navegadores antigos.
-   Não esconder cards esperando animações/IntersectionObserver. */
+/* O modo leve reduz efeitos de fundo e sobrecarga de composição, mas preserva
+   as animações próprias de cada linguagem artística (glitch, desenho, cerâmica etc.). */
 .modo-leve .galeria-grade-global .obra.modo-grade,
 .modo-leve .galeria-grade-global .obra.modo-grade.visivel {
-  opacity: 1 !important;
-  transform: none !important;
-  animation: none !important;
-  transition: none !important;
-}
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-imagem img,
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger,
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
-.modo-leve .galeria-grade-global .obra.modo-grade .glitch-camada {
-  animation: none !important;
-  clip-path: none !important;
-  transform: none !important;
-  filter: none !important;
-}
-.modo-leve .galeria-grade-global .obra.modo-grade .obra-texto {
-  display: flex !important;
-  opacity: 1 !important;
-  transform: none !important;
+  opacity: 1;
+  transform: none;
 }
 @media (max-width: 600px) {
   .modo-leve .galeria-grade-global .obra.modo-grade,
@@ -740,30 +724,21 @@
 }
 
 
-/* Em telas touch (incluindo Safari móvel), a grade não depende da animação
-   de entrada para revelar as obras. Todos os cards aparecem imediatamente. */
+/* Em telas touch, garantimos visibilidade e títulos legíveis sem remover
+   os efeitos artísticos específicos das obras. A acessibilidade é tratada
+   exclusivamente por prefers-reduced-motion. */
 @media (hover: none), (pointer: coarse) {
   .galeria-grade-global .obra.modo-grade,
   .galeria-grade-global .obra.modo-grade.visivel,
   .galeria-grade-global .obra.modo-grade.midia-video {
-    opacity: 1 !important;
-    transform: none !important;
-    animation: none !important;
-    transition: none !important;
+    opacity: 1;
+    transform: none;
   }
   .galeria-grade-global .obra.modo-grade .obra-texto,
   .galeria-grade-global .obra.modo-grade.midia-video .obra-texto {
-    display: flex !important;
-    opacity: 1 !important;
-    transform: none !important;
+    display: flex;
+    opacity: 1;
+    transform: none;
     pointer-events: none;
-  }
-  .galeria-grade-global .obra.modo-grade .obra-imagem img,
-  .galeria-grade-global .obra.modo-grade .obra-video-trigger,
-  .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
-  .galeria-grade-global .obra.modo-grade .glitch-camada {
-    animation: none !important;
-    transform: none !important;
-    clip-path: none !important;
   }
 }

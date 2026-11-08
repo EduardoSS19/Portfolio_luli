@@ -12,22 +12,33 @@ export function useSecaoAtiva(categorias) {
       return
     }
 
-    const elementos = categorias
-      .map(cat => document.getElementById(cat.titulo))
-      .filter(Boolean)
+    const elementos = new Map()
+    categorias.forEach(categoria => {
+      const secao = document.getElementById(categoria.titulo)
+      if (secao) {
+        elementos.set(secao, categoria.titulo)
+        return
+      }
+      // Na grade global não existem seções separadas: cada card continua
+      // associado à categoria original para manter a navegação sincronizada.
+      if (!document.querySelector('.galeria-grade-global')) return
+      document.querySelectorAll('.galeria-grade-global .obra').forEach(card => {
+        if (card.classList.contains(`categoria-${categoria.chave}`)) {
+          elementos.set(card, categoria.titulo)
+        }
+      })
+    })
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            setAtiva(entry.target.id)
-          }
+          if (entry.isIntersecting) setAtiva(elementos.get(entry.target))
         })
       },
       { threshold: 0, rootMargin: '-45% 0px -45% 0px' }
     )
 
-    elementos.forEach(el => observer.observe(el))
+    elementos.forEach((_, elemento) => observer.observe(elemento))
     return () => observer.disconnect()
   }, [categorias])
 

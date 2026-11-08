@@ -325,8 +325,16 @@ nav button[class*="anim-video"],
 @media (prefers-reduced-motion:reduce){
   .obra.arte-fotografia .obra-imagem .obra-zoom-trigger img,
   .obra.arte-videoarte .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-glitch .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-desenho .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-ceramica .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-gravura .obra-imagem .obra-zoom-trigger img,
   .obra.arte-fotografia .obra-texto h3,
-  .obra.arte-videoarte.em-foco .categoria-legenda::before{ animation:none !important; }
+  .obra.arte-glitch .obra-texto h3,
+  .obra.arte-fotografia .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-videoarte.em-foco .categoria-legenda::before{
+    animation:none !important;
+  }
 }
 
 /* ===== Modo leve: navegadores antigos (Safari < 16) ou ?leve no endereço ===== */
@@ -343,21 +351,6 @@ nav button[class*="anim-video"],
   opacity:0.24;
   transform:none;
 }
-.modo-leve .obra .obra-imagem .obra-zoom-trigger img,
-.modo-leve .obra .obra-texto h3,
-.modo-leve .secao-cabecalho h2{ animation:none !important; }
-.modo-leve .secao-cabecalho,
-.modo-leve .sobre-entrada,
-.modo-leve .referencia-item,
-.modo-leve .secao-contato{
-  clip-path:none !important;
-  transform:none !important;
-  transition:opacity 0.45s ease !important;
-}
-.modo-leve .obra,
-.modo-leve .obra::before,
-.modo-leve .obra-imagem::after{ transition:none; }
-.modo-leve .obra-imagem img{ transition:none; }
 .modo-leve .obra-focus{ z-index:1000; background:rgba(3,14,24,0.94); }
 
 

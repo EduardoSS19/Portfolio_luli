@@ -86,3 +86,39 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obras-lista .obra')).toHaveCount(8)
 })
+
+
+test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
+  await abrirPortfolio(page)
+  for (const titulo of ['Glitch Art', 'Vídeos', 'Cerâmica', 'Desenhos']) {
+    const item = page.getByRole('button', { name: titulo, exact: true })
+    await expect(item).toBeVisible()
+    await item.click()
+    const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${titulo.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\s+/g, '-')}`).first()
+    await expect(primeiroCard).toBeVisible()
+    await expect(item).toHaveAttribute('aria-current', 'location')
+  }
+})
+
+test('o modo leve não remove animações artísticas e movimento reduzido continua respeitado', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      categorias,
+      referencias: [],
+      frames: [],
+      redes: [],
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+    }),
+  }))
+  await page.goto('/?leve')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+  await page.getByRole('button', { name: 'Visualizar em grade' }).click()
+  const glitch = page.locator('.galeria-grade-global .obra.arte-glitch').first()
+  await glitch.scrollIntoViewIfNeeded()
+  await expect.poll(() => glitch.evaluate(card => getComputedStyle(card.querySelector('.obra-zoom-trigger img')).animationName)).toContain('glitchConstrucao')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect.poll(() => glitch.evaluate(card => getComputedStyle(card.querySelector('.obra-zoom-trigger img')).animationName)).toBe('none')
+})

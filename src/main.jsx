@@ -9,8 +9,8 @@ import './styles/index.css'
 try {
   const parametros = new URLSearchParams(window.location.search)
   const poucaMemoria = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2
-  const movimentoReduzido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  if (parametros.has('leve') || poucaMemoria || movimentoReduzido) {
+  const poucosNucleos = typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 2
+  if (parametros.has('leve') || poucaMemoria || poucosNucleos) {
     document.documentElement.classList.add('modo-leve')
   }
 } catch {
