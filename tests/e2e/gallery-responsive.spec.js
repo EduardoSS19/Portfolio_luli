@@ -181,14 +181,22 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
       await card.scrollIntoViewIfNeeded()
       const metrics = await card.evaluate(element => {
         const cardRect = element.getBoundingClientRect()
+        const gallery = element.querySelector('.obra-galeria')
+        const media = element.querySelector('.obra-imagem')
         const button = element.querySelector('.obra-zoom-trigger')
         const image = button?.querySelector('img')
+        const galleryRect = gallery?.getBoundingClientRect()
+        const mediaRect = media?.getBoundingClientRect()
         const buttonRect = button?.getBoundingClientRect()
         const imageRect = image?.getBoundingClientRect()
         const style = image ? getComputedStyle(image) : null
         return {
           cardWidth: cardRect.width,
           cardHeight: cardRect.height,
+          galleryWidth: galleryRect?.width ?? 0,
+          galleryHeight: galleryRect?.height ?? 0,
+          mediaWidth: mediaRect?.width ?? 0,
+          mediaHeight: mediaRect?.height ?? 0,
           buttonWidth: buttonRect?.width ?? 0,
           buttonHeight: buttonRect?.height ?? 0,
           imageWidth: imageRect?.width ?? 0,
@@ -200,7 +208,11 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
         }
       })
       expect(metrics.cardWidth, `${chave} card width at ${width}px`).toBeGreaterThan(120)
-      expect(metrics.cardHeight, `${chave} card height at ${width}px`).toBeGreaterThan(150)
+      expect(metrics.cardHeight, `${chave} card height at `${width}px`).toBeGreaterThan(150)
+      expect(metrics.galleryWidth, `${chave} gallery width at `${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
+      expect(metrics.galleryHeight, `${chave} gallery height at `${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
+      expect(metrics.mediaWidth, `${chave} media width at `${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
+      expect(metrics.mediaHeight, `${chave} media height at `${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
       expect(metrics.buttonWidth, `${chave} button width at ${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
       expect(metrics.buttonHeight, `${chave} button height at ${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
       expect(metrics.imageWidth, `${chave} image width at ${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
