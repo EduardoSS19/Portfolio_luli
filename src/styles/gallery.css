@@ -601,3 +601,47 @@
   user-select: none;
   -webkit-user-drag: none;
 }
+
+/* ===== Videoarte na grade: proporção consistente, imagem limpa e título sempre visível =====
+   A categoria mantém o mesmo tamanho dos demais cards. A película/scanlines continuam
+   disponíveis na visualização em lista, mas não cobrem as miniaturas da grade. */
+.galeria-grade-global .obra.modo-grade.arte-videoarte {
+  aspect-ratio: 4 / 5;
+}
+.galeria-grade-global .obra.modo-grade.arte-videoarte .obra-imagem::before {
+  display: none;
+}
+.galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto {
+  display: flex;
+  inset: auto 0 0;
+  z-index: 4;
+  min-height: 0;
+  padding: clamp(.65rem, 1.5vw, 1.1rem);
+  background: linear-gradient(180deg, transparent 0%, rgba(3,14,24,.76) 38%, rgba(3,14,24,.96) 100%);
+  opacity: 1;
+  transform: none;
+  pointer-events: none;
+}
+.galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: #fff;
+  font-size: clamp(.9rem, 1.5vw, 1.2rem);
+  line-height: 1.15;
+  text-shadow: 0 1px 8px rgba(0,0,0,.7);
+}
+@media (max-width: 600px) {
+  .galeria-grade-global .obra.modo-grade.arte-videoarte {
+    aspect-ratio: 3 / 4;
+  }
+  .galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto {
+    display: flex;
+    padding: .55rem .6rem;
+  }
+  .galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto h3 {
+    font-size: clamp(.76rem, 3.1vw, .95rem);
+  }
+}
