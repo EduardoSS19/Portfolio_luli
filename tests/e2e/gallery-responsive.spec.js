@@ -20,7 +20,7 @@ const categorias = [
 ]
 
 async function abrirPortfolio(page, semIntersectionObserver = false) {
-  await page.route('**/api/portfolio*', route => route.fulfill({
+  await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
     body: JSON.stringify({
