@@ -567,37 +567,45 @@ export function ObraCard({
               </span>
             </>
           )}
-          {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
-            <iframe
-              className="obra-focus-video"
-              src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
-              title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-          ) : (
-            <img
-              ref={imagemFocoRef}
-              className="obra-focus-imagem"
-              src={focoPreparado ? (midiaAtiva?.src || midiaAtiva?.miniatura) : undefined}
-              alt={`${titulo} — visualização ampliada`}
-              draggable="false"
-              onPointerDown={iniciarArrasteFoco}
-              onPointerUp={finalizarArrasteFoco}
-              onPointerCancel={() => { inicioArrasteFocoRef.current = null }}
-            />
-          )}
+          <div className={`obra-focus-media ${midiaAtiva?.tipo === 'youtube' ? 'tem-video' : ''}`}>
+            {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
+              <iframe
+                className="obra-focus-video"
+                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+                title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            ) : (
+              <img
+                ref={imagemFocoRef}
+                className="obra-focus-imagem"
+                src={focoPreparado ? (midiaAtiva?.src || midiaAtiva?.miniatura) : undefined}
+                alt={`${titulo} — visualização ampliada`}
+                draggable="false"
+                onPointerDown={iniciarArrasteFoco}
+                onPointerUp={finalizarArrasteFoco}
+                onPointerCancel={() => { inicioArrasteFocoRef.current = null }}
+              />
+            )}
+            {midiaAtiva?.tipo === 'youtube' && !videoFocoAtivo && (
+              <button
+                type="button"
+                className="obra-focus-video-play"
+                aria-label={`Assistir vídeo: ${titulo}`}
+                onClick={() => setVideoFocoAtivo(true)}
+              >
+                <span aria-hidden="true">▶</span>
+                <span>Assistir vídeo</span>
+              </button>
+            )}
+          </div>
           <div className="obra-focus-caption">
             <span>{categoriaNome}</span>
             <h2>{titulo}</h2>
             {descricao && <p>{descricao}</p>}
             {detalhe && <p className="obra-focus-detalhe">{detalhe}</p>}
-            {midiaAtiva?.tipo === 'youtube' && !videoFocoAtivo && (
-              <button type="button" onClick={() => setVideoFocoAtivo(true)}>
-                <span aria-hidden="true">▶</span> Assistir vídeo
-              </button>
-            )}
           </div>
         </div>
       </dialog>
