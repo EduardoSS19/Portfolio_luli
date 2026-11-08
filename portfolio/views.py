@@ -87,6 +87,28 @@ def _work_data(work):
         "midias": [item[2] for item in sorted(media, key=lambda item: (item[0], item[1]))],
         "descricao": work.description,
         "detalhe": work.detail,
+        "fichaTecnica": {
+            "tecnica": work.technique,
+            "material": work.material,
+            "suporte": work.support,
+            "ano": work.year,
+            "dimensoes": {
+                "altura": str(work.height) if work.height is not None else "",
+                "largura": str(work.width) if work.width is not None else "",
+                "profundidade": str(work.depth) if work.depth is not None else "",
+                "unidade": work.dimension_unit or "cm",
+            },
+            "preco": str(work.price) if work.price is not None else "",
+            "moeda": work.currency or "BRL",
+            "disponibilidade": work.get_availability_display() if work.availability else "",
+            "serie": work.series,
+            "edicao": work.edition,
+            "tiragem": work.print_run,
+            "assinada": work.signed,
+            "localCriacao": work.creation_location,
+            "conservacao": work.condition,
+            "exposicoes": work.exhibitions,
+        },
     }
 
 

@@ -59,6 +59,7 @@ export function ObraCard({
   midias: midiasDaObra = [],
   descricao,
   detalhe,
+  fichaTecnica = {},
   categoria,
   categoriaNome,
   tipoDeArte = 'obra',
@@ -98,6 +99,24 @@ export function ObraCard({
     .map((midia, indice) => midia.tipo === 'imagem' ? indice : -1)
     .filter(indice => indice >= 0)
   const midiaAtiva = midias[indiceImagem]
+  const dimensoes = fichaTecnica.dimensoes || {}
+  const valoresTecnicos = [
+    ['Técnica', fichaTecnica.tecnica], ['Material', fichaTecnica.material],
+    ['Suporte', fichaTecnica.suporte], ['Ano', fichaTecnica.ano],
+    ['Dimensões', [dimensoes.altura, dimensoes.largura, dimensoes.profundidade].some(Boolean)
+      ? [
+        dimensoes.altura && 'Alt. ' + dimensoes.altura,
+        dimensoes.largura && 'Larg. ' + dimensoes.largura,
+        dimensoes.profundidade && 'Prof. ' + dimensoes.profundidade,
+      ].filter(Boolean).join(' × ') + (dimensoes.unidade ? ' ' + dimensoes.unidade : '')
+      : ''],
+    ['Série', fichaTecnica.serie], ['Edição', fichaTecnica.edicao], ['Tiragem', fichaTecnica.tiragem],
+    ['Assinatura', fichaTecnica.assinada === true ? 'Assinada' : fichaTecnica.assinada === false ? 'Não assinada' : ''],
+    ['Local de criação', fichaTecnica.localCriacao], ['Conservação', fichaTecnica.conservacao],
+    ['Exposições', fichaTecnica.exposicoes], ['Disponibilidade', fichaTecnica.disponibilidade],
+    ['Preço', fichaTecnica.preco ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: fichaTecnica.moeda || 'BRL' }).format(Number(fichaTecnica.preco)) : ''],
+  ].filter(([, valor]) => valor !== null && valor !== undefined && String(valor).trim() !== '')
+  const temDetalhes = Boolean(detalhe || valoresTecnicos.length)
 
   // Centraliza o card seguindo a posição REAL dele a cada quadro. Assim, se o card
   // crescer (detalhes abrindo) a rolagem acompanha junto, sem esperar nem "corrigir" depois.
@@ -158,7 +177,7 @@ export function ObraCard({
   }
 
   function abrirDetalhesNoHover() {
-    if (!detalhe || detalhesFixadosRef.current !== null || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    if (!temDetalhes || detalhesFixadosRef.current !== null || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
     setExpandido(true)
   }
 
@@ -514,17 +533,18 @@ export function ObraCard({
           <div className={`detalhe-wrapper ${expandido ? 'aberto' : ''}`}>
             <div className="detalhe-inner">
               {detalhe && <p className="detalhe" style={{ whiteSpace: 'pre-line' }}>{detalhe}</p>}
+              {valoresTecnicos.length > 0 && <dl className="obra-ficha-tecnica">{valoresTecnicos.map(([rotulo, valor]) => <div className="obra-ficha-item" key={rotulo}><dt>{rotulo}</dt><dd>{valor}</dd></div>)}</dl>}
             </div>
           </div>
 
-          {detalhe && (
+          {temDetalhes && (
             <button
               type="button"
               className="obra-detalhe-botao"
               aria-expanded={expandido}
               onClick={alternarDetalhes}
             >
-              {expandido ? 'Fechar detalhes' : 'Explorar detalhes'}
+              {expandido ? 'Fechar detalhes' : 'Explorar detalhes e ficha técnica'}
               <span aria-hidden="true">{expandido ? '−' : '+'}</span>
             </button>
           )}
@@ -610,6 +630,7 @@ export function ObraCard({
             <h2>{titulo}</h2>
             {descricao && <p>{descricao}</p>}
             {detalhe && <p className="obra-focus-detalhe">{detalhe}</p>}
+            {valoresTecnicos.length > 0 && <dl className="obra-focus-ficha">{valoresTecnicos.map(([rotulo, valor]) => <div key={rotulo}><dt>{rotulo}</dt><dd>{valor}</dd></div>)}</dl>}
           </div>
         </div>
       </dialog>
