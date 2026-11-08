@@ -738,3 +738,32 @@
     aspect-ratio: 3 / 4;
   }
 }
+
+
+/* Em telas touch (incluindo Safari móvel), a grade não depende da animação
+   de entrada para revelar as obras. Todos os cards aparecem imediatamente. */
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.visivel,
+  .galeria-grade-global .obra.modo-grade.midia-video {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-texto,
+  .galeria-grade-global .obra.modo-grade.midia-video .obra-texto {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: none;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-imagem img,
+  .galeria-grade-global .obra.modo-grade .obra-video-trigger,
+  .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
+  .galeria-grade-global .obra.modo-grade .glitch-camada {
+    animation: none !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
