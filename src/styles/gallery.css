@@ -645,3 +645,15 @@
     font-size: clamp(.76rem, 3.1vw, .95rem);
   }
 }
+
+/* Obras com vídeo fora da categoria Video Arte:
+   mantém o título visível pela presença de mídia, não pelo nome da categoria. */
+.galeria-grade-global .obra.modo-grade.tem-video .obra-texto {
+  display: flex;
+  opacity: 1;
+  transform: none;
+}
+.galeria-grade-global .obra.modo-grade.tem-video .obra-texto h3 {
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,.7);
+}
