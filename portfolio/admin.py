@@ -378,19 +378,28 @@ class WorkAdmin(admin.ModelAdmin):
     actions = ("publicar", "despublicar")
     inlines = (WorkImageInline, WorkVideoInline)
     fieldsets = (
-        ("Obra", {"fields": ("category", "title", "description", "detail")}),
-        (
-            "Imagens",
-            {
-                "fields": ("image", "novas_imagens"),
-                "description": "A imagem principal aparece primeiro no carrossel.",
-            },
-        ),
+        ("Comece por aqui", {
+            "fields": ("category", "title", "description"),
+            "description": "Identifique a obra e conte um pouco sobre ela. Os campos técnicos são opcionais.",
+        }),
+        ("Ficha técnica", {
+            "fields": ("technique", "material", "support", "year", ("height", "width", "depth", "dimension_unit")),
+            "description": "Preencha apenas o que fizer sentido para esta obra. Informações vazias não aparecem no site.",
+        }),
+        ("Informações comerciais", {
+            "fields": ("price", "currency", "availability"),
+        }),
+        ("Série e produção", {
+            "fields": ("series", "edition", "print_run", "signed", "creation_location", "condition", "exhibitions"),
+            "classes": ("collapse",),
+        }),
+        ("Observações adicionais", {"fields": ("detail",)}),
+        ("Imagens da obra", {
+            "fields": ("image", "novas_imagens"),
+            "description": "A primeira imagem é a capa. Adicione outras fotos para mostrar detalhes e ângulos diferentes.",
+        }),
         ("Publicação", {"fields": ("position", "is_active", "preview_site")}),
-        (
-            "Avançado",
-            {"fields": ("image_url",), "classes": ("collapse",)},
-        ),
+        ("Avançado", {"fields": ("image_url",), "classes": ("collapse",)}),
     )
 
     readonly_fields = ("preview_site",)
