@@ -657,3 +657,84 @@
   color: #fff;
   text-shadow: 0 1px 8px rgba(0,0,0,.7);
 }
+
+
+/* Compatibilidade com Safari antigo (incluindo iPhones que não suportam aspect-ratio).
+   A grade continua visível mesmo se IntersectionObserver ou as animações não funcionarem. */
+@supports not (aspect-ratio: 1 / 1) {
+  .galeria-grade-global .obra.modo-grade {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-galeria {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    padding-bottom: 125%;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-imagem {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-texto {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+}
+
+/* Em celulares, todos os cards usam a mesma proporção para não misturar
+   miniaturas altas com cards de vídeo achatados. */
+@media (max-width: 600px) {
+  .galeria-grade-global .obras-lista.modo-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: .55rem;
+  }
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.midia-video {
+    aspect-ratio: 3 / 4;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+/* O modo leve é ativado automaticamente em navegadores antigos.
+   Não esconder cards esperando animações/IntersectionObserver. */
+.modo-leve .galeria-grade-global .obra.modo-grade,
+.modo-leve .galeria-grade-global .obra.modo-grade.visivel {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+.modo-leve .galeria-grade-global .obra.modo-grade .obra-imagem img,
+.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger,
+.modo-leve .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
+.modo-leve .galeria-grade-global .obra.modo-grade .glitch-camada {
+  animation: none !important;
+  clip-path: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+.modo-leve .galeria-grade-global .obra.modo-grade .obra-texto {
+  display: flex !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+@media (max-width: 600px) {
+  .modo-leve .galeria-grade-global .obra.modo-grade,
+  .modo-leve .galeria-grade-global .obra.modo-grade.midia-video {
+    aspect-ratio: 3 / 4;
+  }
+}
