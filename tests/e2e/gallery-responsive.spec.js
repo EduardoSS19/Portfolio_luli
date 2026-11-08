@@ -20,7 +20,7 @@ const categorias = [
 ]
 
 async function abrirPortfolio(page, semIntersectionObserver = false) {
-  await page.route('**/api/portfolio/**', route => route.fulfill({
+  await page.route('**/api/portfolio*', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
     body: JSON.stringify({
@@ -37,7 +37,7 @@ async function abrirPortfolio(page, semIntersectionObserver = false) {
     })
   }
   await page.goto('/')
-  await expect(page.locator('.hero h1')).toHaveText('Luli')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.getByRole('button', { name: 'Visualizar em grade' }).click()
   await expect(page.locator('.galeria-grade-global .obra')).toHaveCount(8)
 }
@@ -76,5 +76,5 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
   await abrirPortfolio(page)
   await page.getByRole('button', { name: 'Visualizar em lista' }).click()
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
-  await expect(page.locator('.secao .obra')).toHaveCount(8)
+  await expect(page.locator('.secao:not(.sobre-secao) .obras-lista .obra')).toHaveCount(8)
 })
