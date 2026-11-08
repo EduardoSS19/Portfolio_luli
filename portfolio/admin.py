@@ -365,6 +365,7 @@ class WorkAdminForm(ImagemSalvaMixin, forms.ModelForm):
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
+    change_form_template = "admin/portfolio/work/change_form.html"
     form = WorkAdminForm
     list_display = ("preview", "title", "category", "total_imagens", "position", "is_active")
     list_display_links = ("preview", "title")
