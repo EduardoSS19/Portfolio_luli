@@ -54,5 +54,5 @@ export function useSecaoAtiva(categorias, modoGaleria = 'lista') {
     return () => observer.disconnect()
   }, [categorias, modoGaleria])
 
-  return ativa
+  return [ativa, setAtiva]
 }
