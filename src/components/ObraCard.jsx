@@ -19,6 +19,29 @@ function fecharDialog(dialog) {
   else dialog.removeAttribute('open')
 }
 
+// Miniatura de vídeo à prova de falhas: se a do banco estiver vazia ou não carregar,
+// tentamos as imagens públicas do próprio YouTube; se nada carregar, o card mostra um
+// fundo próprio em vez de ficar vazio com só o botão de play.
+const urlYoutube = (videoId, tamanho = 'hqdefault') =>
+  `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/${tamanho}.jpg`
+const miniaturaDoVideo = midia => midia.miniatura || urlYoutube(midia.videoId)
+function falhaNaMiniatura(event, midia) {
+  const imagem = event.currentTarget
+  const alternativas = [urlYoutube(midia.videoId), urlYoutube(midia.videoId, 'mqdefault')]
+  const tentativa = Number(imagem.dataset.tentativa || 0)
+  if (tentativa < alternativas.length) {
+    imagem.dataset.tentativa = String(tentativa + 1)
+    imagem.src = alternativas[tentativa]
+    return
+  }
+  imagem.style.visibility = 'hidden'
+  imagem.closest('.obra-video-trigger')?.classList.add('sem-miniatura')
+}
+
+// Na grade os cards são pequenos: pedimos ao Cloudinary uma versão menor (mais rápida no celular).
+const imagemDaGrade = src =>
+  typeof src === 'string' ? src.replace('/upload/f_auto,q_auto,w_1400/', '/upload/f_auto,q_auto,w_640/') : src
+
 const esperar = ms => new Promise(resolve => window.setTimeout(resolve, ms))
 
 function reduzirMovimento() {
@@ -411,9 +434,9 @@ export function ObraCard({
                     >
                       <img
                         key={midiaAtiva.src}
-                        src={midiaAtiva.src}
+                        src={modoGrade ? imagemDaGrade(midiaAtiva.src) : midiaAtiva.src}
                         alt={`${titulo} — imagem ${indicesImagem.indexOf(indiceImagem) + 1} de ${indicesImagem.length}`}
-                        loading={modoGrade && indiceGrade < 6 ? "eager" : "lazy"}
+                        loading={modoGrade ? "eager" : "lazy"}
                         fetchPriority={modoGrade && indiceGrade < 4 ? "high" : "auto"}
                         decoding="async"
                         draggable="false"
@@ -447,7 +470,8 @@ export function ObraCard({
                     onClick={() => modoGrade ? void abrirFoco() : setVideoAtivoId(midiaAtiva.videoId)}
                   >
                     <img
-                      src={midiaAtiva.miniatura}
+                      src={miniaturaDoVideo(midiaAtiva)}
+                      onError={event => falhaNaMiniatura(event, midiaAtiva)}
                       alt={`Miniatura do vídeo ${midiaAtiva.titulo || titulo}`}
                       loading={modoGrade && indiceGrade < 6 ? "eager" : "lazy"}
                       decoding="async"
@@ -458,8 +482,8 @@ export function ObraCard({
                 )}
                 {tipoDeArte === 'glitch' && midiaAtiva.tipo === 'youtube' && (
                   <>
-                    <img className="glitch-camada glitch-ciano" src={midiaAtiva.miniatura} alt="" aria-hidden="true" draggable="false" />
-                    <img className="glitch-camada glitch-magenta" src={midiaAtiva.miniatura} alt="" aria-hidden="true" draggable="false" />
+                    <img className="glitch-camada glitch-ciano" src={miniaturaDoVideo(midiaAtiva)} alt="" aria-hidden="true" draggable="false" />
+                    <img className="glitch-camada glitch-magenta" src={miniaturaDoVideo(midiaAtiva)} alt="" aria-hidden="true" draggable="false" />
                   </>
                 )}
               </>
@@ -507,7 +531,13 @@ export function ObraCard({
                   aria-current={index === indiceImagem ? 'true' : undefined}
                   onClick={() => selecionarMiniatura(index)}
                 >
-                  <img src={midia.tipo === 'youtube' ? midia.miniatura : midia.src} alt="" loading="lazy" decoding="async" />
+                  <img
+                    src={midia.tipo === 'youtube' ? miniaturaDoVideo(midia) : midia.src}
+                    onError={midia.tipo === 'youtube' ? event => falhaNaMiniatura(event, midia) : undefined}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
                   {midia.tipo === 'youtube' && <i aria-hidden="true">▶</i>}
                   <span>{String(index + 1).padStart(2, '0')}</span>
                 </button>
