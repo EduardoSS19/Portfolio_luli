@@ -175,7 +175,7 @@ export function ObraCard({
     // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
     flushSync(() => {
       setFocoPreparado(true)
-      setVideoFocoAtivo(false)
+      setVideoFocoAtivo(midiaAtiva?.tipo === 'youtube')
     })
 
     const imagemFoco = imagemFocoRef.current
@@ -418,7 +418,7 @@ export function ObraCard({
                   <iframe
                     key={midiaAtiva.videoId}
                     className="obra-video-player"
-                    src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+                    src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1&controls=1&playsinline=1`}
                     title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
@@ -571,7 +571,7 @@ export function ObraCard({
             {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
               <iframe
                 className="obra-focus-video"
-                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1`}
+                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1&controls=1&playsinline=1`}
                 title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
