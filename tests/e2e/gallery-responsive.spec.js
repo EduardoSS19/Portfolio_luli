@@ -92,11 +92,21 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
 
 test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
   await abrirPortfolio(page)
-  for (const titulo of ['Glitch Art', 'Vídeos', 'Cerâmica', 'Desenhos']) {
-    const item = page.getByRole('button', { name: titulo, exact: true })
+  const menu = page.locator('.nav-mobile-toggle')
+  if (await menu.isVisible() && await menu.getAttribute('aria-expanded') !== 'true') {
+    await menu.click()
+  }
+  const categoriasTeste = [
+    ['Glitch Art', 'glitch-art'],
+    ['Vídeos', 'videos'],
+    ['Cerâmica', 'ceramica'],
+    ['Desenhos', 'desenhos'],
+  ]
+  for (const [titulo, chave] of categoriasTeste) {
+    const item = page.locator('.nav-links button').filter({ hasText: titulo })
     await expect(item).toBeVisible()
     await item.click()
-    const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${titulo.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\s+/g, '-')}`).first()
+    const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${chave}`).first()
     await expect(primeiroCard).toBeVisible()
     await expect(item).toHaveAttribute('aria-current', 'location')
   }
@@ -143,7 +153,7 @@ test('a grade não renderiza a faixa de miniaturas e mantém a galeria completa 
   await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await expect(card.locator('.grade-midia-contagem')).toHaveText('+1')
   await card.locator('.obra-zoom-trigger').click()
-  const dialog = page.locator('dialog.obra-focus')
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
   await expect(dialog).toHaveAttribute('open', '')
   await expect(dialog.locator('.obra-focus-proxima')).toBeVisible()
   await dialog.locator('.obra-focus-proxima').click()
