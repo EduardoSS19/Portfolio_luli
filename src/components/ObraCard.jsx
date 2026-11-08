@@ -528,7 +528,7 @@ export function ObraCard({
       </article>
       <dialog
         ref={dialogRef}
-        className={`obra-focus ${focoFechando ? 'fechando' : ''}`}
+        className={`obra-focus ${focoFechando ? 'fechando' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'obra-focus-com-video' : ''} ${(descricao?.length || 0) + (detalhe?.length || 0) > 220 ? 'obra-focus-texto-longo' : ''}`}
         aria-label={`Visualização ampliada de ${titulo}`}
         onCancel={event => {
           event.preventDefault()
