@@ -413,7 +413,8 @@ export function ObraCard({
                         key={midiaAtiva.src}
                         src={midiaAtiva.src}
                         alt={`${titulo} — imagem ${indicesImagem.indexOf(indiceImagem) + 1} de ${indicesImagem.length}`}
-                        loading="lazy"
+                        loading={modoGrade && indiceGrade < 6 ? "eager" : "lazy"}
+                        fetchPriority={modoGrade && indiceGrade < 4 ? "high" : "auto"}
                         decoding="async"
                         draggable="false"
                       />
@@ -448,7 +449,7 @@ export function ObraCard({
                     <img
                       src={midiaAtiva.miniatura}
                       alt={`Miniatura do vídeo ${midiaAtiva.titulo || titulo}`}
-                      loading="lazy"
+                      loading={modoGrade && indiceGrade < 6 ? "eager" : "lazy"}
                       decoding="async"
                     />
                     <span className="obra-video-play" aria-hidden="true">▶</span>
@@ -463,7 +464,12 @@ export function ObraCard({
                 )}
               </>
             ) : <span>Imagem da obra</span>}
-            {midias.length > 1 && (
+            {modoGrade && midias.length > 1 && (
+              <span className="grade-midia-contagem" aria-label={`${midias.length} mídias disponíveis`}>
+                +{midias.length - 1}
+              </span>
+            )}
+            {midias.length > 1 && !modoGrade && (
               <>
                 <span className="carrossel-indice">
                   <span>VISTA</span>
@@ -490,7 +496,7 @@ export function ObraCard({
               </>
             )}
           </div>
-          {midias.length > 1 && (
+          {midias.length > 1 && !modoGrade && (
             <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
               {midias.map((midia, index) => (
                 <button
