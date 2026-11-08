@@ -652,3 +652,134 @@ body.change-form #content-main .inline-group { margin-top: 22px; border-radius: 
   body.change-form #content-main .form-row { padding: 14px 15px; }
   body.change-form #content-main .submit-row { bottom: 7px; }
 }
+
+
+/* ===== Correção de contraste e acabamento dos controles =====
+   Estas regras ficam por último para vencer os estilos genéricos do Django Admin
+   e os estados :link/:visited do navegador. */
+.portfolio-task:link,
+.portfolio-task:visited,
+.portfolio-task:hover,
+.portfolio-task:focus,
+.portfolio-library-card:link,
+.portfolio-library-card:visited,
+.portfolio-library-card:hover,
+.portfolio-library-card:focus {
+  color: #edf7fc !important;
+}
+.portfolio-task-text strong,
+.portfolio-task-text small,
+.portfolio-library-card strong,
+.portfolio-library-card small {
+  display: block;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.portfolio-task-text strong,
+.portfolio-library-card strong { color: #f4f9fc !important; }
+.portfolio-task-text small,
+.portfolio-library-card small { color: #bfd0dc !important; }
+.portfolio-welcome .portfolio-welcome-link:link,
+.portfolio-welcome .portfolio-welcome-link:visited,
+.portfolio-welcome .portfolio-welcome-link:hover,
+.portfolio-welcome .portfolio-welcome-link:focus {
+  color: #071a28 !important;
+  background: #a6def8 !important;
+  text-decoration: none !important;
+}
+.portfolio-stat a:link,
+.portfolio-stat a:visited,
+.portfolio-card-link {
+  color: #a6def8 !important;
+}
+.portfolio-task:focus-visible,
+.portfolio-library-card:focus-visible,
+.portfolio-welcome-link:focus-visible {
+  outline: 3px solid #f4c98a !important;
+  outline-offset: 3px;
+}
+
+/* Controles nativos do Django: contraste explícito em todos os estados. */
+body.change-form #content-main .submit-row input[type="submit"],
+body.change-form #content-main .submit-row input[type="button"],
+body.change-form #content-main .submit-row button,
+body.change-form #content-main .submit-row a.button,
+body.change-list #content-main input[type="submit"],
+body.change-list #content-main button,
+body.change-list #content-main a.button,
+body.change-form #content-main .object-tools a,
+body.change-list #content-main .object-tools a {
+  color: #071a28 !important;
+  background: #a6def8 !important;
+  border: 1px solid #a6def8 !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-weight: 750 !important;
+}
+body.change-form #content-main .submit-row input[type="submit"]:hover,
+body.change-form #content-main .submit-row button:hover,
+body.change-list #content-main input[type="submit"]:hover,
+body.change-list #content-main button:hover,
+body.change-form #content-main .object-tools a:hover,
+body.change-list #content-main .object-tools a:hover {
+  color: #061521 !important;
+  background: #c5ebfc !important;
+  border-color: #c5ebfc !important;
+}
+body.change-form #content-main .submit-row .deletelink,
+body.change-form #content-main .submit-row a.deletelink {
+  color: #fff1f1 !important;
+  background: #74343d !important;
+  border-color: #9c4b57 !important;
+}
+body.change-form #content-main .submit-row .deletelink:hover {
+  color: #fff !important;
+  background: #91414c !important;
+}
+
+/* Formulários: superfície, campos e rótulos consistentes também em telas menores. */
+body.change-form #content-main fieldset.module {
+  background: linear-gradient(145deg, #102638, #0c2030) !important;
+  border: 1px solid #35566e !important;
+}
+body.change-form #content-main fieldset.module h2 {
+  color: #f0f7fc !important;
+}
+body.change-form #content-main .aligned label,
+body.change-form #content-main .form-row label {
+  color: #eaf3fa !important;
+}
+body.change-form #content-main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body.change-form #content-main select,
+body.change-form #content-main textarea {
+  color: #f3f8fc !important;
+  caret-color: #a6def8;
+  background: #071a28 !important;
+  border: 1px solid #496b82 !important;
+}
+body.change-form #content-main input::placeholder,
+body.change-form #content-main textarea::placeholder {
+  color: #8fa8b9 !important;
+  opacity: 1;
+}
+body.change-form #content-main input:focus,
+body.change-form #content-main select:focus,
+body.change-form #content-main textarea:focus {
+  border-color: #a6def8 !important;
+  box-shadow: 0 0 0 3px rgba(166, 222, 248, .2) !important;
+}
+body.change-form #content-main .help,
+body.change-form #content-main p.help,
+body.change-form #content-main .description {
+  color: #b5c9d7 !important;
+}
+body.change-form #content-main .submit-row {
+  background: rgba(7, 21, 34, .98) !important;
+}
+@media (max-width: 767px) {
+  body.change-form #content-main .submit-row input[type="submit"],
+  body.change-form #content-main .submit-row button {
+    min-height: 46px;
+  }
+}
