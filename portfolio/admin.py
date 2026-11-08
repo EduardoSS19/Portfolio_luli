@@ -381,23 +381,22 @@ class WorkAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Comece por aqui", {
             "fields": ("category", "title", "description"),
-            "description": "Identifique a obra e conte um pouco sobre ela. Os campos técnicos são opcionais.",
+            "description": "Identifique a obra e conte um pouco sobre ela. Os demais detalhes são opcionais.",
         }),
-        ("Ficha técnica", {
-            "fields": ("technique", "material", "support", "year", ("height", "width", "depth", "dimension_unit")),
-            "description": "Preencha apenas o que fizer sentido para esta obra. Informações vazias não aparecem no site.",
-        }),
-        ("Informações comerciais", {
-            "fields": ("price", "currency", "availability"),
-        }),
-        ("Série e produção", {
-            "fields": ("series", "edition", "print_run", "signed", "creation_location", "condition", "exhibitions"),
-            "description": "Dados complementares de autoria, produção e histórico. Você pode deixar tudo em branco.",
-        }),
-        ("Observações adicionais", {"fields": ("detail",)}),
         ("Imagens da obra", {
             "fields": ("image", "novas_imagens"),
             "description": "A primeira imagem é a capa. Adicione outras fotos para mostrar detalhes e ângulos diferentes.",
+        }),
+        ("Detalhes opcionais da obra", {
+            "fields": (
+                "technique", "material", "support", "year",
+                ("height", "width", "depth", "dimension_unit"),
+                "price", "currency", "availability",
+                "series", "edition", "print_run", "signed",
+                "creation_location", "condition", "exhibitions", "detail",
+            ),
+            "classes": ("collapse",),
+            "description": "Abra somente se quiser informar ficha técnica, preço, série, produção ou observações. Campos em branco não aparecem no site.",
         }),
         ("Publicação", {"fields": ("position", "is_active", "preview_site")}),
         ("Avançado", {"fields": ("image_url",), "classes": ("collapse",)}),

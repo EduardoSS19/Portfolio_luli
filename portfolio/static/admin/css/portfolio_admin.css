@@ -679,3 +679,57 @@ body.change-form #content-main .work-editor-fields fieldset.module:focus-within 
   .work-editor-intro__steps { justify-content:flex-start; }
   .work-editor-intro__steps span { font-size:.68rem; }
 }
+
+
+/* Correção de contraste dos três botões de ação do formulário Django. */
+body.change-form #content-main .submit-row input[type="submit"],
+body.change-form #content-main .submit-row input[type="button"],
+body.change-form #content-main .submit-row button,
+body.change-form #content-main .submit-row a:not(.deletelink) {
+  color: #f7fbff !important;
+  -webkit-text-fill-color: #f7fbff !important;
+  text-shadow: none !important;
+  font-size: .84rem !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+  opacity: 1 !important;
+}
+body.change-form #content-main .submit-row input[type="submit"],
+body.change-form #content-main .submit-row input[type="button"],
+body.change-form #content-main .submit-row button {
+  min-width: 118px;
+  background: #17617d !important;
+  border: 1px solid #3986a2 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+body.change-form #content-main .submit-row input[type="submit"]:hover,
+body.change-form #content-main .submit-row input[type="button"]:hover,
+body.change-form #content-main .submit-row button:hover {
+  background: #237a98 !important;
+}
+body.change-form #content-main .submit-row .deletelink {
+  color: #ffdce0 !important;
+  -webkit-text-fill-color: #ffdce0 !important;
+  background: #552a35 !important;
+  border: 1px solid #965261 !important;
+  font-size: .82rem !important;
+  font-weight: 750 !important;
+  text-indent: 0 !important;
+  opacity: 1 !important;
+}
+body.change-form #content-main fieldset.module.collapse > h2 {
+  cursor: pointer;
+  user-select: none;
+}
+body.change-form #content-main fieldset.module.collapse > h2:hover {
+  color: #a9dfd4 !important;
+}
+body.change-form #content-main fieldset.module.collapsed {
+  margin-bottom: 14px;
+}
+body.change-form #content-main fieldset.module.collapsed > h2 {
+  padding-bottom: 19px;
+}
