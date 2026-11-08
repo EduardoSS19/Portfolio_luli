@@ -27,7 +27,7 @@ export function GaleriaGrade({ categorias }) {
           modoGrade
           indiceGrade={indice}
           estiloGrade={{
-            '--grade-delay': `${(indice % 3) * 95}ms`,
+            '--grade-delay': `${(indice % 3) * 45}ms`,
             '--grade-offset': indice % 2 === 0 ? '-12px' : '12px',
           }}
         />
