@@ -137,16 +137,9 @@ export default function App() {
         categoriaAtiva={secaoAtiva}
         animando={animando}
         aoSelecionar={selecionarCategoria}
+        modoGaleria={modoGaleria}
+        aoTrocarModo={setModoGaleria}
       />
-      <div className="galeria-global-controles" role="group" aria-label="Modo de visualização de todas as obras">
-        <span className="galeria-global-legenda">COMO VOCÊ PREFERE EXPLORAR?</span>
-        <button type="button" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => setModoGaleria('lista')}>
-          <span aria-hidden="true">☷</span> Lista
-        </button>
-        <button type="button" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => setModoGaleria('grade')}>
-          <span aria-hidden="true">▦</span> Grade
-        </button>
-      </div>
       <Sobre perfil={sobre} />
       {modoGaleria === 'grade' ? (
         <GaleriaGrade categorias={categorias} />
