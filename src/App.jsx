@@ -40,7 +40,7 @@ export default function App() {
     ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
   ], [categorias, referencias.length])
-  const secaoAtiva = useSecaoAtiva(secoesNav)
+  const secaoAtiva = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
   const anteriorRef = useRef(secaoAtiva)
