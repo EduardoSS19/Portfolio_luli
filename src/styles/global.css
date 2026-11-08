@@ -2162,15 +2162,17 @@ nav button[class*="anim-video"],
 }
 
 
-/* Carrosséis na grade: preservar a imagem limpa e neutralizar o acento azul do índice.
-   O ajuste é restrito aos cards com mais de uma mídia na grade editorial. */
-.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel::after {
-  opacity:  0;
+/* Mídias da grade: a película editorial é mantida nas visualizações em lista,
+   mas não deve escurecer miniaturas de imagem, carrossel ou vídeo na grade. */
+.galeria-grade-global .obra.modo-grade .obra-imagem::after {
+  opacity: 0;
 }
-.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel .carrossel-indice {
+
+/* O índice do carrossel permanece discreto, sem o acento azul sobre a imagem. */
+.galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice {
   border-color: rgba(255,255,255,.18);
   background: rgba(5,20,33,.48);
 }
-.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel .carrossel-indice span {
+.galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice span {
   color: rgba(255,255,255,.72);
 }
