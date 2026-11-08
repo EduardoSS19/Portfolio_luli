@@ -165,8 +165,6 @@ nav button.anim-inicio,
   border-top:1px solid rgba(255,255,255,0.15);
 }
 
-.dica{ font-size:0.8rem; color:rgba(234,242,251,0.4); margin-top:0.75rem; }
-
 @media (max-width: 760px){
   .obra, .obra.invertido{ grid-template-columns:1fr; }
   .obra.invertido .obra-imagem, .obra.invertido .obra-texto{ order:initial; }
