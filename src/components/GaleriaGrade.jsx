@@ -1,7 +1,7 @@
 import { ObraCard } from './ObraCard.jsx'
 
 function tipoDeArte(titulo, chave) {
-  const nome = `${titulo} ${chave}`.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase()
+  const nome = `${titulo} ${chave}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
   if (nome.includes('glitch')) return 'glitch'
   if (nome.includes('ceram')) return 'ceramica'
   if (nome.includes('gravura') || nome.includes('escultura')) return 'gravura'
