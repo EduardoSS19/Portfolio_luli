@@ -496,8 +496,8 @@ export function ObraCard({
               </>
             )}
           </div>
-          {midias.length > 1 && !modoGrade && (
-            <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
+          {midias.length > 1 && (
+            <div className={`carrossel-miniaturas ${modoGrade ? 'carrossel-miniaturas-grade' : ''}`} role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
               {midias.map((midia, index) => (
                 <button
                   type="button"
