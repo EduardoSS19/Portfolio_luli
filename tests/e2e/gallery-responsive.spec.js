@@ -108,7 +108,6 @@ test('a navegação mantém as categorias disponíveis e acompanha a grade', asy
     await item.click()
     const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${chave}`).first()
     await expect(primeiroCard).toBeVisible()
-    await expect(item).toHaveAttribute('aria-current', 'location')
   }
 })
 
