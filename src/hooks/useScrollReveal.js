@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 // Mantém a visibilidade sincronizada com o viewport. Ao sair, remove a classe;
 // ao retornar, adiciona novamente e reinicia a animação de entrada.
-export function useScrollReveal(threshold = 0) {
+export function useScrollReveal(threshold = 0, rootMargin = '0px 0px -8% 0px') {
   const ref = useRef(null)
   const [visivel, setVisivel] = useState(false)
 
@@ -12,14 +12,14 @@ export function useScrollReveal(threshold = 0) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setVisivel(entry.isIntersecting)
+        setVisivel(entry.isIntersecting && entry.intersectionRatio >= threshold)
       },
-      { threshold, rootMargin: '0px 0px -8% 0px' }
+      { threshold, rootMargin }
     )
 
     observer.observe(elemento)
     return () => observer.disconnect()
-  }, [threshold])
+  }, [threshold, rootMargin])
 
   return [ref, visivel]
 }

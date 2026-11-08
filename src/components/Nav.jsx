@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const categoriaAtual = categorias.find(cat => cat.titulo === categoriaAtiva)
   const animacaoAtual = categoriaAtual && animando === categoriaAtual.chave
@@ -37,6 +37,14 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar }) {
             {cat.titulo}
           </button>
         ))}
+      </div>
+      <div className="nav-gallery-switch" role="group" aria-label="Visualização das obras">
+        <button type="button" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => aoTrocarModo('lista')}>
+          <span aria-hidden="true">☷</span><span>Lista</span>
+        </button>
+        <button type="button" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => aoTrocarModo('grade')}>
+          <span aria-hidden="true">▦</span><span>Grade</span>
+        </button>
       </div>
       <button
         type="button"
