@@ -1,0 +1,427 @@
+/* Entradas com movimento inspirado na matéria de cada linguagem artística. */
+.secao-cabecalho.arte-ceramica,
+.secao-cabecalho.arte-gravura,
+.secao-cabecalho.arte-desenho,
+.secao-cabecalho.arte-glitch,
+.secao-cabecalho.arte-fotografia,
+.secao-cabecalho.arte-videoarte,
+.secao-cabecalho.arte-obra,
+.sobre-entrada,
+.referencia-item,
+.secao-contato{
+  opacity:0;
+  transition:opacity 0.75s ease, transform 0.8s cubic-bezier(.2,.7,.2,1), clip-path 0.9s cubic-bezier(.65,0,.35,1);
+}
+.secao-cabecalho.arte-ceramica,
+.sobre-entrada{ transform:translateY(28px) scale(0.99); }
+.secao-cabecalho.arte-ceramica.visivel,
+.sobre-entrada.visivel{ opacity:1; transform:translateY(0) scale(1); }
+
+.secao-cabecalho.arte-gravura{
+  transform:translateY(12px) scale(0.985);
+  clip-path:inset(0 0 100% 0);
+}
+.secao-cabecalho.arte-gravura.visivel,
+.secao-cabecalho.arte-gravura.visivel{ opacity:1; transform:translateY(0) scale(1); clip-path:inset(0); }
+
+.secao-cabecalho.arte-desenho{
+  transform:translateX(-12px);
+  clip-path:inset(0 100% 0 0);
+}
+.secao-cabecalho.arte-desenho.visivel{ opacity:1; transform:translateX(0); clip-path:inset(0); }
+
+.secao-cabecalho.arte-glitch{
+  transform:translateX(-8px);
+  clip-path:inset(0 100% 0 0);
+}
+.secao-cabecalho.arte-glitch.visivel{ opacity:1; transform:translateX(0); clip-path:inset(0); }
+.secao-cabecalho.arte-obra.visivel{ opacity:1; transform:translateY(0); }
+.secao-cabecalho.arte-obra{ transform:translateY(18px); }
+
+.secao-cabecalho{ position:relative; }
+.secao-cabecalho .secao-indice,
+.secao-cabecalho h2,
+.secao-cabecalho .secao-contagem{
+  transition:opacity 0.55s ease, transform 0.65s cubic-bezier(.2,.7,.2,1);
+}
+.secao-cabecalho:not(.visivel) h2{ transform:translateY(8px); }
+.secao-cabecalho:not(.visivel) .secao-contagem{ opacity:0; transform:translateX(8px); }
+.secao-cabecalho.visivel h2,
+.secao-cabecalho.visivel .secao-contagem{ opacity:1; transform:translate(0); }
+.secao-cabecalho.arte-glitch.visivel h2{ animation:navGlitch 0.72s steps(2,end) 0.12s both; }
+.secao-cabecalho-referencias,
+.secao-contato .secao-cabecalho{ opacity:1; transform:none; }
+
+.obra-imagem img{ transition:transform 1.1s cubic-bezier(.2,.7,.2,1), filter 0.7s ease; }
+.obra.arte-ceramica.visivel .obra-imagem .obra-zoom-trigger img{ animation:ceramicaAmassada 0.9s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes ceramicaAmassada{
+  0%{ opacity:.55; transform:scale(.88) translateY(14px); }
+  58%{ opacity:1; transform:scale(1.025) translateY(-2px); }
+  78%{ transform:scale(.995) translateY(1px); }
+  100%{ transform:scale(1) translateY(0); }
+}
+.obra.arte-gravura .obra-imagem .obra-zoom-trigger img{ filter:contrast(1.04) saturate(.92); }
+.obra.arte-gravura.visivel .obra-imagem .obra-zoom-trigger img{ animation:gravuraImpressa 0.88s cubic-bezier(.22,.7,.2,1) both; }
+@keyframes gravuraImpressa{
+  0%{ opacity:.45; transform:translateY(-16px) scale(1.025); clip-path:inset(0 0 100% 0); }
+  38%{ opacity:1; clip-path:inset(0 0 58% 0); }
+  68%{ transform:translateY(2px) scale(1); clip-path:inset(0); }
+  82%{ transform:translateY(-1px); }
+  100%{ transform:translateY(0); clip-path:inset(0); }
+}
+.obra.arte-desenho.visivel .obra-imagem .obra-zoom-trigger img{ animation:desenhoEsbocado 1s cubic-bezier(.65,0,.35,1) both; }
+@keyframes desenhoEsbocado{
+  0%{ opacity:.35; clip-path:inset(0 100% 0 0); transform:translateX(-8px); }
+  68%{ opacity:.85; clip-path:inset(0); transform:translateX(1px); }
+  100%{ opacity:1; clip-path:inset(0); transform:translateX(0); }
+}
+.obra.arte-glitch .obra-imagem .obra-zoom-trigger img{ clip-path:inset(0); }
+.obra.arte-glitch.visivel .obra-imagem .obra-zoom-trigger img{ animation:glitchConstrucao 0.9s steps(1,end) both; }
+@keyframes glitchConstrucao{
+  0%{ opacity:1; clip-path:inset(0 100% 0 0); transform:translateX(-8px); }
+  12%{ clip-path:polygon(0 0,18% 0,18% 14%,0 14%,0 34%,52% 34%,52% 49%,0 49%,0 71%,31% 71%,31% 84%,0 84%,0 100%,100% 100%,100% 0); transform:translateX(5px); }
+  25%{ clip-path:polygon(0 0,42% 0,42% 13%,12% 13%,12% 28%,82% 28%,82% 42%,0 42%,0 64%,58% 64%,58% 78%,18% 78%,18% 91%,100% 91%,100% 100%,0 100%); transform:translateX(-5px); }
+  39%{ clip-path:polygon(0 0,76% 0,76% 12%,24% 12%,24% 24%,100% 24%,100% 38%,0 38%,0 54%,68% 54%,68% 68%,12% 68%,12% 84%,92% 84%,92% 100%,0 100%); transform:translateX(3px); }
+  54%{ clip-path:polygon(0 0,100% 0,100% 17%,18% 17%,18% 30%,87% 30%,87% 44%,0 44%,0 59%,100% 59%,100% 72%,29% 72%,29% 88%,100% 88%,100% 100%,0 100%); transform:translateX(-2px); }
+  70%{ clip-path:inset(0); transform:translateX(2px); }
+  84%{ transform:translateX(-1px); }
+  100%{ clip-path:inset(0); transform:translateX(0); }
+}
+.obra.arte-glitch.visivel .obra-texto h3{ animation:glitchTitulo 0.62s steps(2,end) both; }
+@keyframes glitchTitulo{
+  0%,100%{ transform:translateX(0); text-shadow:none; }
+  24%{ transform:translateX(3px); text-shadow:-3px 0 rgba(68,226,255,.8),3px 0 rgba(255,73,199,.65); }
+  48%{ transform:translateX(-2px); text-shadow:2px 0 rgba(68,226,255,.7),-2px 0 rgba(255,73,199,.7); }
+  72%{ transform:translateX(1px); text-shadow:-1px 0 rgba(68,226,255,.6),1px 0 rgba(255,73,199,.6); }
+}
+.secao-cabecalho-referencias,
+.secao-contato .secao-cabecalho{ opacity:0; transform:translateY(14px); }
+.secao-cabecalho-referencias.visivel,
+.secao-contato.visivel .secao-cabecalho{ opacity:1; transform:translateY(0); }
+.secao-contato.visivel{ opacity:1; transform:translateY(0); }
+.referencia-item{
+  transform:translateY(18px);
+  transition-delay:calc(var(--indice-referencia, 0) * 90ms);
+}
+.referencia-item.visivel{ opacity:1; transform:translateY(0); }
+.secao-contato .form-contato,
+.secao-contato .contato-chamada,
+.secao-contato .contato-indisponivel{
+  opacity:0;
+  transform:translateY(16px);
+  transition:opacity 0.7s ease 0.14s, transform 0.7s cubic-bezier(.2,.7,.2,1) 0.14s;
+}
+.secao-contato.visivel .form-contato,
+.secao-contato.visivel .contato-chamada,
+.secao-contato.visivel .contato-indisponivel{ opacity:1; transform:translateY(0); }
+.hero-kicker,.hero h1,.hero p,.hero-linha{ animation:heroEntrada 0.9s cubic-bezier(.2,.7,.2,1) both; }
+.hero h1{ animation-delay:0.1s; }
+.hero p{ animation-delay:0.2s; }
+.hero-linha{ animation-delay:0.32s; transform-origin:top; }
+@keyframes heroEntrada{
+  from{ opacity:0; transform:translateY(15px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .secao-cabecalho.arte-ceramica,
+  .secao-cabecalho.arte-gravura,
+  .secao-cabecalho.arte-desenho,
+  .secao-cabecalho.arte-glitch,
+  .secao-cabecalho.arte-fotografia,
+  .secao-cabecalho.arte-videoarte,
+  .sobre-entrada,
+  .referencia-item,
+  .secao-contato,
+  .secao-cabecalho-referencias,
+  .secao-contato .form-contato,
+  .secao-contato .contato-chamada,
+  .secao-contato .contato-indisponivel{
+    opacity:1 !important;
+    clip-path:none !important;
+    filter:none !important;
+    transform:none !important;
+    animation:none !important;
+  }
+  .obra.arte-glitch .glitch-camada{ display:none; }
+  .obra.arte-ceramica .detalhe-wrapper.aberto .detalhe,
+  .obra.arte-gravura .detalhe-wrapper.aberto .detalhe,
+  .obra.arte-desenho .detalhe-wrapper.aberto .detalhe,
+  .obra.arte-glitch .detalhe-wrapper.aberto .detalhe{ animation:none; }
+}
+
+
+/* ===== Card em foco: destaque mais claro quando está no centro da tela ===== */
+/* Leve de propósito: só anima opacity e transform (rodam na GPU), sem blur nem filter. */
+.obra,.obra.invertido{
+  position:relative;
+  contain:layout style;
+  transition:border-color 0.5s ease;
+}
+.obra::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(130deg,rgba(40,100,150,0.55),rgba(13,47,77,0.15));
+  box-shadow:inset 0 0 0 1px rgba(147,200,242,0.25);
+  opacity:0;
+  transition:opacity 0.5s ease;
+}
+.obra > *{ position:relative; z-index:1; }
+.obra-imagem::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(5,20,33,0.10),rgba(5,20,33,0.38));
+  opacity:1;
+  transition:opacity 0.5s ease;
+}
+.obra:not(.em-foco):not(.foco-ativo) .obra-texto h3{ color:rgba(239,247,255,0.82); }
+
+.obra.em-foco,
+.obra.foco-ativo,
+.obra.invertido.em-foco,
+.obra.invertido.foco-ativo{
+  border-color:rgba(160,212,250,0.62);
+}
+.obra.em-foco::before,
+.obra.foco-ativo::before{ opacity:1; }
+.obra.em-foco .obra-imagem::after,
+.obra.foco-ativo .obra-imagem::after{ opacity:0; }
+.obra.em-foco .obra-texto h3,
+.obra.foco-ativo .obra-texto h3{ color:#fff; }
+.obra.em-foco .obra-texto p,
+.obra.foco-ativo .obra-texto p{ color:rgba(239,247,255,0.92); }
+.obra.em-foco .categoria-legenda,
+.obra.foco-ativo .categoria-legenda{ color:#b8defa; }
+
+/* ===== Fundo: um quadro por painel, com entrada suave (antes eram dezenas de camadas) ===== */
+.fundo-fantasma-frame{
+  filter:none;
+  transition:none;
+  will-change:opacity, transform;
+}
+.fundo-fantasma-frame.ativo{
+  animation:fundoEntrada 1.1s ease both, fundoDeriva 6s ease-out both;
+}
+.fundo-fantasma-frame.saindo{
+  animation:fundoSaida 1.1s ease both;
+}
+@keyframes fundoEntrada{ from{ opacity:0; } to{ opacity:0.3; } }
+@keyframes fundoSaida{ from{ opacity:0.3; } to{ opacity:0; } }
+@keyframes fundoDeriva{ from{ transform:scale(1.035); } to{ transform:scale(1); } }
+
+/* ===== Tela de carregamento ===== */
+.carregando{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1.1rem;
+  background:linear-gradient(160deg,#061522 0%,#0a233a 58%,#102f4c 100%);
+  color:var(--texto);
+}
+.carregando-anel{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:2px solid rgba(147,200,242,0.2);
+  border-top-color:#9fd0f6;
+  animation:carregandoGira 0.9s linear infinite;
+}
+.carregando-texto{
+  font-size:0.78rem;
+  letter-spacing:0.32em;
+  text-transform:uppercase;
+  color:rgba(184,222,250,0.8);
+  animation:carregandoPulsa 1.6s ease-in-out infinite;
+}
+@keyframes carregandoGira{ to{ transform:rotate(360deg); } }
+@keyframes carregandoPulsa{ 50%{ opacity:0.45; } }
+@media (prefers-reduced-motion: reduce){
+  .carregando-anel,.carregando-texto{ animation:none; }
+}
+
+/* ===== Zoom da imagem: transição suave entre a miniatura e a tela cheia ===== */
+.obra-focus-imagem{
+  transform-origin:center;
+  will-change:transform, clip-path;
+}
+.obra-focus::backdrop{
+  animation-duration:0.5s;
+  transition-duration:0.46s;
+}
+
+/* ===== Fotografia: a imagem se revela como numa câmara escura (abertura de íris) ===== */
+.secao-cabecalho.arte-fotografia{ transform:none; clip-path:inset(50% 0 50% 0); }
+.secao-cabecalho.arte-fotografia.visivel{ opacity:1; clip-path:inset(0); }
+.obra.arte-fotografia.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:fotoRevelada 1.6s cubic-bezier(.22,.7,.2,1) backwards;
+}
+@keyframes fotoRevelada{
+  0%{ opacity:0; transform:scale(1.14); clip-path:circle(0% at 50% 50%); }
+  30%{ opacity:1; }
+  100%{ opacity:1; transform:scale(1); clip-path:circle(75% at 50% 50%); }
+}
+.obra.arte-fotografia.visivel .obra-texto h3{ animation:fotoTitulo 1.2s cubic-bezier(.22,.7,.2,1) 0.35s backwards; }
+@keyframes fotoTitulo{
+  from{ opacity:0; transform:translateY(10px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* ===== Videoarte: a imagem "liga" como um monitor antigo, com linhas de varredura ===== */
+.secao-cabecalho.arte-videoarte{ transform:none; clip-path:inset(49% 0 49% 0); }
+.secao-cabecalho.arte-videoarte.visivel{ opacity:1; clip-path:inset(0); }
+.obra.arte-videoarte .obra-imagem::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,0.16) 0 1px,transparent 1px 3px);
+  opacity:0.5;
+}
+.obra.arte-videoarte.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:videoLigada 1.1s cubic-bezier(.65,0,.35,1) backwards;
+}
+@keyframes videoLigada{
+  0%{ opacity:0; clip-path:inset(49.6% 0 49.6% 0); transform:scaleX(.92); }
+  18%{ opacity:1; clip-path:inset(49.6% 0 49.6% 0); transform:scaleX(1); }
+  62%{ clip-path:inset(0 0 0 0); transform:translateX(0); }
+  72%{ transform:translateX(3px); }
+  82%{ transform:translateX(-2px); }
+  100%{ opacity:1; clip-path:inset(0 0 0 0); transform:translateX(0); }
+}
+/* "REC" piscando só no card que está em foco (um único elemento animado por vez) */
+.obra.arte-videoarte .categoria-legenda::before{
+  content:"● ";
+  color:#ff5468;
+  opacity:0.55;
+}
+.obra.arte-videoarte.em-foco .categoria-legenda::before{ animation:videoRec 1.2s steps(2,end) infinite; }
+@keyframes videoRec{ 50%{ opacity:0; } }
+
+/* Botões do menu ao entrar na seção */
+nav button[class*="anim-foto"],
+.site-nav .nav-mobile-context strong[class*="anim-foto"]{ animation:navFoto 0.8s ease; }
+@keyframes navFoto{
+  0%{ transform:scale(.96); }
+  30%{ transform:scale(1.07); box-shadow:0 0 22px 6px rgba(255,255,255,0.5); }
+  100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(255,255,255,0); }
+}
+nav button[class*="anim-video"],
+.site-nav .nav-mobile-context strong[class*="anim-video"]{ animation:navVideo 0.7s cubic-bezier(.65,0,.35,1); }
+@keyframes navVideo{
+  0%{ clip-path:inset(48% 0 48% 0); opacity:.6; }
+  60%{ clip-path:inset(0); opacity:1; }
+  100%{ clip-path:inset(0); }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .obra.arte-fotografia .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-videoarte .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-fotografia .obra-texto h3,
+  .obra.arte-videoarte.em-foco .categoria-legenda::before{ animation:none !important; }
+}
+
+/* ===== Modo leve: navegadores antigos (Safari < 16) ou ?leve no endereço ===== */
+.obra-focus:not([open]){ display:none; }
+.modo-leve .fundo-fantasma-painel.painel-1,
+.modo-leve .fundo-fantasma-painel.painel-3,
+.modo-leve .fundo-fantasma-frame.saindo{ display:none; }
+.modo-leve .fundo-fantasma-painel.painel-2{ display:block; left:0; width:100%; }
+.modo-leve .fundo-fantasma-frame{
+  -webkit-mask-image:none;
+  mask-image:none;
+  will-change:auto;
+  animation:none !important;
+  opacity:0.24;
+  transform:none;
+}
+.modo-leve .obra .obra-imagem .obra-zoom-trigger img,
+.modo-leve .obra .obra-texto h3,
+.modo-leve .secao-cabecalho h2{ animation:none !important; }
+.modo-leve .secao-cabecalho,
+.modo-leve .sobre-entrada,
+.modo-leve .referencia-item,
+.modo-leve .secao-contato{
+  clip-path:none !important;
+  transform:none !important;
+  transition:opacity 0.45s ease !important;
+}
+.modo-leve .obra,
+.modo-leve .obra::before,
+.modo-leve .obra-imagem::after{ transition:none; }
+.modo-leve .obra-imagem img{ transition:none; }
+.modo-leve .obra-focus{ z-index:1000; background:rgba(3,14,24,0.94); }
+
+
+/* Indicador visível na prévia privada do CMS. */
+.preview-mode-banner {
+  position: relative;
+  z-index: 30;
+  padding: 10px 18px;
+  background: #292720;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+
+/* ===== Correções de movimento e proporção ===== */
+/* Miniaturas de vídeo usam .obra-video-trigger (não .obra-zoom-trigger). */
+.obra.visivel .obra-video-trigger img {
+  animation: videoLigada 1.1s cubic-bezier(.65,0,.35,1) both;
+}
+.obra .obra-video-trigger img {
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .obra .obra-video-trigger img {
+    animation: none !important;
+  }
+}
+
+/* A biografia não deve determinar a altura da fotografia. */
+.sobre-secao .obra,
+.sobre-secao .obra.invertido {
+  grid-template-columns: minmax(240px, .82fr) minmax(0, 1.18fr);
+  align-items: center;
+}
+.sobre-secao .obra-imagem {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4 / 5;
+  max-height: 620px;
+  align-self: center;
+}
+.sobre-secao .obra-imagem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sobre-secao .obra-texto {
+  min-width: 0;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+}
+@media (max-width: 760px) {
+  .sobre-secao .obra,
+  .sobre-secao .obra.invertido {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sobre-secao .obra-imagem {
+    width: min(100%, 520px);
+    max-height: none;
+    margin-inline: auto;
+  }
+  .sobre-secao .obra-texto {
+    padding: 1.5rem clamp(1.25rem, 5vw, 2rem) 2rem;
+  }
+}
