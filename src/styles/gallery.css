@@ -846,3 +846,12 @@
     pointer-events: none;
   }
 }
+
+
+/* DIAGNÓSTICO: ocultar temporariamente videoarte, glitch e obras com vídeo na grade global. */
+.galeria-grade-global .obras-lista.modo-grade > .obra.arte-glitch,
+.galeria-grade-global .obras-lista.modo-grade > .obra.arte-videoarte,
+.galeria-grade-global .obras-lista.modo-grade > .obra.tem-video,
+.galeria-grade-global .obras-lista.modo-grade > .obra.midia-video {
+  display: none !important;
+}
