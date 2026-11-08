@@ -93,9 +93,6 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
 test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
   await abrirPortfolio(page)
   const menu = page.locator('.nav-mobile-toggle')
-  if (await menu.isVisible() && await menu.getAttribute('aria-expanded') !== 'true') {
-    await menu.click()
-  }
   const categoriasTeste = [
     ['Glitch Art', 'glitch-art'],
     ['Vídeos', 'videos'],
@@ -103,6 +100,11 @@ test('a navegação mantém as categorias disponíveis e acompanha a grade', asy
     ['Desenhos', 'desenhos'],
   ]
   for (const [titulo, chave] of categoriasTeste) {
+    // Em telas móveis, selecionar uma categoria fecha o menu por design.
+    // Reabre antes de cada seleção; em desktop os links já ficam expostos.
+    if (await menu.isVisible() && await menu.getAttribute('aria-expanded') !== 'true') {
+      await menu.click()
+    }
     const item = page.locator('.nav-links button').filter({ hasText: titulo })
     await expect(item).toBeVisible()
     await item.click()
