@@ -817,33 +817,53 @@
 
 
 
-/* iOS/Safari e outros navegadores touch: não animar transform/clip-path em
-   imagens comuns dentro de um card que também está sendo transformado.
-   Essa combinação de camadas compositadas pode reduzir a pintura a um ponto.
-   O card mantém uma entrada por opacidade; vídeos e glitch preservam seus efeitos. */
-@keyframes gradeEntradaMobile {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* Safari/iOS: não encadear height:100% até um pai dimensionado por aspect-ratio.
+   Cada camada ocupa a caixa por posicionamento (inset), evitando percentuais de altura
+   dependentes do cálculo intrínseco do WebKit. As camadas glitch continuam independentes. */
 @media (hover: none), (pointer: coarse) {
-  .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch),
-  .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch).visivel {
+  .galeria-grade-global .obra.modo-grade:not(.midia-video),
+  .galeria-grade-global .obra.modo-grade:not(.midia-video).visivel {
     opacity: 1;
     transform: none !important;
-    animation: none !important;
     transition: none !important;
   }
 
-  .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch).visivel {
-    animation: gradeEntradaMobile .42s ease var(--grade-delay, 0ms) both !important;
-  }
-
-  .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch) .obra-imagem .obra-zoom-trigger img {
-    display: block !important;
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) .obra-galeria,
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) .obra-imagem {
     position: absolute !important;
     inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) .obra-zoom-trigger {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) .obra-zoom-trigger img {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
     width: 100% !important;
     height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
     max-width: 100% !important;
     max-height: 100% !important;
     object-fit: cover !important;
@@ -853,5 +873,10 @@
     clip-path: none !important;
     -webkit-clip-path: none !important;
     animation: none !important;
+  }
+
+  /* A arte glitch usa camadas próprias; não as removemos nem animamos aqui. */
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) .glitch-camada {
+    pointer-events: none;
   }
 }
