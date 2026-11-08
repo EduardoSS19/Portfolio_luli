@@ -1,0 +1,6 @@
+/* Ponto de entrada dos estilos, em ordem de dependência da cascata. */
+@import './base.css';
+@import './sections.css';
+@import './visual-system.css';
+@import './motion.css';
+@import './gallery.css';
