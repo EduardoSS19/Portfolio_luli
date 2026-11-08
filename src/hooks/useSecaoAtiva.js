@@ -47,7 +47,7 @@ export function useSecaoAtiva(categorias, modoGaleria = 'lista') {
           if (titulo) setAtiva(titulo)
         }
       },
-      { threshold: 0, rootMargin: '-45% 0px -45% 0px' }
+      { threshold: 0, rootMargin: '-160px 0px -160px 0px' }
     )
 
     elementos.forEach((_, elemento) => observer.observe(elemento))
