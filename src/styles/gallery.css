@@ -530,17 +530,10 @@
   }
 }
 
-/* Na grade, priorizamos rolagem fluida: os efeitos artísticos continuam na lista,
-   mas os vídeos usam somente a transição leve do próprio card. */
-.galeria-grade-global .obra.modo-grade.midia-video,
-.galeria-grade-global .obra.modo-grade.midia-video.visivel {
-  animation: none !important;
-}
-.galeria-grade-global .obra.modo-grade.midia-video .obra-video-trigger,
-.galeria-grade-global .obra.modo-grade.midia-video .obra-video-trigger img,
-.galeria-grade-global .obra.modo-grade.midia-video .glitch-camada {
-  animation: none !important;
-  transition: none !important;
+/* Vídeos na grade: preserva a animação de entrada da linguagem audiovisual.
+   Movimento reduzido continua sendo respeitado pelo bloco global de acessibilidade. */
+.galeria-grade-global .obra.modo-grade.midia-video.visivel .obra-video-trigger img {
+  animation: videoLigada 1.1s cubic-bezier(.65,0,.35,1) both;
 }
 @media (prefers-reduced-motion:reduce) {
   .obra-focus.obra-focus-video-play > span:first-child { transition: none; }
@@ -552,38 +545,60 @@
   opacity: 0;
 }
 
-/* Carrosséis da grade: preserva o índice e reserva uma faixa inferior para
-   as miniaturas, mantendo o visual original sem a scrollbar azul. */
-.galeria-grade-global .obra.modo-grade .obra-galeria {
-  position: relative;
-}
-.galeria-grade-global .obra.modo-grade .obra-imagem {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
-  bottom: 0;
-  height: 100%;
-}
+/* Miniaturas na grade: mantemos a indicação de carrossel sem a faixa escura.
+   As prévias ficam em uma pequena película flutuante sobre a própria obra. */
 .galeria-grade-global .obra.modo-grade .carrossel-miniaturas {
   position: absolute;
-  z-index: 5;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  z-index: 6;
+  right: .45rem;
+  bottom: .45rem;
+  left: .45rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: .3rem;
   box-sizing: border-box;
-  width: 100%;
-  min-height: 4.7rem;
-  background: linear-gradient(180deg, rgba(5,20,33,.08), rgba(5,20,33,.82));
+  width: auto;
+  min-height: 0;
+  max-width: calc(100% - .9rem);
+  padding: .28rem;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: .65rem;
+  background: rgba(5,20,33,.42);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .galeria-grade-global .obra.modo-grade .carrossel-miniaturas::-webkit-scrollbar {
   display: none;
 }
-
+.galeria-grade-global .obra.modo-grade .carrossel-miniaturas button {
+  flex: 0 0 2.35rem;
+  width: 2.35rem;
+  height: 2rem;
+  border-radius: .35rem;
+}
+.galeria-grade-global .obra.modo-grade .carrossel-miniaturas .carrossel-arraste {
+  margin-left: auto;
+  padding: 0 .2rem;
+  font-size: .95rem;
+}
+@media (max-width: 600px) {
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas {
+    right: .3rem;
+    bottom: .3rem;
+    left: .3rem;
+    gap: .22rem;
+    padding: .22rem;
+  }
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas button {
+    flex-basis: 1.9rem;
+    width: 1.9rem;
+    height: 1.7rem;
+  }
+}
 /* Mantém o índice VISTA visível e discreto sobre a imagem principal. */
 .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice {
   display: flex;
@@ -659,33 +674,22 @@
 }
 
 
-/* Compatibilidade com Safari antigo (incluindo iPhones que não suportam aspect-ratio).
-   A grade continua visível mesmo se IntersectionObserver ou as animações não funcionarem. */
+/* Fallback real para Safari sem aspect-ratio:
+   a própria obra reserva altura mínima; toda a mídia ocupa esse quadro.
+   Não dependemos da altura percentual de filhos absolutos para dimensionar o card. */
 @supports not (aspect-ratio: 1 / 1) {
   .galeria-grade-global .obra.modo-grade {
     height: auto;
-    min-height: 0;
+    min-height: clamp(12rem, 22vw, 22rem);
     aspect-ratio: auto;
   }
   .galeria-grade-global .obra.modo-grade .obra-galeria {
-    position: relative;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    padding-bottom: 125%;
-  }
-  .galeria-grade-global .obra.modo-grade .obra-imagem {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     min-height: 0;
-  }
-  .galeria-grade-global .obra.modo-grade .obra-texto {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    padding: 0;
   }
 }
 
@@ -743,16 +747,39 @@
   }
 }
 
-/* ===== Grade: cartões sempre visíveis e mídia sem faixa de miniaturas =====
-   A visibilidade do conteúdo não pode depender do callback de IntersectionObserver. */
+/* ===== Grade: geometria robusta em navegadores móveis =====
+   Alguns Safari/WebKit calculam mal cards com conteúdo absoluto + contain.
+   A caixa recebe tamanho próprio e não depende do tamanho dos filhos. */
 .galeria-grade-global .obra.modo-grade {
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(12rem, 22vw, 22rem);
+  contain: none;
   opacity: 1;
   transform: none;
+}
+.galeria-grade-global .obra.modo-grade .obra-galeria {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 .galeria-grade-global .obra.modo-grade.visivel {
   animation: gradeEntrada .55s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both;
 }
-.galeria-grade-global .obra.modo-grade .carrossel-miniaturas,
 .galeria-grade-global .obra.modo-grade .carrossel-seta,
 .galeria-grade-global .obra.modo-grade .carrossel-indice {
   display: none !important;
