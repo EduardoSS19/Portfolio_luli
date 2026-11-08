@@ -147,11 +147,20 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
-test('a grade não renderiza a faixa de miniaturas e mantém a galeria completa no foco', async ({ page }) => {
+test('a grade mantém miniaturas discretas sem faixa escura e preserva o carrossel ampliado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
-  await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
-  await expect(card.locator('.grade-midia-contagem')).toHaveText('+1')
+  const miniaturas = card.locator('.carrossel-miniaturas')
+  await expect(miniaturas).toBeVisible()
+  await expect(miniaturas.locator('button')).toHaveCount(2)
+  const railStyle = await miniaturas.evaluate(el => {
+    const style = getComputedStyle(el)
+    return { background: style.backgroundColor, minHeight: parseFloat(style.minHeight), position: style.position }
+  })
+  expect(railStyle.position).toBe('absolute')
+  expect(railStyle.minHeight).toBeLessThan(50)
+  await miniaturas.locator('button').nth(1).click()
+  await expect(card.locator('.obra-zoom-trigger img')).toHaveAttribute('src', imagemTeste)
   await card.locator('.obra-zoom-trigger').click()
   const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
   await expect(dialog).toHaveAttribute('open', '')
@@ -159,3 +168,14 @@ test('a grade não renderiza a faixa de miniaturas e mantém a galeria completa 
   await dialog.locator('.obra-focus-proxima').click()
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
 })
+
+test('vídeos mantêm a animação artística de entrada na grade', async ({ page }) => {
+  await abrirPortfolio(page)
+  const video = page.locator('.galeria-grade-global .obra.midia-video').first()
+  await video.scrollIntoViewIfNeeded()
+  await expect.poll(() => getComputedStyleSafe(video)).toContain('videoLigada')
+})
+
+async function getComputedStyleSafe(locator) {
+  return locator.locator('.obra-video-trigger img').evaluate(img => getComputedStyle(img).animationName)
+}
