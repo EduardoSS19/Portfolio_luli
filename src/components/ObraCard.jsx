@@ -92,7 +92,11 @@ export function ObraCard({
   const [videoAtivoId, setVideoAtivoId] = useState(null)
   const [videoFocoAtivo, setVideoFocoAtivo] = useState(false)
   const [focoPreparado, setFocoPreparado] = useState(false)
-  const [ref, visivel] = useScrollReveal(modoGrade ? 0.02 : 0, modoGrade ? '0px 0px 12% 0px' : '0px 0px -8% 0px')
+  const [ref, visivel] = useScrollReveal(
+    modoGrade ? 0.02 : 0,
+    modoGrade ? '0px 0px 12% 0px' : '0px 0px -8% 0px',
+    { once: modoGrade },
+  )
   const emFoco = useCardEmFoco(ref)
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
