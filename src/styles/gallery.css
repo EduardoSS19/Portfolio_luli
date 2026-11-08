@@ -828,7 +828,7 @@
 @media (hover: none), (pointer: coarse) {
   .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch),
   .galeria-grade-global .obra.modo-grade:not(.midia-video):not(.arte-glitch).visivel {
-    opacity: 1 !important;
+    opacity: 1;
     transform: none !important;
     animation: none !important;
     transition: none !important;
