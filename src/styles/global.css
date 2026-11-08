@@ -2176,3 +2176,36 @@ nav button[class*="anim-video"],
 .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-indice span {
   color: rgba(255,255,255,.72);
 }
+
+
+/* Miniaturas do carrossel na grade: ficam ancoradas à base da imagem.
+   A barra de rolagem nativa azul é ocultada; o gesto horizontal continua funcionando. */
+.galeria-grade-global .obra.modo-grade .obra-galeria {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+.galeria-grade-global .obra.modo-grade .carrossel-miniaturas {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  min-height: 0;
+  padding: .55rem .65rem;
+  border-top: 1px solid rgba(195,225,249,.12);
+  background: linear-gradient(180deg, transparent, rgba(3,14,24,.82));
+  pointer-events: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.galeria-grade-global .obra.modo-grade .carrossel-miniaturas::-webkit-scrollbar {
+  display: none;
+}
