@@ -1,0 +1,143 @@
+/* ------------ CARDS DA LULI ------------ */
+
+/* ---------- SEÇÃO INÍCIO (scroll-scrub de frames de vídeo) ---------- */
+.sobre-wrapper{
+  position:relative;
+  height:400vh; /* mais alto = transição entre frames mais gradual/lenta */
+}
+.sobre-sticky{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  gap:3rem;
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 1.5rem;
+}
+.sobre-imagem{
+  height:80vh;
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.04);
+  box-shadow:0 20px 40px -12px rgba(0,0,0,0.5);
+}
+.sobre-imagem img{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.sobre-texto h2{
+  font-size:clamp(2rem,4vw,3rem);
+  margin:0 0 1.5rem;
+}
+.sobre-texto p{
+  font-size:1.05rem;
+  line-height:1.7;
+  color:rgba(234,242,251,0.8);
+  margin:0 0 1.2rem;
+}
+
+@media (max-width:760px){
+  .sobre-sticky{ grid-template-columns:1fr; height:auto; padding:3rem 1.5rem; position:static; }
+  .sobre-wrapper{ height:auto; }
+  .sobre-imagem{ height:50vh; margin-bottom:1.5rem; }
+}
+
+/* ---------- SEÇÃO REFERÊNCIAS ---------- */
+.referencias-lista{ display:flex; flex-direction:column; gap:2rem; }
+.referencia-item{
+  background: rgba(15, 35, 58, 1);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:2rem;
+}
+.referencia-item h3{ margin:0 0 0.35rem; font-size:1.3rem; }
+.referencia-periodo{
+  display:inline-block;
+  font-size:0.8rem;
+  color:var(--azul-claro);
+  margin-bottom:1rem;
+}
+.referencia-item ul{ margin:0; padding-left:1.2rem; }
+.referencia-item li{ margin-bottom:0.5rem; font-size:0.95rem; }
+.referencia-item a{ color:rgba(234,242,251,0.85); text-decoration:underline; text-decoration-color:rgba(255,255,255,0.3); }
+.referencia-item a:hover{ color:var(--azul-claro); text-decoration-color:var(--azul-claro); }
+
+
+/* ---------- RODAPÉ ---------- */
+.rodape{
+  text-align:center;
+  padding:3rem 1.5rem 4rem;
+  border-top:1px solid rgba(255,255,255,0.1);
+  margin-top:2rem;
+}
+.rodape p{
+  font-size:1.1rem;
+  margin:0 0 0.75rem;
+}
+.rodape-links{
+  display:flex;
+  justify-content:center;
+  gap:1.5rem;
+  margin-bottom:1rem;
+}
+.rodape-links a{
+  color:var(--azul-claro);
+  text-decoration:none;
+  font-size:0.9rem;
+}
+.rodape-links a:hover{
+  text-decoration:underline;
+}
+.rodape small{
+  color:rgba(234,242,251,0.4);
+  font-size:0.75rem;
+}
+/* fundo fantasma! */
+.fundo-fantasma{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:-1;
+}
+.fundo-fantasma img{
+  position:absolute;
+  inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity 1.8s ease;
+}
+.fundo-fantasma img.ativo{ opacity:0.16; } /* baixo o bastante pra não brigar com o texto */
+
+@media (prefers-reduced-motion: reduce){
+  .fundo-fantasma-frame{ transition:none; }
+}
+/* contato */
+.form-contato{ display:flex; flex-direction:column; gap:1.25rem; max-width:600px; margin:0 auto; }
+.form-contato label{ display:flex; flex-direction:column; gap:0.4rem; font-size:0.9rem; color:rgba(234,242,251,0.75); }
+.form-contato input, .form-contato textarea{
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px; padding:0.75rem 1rem; color:var(--texto); font-family:inherit; font-size:1rem; resize:vertical;
+}
+.form-contato input:focus, .form-contato textarea:focus{ outline:none; border-color:var(--azul-claro); }
+.campo-isca{
+  position:absolute;
+  left:-10000px;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+.form-contato button{
+  background:var(--azul-claro); color:var(--azul-escuro); border:none; border-radius:24px;
+  padding:0.75rem 1.5rem; font-weight:bold; cursor:pointer; transition:opacity 0.2s;
+}
+.form-contato button:disabled{ opacity:0.6; cursor:default; }
+.contato-email{ color:var(--azul-claro); }
+.form-status{ font-size:0.9rem; margin-top:0.5rem; }
+.form-status.sucesso{ color:#8fd19e; }
+.form-status.erro{ color:#e08a8a; }

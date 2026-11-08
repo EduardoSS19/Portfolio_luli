@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './styles/global.css'
+import './styles/index.css'
 
 // "Modo leve": navegadores antigos (como Safari anterior ao 16) ganham uma versão com
 // menos efeitos. Para testar em qualquer navegador, abra o site com ?leve no endereço.
