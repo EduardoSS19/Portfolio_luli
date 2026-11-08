@@ -8,7 +8,12 @@ function chaveDasOpcoes({ rootMargin = '0px', threshold = 0 } = {}) {
 }
 
 export function observarIntersecao(elemento, callback, opcoes = {}) {
-  if (!elemento || typeof IntersectionObserver === 'undefined') return () => {}
+  if (!elemento) return () => {}
+  if (typeof IntersectionObserver === 'undefined') {
+    // Fallback progressivo: sem IntersectionObserver, nunca deixe o conteúdo invisível.
+    callback({ target: elemento, isIntersecting: true, intersectionRatio: 1 })
+    return () => {}
+  }
 
   const chave = chaveDasOpcoes(opcoes)
   let pool = pools.get(chave)
