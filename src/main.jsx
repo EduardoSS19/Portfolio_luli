@@ -3,15 +3,18 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './styles/index.css'
 
-// "Modo leve": navegadores antigos (como Safari anterior ao 16) ganham uma versão com
-// menos efeitos. Para testar em qualquer navegador, abra o site com ?leve no endereço.
+// O modo leve depende de sinais diretamente relacionados a desempenho/conforto.
+// Não usamos suporte a uma propriedade CSS (overflow: clip) como proxy de Safari antigo:
+// cada recurso visual tem seu próprio fallback em CSS.
 try {
-  const antigo = !(window.CSS && CSS.supports && CSS.supports('overflow: clip'))
-  const forcado = new URLSearchParams(window.location.search).has('leve')
-  const poucaMemoria = navigator.deviceMemory && navigator.deviceMemory <= 2
-  if (antigo || forcado || poucaMemoria) document.documentElement.classList.add('modo-leve')
+  const parametros = new URLSearchParams(window.location.search)
+  const poucaMemoria = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2
+  const movimentoReduzido = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  if (parametros.has('leve') || poucaMemoria || movimentoReduzido) {
+    document.documentElement.classList.add('modo-leve')
+  }
 } catch {
-  /* sem problema: segue com a versão completa */
+  // Se uma API opcional não estiver disponível, o conteúdo continua funcionando.
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
