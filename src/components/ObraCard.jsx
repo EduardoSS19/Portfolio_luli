@@ -280,12 +280,16 @@ export function ObraCard({
   }
 
   function iniciarArrasteFoco(event) {
-    inicioArrasteFocoRef.current = event.clientX
+    inicioArrasteFocoRef.current = { x: event.clientX, pointerId: event.pointerId }
+    if (event.currentTarget instanceof Element && 'setPointerCapture' in event.currentTarget) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
   }
 
   function finalizarArrasteFoco(event) {
-    if (inicioArrasteFocoRef.current === null) return
-    const distancia = event.clientX - inicioArrasteFocoRef.current
+    const inicio = inicioArrasteFocoRef.current
+    if (inicio === null || event.pointerId !== inicio.pointerId) return
+    const distancia = event.clientX - inicio.x
     inicioArrasteFocoRef.current = null
     if (Math.abs(distancia) > 42 && indicesImagem.length > 1) {
       navegarImagemFoco(distancia < 0 ? 1 : -1)
