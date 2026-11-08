@@ -39,12 +39,15 @@ async function abrirPortfolio(page, semIntersectionObserver = false) {
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.getByRole('button', { name: 'Visualizar em grade' }).click()
+  const primeiroCard = page.locator('.galeria-grade-global .obra').first()
   await expect(page.locator('.galeria-grade-global .obra')).toHaveCount(8)
-  // A classe visivel inicia uma transição de opacidade de 550 ms. Aguarda o estado final
-  // antes de medir responsividade, para não confundir animação de entrada com card invisível.
-  await expect.poll(() => page.locator('.galeria-grade-global .obra').evaluateAll(cards =>
-    cards.filter(card => Number.parseFloat(getComputedStyle(card).opacity) < 0.95).length
-  ), { timeout: 5000 }).toBe(0)
+  // Com IntersectionObserver ativo, apenas cards próximos ao viewport devem revelar.
+  // Leva o primeiro card à área visível e aguarda sua transição, sem exigir que
+  // os demais cards (ainda fora da tela) fiquem visíveis antes do scroll.
+  await primeiroCard.scrollIntoViewIfNeeded()
+  await expect.poll(() => primeiroCard.evaluate(card =>
+    Number.parseFloat(getComputedStyle(card).opacity)
+  ), { timeout: 5000 }).toBeGreaterThanOrEqual(0.95)
 }
 
 test('a grade mantém todas as categorias e cartões em vários tamanhos, mesmo sem IntersectionObserver', async ({ page, browserName }) => {
