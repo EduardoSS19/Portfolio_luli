@@ -141,7 +141,18 @@ export default function App() {
     const categoria = categorias.find(item => item.titulo === titulo)
     const primeiraObra = categoria && [...document.querySelectorAll('.galeria-grade-global .obra')]
       .find(card => card.classList.contains(`categoria-${categoria.chave}`))
-    primeiraObra?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (primeiraObra) {
+      // A rolagem suave dispara atualizações do observer enquanto ainda está
+      // chegando ao destino. Reafirma a seleção quando a rolagem terminar,
+      // para que a navegação não volte temporariamente à categoria anterior.
+      const confirmarDestino = () => definirSecaoAtiva(titulo)
+      window.addEventListener('scrollend', confirmarDestino, { once: true })
+      primeiraObra.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      window.setTimeout(() => {
+        window.removeEventListener('scrollend', confirmarDestino)
+        confirmarDestino()
+      }, 1200)
+    }
   }
 
   function voltarAoTopo() {
