@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { observarIntersecao } from './observarIntersecao.js'
 
 // Mantém a visibilidade sincronizada com o viewport. Ao sair, remove a classe;
 // ao retornar, adiciona novamente e reinicia a animação de entrada.
@@ -10,15 +11,11 @@ export function useScrollReveal(threshold = 0, rootMargin = '0px 0px -8% 0px') {
     const elemento = ref.current
     if (!elemento) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setVisivel(entry.isIntersecting && entry.intersectionRatio >= threshold)
-      },
-      { threshold, rootMargin }
+    return observarIntersecao(
+      elemento,
+      entrada => setVisivel(entrada.isIntersecting && entrada.intersectionRatio >= threshold),
+      { threshold, rootMargin },
     )
-
-    observer.observe(elemento)
-    return () => observer.disconnect()
   }, [threshold, rootMargin])
 
   return [ref, visivel]
