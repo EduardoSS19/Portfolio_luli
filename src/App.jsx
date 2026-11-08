@@ -45,6 +45,8 @@ export default function App() {
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
   const anteriorRef = useRef(secaoAtiva)
   const trocaModoPendenteRef = useRef(null)
+  const selecaoCategoriaTimerRef = useRef(null)
+  const scrollEndHandlerRef = useRef(null)
 
   function trocarModoGaleria(novoModo) {
     if (novoModo === modoGaleria) return
@@ -130,8 +132,18 @@ export default function App() {
   }, [secaoAtiva])
 
   function selecionarCategoria(titulo) {
-    // A seleção explícita deve refletir imediatamente na navegação; o observer
-    // assume novamente o acompanhamento conforme a rolagem continua.
+    // Cancela confirmações de navegações anteriores. Sem isso, cliques rápidos
+    // podem deixar timeouts/scrollend antigos sobrescrevendo a categoria atual.
+    if (selecaoCategoriaTimerRef.current) {
+      window.clearTimeout(selecaoCategoriaTimerRef.current)
+      selecaoCategoriaTimerRef.current = null
+    }
+    if (scrollEndHandlerRef.current) {
+      window.removeEventListener('scrollend', scrollEndHandlerRef.current)
+      scrollEndHandlerRef.current = null
+    }
+
+    // A seleção explícita deve refletir imediatamente na navegação.
     definirSecaoAtiva(titulo)
     const secao = document.getElementById(titulo)
     if (secao) {
@@ -141,7 +153,28 @@ export default function App() {
     const categoria = categorias.find(item => item.titulo === titulo)
     const primeiraObra = categoria && [...document.querySelectorAll('.galeria-grade-global .obra')]
       .find(card => card.classList.contains(`categoria-${categoria.chave}`))
-    primeiraObra?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (primeiraObra) {
+      // A rolagem suave dispara atualizações do observer enquanto ainda está
+      // chegando ao destino. Reafirma a seleção quando a rolagem terminar,
+      // para que a navegação não volte temporariamente à categoria anterior.
+      const confirmarDestino = () => {
+        if (selecaoCategoriaTimerRef.current) {
+          window.clearTimeout(selecaoCategoriaTimerRef.current)
+          selecaoCategoriaTimerRef.current = null
+        }
+        if (scrollEndHandlerRef.current === confirmarDestino) {
+          scrollEndHandlerRef.current = null
+        }
+        definirSecaoAtiva(titulo)
+      }
+      scrollEndHandlerRef.current = confirmarDestino
+      window.addEventListener('scrollend', confirmarDestino, { once: true })
+      primeiraObra.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      selecaoCategoriaTimerRef.current = window.setTimeout(() => {
+        window.removeEventListener('scrollend', confirmarDestino)
+        confirmarDestino()
+      }, 2000)
+    }
   }
 
   function voltarAoTopo() {

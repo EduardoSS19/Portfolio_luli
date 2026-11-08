@@ -33,25 +33,42 @@ export function useSecaoAtiva(categorias, modoGaleria = 'lista') {
       })
     })
 
-    const observer = new IntersectionObserver(
-      entries => {
-        // Usa a entrada mais próxima do centro da viewport quando várias
-        // obras da mesma/diferentes categorias intersectam a faixa central.
-        const visiveis = entries
-          .filter(entry => entry.isIntersecting)
-          .sort((a, b) => Math.abs(a.boundingClientRect.top + a.boundingClientRect.height / 2 - window.innerHeight / 2)
-            - Math.abs(b.boundingClientRect.top + b.boundingClientRect.height / 2 - window.innerHeight / 2))
+    const atualizarSecaoAtiva = () => {
+      const centro = window.innerHeight / 2
+      const limiteSuperior = 160
+      const limiteInferior = window.innerHeight - 160
+      const candidatas = [...elementos.entries()]
+        .map(([elemento, titulo]) => ({
+          titulo,
+          rect: elemento.getBoundingClientRect(),
+        }))
+        .filter(({ rect }) => rect.bottom > limiteSuperior && rect.top < limiteInferior)
+        .sort((a, b) =>
+          Math.abs((a.rect.top + a.rect.height / 2) - centro)
+          - Math.abs((b.rect.top + b.rect.height / 2) - centro)
+        )
 
-        if (visiveis.length) {
-          const titulo = elementos.get(visiveis[0].target)
-          if (titulo) setAtiva(titulo)
-        }
-      },
-      { threshold: 0, rootMargin: '-160px 0px -160px 0px' }
-    )
+      if (candidatas.length) setAtiva(candidatas[0].titulo)
+    }
+
+    const observer = new IntersectionObserver(atualizarSecaoAtiva, {
+      threshold: 0,
+      rootMargin: '-160px 0px -160px 0px',
+    })
 
     elementos.forEach((_, elemento) => observer.observe(elemento))
-    return () => observer.disconnect()
+    window.addEventListener('scroll', atualizarSecaoAtiva, { passive: true })
+    window.addEventListener('resize', atualizarSecaoAtiva)
+
+    // Recalcula após a montagem para não depender apenas da primeira leva
+    // de entries do IntersectionObserver, que pode conter posições antigas.
+    atualizarSecaoAtiva()
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', atualizarSecaoAtiva)
+      window.removeEventListener('resize', atualizarSecaoAtiva)
+    }
   }, [categorias, modoGaleria])
 
   return [ativa, setAtiva]
