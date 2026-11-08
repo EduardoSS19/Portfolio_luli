@@ -803,3 +803,15 @@
   transform:none !important;
   visibility:visible !important;
 }
+
+/* Vídeo na grade: mesmo tamanho dos outros cards e a mesma animação de entrada.
+   (Antes os vídeos ficavam em 4:3, sem animação, e só nos celulares igualavam.) */
+.galeria-grade-global .obra.modo-grade.midia-video { aspect-ratio: 4 / 5; }
+@media (max-width: 600px) {
+  .galeria-grade-global .obra.modo-grade.midia-video { aspect-ratio: 3 / 4; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .galeria-grade-global .obra.modo-grade.midia-video.visivel {
+    animation: gradeEntrada .72s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both !important;
+  }
+}
