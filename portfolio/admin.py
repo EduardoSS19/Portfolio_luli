@@ -404,6 +404,9 @@ class WorkAdmin(admin.ModelAdmin):
 
     readonly_fields = ("preview_site",)
 
+    class Media:
+        css = {"all": ("admin/css/portfolio_admin.css",)}
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
