@@ -331,6 +331,20 @@ export function ObraCard({
     }
   }
 
+  // Avança automaticamente pelos itens do carrossel enquanto o card está visível.
+  // Pausa fora da viewport, com o visualizador aberto ou durante a reprodução de vídeo.
+  useEffect(() => {
+    if (midias.length < 2 || !visivel || focoAberto || videoAtivoId) return undefined
+
+    const intervalo = window.setInterval(() => {
+      if (document.hidden) return
+      setDirecao(1)
+      setIndiceImagem(indiceAtual => (indiceAtual + 1) % midias.length)
+    }, 4500)
+
+    return () => window.clearInterval(intervalo)
+  }, [midias.length, visivel, focoAberto, videoAtivoId])
+
   useEffect(() => {
     const imagem = imagemRef.current
     if (!imagem || typeof imagem.animate !== 'function' || reduzirMovimento()) return
