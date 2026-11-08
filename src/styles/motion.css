@@ -325,8 +325,16 @@ nav button[class*="anim-video"],
 @media (prefers-reduced-motion:reduce){
   .obra.arte-fotografia .obra-imagem .obra-zoom-trigger img,
   .obra.arte-videoarte .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-glitch .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-desenho .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-ceramica .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-gravura .obra-imagem .obra-zoom-trigger img,
   .obra.arte-fotografia .obra-texto h3,
-  .obra.arte-videoarte.em-foco .categoria-legenda::before{ animation:none !important; }
+  .obra.arte-glitch .obra-texto h3,
+  .obra.arte-fotografia .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-videoarte.em-foco .categoria-legenda::before{
+    animation:none !important;
+  }
 }
 
 /* ===== Modo leve: navegadores antigos (Safari < 16) ou ?leve no endereço ===== */
