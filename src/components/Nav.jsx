@@ -39,10 +39,10 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
         ))}
       </div>
       <div className="nav-gallery-switch" role="group" aria-label="Visualização das obras">
-        <button type="button" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => aoTrocarModo('lista')}>
+        <button type="button" aria-label="Visualizar em lista" title="Lista" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => aoTrocarModo('lista')}>
           <span aria-hidden="true">☷</span><span>Lista</span>
         </button>
-        <button type="button" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => aoTrocarModo('grade')}>
+        <button type="button" aria-label="Visualizar em grade" title="Grade" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => aoTrocarModo('grade')}>
           <span aria-hidden="true">▦</span><span>Grade</span>
         </button>
       </div>

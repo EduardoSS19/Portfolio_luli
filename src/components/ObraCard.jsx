@@ -75,7 +75,7 @@ export function ObraCard({
   const [videoAtivoId, setVideoAtivoId] = useState(null)
   const [videoFocoAtivo, setVideoFocoAtivo] = useState(false)
   const [focoPreparado, setFocoPreparado] = useState(false)
-  const [ref, visivel] = useScrollReveal(modoGrade ? 0.14 : 0, modoGrade ? '0px 0px -18% 0px' : '0px 0px -8% 0px')
+  const [ref, visivel] = useScrollReveal(modoGrade ? 0.02 : 0, modoGrade ? '0px 0px 12% 0px' : '0px 0px -8% 0px')
   const emFoco = useCardEmFoco(ref)
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
@@ -373,6 +373,7 @@ export function ObraCard({
         className={`obra arte-${tipoDeArte} categoria-${categoria} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
         style={modoGrade ? estiloGrade : undefined}
         data-grade-indice={modoGrade ? indiceGrade : undefined}
+        data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
         onClick={centralizarAoClicarCard}
       >
         <div className="obra-galeria">
