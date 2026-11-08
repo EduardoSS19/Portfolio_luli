@@ -724,30 +724,21 @@
 }
 
 
-/* Em telas touch (incluindo Safari móvel), a grade não depende da animação
-   de entrada para revelar as obras. Todos os cards aparecem imediatamente. */
+/* Em telas touch, garantimos visibilidade e títulos legíveis sem remover
+   os efeitos artísticos específicos das obras. A acessibilidade é tratada
+   exclusivamente por prefers-reduced-motion. */
 @media (hover: none), (pointer: coarse) {
   .galeria-grade-global .obra.modo-grade,
   .galeria-grade-global .obra.modo-grade.visivel,
   .galeria-grade-global .obra.modo-grade.midia-video {
-    opacity: 1 !important;
-    transform: none !important;
-    animation: none !important;
-    transition: none !important;
+    opacity: 1;
+    transform: none;
   }
   .galeria-grade-global .obra.modo-grade .obra-texto,
   .galeria-grade-global .obra.modo-grade.midia-video .obra-texto {
-    display: flex !important;
-    opacity: 1 !important;
-    transform: none !important;
+    display: flex;
+    opacity: 1;
+    transform: none;
     pointer-events: none;
-  }
-  .galeria-grade-global .obra.modo-grade .obra-imagem img,
-  .galeria-grade-global .obra.modo-grade .obra-video-trigger,
-  .galeria-grade-global .obra.modo-grade .obra-video-trigger img,
-  .galeria-grade-global .obra.modo-grade .glitch-camada {
-    animation: none !important;
-    transform: none !important;
-    clip-path: none !important;
   }
 }
