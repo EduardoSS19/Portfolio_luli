@@ -92,7 +92,11 @@ export function ObraCard({
   const [videoAtivoId, setVideoAtivoId] = useState(null)
   const [videoFocoAtivo, setVideoFocoAtivo] = useState(false)
   const [focoPreparado, setFocoPreparado] = useState(false)
-  const [ref, visivel] = useScrollReveal(modoGrade ? 0.02 : 0, modoGrade ? '0px 0px 12% 0px' : '0px 0px -8% 0px')
+  const [ref, visivel] = useScrollReveal(
+    modoGrade ? 0.02 : 0,
+    modoGrade ? '0px 0px 12% 0px' : '0px 0px -8% 0px',
+    { once: modoGrade },
+  )
   const emFoco = useCardEmFoco(ref)
   const imagemRef = useRef(null)
   const dialogRef = useRef(null)
@@ -330,6 +334,20 @@ export function ObraCard({
       navegarImagemFoco(distancia < 0 ? 1 : -1)
     }
   }
+
+  // Avança automaticamente pelos itens do carrossel enquanto o card está visível.
+  // Pausa fora da viewport, com o visualizador aberto ou durante a reprodução de vídeo.
+  useEffect(() => {
+    if (midias.length < 2 || !visivel || focoAberto || videoAtivoId) return undefined
+
+    const intervalo = window.setInterval(() => {
+      if (document.hidden) return
+      setDirecao(1)
+      setIndiceImagem(indiceAtual => (indiceAtual + 1) % midias.length)
+    }, 4500)
+
+    return () => window.clearInterval(intervalo)
+  }, [midias.length, visivel, focoAberto, videoAtivoId])
 
   useEffect(() => {
     const imagem = imagemRef.current
