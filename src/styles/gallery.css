@@ -365,8 +365,6 @@
   border: 0;
   border-radius: inherit;
   background: #071522;
-  transform: none !important;
-  animation: none !important;
 }
 .galeria-grade-global .obra.modo-grade.midia-video .obra-video-trigger img {
   position: absolute;
@@ -378,10 +376,7 @@
   max-height: 100%;
   object-fit: cover;
   object-position: center;
-  transform: none !important;
   filter: none;
-  clip-path: none !important;
-  animation: none !important;
   transition: filter .2s ease;
 }
 .galeria-grade-global .obra.modo-grade.midia-video .glitch-camada,
@@ -530,18 +525,7 @@
   }
 }
 
-/* Na grade, priorizamos rolagem fluida: os efeitos artísticos continuam na lista,
-   mas os vídeos usam somente a transição leve do próprio card. */
-.galeria-grade-global .obra.modo-grade.midia-video,
-.galeria-grade-global .obra.modo-grade.midia-video.visivel {
-  animation: none !important;
-}
-.galeria-grade-global .obra.modo-grade.midia-video .obra-video-trigger,
-.galeria-grade-global .obra.modo-grade.midia-video .obra-video-trigger img,
-.galeria-grade-global .obra.modo-grade.midia-video .glitch-camada {
-  animation: none !important;
-  transition: none !important;
-}
+
 @media (prefers-reduced-motion:reduce) {
   .obra-focus.obra-focus-video-play > span:first-child { transition: none; }
 }
@@ -792,17 +776,7 @@
   background:linear-gradient(135deg,#2a6f9e 0%,#1c4a73 50%,#5a2d82 100%);
 }
 
-/* Na grade, o próprio card já tem a animação de entrada. As animações por técnica
-   (recortes com clip-path) ficam só na lista: no Safari do iPhone elas deixavam a
-   imagem recortada ou invisível, sobrando só uma "bolinha". */
-.galeria-grade-global .obra.modo-grade .obra-zoom-trigger img,
-.galeria-grade-global .obra.modo-grade.visivel .obra-imagem .obra-zoom-trigger img{
-  animation:none !important;
-  clip-path:none !important;
-  opacity:1 !important;
-  transform:none !important;
-  visibility:visible !important;
-}
+
 
 /* Vídeo na grade: mesmo tamanho dos outros cards e a mesma animação de entrada.
    (Antes os vídeos ficavam em 4:3, sem animação, e só nos celulares igualavam.) */
@@ -817,6 +791,8 @@
 }
 
 
+/* Grade: a entrada é controlada uma única vez pelo hook useScrollReveal({ once: true }).
+   As animações da mídia (técnicas artísticas e vídeo) permanecem independentes. */
 /* Ajustes de interação da grade: títulos sob demanda e cards estáveis ao reentrar no viewport. */
 .galeria-grade-global .obra.modo-grade .obra-texto,
 .galeria-grade-global .obra.modo-grade.tem-video .obra-texto,
@@ -838,13 +814,4 @@
   }
 }
 
-/* A grade não reexecuta animação de entrada ao sair e voltar para a tela.
-   Isso evita o salto visual e o trabalho extra de composição durante a rolagem. */
-.galeria-grade-global .obra.modo-grade,
-.galeria-grade-global .obra.modo-grade.visivel,
-.galeria-grade-global .obra.modo-grade.midia-video,
-.galeria-grade-global .obra.modo-grade.midia-video.visivel {
-  animation: none !important;
-  transform: none !important;
-  transition: none !important;
-}
+
