@@ -786,3 +786,20 @@
     transition: none !important;
   }
 }
+
+/* Vídeo sem miniatura utilizável: fundo próprio, nunca um card vazio com só o botão de play. */
+.obra-video-trigger.sem-miniatura{
+  background:linear-gradient(135deg,#2a6f9e 0%,#1c4a73 50%,#5a2d82 100%);
+}
+
+/* Na grade, o próprio card já tem a animação de entrada. As animações por técnica
+   (recortes com clip-path) ficam só na lista: no Safari do iPhone elas deixavam a
+   imagem recortada ou invisível, sobrando só uma "bolinha". */
+.galeria-grade-global .obra.modo-grade .obra-zoom-trigger img,
+.galeria-grade-global .obra.modo-grade.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:none !important;
+  clip-path:none !important;
+  opacity:1 !important;
+  transform:none !important;
+  visibility:visible !important;
+}
