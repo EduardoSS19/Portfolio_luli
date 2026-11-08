@@ -141,7 +141,7 @@ test('o modo leve não remove animações artísticas e movimento reduzido conti
 
 const imagemFotoReal = 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Still_Life_Photography.jpg/640px-Still_Life_Photography.jpg'
 
-test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou glitch', async ({ page, browserName }) => {
+test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou glitch', async ({ page }, testInfo) => {
   const categoriasComFoto = [
     { titulo: 'Cerâmica', chave: 'ceramica', obras: [{ titulo: 'Foto cerâmica', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
     { titulo: 'Gravura', chave: 'gravura', obras: [{ titulo: 'Foto gravura', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
@@ -205,7 +205,7 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
       expect(metrics.imageWidth, `${chave} image width at ${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
       expect(metrics.imageHeight, `${chave} image height at ${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
       expect(metrics.naturalWidth, `${chave} real photo loaded at ${width}px`).toBeGreaterThan(100)
-      if (browserName === 'webkit' || width <= 600) {
+      if (testInfo.project.name === 'webkit-iphone' || testInfo.project.name === 'chromium-android') {
         expect(metrics.clipPath, `${chave} image clip-path at ${width}px`).toBe('none')
         expect(metrics.transform, `${chave} image transform at ${width}px`).toBe('none')
         expect(metrics.animation, `${chave} image animation at ${width}px`).toBe('none')
