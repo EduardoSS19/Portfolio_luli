@@ -38,7 +38,7 @@ async function abrirPortfolio(page, semIntersectionObserver = false) {
       Object.defineProperty(window, 'IntersectionObserver', { configurable: true, value: undefined })
     })
   }
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.getByRole('button', { name: 'Visualizar em grade' }).click()
   const primeiroCard = page.locator('.galeria-grade-global .obra').first()
@@ -126,7 +126,7 @@ test('o modo leve não remove animações artísticas e movimento reduzido conti
       sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
     }),
   }))
-  await page.goto('/?leve')
+  await page.goto('/?leve', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.getByRole('button', { name: 'Visualizar em grade' }).click()
   const glitch = page.locator('.galeria-grade-global .obra.arte-glitch').first()
@@ -164,7 +164,7 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
       sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
     }),
   }))
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.getByRole('button', { name: 'Visualizar em grade' }).click()
 
