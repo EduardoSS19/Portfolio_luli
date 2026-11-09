@@ -1228,6 +1228,10 @@
   .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-seta {
     display: none !important;
   }
+  /* Uma regra legada para dispositivos touch escondia o contador; reativa o +N. */
+  .galeria-grade-global .obra.modo-grade .grade-midia-contagem {
+    display: inline-flex !important;
+  }
   .galeria-grade-global .obra.modo-grade .carrossel-indice {
     top: .5rem;
     left: .5rem;
