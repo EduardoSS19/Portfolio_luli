@@ -16,6 +16,7 @@ from .models import (
     Reference,
     ReferenceLink,
     SocialLink,
+    SiteAppearance,
     Work,
     WorkImage,
     WorkVideo,
@@ -590,8 +591,12 @@ class SiteAppearanceForm(forms.ModelForm):
         model = SiteAppearance
         fields = ("accent", "background", "background_alt", "surface", "text", "border")
         widgets = {
-            name: forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"})
-            for name in fields
+            "accent": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
+            "background": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
+            "background_alt": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
+            "surface": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
+            "text": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
+            "border": forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"}),
         }
 
     def clean(self):
