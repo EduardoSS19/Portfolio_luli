@@ -494,8 +494,7 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
   const rodape = page.locator('.rodape')
   await expect(rodape).toBeVisible()
   const fundo = await rodape.evaluate(element => getComputedStyle(element).backgroundColor)
-  const alpha = Number(fundo.match(/rgba?\\([^,]+,[^,]+,[^,]+,\\s*([0-9.]+)\\)/)?.[1] ?? 1)
-  expect(alpha).toBeGreaterThanOrEqual(0.99)
+  expect(fundo).toBe('rgb(4, 17, 28)')
 
   await expect(rodape.getByText('Desenvolvido por')).toBeVisible()
   await expect(rodape.getByText('Eduardo', { exact: true })).toBeVisible()
