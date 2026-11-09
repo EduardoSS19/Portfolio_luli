@@ -85,4 +85,10 @@ jobs:
 
       - name: Diagnose first responsive gallery failure
         timeout-minutes: 4
-        run: npx --yes --package=@playwright/test@1.56.1 playwright test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
+        shell: bash
+        run: |
+          PLAYWRIGHT_TEST_PACKAGE="$(find "$HOME/.npm/_npx" -path '*/node_modules/@playwright/test/package.json' -print -quit)"
+          test -n "$PLAYWRIGHT_TEST_PACKAGE"
+          PLAYWRIGHT_CLI="$(dirname "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")")/playwright/cli.js"
+          test -f "$PLAYWRIGHT_CLI"
+          node "$PLAYWRIGHT_CLI" test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
