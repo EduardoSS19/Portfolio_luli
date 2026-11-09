@@ -1341,7 +1341,7 @@ nav.site-nav.editorial-nav{
 @media (max-width:760px) {
   .controles-flutuantes {
     right: max(.85rem, env(safe-area-inset-right));
-    bottom: calc(4.9rem + env(safe-area-inset-bottom));
+    bottom: calc(4.2rem + env(safe-area-inset-bottom));
   }
   .site-shell:has(.site-nav.menu-aberto) .controles-flutuantes {
     visibility: hidden;
