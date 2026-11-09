@@ -260,4 +260,6 @@ class SiteAppearance(models.Model):
         # objects.create() usa force_insert=True; o singleton deve atualizar a
         # linha única existente em vez de tentar inserir uma segunda.
         kwargs.pop("force_insert", None)
+        if type(self).objects.filter(pk=1).exists():
+            kwargs["force_update"] = True
         super().save(*args, **kwargs)
