@@ -1111,3 +1111,65 @@ nav.site-nav.editorial-nav{
 @media(prefers-reduced-motion:reduce){
   .editorial-nav.menu-aberto .nav-overlay-link,.secao-cabecalho.animando h2{animation:none!important}
 }
+
+
+/* Preferências do portfólio dentro do menu editorial. */
+.editorial-nav .nav-gallery-switch{display:none!important}
+.editorial-menu-panel{box-sizing:border-box}
+.editorial-menu-heading p{display:block;line-height:1.55;padding-block:.08em;overflow:visible}
+.editorial-menu-controls{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:clamp(1.4rem,3vh,2rem);padding-top:1rem;border-top:1px solid rgba(195,225,249,.16)}
+.editorial-menu-control{display:inline-flex;min-height:2.9rem;align-items:center;justify-content:center;gap:.65rem;padding:.65rem 1rem;border:1px solid rgba(195,225,249,.24);border-radius:999px;color:var(--texto);background:rgba(147,200,242,.08);font:600 .76rem/1.2 inherit;cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.editorial-menu-control:hover{border-color:var(--azul-claro);background:rgba(147,200,242,.16);transform:translateY(-1px)}
+.editorial-menu-control span:first-child{font-size:1.05rem;color:var(--azul-claro)}
+.editorial-menu-control:focus-visible{outline:2px solid var(--azul-claro);outline-offset:3px}
+@media(max-width:760px){
+  .editorial-menu-backdrop{padding-top:calc(5.8rem + env(safe-area-inset-top));padding-bottom:calc(2rem + env(safe-area-inset-bottom))}
+  .editorial-menu-panel{min-height:0;justify-content:flex-start}
+  .editorial-menu-heading{margin-bottom:1.15rem}
+  .editorial-menu-heading p{margin-top:.45rem;line-height:1.5}
+  .editorial-menu-controls{gap:.5rem;margin-top:1.25rem;padding-top:.85rem}
+  .editorial-menu-control{flex:1 1 calc(50% - .5rem);min-width:0;min-height:2.8rem;padding:.6rem .65rem;font-size:.7rem}
+  .editorial-menu-footer{margin-top:1.25rem}
+}
+@media(max-height:680px){
+  .editorial-menu-backdrop{align-items:flex-start;padding-top:calc(4.8rem + env(safe-area-inset-top));padding-bottom:1.25rem}
+  .editorial-menu-heading{margin-bottom:.8rem}
+  .nav-overlay-link{min-height:3.8rem}
+  .editorial-menu-controls{margin-top:.8rem;padding-top:.65rem}
+  .editorial-menu-footer{margin-top:.8rem}
+}
+
+/* Tema claro: mantém a paleta azul, invertendo superfícies e contraste. */
+:root[data-theme="claro"]{
+  color-scheme:light;
+  --azul-escuro:#eaf2f8;
+  --azul-medio:#d6e5f1;
+  --azul-claro:#285f8d;
+  --texto:#172b3b;
+  --linha:rgba(28,65,94,.2);
+}
+:root[data-theme="claro"] body{
+  background:radial-gradient(ellipse at 50% -20%,rgba(110,165,205,.2),transparent 55%),linear-gradient(160deg,#f8fbfd 0%,#eaf2f8 58%,#dceaf4 100%);
+  color:var(--texto);
+}
+:root[data-theme="claro"] .editorial-menu-backdrop{
+  color:var(--texto);
+  background:radial-gradient(ellipse at 80% 15%,rgba(52,113,166,.13),transparent 48%),linear-gradient(145deg,rgba(247,251,254,.99),rgba(225,238,248,.99));
+}
+:root[data-theme="claro"] .editorial-menu-heading p,
+:root[data-theme="claro"] .editorial-menu-footer,
+:root[data-theme="claro"] .editorial-menu-control{color:rgba(23,43,59,.72)}
+:root[data-theme="claro"] .nav-overlay-link{color:rgba(23,43,59,.84);border-color:rgba(28,65,94,.2)}
+:root[data-theme="claro"] .nav-overlay-link:hover,
+:root[data-theme="claro"] .nav-overlay-link.ativo{color:#102b42;border-color:rgba(40,95,141,.55)}
+:root[data-theme="claro"] .editorial-menu-control{border-color:rgba(28,65,94,.25);background:rgba(40,95,141,.07)}
+:root[data-theme="claro"] .editorial-menu-control:hover{background:rgba(40,95,141,.14)}
+:root[data-theme="claro"] .editorial-menu-control span:first-child{color:#285f8d}
+:root[data-theme="claro"] .editorial-menu-trigger{color:#172b3b;background:rgba(247,251,254,.9);border-color:rgba(28,65,94,.25)}
+:root[data-theme="claro"] .editorial-menu-mark{border-color:rgba(40,95,141,.32);background:rgba(40,95,141,.1)}
+:root[data-theme="claro"] .editorial-menu-mark i{background:#285f8d}
+:root[data-theme="claro"] .obra,
+:root[data-theme="claro"] .referencia-item{color:#172b3b;background:linear-gradient(130deg,rgba(255,255,255,.96),rgba(231,241,248,.98));border-color:rgba(28,65,94,.2)}
+:root[data-theme="claro"] .obra-ficha-item dd,
+:root[data-theme="claro"] .obra-focus-ficha dd{color:rgba(23,43,59,.86)}
+:root[data-theme="claro"] .voltar-topo{color:#172b3b;background:rgba(247,251,254,.92);border-color:rgba(40,95,141,.4)}
