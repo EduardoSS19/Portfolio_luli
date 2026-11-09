@@ -93,8 +93,7 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
 
 test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
   await abrirPortfolio(page)
-  const menuMobile = page.locator('.nav-mobile-toggle')
-  const menuDesktop = page.locator('.nav-desktop-toggle')
+  const menu = page.locator('.editorial-menu-trigger')
   const categoriasTeste = [
     ['Glitch Art', 'glitch-art'],
     ['Vídeos', 'videos'],
@@ -102,15 +101,13 @@ test('a navegação mantém as categorias disponíveis e acompanha a grade', asy
     ['Desenhos', 'desenhos'],
   ]
   for (const [titulo, chave] of categoriasTeste) {
-    const menu = await menuMobile.isVisible() ? menuMobile : menuDesktop
     if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click()
-    const item = page.locator('.nav-links button').filter({ hasText: titulo })
+    const item = page.locator('.nav-overlay-link').filter({ hasText: titulo })
     await expect(item).toBeVisible()
     await item.click()
     const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${chave}`).first()
     await expect(primeiroCard).toBeVisible()
     await primeiroCard.scrollIntoViewIfNeeded()
-    await expect(item).toBeAttached()
     await expect(menu).toHaveAttribute('aria-expanded', 'false')
   }
 })
