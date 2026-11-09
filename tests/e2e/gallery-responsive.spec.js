@@ -264,3 +264,22 @@ test('a grade mostra a faixa de miniaturas e mantém a galeria completa no foco'
   await dialog.locator('.obra-focus-proxima').click()
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
 })
+
+
+test('a grade usa altura explícita e igual para todos os cards, com mídia ocupando a caixa', async ({ page }) => {
+  await abrirPortfolio(page, true)
+  for (const width of [320, 375, 390, 414, 600, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 844 })
+    const metrics = await page.evaluate(() => {
+      const cards = [...document.querySelectorAll('.galeria-grade-global .obra')]
+      return {
+        heights: cards.map(card => Math.round(card.getBoundingClientRect().height)),
+        mediaHeights: cards.map(card => Math.round(card.querySelector('.obra-imagem')?.getBoundingClientRect().height || 0)),
+      }
+    })
+    expect(metrics.heights.length).toBe(8)
+    expect(new Set(metrics.heights).size, `uniform card height at ${width}px`).toBe(1)
+    expect(metrics.heights[0], `non-collapsed card at ${width}px`).toBeGreaterThanOrEqual(230)
+    expect(Math.min(...metrics.mediaHeights), `media area at ${width}px`).toBeGreaterThanOrEqual(180)
+  }
+})
