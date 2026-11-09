@@ -75,6 +75,14 @@ jobs:
       - name: Install browser engines
         run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium
 
+      - name: Link isolated Playwright package for config resolution
+        shell: bash
+        run: |
+          PLAYWRIGHT_TEST_PACKAGE="$(find "$HOME/.npm/_npx" -path '*/node_modules/@playwright/test/package.json' -print -quit)"
+          test -n "$PLAYWRIGHT_TEST_PACKAGE"
+          mkdir -p node_modules/@playwright
+          ln -s "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")" node_modules/@playwright/test
+
       - name: Diagnose first responsive gallery failure
         timeout-minutes: 4
         run: npx --yes --package=@playwright/test@1.56.1 playwright test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
