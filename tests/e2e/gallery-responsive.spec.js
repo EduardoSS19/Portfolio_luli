@@ -287,6 +287,23 @@ test('o carrossel da grade ocupa toda a altura do card sem reservar faixa de min
   await expect(card.locator('.carrossel-indice')).toHaveCount(0)
 })
 
+test('na lista, as miniaturas ficam sobre a mídia sem reservar altura extra', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
+  const galeria = card.locator('.obra-galeria')
+  const imagem = card.locator('.obra-imagem')
+  const miniaturas = card.locator('.carrossel-miniaturas')
+  const [caixaGaleria, caixaImagem, caixaMiniaturas] = await Promise.all([
+    galeria.boundingBox(), imagem.boundingBox(), miniaturas.boundingBox(),
+  ])
+  expect(caixaGaleria).not.toBeNull()
+  expect(caixaImagem).not.toBeNull()
+  expect(caixaMiniaturas).not.toBeNull()
+  expect(Math.abs(caixaImagem.height - caixaGaleria.height)).toBeLessThanOrEqual(2)
+  expect(Math.abs((caixaMiniaturas.y + caixaMiniaturas.height) - (caixaGaleria.y + caixaGaleria.height))).toBeLessThanOrEqual(2)
+})
+
 test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o card', async ({ page }) => {
   await page.clock.install()
   await abrirPortfolio(page)
@@ -297,6 +314,21 @@ test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o ca
   await page.clock.fastForward(9000)
   await expect(imagem).toHaveAttribute('src', antes)
   await page.mouse.move(0, 0)
+  await page.clock.fastForward(4600)
+  await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
+})
+
+test('o carrossel também pausa durante interação por toque no modo lista', async ({ page }) => {
+  await page.clock.install()
+  await abrirPortfolio(page)
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
+  const imagem = card.locator('.obra-imagem img').first()
+  const antes = await imagem.getAttribute('src')
+  await card.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 1 })
+  await page.clock.fastForward(9000)
+  await expect(imagem).toHaveAttribute('src', antes)
+  await card.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 1 })
   await page.clock.fastForward(4600)
   await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
 })
