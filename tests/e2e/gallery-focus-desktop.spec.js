@@ -33,7 +33,8 @@ test('no foco desktop, as informações da obra continuam visíveis sem controle
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.locator('.editorial-menu-trigger').click()
-  await page.getByRole('button', { name: 'Alternar para visualização em grade' }).click()
+  await page.locator('.editorial-menu-controls .editorial-menu-control').last().click()
+  await expect(page.getByRole('dialog', { name: 'Menu do portfólio' })).toBeHidden()
 
   const card = page.locator('.galeria-grade-global .obra').first()
   await card.locator('.obra-zoom-trigger').click()

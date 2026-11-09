@@ -28,7 +28,7 @@ async function alternarModoGaleria(page, nomeBotao) {
     await menu.click()
     await expect(page.getByRole('dialog')).toBeVisible()
   }
-  await page.getByRole('button', { name: nomeBotao }).click()
+  await page.locator('.editorial-menu-controls').getByRole('button', { name: nomeBotao }).click()
 }
 
 async function abrirPortfolio(page, semIntersectionObserver = false) {
@@ -311,6 +311,9 @@ test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual 
   await expect.poll(() => imagem.evaluate(element =>
     element.getAnimations().some(animation => animation.playState === 'running')
   )).toBe(true)
+  // Interrompe no meio do zoom, quando getBoundingClientRect já está alterado
+  // pela transformação WAAPI. Esse é o cenário que deslocava o quadro de retorno.
+  await page.waitForTimeout(280)
 
   await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
   await expect(dialog).not.toHaveAttribute('open', '')
@@ -611,4 +614,99 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
   const contatoDev = rodape.getByRole('link', { name: 'Contato do desenvolvedor' })
   await expect(contatoDev).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
   await expect(rodape.getByText('leduardoss19@gmail.com', { exact: true })).toHaveCount(0)
+})
+
+
+test('o tema inicia sempre escuro mesmo se houver uma preferência clara antiga salva', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('portfolio-tema', 'claro'))
+  await abrirPortfolio(page)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'escuro')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+})
+
+test('o seletor de grade/lista fica fora do menu e abaixo do botão voltar ao topo', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.evaluate(() => window.scrollTo(0, 900))
+  const controles = page.locator('.controles-flutuantes')
+  const topo = controles.getByRole('button', { name: 'Voltar ao topo' })
+  const modo = controles.getByRole('button', { name: 'Alternar para visualização em lista' })
+  await expect(topo).toBeVisible()
+  await expect(modo).toBeVisible()
+  const [topoBox, modoBox] = await Promise.all([topo.boundingBox(), modo.boundingBox()])
+  expect(topoBox).not.toBeNull()
+  expect(modoBox).not.toBeNull()
+  expect(modoBox.y).toBeGreaterThan(topoBox.y + topoBox.height)
+
+  // O controle flutuante e o menu devem refletir a mesma fonte de estado.
+  await modo.click()
+  await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra').first()).toBeVisible()
+  await expect(controles.getByRole('button', { name: 'Alternar para visualização em grade' })).toBeVisible()
+
+  await page.locator('.editorial-menu-trigger').click()
+  const controleMenu = page.locator('.editorial-menu-controls')
+    .getByRole('button', { name: 'Alternar para visualização em grade' })
+  await expect(controleMenu).toBeVisible()
+  await controleMenu.click()
+  await expect(page.locator('.galeria-grade-global')).toBeVisible()
+  await expect(controles.getByRole('button', { name: 'Alternar para visualização em lista' })).toBeVisible()
+})
+
+test('links de referências têm contraste legível no tema claro sem hover', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: categorias.slice(0, 1),
+      referencias: [{ titulo: 'Exposição', periodo: '2025', links: [{ texto: 'Catálogo', url: 'https://example.com' }] }],
+      frames: [],
+      redes: [],
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+    }),
+  }))
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+  await page.locator('.editorial-menu-trigger').click()
+  await page.getByRole('button', { name: 'Ativar tema claro' }).click()
+  const link = page.getByRole('link', { name: 'Catálogo' })
+  await expect(link).toBeVisible()
+  const cor = await link.evaluate(element => getComputedStyle(element).color)
+  expect(cor).toBe('rgba(23, 43, 59, 0.88)')
+  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(248, 251, 253)')
+})
+
+
+test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao mesmo retângulo', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const card = page.locator('.galeria-grade-global .obra').first()
+  const trigger = card.locator('.obra-zoom-trigger')
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  const imagem = dialog.locator('.obra-focus-imagem')
+
+  for (const atraso of [90, 260, 430]) {
+    await trigger.click()
+    await expect(dialog).toHaveAttribute('open', '')
+    await page.waitForTimeout(atraso)
+    // A abertura centraliza o card antes do foco; a referência correta é
+    // a miniatura já centralizada, imediatamente antes de iniciar o retorno.
+    const antes = await trigger.boundingBox()
+    const scrollAntes = await page.evaluate(() => window.scrollY)
+    await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+    await expect(dialog).not.toHaveAttribute('open', '')
+    await expect.poll(() => imagem.evaluate(element => ({
+      transform: getComputedStyle(element).transform,
+      clipPath: getComputedStyle(element).clipPath,
+      animations: element.getAnimations().length,
+    }))).toEqual({ transform: 'none', clipPath: 'none', animations: 0 })
+    const depois = await trigger.boundingBox()
+    const scrollDepois = await page.evaluate(() => window.scrollY)
+    expect(depois).not.toBeNull()
+    expect(Math.abs(depois.x - antes.x)).toBeLessThanOrEqual(1)
+    // O desbloqueio do body no Safari/Chromium pode ajustar a rolagem da janela.
+    // Compare a coordenada no documento, não a posição transitória na viewport.
+    expect(Math.abs((depois.y + scrollDepois) - (antes.y + scrollAntes))).toBeLessThanOrEqual(1)
+    expect(Math.abs(depois.width - antes.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(depois.height - antes.height)).toBeLessThanOrEqual(1)
+  }
 })

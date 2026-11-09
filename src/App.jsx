@@ -35,11 +35,11 @@ export default function App() {
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
   const [modoGaleria, setModoGaleria] = useState('lista')
-  const [tema, setTema] = useState(() => window.localStorage.getItem('portfolio-tema') === 'claro' ? 'claro' : 'escuro')
+  // O portfólio sempre inicia no tema escuro; a escolha clara vale apenas para a sessão atual.
+  const [tema, setTema] = useState('escuro')
 
   useEffect(() => {
     document.documentElement.dataset.theme = tema
-    window.localStorage.setItem('portfolio-tema', tema)
     document.documentElement.style.colorScheme = tema === 'claro' ? 'light' : 'dark'
   }, [tema])
   const secoesNav = useMemo(() => [
@@ -272,16 +272,28 @@ export default function App() {
       {referencias.length > 0 && <Referencias referencias={referencias} />}
       <Contato endpoint={sobre.formulario} email={sobre.email} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
-      <button
-        type="button"
-        className={`voltar-topo ${mostrarVoltarTopo ? 'visivel' : ''}`}
-        aria-label="Voltar ao topo"
-        onClick={voltarAoTopo}
-        tabIndex={mostrarVoltarTopo ? 0 : -1}
-        aria-hidden={!mostrarVoltarTopo}
-      >
-        <span aria-hidden="true">↑</span>
-      </button>
+      <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
+        <button
+          type="button"
+          className={`voltar-topo ${mostrarVoltarTopo ? 'visivel' : ''}`}
+          aria-label="Voltar ao topo"
+          onClick={voltarAoTopo}
+          tabIndex={mostrarVoltarTopo ? 0 : -1}
+          aria-hidden={!mostrarVoltarTopo}
+        >
+          <span aria-hidden="true">↑</span>
+        </button>
+        <button
+          type="button"
+          className="alternar-modo-flutuante"
+          aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}
+          title={modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}
+          onClick={() => trocarModoGaleria(modoGaleria === 'lista' ? 'grade' : 'lista')}
+        >
+          <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
+          <span>{modoGaleria === 'lista' ? 'Grade' : 'Lista'}</span>
+        </button>
+      </div>
     </div>
   )
 }
