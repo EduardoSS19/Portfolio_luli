@@ -568,3 +568,31 @@ class ReferenceAdmin(admin.ModelAdmin):
     list_per_page = 30
     save_on_top = True
     inlines = (ReferenceLinkInline,)
+
+
+# ---------------------------------------------------------------------------
+# Identidade visual compartilhada pelo site e pelo painel
+# ---------------------------------------------------------------------------
+
+@admin.register(SiteAppearance)
+class SiteAppearanceAdmin(admin.ModelAdmin):
+    list_display = ("__str__",)
+    fieldsets = (
+        ("Cores do site", {
+            "fields": ("accent", "background", "background_alt", "surface", "text", "border"),
+            "description": (
+                "Estas cores são aplicadas ao portfólio público e ao painel. "
+                "Use a prévia para conferir a combinação antes de salvar."
+            ),
+        }),
+    )
+
+    class Media:
+        css = {"all": ("admin/css/portfolio_admin.css",)}
+        js = ("admin/js/site_appearance_preview.js",)
+
+    def has_add_permission(self, request):
+        return not SiteAppearance.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
