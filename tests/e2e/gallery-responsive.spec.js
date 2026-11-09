@@ -500,12 +500,32 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
       imagem: style.backgroundImage,
       opacidade: style.opacity,
       posicao: style.position,
+      displayShell: getComputedStyle(element.closest('.site-shell')).display,
+      direcaoShell: getComputedStyle(element.closest('.site-shell')).flexDirection,
+      margemSuperior: style.marginTop,
+      contato: (() => {
+        const link = element.querySelector('.rodape-contato-dev')
+        const linkStyle = getComputedStyle(link)
+        return {
+          borda: linkStyle.borderTopWidth,
+          fundo: linkStyle.backgroundColor,
+          tamanho: linkStyle.fontSize,
+          peso: linkStyle.fontWeight,
+        }
+      })(),
     }
   })
   expect(estilosRodape.fundo).toBe('rgb(2, 7, 13)')
   expect(estilosRodape.imagem).toBe('none')
   expect(estilosRodape.opacidade).toBe('1')
   expect(estilosRodape.posicao).toBe('relative')
+  expect(estilosRodape.displayShell).toBe('flex')
+  expect(estilosRodape.direcaoShell).toBe('column')
+  expect(estilosRodape.margemSuperior).toBe('auto')
+  expect(estilosRodape.contato.borda).toBe('0px')
+  expect(estilosRodape.contato.fundo).toBe('rgba(0, 0, 0, 0)')
+  expect(estilosRodape.contato.tamanho).toBe('10.88px')
+  expect(estilosRodape.contato.peso).toBe('400')
 
   await expect(rodape.getByText('Desenvolvido por')).toBeVisible()
   await expect(rodape.getByText('Eduardo', { exact: true })).toBeVisible()
