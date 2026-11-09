@@ -16,8 +16,10 @@ test('no foco desktop, as informações da obra continuam visíveis sem controle
           midias: [{ tipo: 'imagem', src: imagem }],
           descricao: 'Peça experimental em argila.',
           detalhe: 'Queima em alta temperatura.',
-          dimensoes: '20 × 30 cm',
-          ano: 2026,
+          fichaTecnica: {
+            dimensoes: { altura: 20, largura: 30, unidade: 'cm' },
+            ano: 2026,
+          },
         }],
       }],
       referencias: [],
