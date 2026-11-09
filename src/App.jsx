@@ -51,7 +51,8 @@ export default function App() {
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
-  const anteriorRef = useRef(secaoAtiva)
+  const animacaoPendenteRef = useRef(null)
+  const animacaoTimerRef = useRef(null)
   const trocaModoPendenteRef = useRef(null)
   const selecaoCategoriaTimerRef = useRef(null)
   const scrollEndHandlerRef = useRef(null)
@@ -127,16 +128,22 @@ export default function App() {
     return () => controller.abort()
   }, [])
 
+  function dispararAnimacaoCategoria(chave) {
+    if (animacaoTimerRef.current) window.clearTimeout(animacaoTimerRef.current)
+    setAnimando(chave)
+    animacaoTimerRef.current = window.setTimeout(() => {
+      setAnimando(atual => atual === chave ? null : atual)
+      animacaoTimerRef.current = null
+    }, 850)
+  }
+
+  // A seção ativa também muda durante a rolagem manual. Só animamos o título
+  // quando a navegação foi solicitada explicitamente pelo menu e chegou ao destino.
   useEffect(() => {
-    if (secaoAtiva !== anteriorRef.current) {
-      const sec = secoesNav.find(s => s.titulo === secaoAtiva)
-      anteriorRef.current = secaoAtiva
-      if (sec) {
-        setAnimando(sec.chave)
-        const timer = setTimeout(() => setAnimando(null), 1000)
-        return () => clearTimeout(timer)
-      }
-    }
+    const pendente = animacaoPendenteRef.current
+    if (!pendente || secaoAtiva !== pendente.titulo) return
+    animacaoPendenteRef.current = null
+    dispararAnimacaoCategoria(pendente.chave)
   }, [secaoAtiva])
 
   function selecionarCategoria(titulo) {
@@ -152,6 +159,15 @@ export default function App() {
     }
 
     // A seleção explícita deve refletir imediatamente na navegação.
+    const categoriaAnimacao = secoesNav.find(secao => secao.titulo === titulo)
+    if (categoriaAnimacao) {
+      if (secaoAtiva === titulo) {
+        animacaoPendenteRef.current = null
+        dispararAnimacaoCategoria(categoriaAnimacao.chave)
+      } else {
+        animacaoPendenteRef.current = categoriaAnimacao
+      }
+    }
     definirSecaoAtiva(titulo)
     const comportamentoRolagem = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     const rolarPara = (elemento, alinhamento = 'start') => {
