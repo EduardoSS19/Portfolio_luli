@@ -15,6 +15,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
+  const overflowAnteriorRef = useRef('')
   const categoriaAtual = categorias.find(cat => cat.titulo === categoriaAtiva)
   const animacaoAtual = categoriaAtual && animando === categoriaAtual.chave
     ? `anim-${tipoDeAnimacao(categoriaAtual)}`
@@ -24,7 +25,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     if (!menuAberto) return undefined
 
     const focoAnterior = document.activeElement
-    const overflowAnterior = document.body.style.overflow
+    overflowAnteriorRef.current = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     primeiroLinkRef.current?.focus()
 
@@ -51,14 +52,16 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     document.addEventListener('keydown', tratarTeclado)
     return () => {
       document.removeEventListener('keydown', tratarTeclado)
-      document.body.style.overflow = overflowAnterior
+      document.body.style.overflow = overflowAnteriorRef.current
       if (focoAnterior instanceof HTMLElement) focoAnterior.focus()
     }
   }, [menuAberto])
 
   function selecionar(titulo) {
-    aoSelecionar(titulo)
+    // Libera a rolagem antes de iniciar o scroll suave da seção selecionada.
+    document.body.style.overflow = overflowAnteriorRef.current
     setMenuAberto(false)
+    aoSelecionar(titulo)
   }
 
   function fecharAoClicarNoFundo(evento) {
