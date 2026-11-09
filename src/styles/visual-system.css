@@ -5,6 +5,9 @@
   --azul-claro:#93c8f2;
   --texto:#eff7ff;
   --linha:rgba(195,225,249,0.16);
+  --rodape-fundo:#02070d;
+  --rodape-texto:#eff7ff;
+  --rodape-muted:rgba(239,247,255,0.58);
 }
 html{ scroll-behavior:smooth; scroll-padding-top:6rem; }
 body{
@@ -636,18 +639,24 @@ nav button.ativo{
   border-radius:1rem;
   background:rgba(9,31,50,0.82);
 }
+:root[data-theme="claro"]{
+  --rodape-fundo:#f1f6fa;
+  --rodape-texto:#172b3b;
+  --rodape-muted:rgba(23,43,59,0.66);
+}
 .rodape{
   position:relative;
   isolation:isolate;
   border-color:var(--linha);
   padding-top:3rem;
-  background:#02070d !important;
-  background-color:#02070d !important;
-  background-image:none !important;
+  color:var(--rodape-texto);
+  background:var(--rodape-fundo);
+  background-image:none;
   opacity:1 !important;
   backdrop-filter:none !important;
 }
 .rodape-links a{
+  color:var(--azul-claro);
   padding:0.45rem 0.7rem;
   border:1px solid transparent;
   border-radius:999px;
@@ -667,10 +676,16 @@ nav button.ativo{
   margin-top:1.25rem;
   padding-top:1rem;
   border-top:1px solid var(--linha);
-  color:rgba(239,247,255,0.58);
+  color:var(--rodape-muted);
   font-size:0.78rem;
 }
-.rodape-creditos strong{ color:rgba(239,247,255,0.88); font-weight:600; }
+.rodape-creditos strong{ color:var(--rodape-texto); font-weight:600; }
+.rodape small{ color:var(--rodape-muted); }
+:root[data-theme="claro"] .rodape-links a,
+:root[data-theme="claro"] .rodape-links a:visited{ color:#285f8d; }
+:root[data-theme="claro"] .rodape-links a:hover,
+:root[data-theme="claro"] .rodape-links a:focus-visible{ color:#0b2943; }
+:root[data-theme="claro"] .rodape-creditos{ border-color:rgba(40,95,141,.2); }
 .rodape-creditos .rodape-contato-dev{
   display:inline-flex;
   min-height:2.25rem;
@@ -1245,7 +1260,7 @@ nav.site-nav.editorial-nav{
   padding:0;
   border:0;
   border-radius:0;
-  color:rgba(239,247,255,.48);
+  color:var(--rodape-muted);
   background:transparent;
   font-size:.68rem;
   font-weight:400;
@@ -1254,19 +1269,19 @@ nav.site-nav.editorial-nav{
   opacity:.82;
 }
 .rodape-creditos .rodape-contato-dev:hover{
-  color:rgba(239,247,255,.78);
+  color:var(--rodape-texto);
   border:0;
   background:transparent;
   text-decoration:underline;
   transform:none;
 }
 :root[data-theme="claro"] .rodape-creditos .rodape-contato-dev{
-  color:rgba(23,43,59,.52);
+  color:var(--rodape-muted);
   border:0;
   background:transparent;
 }
 :root[data-theme="claro"] .rodape-creditos .rodape-contato-dev:hover{
-  color:rgba(23,43,59,.82);
+  color:var(--rodape-texto);
   border:0;
   background:transparent;
 }
@@ -1326,7 +1341,7 @@ nav.site-nav.editorial-nav{
 @media (max-width:760px) {
   .controles-flutuantes {
     right: max(.85rem, env(safe-area-inset-right));
-    bottom: calc(5.25rem + env(safe-area-inset-bottom));
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
   .site-shell:has(.site-nav.menu-aberto) .controles-flutuantes {
     visibility: hidden;
