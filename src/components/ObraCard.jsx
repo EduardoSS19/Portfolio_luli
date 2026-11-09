@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
 import { useCardEmFoco } from '../hooks/useCardEmFoco.js'
@@ -85,6 +85,8 @@ export function ObraCard({
   estiloGrade,
 }) {
   const [expandido, setExpandido] = useState(false)
+  const [fichaFocoExpandida, setFichaFocoExpandida] = useState(false)
+  const fichaFocoId = useId()
   const [hoverNoCard, setHoverNoCard] = useState(false)
   const [indiceImagem, setIndiceImagem] = useState(0)
   const [direcao, setDirecao] = useState(1)
@@ -212,6 +214,7 @@ export function ObraCard({
     if (!dialog || dialogAberto(dialog) || focoFechandoRef.current) return
 
     focoPendenteRef.current = false
+    setFichaFocoExpandida(false)
     // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
     flushSync(() => {
       setFocoPreparado(true)
@@ -280,6 +283,7 @@ export function ObraCard({
     document.body.style.overflow = overflowAnteriorRef.current
     setFocoFechando(false)
     setVideoFocoAtivo(false)
+    setFichaFocoExpandida(false)
     focoFechandoRef.current = false
     imagemRef.current?.focus({ preventScroll: true })
   }
@@ -676,11 +680,26 @@ export function ObraCard({
             )}
           </div>
           <div className="obra-focus-caption">
-            <span>{categoriaNome}</span>
             <h2>{titulo}</h2>
-            {descricao && <p>{descricao}</p>}
-            {detalhe && <p className="obra-focus-detalhe">{detalhe}</p>}
-            {valoresTecnicos.length > 0 && <dl className="obra-focus-ficha">{valoresTecnicos.map(([rotulo, valor]) => <div key={rotulo}><dt>{rotulo}</dt><dd>{valor}</dd></div>)}</dl>}
+            <button
+              type="button"
+              className="obra-focus-info-toggle"
+              aria-expanded={fichaFocoExpandida}
+              aria-controls={fichaFocoId}
+              onClick={() => setFichaFocoExpandida(aberta => !aberta)}
+            >
+              {fichaFocoExpandida ? 'Ocultar informações' : 'Ver informações da obra'}
+              <span aria-hidden="true">{fichaFocoExpandida ? '−' : '+'}</span>
+            </button>
+            <div
+              id={fichaFocoId}
+              className={`obra-focus-metadados ${fichaFocoExpandida ? 'expandido' : ''}`}
+            >
+              <span>{categoriaNome}</span>
+              {descricao && <p>{descricao}</p>}
+              {detalhe && <p className="obra-focus-detalhe">{detalhe}</p>}
+              {valoresTecnicos.length > 0 && <dl className="obra-focus-ficha">{valoresTecnicos.map(([rotulo, valor]) => <div key={rotulo}><dt>{rotulo}</dt><dd>{valor}</dd></div>)}</dl>}
+            </div>
           </div>
         </div>
       </dialog>
