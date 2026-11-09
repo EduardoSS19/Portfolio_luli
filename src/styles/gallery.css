@@ -1154,3 +1154,38 @@
     bottom: 44px !important;
   }
 }
+
+
+/* Na grade, o carrossel é indicado por um contador compacto (+N imagens).
+   As miniaturas continuam disponíveis no modo lista e no visualizador ampliado. */
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-texto,
+.galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
+  bottom: 0 !important;
+}
+.galeria-grade-global .obra.modo-grade .grade-midia-contagem {
+  position: absolute !important;
+  z-index: 8 !important;
+  top: .6rem !important;
+  right: .6rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 2rem !important;
+  min-height: 1.7rem !important;
+  padding: .2rem .55rem !important;
+  border: 1px solid rgba(255,255,255,.32) !important;
+  border-radius: 999px !important;
+  color: #fff !important;
+  background: rgba(5,20,33,.78) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.22) !important;
+  font-size: .7rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
