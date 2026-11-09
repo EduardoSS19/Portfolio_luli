@@ -9,6 +9,16 @@
 
 {% block extrahead %}
 {{ block.super }}
+<style>
+:root {
+  --site-accent: {{ site_appearance.accent }};
+  --site-background: {{ site_appearance.background }};
+  --site-background-alt: {{ site_appearance.background_alt }};
+  --site-surface: {{ site_appearance.surface }};
+  --site-text: {{ site_appearance.text }};
+  --site-border: {{ site_appearance.border }};
+}
+</style>
 <link rel="stylesheet" href="{% static 'admin/css/portfolio_admin.css' %}">
 <script src="{% static 'admin/js/portfolio_admin.js' %}" defer></script>
 {% endblock %}
