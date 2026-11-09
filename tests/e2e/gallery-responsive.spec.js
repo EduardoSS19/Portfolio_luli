@@ -712,20 +712,17 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
 })
 
 
-test('o botão flutuante fica alinhado logo acima da navegação inferior no mobile', async ({ page }) => {
+test('o botão flutuante fica mais baixo e mantém margem segura no mobile', async ({ page }) => {
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 390, height: 844 })
   await page.evaluate(() => window.scrollTo(0, 900))
   const botao = page.locator('.alternar-modo-flutuante')
-  const navegacao = page.locator('nav.site-nav')
   await expect(botao).toBeVisible()
-  await expect(navegacao).toBeVisible()
-  const [botaoBox, navBox] = await Promise.all([botao.boundingBox(), navegacao.boundingBox()])
+  const botaoBox = await botao.boundingBox()
   expect(botaoBox).not.toBeNull()
-  expect(navBox).not.toBeNull()
-  const distancia = navBox.y - (botaoBox.y + botaoBox.height)
-  expect(distancia).toBeGreaterThanOrEqual(0)
-  expect(distancia).toBeLessThanOrEqual(12)
+  const distanciaDaBordaInferior = 844 - (botaoBox.y + botaoBox.height)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(60)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(75)
 })
 
 test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ page }) => {
