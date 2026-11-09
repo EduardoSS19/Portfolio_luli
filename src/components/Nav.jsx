@@ -76,6 +76,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     if (evento.target === evento.currentTarget) setMenuAberto(false)
   }
 
+  function alternarModoGaleria() {
+    aoTrocarModo(modoGaleria === 'lista' ? 'grade' : 'lista')
+    setMenuAberto(false)
+  }
+
   return (
     <nav className={`site-nav editorial-nav ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
       <button
@@ -129,7 +134,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
               <span aria-hidden="true">{tema === 'escuro' ? '☼' : '☾'}</span>
               <span>{tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}</span>
             </button>
-            <button type="button" className="editorial-menu-control" onClick={() => aoTrocarModo(modoGaleria === 'lista' ? 'grade' : 'lista')} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
+            <button type="button" className="editorial-menu-control" onClick={alternarModoGaleria} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
               <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
               <span>{modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}</span>
             </button>
