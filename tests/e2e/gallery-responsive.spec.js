@@ -271,6 +271,36 @@ test('a grade indica carrossel com contador e setas, sem miniaturas ou rótulo V
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
 })
 
+test('o carrossel da grade ocupa toda a altura do card sem reservar faixa de miniaturas', async ({ page }) => {
+  await abrirPortfolio(page)
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  const galeria = card.locator('.obra-galeria')
+  const imagem = card.locator('.obra-imagem')
+  const [caixaGaleria, caixaImagem] = await Promise.all([
+    galeria.boundingBox(),
+    imagem.boundingBox(),
+  ])
+  expect(caixaGaleria).not.toBeNull()
+  expect(caixaImagem).not.toBeNull()
+  expect(Math.abs(caixaImagem.height - caixaGaleria.height)).toBeLessThanOrEqual(2)
+  await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
+})
+
+test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o card', async ({ page }) => {
+  await page.clock.install()
+  await abrirPortfolio(page)
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  const imagem = card.locator('.obra-imagem img').first()
+  const antes = await imagem.getAttribute('src')
+  await card.hover()
+  await page.clock.fastForward(9000)
+  await expect(imagem).toHaveAttribute('src', antes)
+  await page.mouse.move(0, 0)
+  await page.clock.fastForward(4600)
+  await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
+})
+
 test('os títulos da grade só aparecem ao passar o mouse ou focar por teclado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
