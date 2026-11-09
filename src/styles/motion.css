@@ -510,3 +510,13 @@ nav button[class*="anim-video"],
     padding: 1.5rem clamp(1.25rem, 5vw, 2rem) 2rem;
   }
 }
+
+
+/* O título de Cerâmica usa apenas a animação de entrada para controlar o movimento. */
+.secao-cabecalho.arte-ceramica.animando h2{
+  transition:opacity .55s ease,color .2s ease!important;
+  will-change:transform,letter-spacing;
+}
+@media(prefers-reduced-motion:reduce){
+  .secao-cabecalho.arte-ceramica.animando h2{will-change:auto}
+}
