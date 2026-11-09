@@ -502,7 +502,6 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
       posicao: style.position,
       displayShell: getComputedStyle(element.closest('.site-shell')).display,
       direcaoShell: getComputedStyle(element.closest('.site-shell')).flexDirection,
-      margemSuperior: style.marginTop,
       contato: (() => {
         const link = element.querySelector('.rodape-contato-dev')
         const linkStyle = getComputedStyle(link)
@@ -521,7 +520,16 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
   expect(estilosRodape.posicao).toBe('relative')
   expect(estilosRodape.displayShell).toBe('flex')
   expect(estilosRodape.direcaoShell).toBe('column')
-  expect(estilosRodape.margemSuperior).toBe('auto')
+  // Simula uma página curta: sem conteúdo anterior, o rodapé deve ocupar o fim da janela.
+  const alinhamentoRodape = await rodape.evaluate(element => {
+    const shell = element.closest('.site-shell')
+    Array.from(shell.children).forEach(child => {
+      if (child !== element) child.remove()
+    })
+    const rect = element.getBoundingClientRect()
+    return { inferior: rect.bottom, alturaJanela: window.innerHeight }
+  })
+  expect(alinhamentoRodape.inferior).toBeGreaterThanOrEqual(alinhamentoRodape.alturaJanela - 1)
   expect(estilosRodape.contato.borda).toBe('0px')
   expect(estilosRodape.contato.fundo).toBe('rgba(0, 0, 0, 0)')
   expect(estilosRodape.contato.tamanho).toBe('10.88px')
