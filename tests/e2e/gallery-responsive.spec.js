@@ -334,6 +334,12 @@ test('o carrossel também pausa durante interação por toque no modo lista', as
   await abrirPortfolio(page)
   await page.getByRole('button', { name: 'Visualizar em lista' }).click()
   const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
+  // A lista pode reposicionar o primeiro carrossel fora da viewport.
+  // O autoplay só roda depois que o card foi revelado pelo IntersectionObserver.
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => card.evaluate(element =>
+    Number.parseFloat(getComputedStyle(element).opacity)
+  ), { timeout: 5000 }).toBeGreaterThanOrEqual(0.95)
   const imagem = card.locator('.obra-imagem img').first()
   const antes = await imagem.getAttribute('src')
   await card.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 1 })
