@@ -1292,7 +1292,7 @@ nav.site-nav.editorial-nav{
   position: fixed;
   z-index: 22;
   right: max(1.1rem, env(safe-area-inset-right));
-  bottom: max(1.1rem, env(safe-area-inset-bottom));
+  bottom: max(.55rem, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1341,7 +1341,7 @@ nav.site-nav.editorial-nav{
 @media (max-width:760px) {
   .controles-flutuantes {
     right: max(.85rem, env(safe-area-inset-right));
-    bottom: calc(4.2rem + env(safe-area-inset-bottom));
+    bottom: calc(2.9rem + env(safe-area-inset-bottom));
   }
   .site-shell:has(.site-nav.menu-aberto) .controles-flutuantes {
     visibility: hidden;
