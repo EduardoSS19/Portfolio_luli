@@ -260,6 +260,25 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
+test('no celular a grade mantém o +N e esconde as setas do carrossel', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  await expect(card.locator('.grade-midia-contagem')).toContainText('+')
+  await expect(card.locator('.carrossel-seta')).toHaveCount(2)
+  await expect(card.locator('.carrossel-seta').first()).toBeHidden()
+  await expect(card.locator('.carrossel-seta').last()).toBeHidden()
+})
+
+test('na lista desktop, o texto do carrossel fica centralizado verticalmente', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const texto = page.locator('.secao:not(.sobre-secao) .obra.tem-carrossel .obra-texto').first()
+  await expect(texto).toBeVisible()
+  await expect(texto).toHaveCSS('justify-content', 'center')
+})
+
 test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplicado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()

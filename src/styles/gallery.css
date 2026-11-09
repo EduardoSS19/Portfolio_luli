@@ -1224,14 +1224,10 @@
   }
 }
 @media (max-width: 760px) {
+  /* No celular, a quantidade de mídias já indica o carrossel sem poluir a foto. */
   .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-seta {
-    display: grid !important;
-    width: 2.15rem;
-    height: 2.15rem;
-    opacity: .92;
+    display: none !important;
   }
-  .galeria-grade-global .obra.modo-grade .carrossel-anterior { left: .45rem; }
-  .galeria-grade-global .obra.modo-grade .carrossel-proxima { right: .45rem; }
   .galeria-grade-global .obra.modo-grade .carrossel-indice {
     top: .5rem;
     left: .5rem;
@@ -1241,14 +1237,14 @@
 }
 
 
-/* Quando a galeria tem miniaturas no modo lista, sua coluna fica mais alta.
-   Ancoramos o bloco editorial no rodapé do card para o título não parecer flutuar. */
+/* No modo lista, o texto do carrossel mantém o mesmo alinhamento vertical
+   dos demais cards; as miniaturas são sobrepostas à mídia e não pedem altura extra. */
 .secao:not(.sobre-secao) .obra.tem-carrossel .obra-texto {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   align-self: stretch;
-  min-height: 100%;
+  min-height: 0;
   box-sizing: border-box;
 }
 
