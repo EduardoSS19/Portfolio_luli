@@ -429,8 +429,11 @@ export function ObraCard({
         data-grade-indice={modoGrade ? indiceGrade : undefined}
         data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
         onClick={centralizarAoClicarCard}
-        onPointerEnter={() => setHoverNoCard(true)}
-        onPointerLeave={() => setHoverNoCard(false)}
+        onPointerEnter={event => { if (event.pointerType === 'mouse') setHoverNoCard(true) }}
+        onPointerLeave={event => { if (event.pointerType === 'mouse') setHoverNoCard(false) }}
+        onPointerDown={event => { if (event.pointerType !== 'mouse') setHoverNoCard(true) }}
+        onPointerUp={event => { if (event.pointerType !== 'mouse') setHoverNoCard(false) }}
+        onPointerCancel={() => setHoverNoCard(false)}
       >
         <div className="obra-galeria">
           <div
