@@ -85,6 +85,7 @@ export function ObraCard({
   estiloGrade,
 }) {
   const [expandido, setExpandido] = useState(false)
+  const [hoverNoCard, setHoverNoCard] = useState(false)
   const [indiceImagem, setIndiceImagem] = useState(0)
   const [direcao, setDirecao] = useState(1)
   const [focoAberto, setFocoAberto] = useState(false)
@@ -138,8 +139,8 @@ export function ObraCard({
   ].filter(([, valor]) => valor !== null && valor !== undefined && String(valor).trim() !== '')
   const temDetalhes = Boolean(detalhe || valoresTecnicos.length)
 
-  // Centraliza o card seguindo a posição REAL dele a cada quadro. Assim, se o card
-  // crescer (detalhes abrindo) a rolagem acompanha junto, sem esperar nem "corrigir" depois.
+  // Centralização curta e com easing de saída: chega ao ponto sem aquela
+  // desaceleração interminável do ajuste incremental anterior.
   function centralizarCard(minimoMs = 0) {
     const card = ref.current
     if (!card) return Promise.resolve()
@@ -159,25 +160,25 @@ export function ObraCard({
 
     return new Promise(resolve => {
       const inicio = performance.now()
+      const inicioScroll = window.scrollY
+      const duracao = Math.max(340, minimoMs)
       let interrompido = false
       const interromper = () => { interrompido = true }
 
       function finalizar() {
         window.removeEventListener('wheel', interromper)
         window.removeEventListener('touchstart', interromper)
+        if (!interrompido) window.scrollTo({ top: calcularAlvo(), behavior: 'auto' })
         resolve()
       }
 
       function passo(agora) {
-        const decorrido = agora - inicio
-        if (interrompido || decorrido > 1400) return finalizar()
-
-        const falta = calcularAlvo() - window.scrollY
-        if (Math.abs(falta) < 1 && decorrido >= minimoMs) return finalizar()
-
-        const tamanho = Math.max(1, Math.abs(falta) * 0.16)
-        const deslocamento = Math.sign(falta) * Math.min(Math.abs(falta), tamanho)
-        window.scrollTo({ top: window.scrollY + deslocamento, behavior: 'auto' })
+        if (interrompido) return finalizar()
+        const progresso = Math.min(1, (agora - inicio) / duracao)
+        const easing = 1 - Math.pow(1 - progresso, 4)
+        const alvo = calcularAlvo()
+        window.scrollTo({ top: inicioScroll + (alvo - inicioScroll) * easing, behavior: 'auto' })
+        if (progresso >= 1) return finalizar()
         seguirRef.current = requestAnimationFrame(passo)
       }
 
@@ -335,10 +336,10 @@ export function ObraCard({
     }
   }
 
-  // Avança automaticamente pelos itens do carrossel enquanto o card está visível.
-  // Pausa fora da viewport, com o visualizador aberto ou durante a reprodução de vídeo.
+  // Avança automaticamente apenas enquanto o card está visível e não está sob interação.
+  // O hover pausa o timer inteiro; ao sair, começa um novo intervalo de 4,5 s.
   useEffect(() => {
-    if (midias.length < 2 || !visivel || focoAberto || videoAtivoId) return undefined
+    if (midias.length < 2 || !visivel || focoAberto || videoAtivoId || hoverNoCard) return undefined
 
     const intervalo = window.setInterval(() => {
       if (document.hidden) return
@@ -347,7 +348,7 @@ export function ObraCard({
     }, 4500)
 
     return () => window.clearInterval(intervalo)
-  }, [midias.length, visivel, focoAberto, videoAtivoId])
+  }, [midias.length, visivel, focoAberto, videoAtivoId, hoverNoCard])
 
   useEffect(() => {
     const imagem = imagemRef.current
@@ -428,6 +429,11 @@ export function ObraCard({
         data-grade-indice={modoGrade ? indiceGrade : undefined}
         data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
         onClick={centralizarAoClicarCard}
+        onPointerEnter={event => { if (event.pointerType === 'mouse') setHoverNoCard(true) }}
+        onPointerLeave={event => { if (event.pointerType === 'mouse') setHoverNoCard(false) }}
+        onPointerDown={event => { if (event.pointerType !== 'mouse') setHoverNoCard(true) }}
+        onPointerUp={event => { if (event.pointerType !== 'mouse') setHoverNoCard(false) }}
+        onPointerCancel={() => setHoverNoCard(false)}
       >
         <div className="obra-galeria">
           <div
@@ -508,11 +514,13 @@ export function ObraCard({
             ) : <span>Imagem da obra</span>}
             {midias.length > 1 && (
               <>
-                <span className="carrossel-indice" aria-label={`Imagem ${indiceImagem + 1} de ${midias.length}`}>
-                  {String(indiceImagem + 1).padStart(2, '0')}
-                  <i aria-hidden="true">/</i>
-                  {String(midias.length).padStart(2, '0')}
-                </span>
+                {!modoGrade && (
+                  <span className="carrossel-indice" aria-label={`Imagem ${indiceImagem + 1} de ${midias.length}`}>
+                    {String(indiceImagem + 1).padStart(2, '0')}
+                    <i aria-hidden="true">/</i>
+                    {String(midias.length).padStart(2, '0')}
+                  </span>
+                )}
                 <button
                   type="button"
                   className="carrossel-seta carrossel-anterior"

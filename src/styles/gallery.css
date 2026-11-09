@@ -1251,3 +1251,33 @@
   min-height: 100%;
   box-sizing: border-box;
 }
+
+
+/* A grade não reserva mais os 48 px que pertenciam à faixa de miniaturas.
+   O contador +N imagens é o único indicador; a mídia ocupa o card inteiro. */
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+  inset: 0 !important;
+  height: 100% !important;
+  bottom: 0 !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-texto,
+.galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
+  bottom: 0 !important;
+}
+.galeria-grade-global .obra.modo-grade .carrossel-indice {
+  display: none !important;
+}
+
+
+/* Lista e grade compartilham a mesma área de mídia: miniaturas da lista
+   ficam sobrepostas no rodapé, sem criar uma faixa vazia nem reduzir a imagem. */
+.secao:not(.sobre-secao) .obra.tem-carrossel .obra-galeria {
+  position: relative;
+}
+.secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
+  position: absolute;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}

@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 const imagemTeste = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%231e6688%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23f5d6a2%22/%3E%3C/svg%3E'
+const imagemTesteAlternativa = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%23883b66%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23a2e5f5%22/%3E%3C/svg%3E'
 
 const categorias = [
   { titulo: 'Glitch Art', chave: 'glitch-art', obras: [
-    { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTeste }], descricao: 'Estudo de cor e interferência.' },
+    { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTesteAlternativa }], descricao: 'Estudo de cor e interferência.' },
     { titulo: 'Falha de sinal', imagem: imagemTeste, descricao: 'Composição digital.' },
   ] },
   { titulo: 'Vídeos', chave: 'videos', obras: [
@@ -182,6 +183,11 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
     for (const chave of ['ceramica', 'gravura', 'desenhos', 'fotografia', 'outras']) {
       const card = page.locator(`.galeria-grade-global .obra.categoria-${chave}`)
       await card.scrollIntoViewIfNeeded()
+      // Aguarda a animação artística inicial terminar antes de medir a caixa renderizada:
+      // alguns keyframes (ex.: cerâmica no torno) aplicam scale/clip-path durante a entrada.
+      await expect.poll(() => card.locator('.obra-zoom-trigger img').evaluate(image =>
+        image.getAnimations().every(animation => animation.playState === 'finished')
+      ), { timeout: 5000 }).toBe(true)
       const metrics = await card.evaluate(element => {
         const cardRect = element.getBoundingClientRect()
         const gallery = element.querySelector('.obra-galeria')
@@ -254,21 +260,94 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
-test('a grade indica carrossel com contador e setas, sem miniaturas ou rótulo VISTA', async ({ page }) => {
+test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplicado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
   await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await expect(card.locator('.grade-midia-contagem')).toHaveText('+1 imagem')
-  await expect(card.locator('.carrossel-indice')).not.toContainText('VISTA')
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
   await expect(card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' })).toBeVisible()
   await card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' }).click()
-  await expect(card.locator('.carrossel-indice')).toContainText('02')
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
   await card.locator('.obra-zoom-trigger').click()
   const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
   await expect(dialog).toHaveAttribute('open', '')
   await expect(dialog.locator('.obra-focus-proxima')).toBeVisible()
   await dialog.locator('.obra-focus-proxima').click()
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
+})
+
+test('o carrossel da grade ocupa toda a altura do card sem reservar faixa de miniaturas', async ({ page }) => {
+  await abrirPortfolio(page)
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  const galeria = card.locator('.obra-galeria')
+  const imagem = card.locator('.obra-imagem')
+  const [caixaGaleria, caixaImagem] = await Promise.all([
+    galeria.boundingBox(),
+    imagem.boundingBox(),
+  ])
+  expect(caixaGaleria).not.toBeNull()
+  expect(caixaImagem).not.toBeNull()
+  expect(Math.abs(caixaImagem.height - caixaGaleria.height)).toBeLessThanOrEqual(2)
+  await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
+})
+
+test('na lista, as miniaturas ficam sobre a mídia sem reservar altura extra', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
+  const galeria = card.locator('.obra-galeria')
+  const imagem = card.locator('.obra-imagem')
+  const miniaturas = card.locator('.carrossel-miniaturas')
+  const [caixaGaleria, caixaImagem, caixaMiniaturas] = await Promise.all([
+    galeria.boundingBox(), imagem.boundingBox(), miniaturas.boundingBox(),
+  ])
+  expect(caixaGaleria).not.toBeNull()
+  expect(caixaImagem).not.toBeNull()
+  expect(caixaMiniaturas).not.toBeNull()
+  expect(Math.abs(caixaImagem.height - caixaGaleria.height)).toBeLessThanOrEqual(2)
+  expect(Math.abs((caixaMiniaturas.y + caixaMiniaturas.height) - (caixaGaleria.y + caixaGaleria.height))).toBeLessThanOrEqual(2)
+})
+
+test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o card', async ({ page }) => {
+  await page.clock.install()
+  await abrirPortfolio(page)
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  const imagem = card.locator('.obra-imagem img').first()
+  const antes = await imagem.getAttribute('src')
+  await card.hover()
+  await page.clock.fastForward(9000)
+  await expect(imagem).toHaveAttribute('src', antes)
+  // React sintetiza onPointerLeave a partir de pointerout; relatedTarget fora do card.
+  await card.evaluate(element => element.dispatchEvent(new PointerEvent('pointerout', {
+    bubbles: true,
+    pointerType: 'mouse',
+    relatedTarget: document.body,
+  })))
+  await page.clock.fastForward(4600)
+  await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
+})
+
+test('o carrossel também pausa durante interação por toque no modo lista', async ({ page }) => {
+  await page.clock.install()
+  await abrirPortfolio(page)
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
+  // A lista pode reposicionar o primeiro carrossel fora da viewport.
+  // O autoplay só roda depois que o card foi revelado pelo IntersectionObserver.
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => card.evaluate(element =>
+    Number.parseFloat(getComputedStyle(element).opacity)
+  ), { timeout: 5000 }).toBeGreaterThanOrEqual(0.95)
+  const imagem = card.locator('.obra-imagem img').first()
+  const antes = await imagem.getAttribute('src')
+  await card.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 1 })
+  await page.clock.fastForward(9000)
+  await expect(imagem).toHaveAttribute('src', antes)
+  await card.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 1 })
+  await page.clock.fastForward(4600)
+  await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
 })
 
 test('os títulos da grade só aparecem ao passar o mouse ou focar por teclado', async ({ page }) => {
