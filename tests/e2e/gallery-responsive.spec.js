@@ -313,7 +313,8 @@ test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o ca
   await card.hover()
   await page.clock.fastForward(9000)
   await expect(imagem).toHaveAttribute('src', antes)
-  await page.mouse.move(0, 0)
+  // Dispara a saída explicitamente: (0, 0) pode continuar dentro do card em alguns viewports.
+  await card.dispatchEvent('pointerleave', { pointerType: 'mouse' })
   await page.clock.fastForward(4600)
   await expect.poll(() => imagem.getAttribute('src')).not.toBe(antes)
 })
