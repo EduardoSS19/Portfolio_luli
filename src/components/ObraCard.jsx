@@ -423,7 +423,7 @@ export function ObraCard({
     <>
       <article
         ref={ref}
-        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midias.some(midia => midia.tipo === 'youtube') ? 'tem-video' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midias.some(midia => midia.tipo === 'youtube') ? 'tem-video' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${modoGrade && midias.length > 1 ? 'tem-miniaturas-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
         style={modoGrade ? estiloGrade : undefined}
         data-grade-indice={modoGrade ? indiceGrade : undefined}
         data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
@@ -506,12 +506,7 @@ export function ObraCard({
                 )}
               </>
             ) : <span>Imagem da obra</span>}
-            {modoGrade && midias.length > 1 && (
-              <span className="grade-midia-contagem" aria-label={`${midias.length} mídias disponíveis`}>
-                +{midias.length - 1}
-              </span>
-            )}
-            {midias.length > 1 && !modoGrade && (
+            {midias.length > 1 && (
               <>
                 <span className="carrossel-indice">
                   <span>VISTA</span>
@@ -538,8 +533,8 @@ export function ObraCard({
               </>
             )}
           </div>
-          {midias.length > 1 && !modoGrade && (
-            <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
+          {midias.length > 1 && (
+            <div className={`carrossel-miniaturas ${modoGrade ? 'grade-miniaturas' : ''}`} role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
               {midias.map((midia, index) => (
                 <button
                   type="button"

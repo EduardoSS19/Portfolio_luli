@@ -848,10 +848,173 @@
 }
 
 
-/* DIAGNÓSTICO: ocultar temporariamente videoarte, glitch e obras com vídeo na grade global. */
-.galeria-grade-global .obras-lista.modo-grade > .obra.arte-glitch,
-.galeria-grade-global .obras-lista.modo-grade > .obra.arte-videoarte,
-.galeria-grade-global .obras-lista.modo-grade > .obra.tem-video,
-.galeria-grade-global .obras-lista.modo-grade > .obra.midia-video {
-  display: none !important;
+
+/* Grade mobile estável: a caixa de mídia participa do fluxo e define sua
+   própria proporção. Evita a cadeia de alturas percentuais absolutas que
+   fazia alguns WebKit/Android reduzirem a mídia a poucos pixels. */
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obras-lista.modo-grade {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start;
+    gap: .55rem;
+  }
+
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.midia-video {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    aspect-ratio: auto !important;
+    overflow: hidden;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-galeria {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-imagem {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+    overflow: hidden;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+    bottom: 2.65rem !important;
+    height: auto !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-zoom-trigger,
+  .galeria-grade-global .obra.modo-grade .obra-video-trigger {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-zoom-trigger img,
+  .galeria-grade-global .obra.modo-grade .obra-video-trigger img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-texto {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 4;
+    display: flex !important;
+    min-width: 0;
+    padding: .55rem .6rem !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: none !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
+    bottom: 2.65rem !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-texto h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: clamp(.76rem, 3.1vw, .95rem);
+    line-height: 1.15;
+    text-shadow: 0 1px 8px rgba(0,0,0,.65);
+  }
+
+  .galeria-grade-global .obra.modo-grade .obra-texto > p,
+  .galeria-grade-global .obra.modo-grade .categoria-legenda {
+    display: none !important;
+  }
+
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas {
+    position: absolute !important;
+    z-index: 6 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    display: flex !important;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 2.65rem;
+    min-height: 2.65rem;
+    gap: .3rem;
+    padding: .3rem .4rem;
+    overflow-x: auto;
+    background: rgba(5,20,33,.88);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas::-webkit-scrollbar {
+    display: none;
+  }
+
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas button {
+    flex: 0 0 2.15rem;
+    width: 2.15rem;
+    height: 1.95rem;
+    min-width: 2.15rem;
+    border-radius: .25rem;
+  }
+
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas .carrossel-arraste {
+    display: none;
+  }
+
+  .galeria-grade-global .obra.modo-grade .grade-midia-contagem {
+    display: none !important;
+  }
+}
+
+@supports not (aspect-ratio: 1 / 1) {
+  @media (hover: none), (pointer: coarse) {
+    .galeria-grade-global .obra.modo-grade .obra-galeria {
+      height: 0 !important;
+      padding-bottom: 133.333% !important;
+    }
+  }
 }
