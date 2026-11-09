@@ -310,10 +310,11 @@ test('no foco mobile, a obra e o título aparecem antes das informações adicio
   const toggle = dialog.getByRole('button', { name: 'Ver informações da obra' })
   await expect(toggle).toBeVisible()
   await toggle.click()
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  const toggleAberto = dialog.getByRole('button', { name: 'Ocultar informações' })
+  await expect(toggleAberto).toHaveAttribute('aria-expanded', 'true')
   await expect(metadados).toBeVisible()
   await expect(metadados).toContainText('Estudo de cor e interferência.')
-  await dialog.getByRole('button', { name: 'Ocultar informações' }).click()
+  await toggleAberto.click()
   await expect(metadados).toBeHidden()
 })
 
