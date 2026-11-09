@@ -155,7 +155,7 @@ def portfolio_data(request):
     social_links = SocialLink.objects.filter(is_active=True)
 
     payload = {
-            "aparencia": {\n                "accent": SiteAppearance.get_solo().accent,\n                "background": SiteAppearance.get_solo().background,\n                "backgroundAlt": SiteAppearance.get_solo().background_alt,\n                "surface": SiteAppearance.get_solo().surface,\n                "text": SiteAppearance.get_solo().text,\n                "border": SiteAppearance.get_solo().border,\n            },\n            "sobre": (
+            "aparencia": {\n                "accent": appearance.accent,\n                "background": appearance.background,\n                "backgroundAlt": appearance.background_alt,\n                "surface": appearance.surface,\n                "text": appearance.text,\n                "border": appearance.border,\n            },\n            "sobre": (
                 {
                     "nome": profile.name,
                     "frase": profile.tagline,
