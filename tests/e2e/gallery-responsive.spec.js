@@ -183,6 +183,11 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
     for (const chave of ['ceramica', 'gravura', 'desenhos', 'fotografia', 'outras']) {
       const card = page.locator(`.galeria-grade-global .obra.categoria-${chave}`)
       await card.scrollIntoViewIfNeeded()
+      // Aguarda a animação artística inicial terminar antes de medir a caixa renderizada:
+      // alguns keyframes (ex.: cerâmica no torno) aplicam scale/clip-path durante a entrada.
+      await expect.poll(() => card.locator('.obra-zoom-trigger img').evaluate(image =>
+        image.getAnimations().every(animation => animation.playState === 'finished')
+      ), { timeout: 5000 }).toBe(true)
       const metrics = await card.evaluate(element => {
         const cardRect = element.getBoundingClientRect()
         const gallery = element.querySelector('.obra-galeria')
