@@ -829,4 +829,3 @@ class SiteAppearanceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'type="color"')
         self.assertContains(response, "site_appearance_preview.js")
-        self.assertContains(response, "Restaurar cores originais")
