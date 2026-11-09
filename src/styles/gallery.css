@@ -1018,3 +1018,139 @@
     }
   }
 }
+
+
+/* ===== Grade: dimensões explícitas por breakpoint =====
+   O card define a altura final em pixels. A mídia ocupa essa caixa diretamente,
+   sem depender de aspect-ratio ou de uma cadeia de height:100% em elementos
+   cujo pai pode não ter altura resolvida em Safari/WebKit e navegadores móveis. */
+.galeria-grade-global .obras-lista.modo-grade {
+  align-items: start !important;
+}
+.galeria-grade-global .obra.modo-grade,
+.galeria-grade-global .obra.modo-grade.midia-video {
+  position: relative !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 380px !important;
+  min-height: 380px !important;
+  max-height: 380px !important;
+  aspect-ratio: auto !important;
+  overflow: hidden !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-galeria {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  overflow: hidden !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+  inset: 0 0 48px !important;
+  width: 100% !important;
+  height: auto !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-zoom-trigger,
+.galeria-grade-global .obra.modo-grade .obra-video-trigger {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-zoom-trigger img,
+.galeria-grade-global .obra.modo-grade .obra-video-trigger img {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+.galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas {
+  position: absolute !important;
+  z-index: 6 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  display: flex !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  overflow-x: auto !important;
+}
+.galeria-grade-global .obra.modo-grade .obra-texto {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 7 !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+.galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
+  bottom: 48px !important;
+}
+.galeria-grade-global .obra.modo-grade .glitch-camada {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.midia-video {
+    height: 320px !important;
+    min-height: 320px !important;
+    max-height: 320px !important;
+  }
+}
+@media (max-width: 600px) {
+  .galeria-grade-global { width: calc(100% - 1.25rem); }
+  .galeria-grade-global .obras-lista.modo-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: .55rem !important;
+  }
+  .galeria-grade-global .obra.modo-grade,
+  .galeria-grade-global .obra.modo-grade.midia-video {
+    height: 240px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
+  }
+  .galeria-grade-global .obra.modo-grade .carrossel-miniaturas.grade-miniaturas {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+  }
+  .galeria-grade-global .obra.modo-grade .obra-imagem.tem-carrossel {
+    bottom: 44px !important;
+  }
+  .galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
+    bottom: 44px !important;
+  }
+}
