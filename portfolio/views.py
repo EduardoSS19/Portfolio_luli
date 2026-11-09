@@ -1,5 +1,6 @@
 import json
 import logging
+from html import escape
 from smtplib import SMTPException
 
 from django.conf import settings
@@ -9,7 +10,7 @@ from django.core.signing import BadSignature, SignatureExpired
 from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.db.models import Prefetch, Q
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
@@ -285,4 +286,58 @@ def frontend(request):
     index_file = settings.FRONTEND_DIST / "index.html"
     if not index_file.is_file():
         raise Http404("Frontend ainda não compilado.")
-    return FileResponse(index_file.open("rb"), content_type="text/html")
+    html = index_file.read_text(encoding="utf-8")
+    profile = ArtistProfile.objects.first()
+    obra_destaque = (
+        Work.objects.filter(
+            is_share_image=True,
+            is_active=True,
+            category__is_active=True,
+        )
+        .select_related("category")
+        .first()
+    )
+
+    nome_artista = profile.name if profile else "Portfólio"
+    titulo = (
+        f"{obra_destaque.title} | {nome_artista}"
+        if obra_destaque
+        else f"{nome_artista} | Portfólio"
+    )
+    descricao = (
+        obra_destaque.description if obra_destaque else ""
+    ) or (profile.tagline if profile else "") or (profile.bio if profile else "")
+    descricao = " ".join(descricao.split())[:200] or "Conheça o portfólio artístico."
+
+    imagem = ""
+    if obra_destaque:
+        imagem = _image_url(obra_destaque.image, obra_destaque.image_url, 1200)
+    if not imagem and profile:
+        imagem = _image_url(profile.photo, profile.photo_url, 1200)
+    if imagem:
+        imagem = request.build_absolute_uri(imagem)
+
+    tags = [
+        f'<title>{escape(titulo)}</title>',
+        f'<meta name="description" content="{escape(descricao, quote=True)}" />',
+        '<meta property="og:type" content="website" />',
+        f'<meta property="og:url" content="{escape(request.build_absolute_uri(request.path), quote=True)}" />',
+        f'<meta property="og:title" content="{escape(titulo, quote=True)}" />',
+        f'<meta property="og:description" content="{escape(descricao, quote=True)}" />',
+        '<meta name="twitter:card" content="summary_large_image" />',
+        f'<meta name="twitter:title" content="{escape(titulo, quote=True)}" />',
+        f'<meta name="twitter:description" content="{escape(descricao, quote=True)}" />',
+    ]
+    if imagem:
+        tags.extend([
+            f'<meta property="og:image" content="{escape(imagem, quote=True)}" />',
+            f'<meta property="og:image:alt" content="{escape(titulo, quote=True)}" />',
+            f'<meta name="twitter:image" content="{escape(imagem, quote=True)}" />',
+        ])
+
+    # Redes sociais leem o HTML inicial e não executam o React; por isso os
+    # metadados são montados no Django antes de entregar o index do frontend.
+    html = html.replace("</head>", "\\n    " + "\\n    ".join(tags) + "\\n  </head>", 1)
+    if '<title>Portfólio</title>' in html:
+        html = html.replace('<title>Portfólio</title>', f'<title>{escape(titulo)}</title>', 1)
+    return HttpResponse(html, content_type="text/html; charset=utf-8")
