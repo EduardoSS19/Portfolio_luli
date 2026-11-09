@@ -787,11 +787,15 @@
    Cada camada ocupa a caixa por posicionamento (inset), evitando percentuais de altura
    dependentes do cálculo intrínseco do WebKit. As camadas glitch continuam independentes. */
 @media (hover: none), (pointer: coarse) {
-  .galeria-grade-global .obra.modo-grade:not(.midia-video),
+  .galeria-grade-global .obra.modo-grade:not(.midia-video) {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(.985);
+    transition: none;
+  }
   .galeria-grade-global .obra.modo-grade:not(.midia-video).visivel {
     opacity: 1;
-    transform: none !important;
-    transition: none !important;
+    transform: none;
+    animation: gradeEntrada .72s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both;
   }
 
   .galeria-grade-global .obra.modo-grade:not(.midia-video) .obra-galeria,
@@ -833,12 +837,9 @@
     max-width: 100% !important;
     max-height: 100% !important;
     object-fit: cover !important;
-    opacity: 1 !important;
     visibility: visible !important;
-    transform: none !important;
-    clip-path: none !important;
-    -webkit-clip-path: none !important;
-    animation: none !important;
+    /* Transform, recorte e animação ficam livres para os efeitos de cada técnica.
+       A caixa e suas dimensões continuam determinadas pelo card, não pela imagem. */
   }
 
   /* A arte glitch usa camadas próprias; não as removemos nem animamos aqui. */
@@ -871,9 +872,15 @@
     max-width: 100% !important;
     aspect-ratio: auto !important;
     overflow: hidden;
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(.985);
+    transition: none;
+  }
+
+  .galeria-grade-global .obra.modo-grade.visivel {
+    opacity: 1;
+    transform: none;
+    animation: gradeEntrada .72s cubic-bezier(.2,.75,.25,1) var(--grade-delay, 0ms) both;
   }
 
   .galeria-grade-global .obra.modo-grade .obra-galeria {
@@ -1152,5 +1159,25 @@
   }
   .galeria-grade-global .obra.modo-grade.tem-miniaturas-grade .obra-texto {
     bottom: 44px !important;
+  }
+}
+
+
+/* Modo lista: os cards também entram uma única vez quando alcançam o viewport. */
+.secao:not(.sobre-secao) .obra:not(.modo-grade){
+  opacity:0;
+  transform:translate3d(0,18px,0);
+  transition:opacity .62s ease,transform .72s cubic-bezier(.2,.7,.2,1);
+}
+.secao:not(.sobre-secao) .obra:not(.modo-grade).visivel{
+  opacity:1;
+  transform:translate3d(0,0,0);
+}
+@media (prefers-reduced-motion: reduce){
+  .secao:not(.sobre-secao) .obra:not(.modo-grade),
+  .secao:not(.sobre-secao) .obra:not(.modo-grade).visivel{
+    opacity:1;
+    transform:none;
+    transition:none;
   }
 }
