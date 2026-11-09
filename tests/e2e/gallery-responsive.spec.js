@@ -721,8 +721,21 @@ test('o botão flutuante fica mais baixo e mantém margem segura no mobile', asy
   const botaoBox = await botao.boundingBox()
   expect(botaoBox).not.toBeNull()
   const distanciaDaBordaInferior = 844 - (botaoBox.y + botaoBox.height)
-  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(60)
-  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(75)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(50)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(60)
+})
+
+test('o botão flutuante fica próximo à borda inferior no desktop', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.evaluate(() => window.scrollTo(0, 900))
+  const botao = page.locator('.alternar-modo-flutuante')
+  await expect(botao).toBeVisible()
+  const botaoBox = await botao.boundingBox()
+  expect(botaoBox).not.toBeNull()
+  const distanciaDaBordaInferior = 900 - (botaoBox.y + botaoBox.height)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(4)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(10)
 })
 
 test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ page }) => {
