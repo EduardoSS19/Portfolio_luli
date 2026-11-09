@@ -21,6 +21,7 @@ from .models import (
     Category,
     Reference,
     SocialLink,
+    SiteAppearance,
     Work,
     WorkImage,
     WorkVideo,
@@ -63,6 +64,14 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {
+            "aparencia": {
+                "accent": "#93C8F2",
+                "background": "#061522",
+                "backgroundAlt": "#102F4C",
+                "surface": "#0B2943",
+                "text": "#EFF7FF",
+                "border": "#93C8F2",
+            },
             "sobre": {
                 "nome": "Luísa Becker",
                 "frase": "Cerâmica e desenho",
@@ -137,7 +146,17 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(
             response.json(),
-            {"sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
+            {
+                "aparencia": {
+                    "accent": "#93C8F2",
+                    "background": "#061522",
+                    "backgroundAlt": "#102F4C",
+                    "surface": "#0B2943",
+                    "text": "#EFF7FF",
+                    "border": "#93C8F2",
+                },
+                "sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []
+            },
         )
 
     @override_settings(
@@ -779,3 +798,34 @@ class SocialPreviewMetadataTests(TestCase):
         self.assertNotContains(response, "Artista visual e pesquisadora.")
         self.assertNotContains(response, 'property="og:image"')
 
+
+
+
+class SiteAppearanceTests(TestCase):
+    def test_singleton_always_uses_primary_key_one(self):
+        SiteAppearance(accent="#AABBCC").save()
+        another = SiteAppearance.objects.create(accent="#112233")
+
+        self.assertEqual(SiteAppearance.objects.count(), 1)
+        self.assertEqual(another.pk, 1)
+        self.assertEqual(SiteAppearance.get_solo().accent, "#112233")
+
+    def test_rejects_invalid_hex_color(self):
+        appearance = SiteAppearance(accent="blue")
+        with self.assertRaises(Exception):
+            appearance.full_clean()
+
+    def test_admin_exposes_color_controls_and_live_preview(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="appearance-admin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse("admin:portfolio_siteappearance_change", args=[1]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'type="color"')
+        self.assertContains(response, "site_appearance_preview.js")
+        self.assertContains(response, "Restaurar cores originais")
