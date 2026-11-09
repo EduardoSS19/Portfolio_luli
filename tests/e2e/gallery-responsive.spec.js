@@ -28,7 +28,7 @@ async function alternarModoGaleria(page, nomeBotao) {
     await menu.click()
     await expect(page.getByRole('dialog')).toBeVisible()
   }
-  await page.getByRole('button', { name: nomeBotao }).click()
+  await page.locator('.editorial-menu-controls').getByRole('button', { name: nomeBotao }).click()
 }
 
 async function abrirPortfolio(page, semIntersectionObserver = false) {
