@@ -18,6 +18,10 @@ export function Footer({ nome, instagram, email, redes = [] }) {
         {email && <a href={`mailto:${email}`}>Contato</a>}
       </div>
       <small>© {new Date().getFullYear()} — Todos os direitos reservados</small>
+      <div className="rodape-creditos">
+        <span>Desenvolvido por <strong>Eduardo</strong></span>
+        <a href="mailto:leduardoss19@gmail.com">leduardoss19@gmail.com</a>
+      </div>
     </footer>
   );
 }

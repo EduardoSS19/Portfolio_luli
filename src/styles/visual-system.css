@@ -498,7 +498,6 @@ nav button.ativo{
   gap:0.55rem;
   min-height:4.7rem;
   padding:0.7rem 0.85rem;
-  border-top:1px solid rgba(195,225,249,0.12);
   overflow-x:auto;
   scrollbar-width:thin;
   scrollbar-color:rgba(147,200,242,0.5) transparent;
@@ -640,7 +639,7 @@ nav button.ativo{
 .rodape{ border-color:var(--linha); }
 .rodape{
   padding-top:3rem;
-  background:rgba(4,17,28,0.4);
+  background:#04111c;
 }
 .rodape-links a{
   padding:0.45rem 0.7rem;
@@ -648,11 +647,26 @@ nav button.ativo{
   border-radius:999px;
   transition:border-color 0.2s ease, background 0.2s ease;
 }
-.rodape-links a:hover{
+ .rodape-links a:hover{
   border-color:var(--linha);
   background:rgba(147,200,242,0.08);
   text-decoration:none;
 }
+.rodape-creditos{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:0.25rem 0.4rem;
+  margin-top:1.25rem;
+  padding-top:1rem;
+  border-top:1px solid var(--linha);
+  color:rgba(239,247,255,0.58);
+  font-size:0.78rem;
+}
+.rodape-creditos strong{ color:rgba(239,247,255,0.88); font-weight:600; }
+.rodape-creditos a{ color:var(--azul-claro); text-decoration:none; }
+.rodape-creditos a:hover{ text-decoration:underline; text-underline-offset:3px; }
 .voltar-topo{
   position:fixed;
   right:max(1.1rem,env(safe-area-inset-right));
