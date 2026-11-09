@@ -318,7 +318,6 @@ def frontend(request):
         imagem = request.build_absolute_uri(imagem)
 
     tags = [
-        f'<title>{escape(titulo)}</title>',
         f'<meta name="description" content="{escape(descricao, quote=True)}" />',
         '<meta property="og:type" content="website" />',
         f'<meta property="og:url" content="{escape(request.build_absolute_uri(request.path), quote=True)}" />',
@@ -337,7 +336,6 @@ def frontend(request):
 
     # Redes sociais leem o HTML inicial e não executam o React; por isso os
     # metadados são montados no Django antes de entregar o index do frontend.
-    html = html.replace("</head>", "\\n    " + "\\n    ".join(tags) + "\\n  </head>", 1)
+    html = html.replace("</head>", "\n    " + "\n    ".join(tags) + "\n  </head>", 1)
     if '<title>Portfólio</title>' in html:
-        html = html.replace('<title>Portfólio</title>', f'<title>{escape(titulo)}</title>', 1)
     return HttpResponse(html, content_type="text/html; charset=utf-8")
