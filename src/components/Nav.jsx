@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -40,7 +40,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
         return
       }
       if (evento.key !== 'Tab') return
-      const links = [...document.querySelectorAll('.nav-overlay-link')]
+      const links = [...document.querySelectorAll('.nav-overlay-link, .editorial-menu-control')]
       if (!links.length) return
       const primeiro = links[0]
       const ultimo = links[links.length - 1]
@@ -74,6 +74,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
 
   function fecharAoClicarNoFundo(evento) {
     if (evento.target === evento.currentTarget) setMenuAberto(false)
+  }
+
+  function alternarModoGaleria() {
+    aoTrocarModo(modoGaleria === 'lista' ? 'grade' : 'lista')
+    setMenuAberto(false)
   }
 
   return (
@@ -124,6 +129,16 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
               </button>
             ))}
           </div>
+          <div className="editorial-menu-controls" role="group" aria-label="Preferências de visualização">
+            <button type="button" className="editorial-menu-control" onClick={() => aoTrocarTema()} aria-label={tema === 'escuro' ? 'Ativar tema claro' : 'Ativar tema escuro'}>
+              <span aria-hidden="true">{tema === 'escuro' ? '☼' : '☾'}</span>
+              <span>{tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}</span>
+            </button>
+            <button type="button" className="editorial-menu-control" onClick={alternarModoGaleria} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
+              <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
+              <span>{modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}</span>
+            </button>
+          </div>
           <div className="editorial-menu-footer">
             <span>ARTE · PESQUISA · EXPERIMENTAÇÃO</span>
             <span>PORTO ALEGRE, BRASIL</span>
@@ -131,14 +146,6 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
         </div>
       </div>
 
-      <div className="nav-gallery-switch" role="group" aria-label="Visualização das obras">
-        <button type="button" aria-label="Visualizar em lista" title="Lista" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => aoTrocarModo('lista')}>
-          <span aria-hidden="true">☷</span><span>Lista</span>
-        </button>
-        <button type="button" aria-label="Visualizar em grade" title="Grade" className={modoGaleria === 'grade' ? 'ativo' : ''} aria-pressed={modoGaleria === 'grade'} onClick={() => aoTrocarModo('grade')}>
-          <span aria-hidden="true">▦</span><span>Grade</span>
-        </button>
-      </div>
     </nav>
   )
 }
