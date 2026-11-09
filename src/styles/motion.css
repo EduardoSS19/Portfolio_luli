@@ -22,9 +22,11 @@
   opacity:0;
   transition:opacity 0.75s ease, transform 0.8s cubic-bezier(.2,.7,.2,1), clip-path 0.9s cubic-bezier(.65,0,.35,1);
 }
-.secao-cabecalho.arte-ceramica,
+/* O cabeçalho de Cerâmica não desloca junto com o h2: o movimento fica
+   concentrado no título para evitar duas transformações concorrentes. */
+.secao-cabecalho.arte-ceramica{ transform:none; }
 .sobre-entrada{ transform:translateY(28px) scale(0.99); }
-.secao-cabecalho.arte-ceramica.visivel,
+.secao-cabecalho.arte-ceramica.visivel{ opacity:1; transform:none; }
 .sobre-entrada.visivel{ opacity:1; transform:translateY(0) scale(1); }
 
 .secao-cabecalho.arte-gravura{
