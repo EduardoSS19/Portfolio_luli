@@ -298,16 +298,8 @@ def frontend(request):
         .first()
     )
 
-    nome_artista = profile.name if profile else "Portfólio"
-    titulo = (
-        f"{obra_destaque.title} | {nome_artista}"
-        if obra_destaque
-        else f"{nome_artista} | Portfólio"
-    )
-    descricao = (
-        obra_destaque.description if obra_destaque else ""
-    ) or (profile.tagline if profile else "") or (profile.bio if profile else "")
-    descricao = " ".join(descricao.split())[:200] or "Conheça o portfólio artístico."
+    titulo = profile.name if profile and profile.name else "Luli Becker"
+    descricao = "Portfólio digital"
 
     imagem = ""
     if obra_destaque:
