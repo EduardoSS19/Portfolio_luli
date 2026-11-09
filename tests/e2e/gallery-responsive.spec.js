@@ -93,7 +93,8 @@ test('alternar lista e grade preserva as oito obras', async ({ page }) => {
 
 test('a navegação mantém as categorias disponíveis e acompanha a grade', async ({ page }) => {
   await abrirPortfolio(page)
-  const menu = page.locator('.nav-mobile-toggle')
+  const menuMobile = page.locator('.nav-mobile-toggle')
+  const menuDesktop = page.locator('.nav-desktop-toggle')
   const categoriasTeste = [
     ['Glitch Art', 'glitch-art'],
     ['Vídeos', 'videos'],
@@ -101,20 +102,16 @@ test('a navegação mantém as categorias disponíveis e acompanha a grade', asy
     ['Desenhos', 'desenhos'],
   ]
   for (const [titulo, chave] of categoriasTeste) {
-    // Em telas móveis, selecionar uma categoria fecha o menu por design.
-    // Reabre antes de cada seleção; em desktop os links já ficam expostos.
-    if (await menu.isVisible() && await menu.getAttribute('aria-expanded') !== 'true') {
-      await menu.click()
-    }
+    const menu = await menuMobile.isVisible() ? menuMobile : menuDesktop
+    if (await menu.getAttribute('aria-expanded') !== 'true') await menu.click()
     const item = page.locator('.nav-links button').filter({ hasText: titulo })
     await expect(item).toBeVisible()
     await item.click()
     const primeiroCard = page.locator(`.galeria-grade-global .obra.categoria-${chave}`).first()
     await expect(primeiroCard).toBeVisible()
     await primeiroCard.scrollIntoViewIfNeeded()
-    // A navegação usa rolagem; a categoria ativa é atualizada pelo observador de seção,
-    // então não exigimos aria-current imediatamente após scrollIntoViewIfNeeded.
-    await expect(item).toBeVisible()
+    await expect(item).toBeAttached()
+    await expect(menu).toHaveAttribute('aria-expanded', 'false')
   }
 })
 
@@ -436,4 +433,21 @@ test('as entradas do modo lista acontecem uma vez e respeitam a técnica da obra
   await page.evaluate(() => window.scrollTo(0, 0))
   await card.scrollIntoViewIfNeeded()
   await expect(card).toHaveClass(/visivel/)
+})
+
+
+test('a navegação desktop mantém as seções em um menu compacto', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const menu = page.locator('.nav-desktop-toggle')
+  const links = page.locator('.nav-links')
+  await expect(menu).toBeVisible()
+  await expect(links).toBeHidden()
+  await expect(page.locator('.nav-mobile-toggle')).toBeHidden()
+  await menu.click()
+  await expect(links).toBeVisible()
+  await expect(links.locator('button')).toHaveCount(6)
+  await links.getByRole('button', { name: 'Cerâmica' }).click()
+  await expect(links).toBeHidden()
+  await expect(menu).toContainText('Cerâmica')
 })
