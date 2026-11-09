@@ -574,12 +574,14 @@ class ReferenceAdmin(admin.ModelAdmin):
 # Identidade visual compartilhada pelo site e pelo painel
 # ---------------------------------------------------------------------------
 
-@admin.register(SiteAppearance)
 class SiteAppearanceForm(forms.ModelForm):
     class Meta:
         model = SiteAppearance
-        fields = (\"accent\", \"background\", \"background_alt\", \"surface\", \"text\", \"border\")
-        widgets = {name: forms.TextInput(attrs={\"type\": \"color\", \"class\": \"appearance-color-input\"}) for name in fields}
+        fields = ("accent", "background", "background_alt", "surface", "text", "border")
+        widgets = {
+            name: forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"})
+            for name in fields
+        }
 
 
 @admin.register(SiteAppearance)
