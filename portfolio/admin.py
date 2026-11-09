@@ -362,6 +362,17 @@ class WorkAdminForm(ImagemSalvaMixin, forms.ModelForm):
         if not self.instance.pk:
             self.fields["is_active"].initial = False
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("is_share_image") and not (
+            cleaned_data.get("image") or cleaned_data.get("image_url")
+        ):
+            self.add_error(
+                "is_share_image",
+                "Escolha uma imagem de capa antes de usar esta obra no compartilhamento.",
+            )
+        return cleaned_data
+
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
@@ -411,7 +422,10 @@ class WorkAdmin(admin.ModelAdmin):
             "classes": ("collapse",),
             "description": "Qualquer informação complementar que queira compartilhar.",
         }),
-        ("Publicação", {"fields": ("position", "is_active", "preview_site")}),
+        ("Publicação", {
+            "fields": ("position", "is_active", "is_share_image", "preview_site"),
+            "description": "A obra marcada será usada como imagem de prévia ao compartilhar o endereço do portfólio. Ao marcar outra obra, a seleção anterior será substituída.",
+        }),
         ("Avançado", {"fields": ("image_url",), "classes": ("collapse",)}),
     )
 
@@ -463,6 +477,11 @@ class WorkAdmin(admin.ModelAdmin):
     @admin.display(description="Fotos extras", ordering="_imagens")
     def total_imagens(self, obj):
         return obj._imagens
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if obj.is_share_image:
+            Work.objects.exclude(pk=obj.pk).filter(is_share_image=True).update(is_share_image=False)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
