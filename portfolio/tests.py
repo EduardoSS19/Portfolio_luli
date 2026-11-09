@@ -1,5 +1,7 @@
 from io import BytesIO
 import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 import os
 from unittest.mock import MagicMock, patch
 
@@ -7,7 +9,7 @@ from PIL import Image
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import Client, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.test import override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -24,6 +26,7 @@ from .models import (
     WorkVideo,
 )
 from .youtube import YouTubeMetadataError, extract_youtube_video_id, fetch_youtube_video_metadata
+from .views import frontend
 
 
 class PortfolioApiTests(TestCase):
@@ -723,3 +726,53 @@ class EditorialWorkflowTests(TestCase):
         response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
 
         self.assertEqual(response.status_code, 403)
+
+
+class SocialPreviewMetadataTests(TestCase):
+    def setUp(self):
+        ArtistProfile.objects.all().delete()
+
+    def test_homepage_uses_selected_published_work_for_social_preview(self):
+        category = Category.objects.create(title="Videoarte", key="videoarte")
+        Work.objects.create(
+            category=category,
+            title="Ciclos",
+            image_url="https://res.cloudinary.com/demo/image/upload/ciclos.jpg",
+            description="Uma experiência audiovisual sobre ciclos.",
+            is_active=True,
+            is_share_image=True,
+        )
+        ArtistProfile.objects.create(name="Luli Becker", bio="Artista visual.")
+
+        with TemporaryDirectory() as directory:
+            Path(directory, "index.html").write_text(
+                '<!doctype html><html><head><title>Portfólio</title></head><body></body></html>',
+                encoding="utf-8",
+            )
+            with override_settings(DEBUG=False, FRONTEND_DIST=Path(directory)):
+                response = frontend(RequestFactory().get("/"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<meta property="og:title" content="Ciclos | Luli Becker" />')
+        self.assertContains(response, "Uma experiência audiovisual sobre ciclos.")
+        self.assertContains(response, "https://res.cloudinary.com/demo/image/upload/ciclos.jpg")
+        self.assertContains(response, '<meta name="twitter:card" content="summary_large_image" />')
+
+    def test_homepage_falls_back_to_artist_profile_without_selected_work(self):
+        ArtistProfile.objects.create(
+            name="Luli Becker",
+            tagline="Artista visual e pesquisadora.",
+            bio="Biografia.",
+        )
+        with TemporaryDirectory() as directory:
+            Path(directory, "index.html").write_text(
+                '<!doctype html><html><head><title>Portfólio</title></head><body></body></html>',
+                encoding="utf-8",
+            )
+            with override_settings(DEBUG=False, FRONTEND_DIST=Path(directory)):
+                response = frontend(RequestFactory().get("/"))
+
+        self.assertContains(response, '<meta property="og:title" content="Luli Becker | Portfólio" />')
+        self.assertContains(response, "Artista visual e pesquisadora.")
+        self.assertNotContains(response, 'property="og:image"')
+

@@ -114,6 +114,11 @@ class Work(models.Model):
     exhibitions = models.TextField("exposições e contexto", blank=True)
     position = models.PositiveIntegerField("ordem", default=0)
     is_active = models.BooleanField("publicada", default=True)
+    is_share_image = models.BooleanField(
+        "usar como imagem de compartilhamento",
+        default=False,
+        help_text="Esta obra será a imagem exibida quando o site for compartilhado no WhatsApp e nas redes sociais. Apenas uma obra pode ficar selecionada.",
+    )
 
     class Meta:
         ordering = ("position", "id")
