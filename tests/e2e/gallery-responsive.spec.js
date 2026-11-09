@@ -41,7 +41,8 @@ async function abrirPortfolio(page, semIntersectionObserver = false) {
   }
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
-  await page.getByRole('button', { name: 'Visualizar em grade' }).click()
+  await page.locator('.editorial-menu-trigger').click()
+  await page.getByRole('button', { name: 'Alternar para visualização em grade' }).click()
   const primeiroCard = page.locator('.galeria-grade-global .obra').first()
   await expect(page.locator('.galeria-grade-global .obra')).toHaveCount(8)
   // Com IntersectionObserver ativo, apenas cards próximos ao viewport devem revelar.
@@ -85,7 +86,7 @@ test('a grade mantém todas as categorias e cartões em vários tamanhos, mesmo 
 
 test('alternar lista e grade preserva as oito obras', async ({ page }) => {
   await abrirPortfolio(page)
-  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  await page.getByRole('button', { name: 'Alternar para visualização em lista' }).click()
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obras-lista .obra')).toHaveCount(8)
 })
