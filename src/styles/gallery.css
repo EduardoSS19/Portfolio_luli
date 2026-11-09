@@ -1277,3 +1277,18 @@
   bottom: 0;
   left: 0;
 }
+
+
+/* Em qualquer dispositivo touch (celular ou tablet), independentemente da
+   largura CSS: o contador substitui as setas como indicador do carrossel.
+   Esta regra vem depois da regra legada que ocultava o contador em touch. */
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obra.modo-grade .obra-imagem .carrossel-seta {
+    display: none !important;
+  }
+  .galeria-grade-global .obra.modo-grade .grade-midia-contagem {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
