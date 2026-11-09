@@ -1267,3 +1267,17 @@
 .galeria-grade-global .obra.modo-grade .carrossel-indice {
   display: none !important;
 }
+
+
+/* Lista e grade compartilham a mesma área de mídia: miniaturas da lista
+   ficam sobrepostas no rodapé, sem criar uma faixa vazia nem reduzir a imagem. */
+.secao:not(.sobre-secao) .obra.tem-carrossel .obra-galeria {
+  position: relative;
+}
+.secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
+  position: absolute;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
