@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 const imagemTeste = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%231e6688%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23f5d6a2%22/%3E%3C/svg%3E'
+const imagemTesteAlternativa = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%23883b66%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23a2e5f5%22/%3E%3C/svg%3E'
 
 const categorias = [
   { titulo: 'Glitch Art', chave: 'glitch-art', obras: [
-    { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTeste }], descricao: 'Estudo de cor e interferência.' },
+    { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTesteAlternativa }], descricao: 'Estudo de cor e interferência.' },
     { titulo: 'Falha de sinal', imagem: imagemTeste, descricao: 'Composição digital.' },
   ] },
   { titulo: 'Vídeos', chave: 'videos', obras: [
