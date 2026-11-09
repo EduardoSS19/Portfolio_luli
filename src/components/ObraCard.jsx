@@ -423,7 +423,7 @@ export function ObraCard({
     <>
       <article
         ref={ref}
-        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midias.some(midia => midia.tipo === 'youtube') ? 'tem-video' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${modoGrade && midias.length > 1 ? 'tem-miniaturas-grade' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
+        className={`obra arte-${tipoDeArte} categoria-${categoria} ${midias.some(midia => midia.tipo === 'youtube') ? 'tem-video' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'midia-video' : ''} ${modoGrade ? 'modo-grade' : ''} ${midias.length > 1 ? 'tem-carrossel' : ''} ${visivel ? 'visivel' : ''} ${emFoco ? 'em-foco' : ''} ${invertido ? 'invertido' : ''} ${focoAberto ? 'foco-ativo' : ''}`}
         style={modoGrade ? estiloGrade : undefined}
         data-grade-indice={modoGrade ? indiceGrade : undefined}
         data-obra-chave={`${categoria || 'obra'}::${titulo || indiceGrade}`}
@@ -508,8 +508,7 @@ export function ObraCard({
             ) : <span>Imagem da obra</span>}
             {midias.length > 1 && (
               <>
-                <span className="carrossel-indice">
-                  <span>VISTA</span>
+                <span className="carrossel-indice" aria-label={`Imagem ${indiceImagem + 1} de ${midias.length}`}>
                   {String(indiceImagem + 1).padStart(2, '0')}
                   <i aria-hidden="true">/</i>
                   {String(midias.length).padStart(2, '0')}
@@ -530,11 +529,16 @@ export function ObraCard({
                 >
                   <span aria-hidden="true">→</span>
                 </button>
+                {modoGrade && (
+                  <span className="grade-midia-contagem" aria-label={`${midias.length - 1} mídias adicionais`}>
+                    +{midias.length - 1} {midias.length === 2 ? 'imagem' : 'imagens'}
+                  </span>
+                )}
               </>
             )}
           </div>
-          {midias.length > 1 && (
-            <div className={`carrossel-miniaturas ${modoGrade ? 'grade-miniaturas' : ''}`} role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
+          {midias.length > 1 && !modoGrade && (
+            <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
               {midias.map((midia, index) => (
                 <button
                   type="button"
