@@ -107,6 +107,15 @@ export default function App() {
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
         }))
         setPrevisualizacao(data.preview ?? null)
+        if (data.aparencia) {
+          const root = document.documentElement
+          root.style.setProperty('--azul-claro', data.aparencia.accent)
+          root.style.setProperty('--azul-escuro', data.aparencia.background)
+          root.style.setProperty('--azul-medio', data.aparencia.surface)
+          root.style.setProperty('--texto', data.aparencia.text)
+          root.style.setProperty('--cor-fundo-alt', data.aparencia.backgroundAlt)
+          root.style.setProperty('--cor-borda', data.aparencia.border)
+        }
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
