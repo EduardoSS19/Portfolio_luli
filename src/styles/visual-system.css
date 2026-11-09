@@ -1074,3 +1074,40 @@ nav.site-nav.editorial-nav{
 @media(prefers-reduced-motion:reduce){
   .editorial-menu-trigger,.editorial-menu-mark i,.editorial-menu-backdrop,.nav-overlay-link,.editorial-menu-arrow{transition:none}
 }
+
+
+/* Entrada editorial com gestos visuais inspirados em cada linguagem artística. */
+.editorial-nav.menu-aberto .nav-overlay-link{
+  animation-duration:.62s;
+  animation-timing-function:cubic-bezier(.2,.75,.25,1);
+  animation-fill-mode:both;
+  animation-delay:calc(var(--menu-index, 0) * 65ms);
+}
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-inicio,
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-referencias,
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-contato{
+  animation-name:menuEntradaEditorial;
+}
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-ceramica{animation-name:menuEntradaCeramica}
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-glitch{animation-name:menuEntradaGlitch;animation-timing-function:steps(1,end)}
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-gravura{animation-name:menuEntradaGravura}
+.editorial-nav.menu-aberto .nav-overlay-link.entrada-desenho{animation-name:menuEntradaDesenho}
+@keyframes menuEntradaEditorial{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes menuEntradaCeramica{from{opacity:0;transform:translateY(24px) scale(.94) rotate(-1.5deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+@keyframes menuEntradaGlitch{0%{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-5px)}45%{opacity:1;clip-path:inset(0 0 45% 0);transform:translateX(3px)}75%{clip-path:inset(0);transform:translateX(-1px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes menuEntradaGravura{from{opacity:0;clip-path:inset(100% 0 0);transform:translateY(12px)}to{opacity:1;clip-path:inset(0);transform:translateY(0)}}
+@keyframes menuEntradaDesenho{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0)}}
+.secao-cabecalho.animando h2{animation-duration:.72s;animation-fill-mode:both;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+.secao-cabecalho.arte-ceramica.animando h2{animation-name:tituloCeramica}
+.secao-cabecalho.arte-glitch.animando h2{animation-name:tituloGlitch;animation-timing-function:steps(1,end)}
+.secao-cabecalho.arte-gravura.animando h2{animation-name:tituloGravura}
+.secao-cabecalho.arte-desenho.animando h2{animation-name:tituloDesenho}
+.secao-cabecalho.arte-fotografia.animando h2,.secao-cabecalho.arte-videoarte.animando h2{animation-name:tituloRevelado}
+@keyframes tituloCeramica{from{opacity:0;transform:translateY(15px) scale(.94);letter-spacing:.02em}to{opacity:1;transform:translateY(0) scale(1);letter-spacing:inherit}}
+@keyframes tituloGlitch{0%{opacity:0;clip-path:inset(0 100% 0 0);transform:translateX(-4px)}40%{opacity:1;clip-path:inset(0 0 45% 0);transform:translateX(3px)}70%{clip-path:inset(0);transform:translateX(-1px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes tituloGravura{from{opacity:0;clip-path:inset(100% 0 0);transform:translateY(10px)}to{opacity:1;clip-path:inset(0);transform:translateY(0)}}
+@keyframes tituloDesenho{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0)}}
+@keyframes tituloRevelado{from{opacity:0;filter:blur(7px);transform:translateY(8px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  .editorial-nav.menu-aberto .nav-overlay-link,.secao-cabecalho.animando h2{animation:none!important}
+}
