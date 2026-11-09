@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 
 
 class ArtistProfile(models.Model):
@@ -211,3 +211,40 @@ class ReferenceLink(models.Model):
 
     def __str__(self):
         return self.text
+
+class SiteAppearance(models.Model):
+    """Configurações visuais persistentes do site público."""
+
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    background_start = models.CharField(
+        "início do fundo", max_length=7, default="#061522",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    background_middle = models.CharField(
+        "meio do fundo", max_length=7, default="#0a233a",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    background_end = models.CharField(
+        "fim do fundo", max_length=7, default="#102f4c",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    accent_color = models.CharField(
+        "cor de destaque", max_length=7, default="#93c8f2",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    text_color = models.CharField(
+        "cor principal dos textos", max_length=7, default="#eff7ff",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    border_color = models.CharField(
+        "cor das linhas e bordas", max_length=7, default="#c3e1f9",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    updated_at = models.DateTimeField("última atualização", auto_now=True)
+
+    class Meta:
+        verbose_name = "aparência do site"
+        verbose_name_plural = "aparência do site"
+
+    def __str__(self):
+        return "Aparência do site"
