@@ -19,6 +19,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter frontend changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'src/**'
+              - 'tests/e2e/**'
+              - 'playwright.config.js'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'vite.config.*'
+              - 'index.html'
+
   backend:
     name: Django checks and tests
     runs-on: ubuntu-latest
@@ -51,6 +79,8 @@ jobs:
 
   frontend:
     name: Build React frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -83,12 +113,10 @@ jobs:
           mkdir -p node_modules/@playwright
           ln -s "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")" node_modules/@playwright/test
 
-      - name: Diagnose first responsive gallery failure
+      - name: Run responsive gallery tests
         timeout-minutes: 4
         shell: bash
         run: |
-          PLAYWRIGHT_TEST_PACKAGE="$(find "$HOME/.npm/_npx" -path '*/node_modules/@playwright/test/package.json' -print -quit)"
-          test -n "$PLAYWRIGHT_TEST_PACKAGE"
-          PLAYWRIGHT_CLI="$(dirname "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")")/playwright/cli.js"
-          test -f "$PLAYWRIGHT_CLI"
+          PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
+          test -n "$PLAYWRIGHT_CLI"
           node "$PLAYWRIGHT_CLI" test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
