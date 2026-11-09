@@ -64,6 +64,7 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {
+            "aparencia": None,
             "sobre": {
                 "nome": "Luísa Becker",
                 "frase": "Cerâmica e desenho",
@@ -138,7 +139,7 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(
             response.json(),
-            {"sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
+            {"aparencia": None, "sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
         )
 
     @override_settings(
