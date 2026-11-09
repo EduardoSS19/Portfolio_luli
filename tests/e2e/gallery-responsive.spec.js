@@ -311,6 +311,9 @@ test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual 
   await expect.poll(() => imagem.evaluate(element =>
     element.getAnimations().some(animation => animation.playState === 'running')
   )).toBe(true)
+  // Interrompe no meio do zoom, quando getBoundingClientRect já está alterado
+  // pela transformação WAAPI. Esse é o cenário que deslocava o quadro de retorno.
+  await page.waitForTimeout(280)
 
   await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
   await expect(dialog).not.toHaveAttribute('open', '')
@@ -659,4 +662,34 @@ test('links de referências têm contraste legível no tema claro sem hover', as
   const cor = await link.evaluate(element => getComputedStyle(element).color)
   expect(cor).toBe('rgba(23, 43, 59, 0.88)')
   await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(248, 251, 253)')
+})
+
+
+test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao mesmo retângulo', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const card = page.locator('.galeria-grade-global .obra').first()
+  const trigger = card.locator('.obra-zoom-trigger')
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  const imagem = dialog.locator('.obra-focus-imagem')
+
+  for (const atraso of [90, 260, 430]) {
+    const antes = await trigger.boundingBox()
+    await trigger.click()
+    await expect(dialog).toHaveAttribute('open', '')
+    await page.waitForTimeout(atraso)
+    await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+    await expect(dialog).not.toHaveAttribute('open', '')
+    await expect.poll(() => imagem.evaluate(element => ({
+      transform: getComputedStyle(element).transform,
+      clipPath: getComputedStyle(element).clipPath,
+      animations: element.getAnimations().length,
+    }))).toEqual({ transform: 'none', clipPath: 'none', animations: 0 })
+    const depois = await trigger.boundingBox()
+    expect(depois).not.toBeNull()
+    expect(Math.abs(depois.x - antes.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(depois.y - antes.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(depois.width - antes.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(depois.height - antes.height)).toBeLessThanOrEqual(1)
+  }
 })
