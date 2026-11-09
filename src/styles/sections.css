@@ -97,3 +97,25 @@
 .form-status{ font-size:0.9rem; margin-top:0.5rem; }
 .form-status.sucesso{ color:#8fd19e; }
 .form-status.erro{ color:#e08a8a; }
+
+
+/* Contraste explícito das referências no tema claro: os links não podem depender do hover. */
+:root[data-theme="claro"] .referencia-item {
+  color: #172b3b;
+}
+:root[data-theme="claro"] .referencia-item h3 {
+  color: #172b3b;
+}
+:root[data-theme="claro"] .referencia-periodo {
+  color: #285f8d;
+}
+:root[data-theme="claro"] .referencia-item a,
+:root[data-theme="claro"] .referencia-item a:visited {
+  color: rgba(23,43,59,.88);
+  text-decoration-color: rgba(23,43,59,.38);
+}
+:root[data-theme="claro"] .referencia-item a:hover,
+:root[data-theme="claro"] .referencia-item a:focus-visible {
+  color: #0b2943;
+  text-decoration-color: #285f8d;
+}
