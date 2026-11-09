@@ -1019,3 +1019,58 @@ body.change-list #changelist .paginator .this-page { color: #eaf3fa; font-weight
     padding-top: 16px !important;
   }
 }
+
+/* Identidade compartilhada: o painel herda as mesmas cores configuradas para o site. */
+:root {
+  --portfolio-accent: var(--site-accent, #93c8f2);
+  --portfolio-ink: var(--site-text, #eff7ff);
+  --portfolio-muted: color-mix(in srgb, var(--site-text, #eff7ff) 68%, transparent);
+  --portfolio-border: color-mix(in srgb, var(--site-border, #93c8f2) 24%, transparent);
+  --portfolio-paper: var(--site-surface, #0b2943);
+}
+body.change-list, body.change-form, body.app-index, body.dashboard {
+  background: var(--site-background, #061522) !important;
+  color: var(--portfolio-ink) !important;
+}
+#header { background: var(--site-surface, #0b2943) !important; }
+#branding #site-name a, #user-tools, #user-tools a { color: var(--site-text, #eff7ff) !important; }
+.portfolio-brand-muted { color: var(--site-accent, #93c8f2) !important; }
+div.breadcrumbs { background: var(--site-surface, #0b2943) !important; color: var(--portfolio-muted) !important; }
+div.breadcrumbs a { color: var(--site-accent, #93c8f2) !important; }
+.module, .inline-group, .submit-row, .selector, #changelist-filter {
+  background: var(--site-surface, #0b2943) !important;
+  border-color: var(--portfolio-border) !important;
+  color: var(--portfolio-ink) !important;
+}
+.module h2, .module caption, .inline-group h2, #changelist table thead th {
+  background: color-mix(in srgb, var(--site-surface, #0b2943) 78%, var(--site-background-alt, #102f4c)) !important;
+  color: var(--site-text, #eff7ff) !important;
+}
+#content-main table, #content-main td, #content-main th,
+.form-row, .aligned label, .help, p.help, form .help { color: var(--portfolio-ink) !important; }
+input, textarea, select, .vTextField {
+  background: color-mix(in srgb, var(--site-background, #061522) 70%, var(--site-surface, #0b2943)) !important;
+  border-color: var(--portfolio-border) !important;
+  color: var(--site-text, #eff7ff) !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--site-accent, #93c8f2) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--site-accent, #93c8f2) 20%, transparent) !important;
+}
+.button, input[type=submit], input[type=button], .submit-row input, a.button,
+.object-tools a:link, .object-tools a:visited {
+  background: var(--site-accent, #93c8f2) !important;
+  border-color: var(--site-accent, #93c8f2) !important;
+  color: var(--site-background, #061522) !important;
+}
+#content-main .module table tbody tr:hover, #changelist table tbody tr:hover {
+  background: color-mix(in srgb, var(--site-accent, #93c8f2) 9%, var(--site-surface, #0b2943)) !important;
+}
+.appearance-color-input {
+  width: 76px !important;
+  min-width: 76px !important;
+  height: 42px;
+  padding: 4px !important;
+  cursor: pointer;
+}
+.appearance-preview-actions { margin: 0 0 16px; }
