@@ -111,6 +111,7 @@ export function ObraCard({
   const focoPendenteRef = useRef(false)
   const focoFechandoRef = useRef(false)
   const focoAbrindoRef = useRef(false)
+  const animacaoFocoRef = useRef(null)
   const seguirRef = useRef(0)
   const detalhesFixadosRef = useRef(null)
   const overflowAnteriorRef = useRef('')
@@ -246,39 +247,59 @@ export function ObraCard({
       ],
       { duration: 640, easing: EASE_ABRIR, fill: 'both' },
     )
+    animacaoFocoRef.current = animacao
     await Promise.race([animacao.finished.catch(() => {}), esperar(900)])
-    animacao.cancel()
-    focoAbrindoRef.current = false
+    // Um fechamento pode interromper esta abertura. Não deixe a rotina antiga
+    // cancelar a animação nova nem sobrescrever o estado do fechamento.
+    if (animacaoFocoRef.current === animacao) {
+      animacao.cancel()
+      animacaoFocoRef.current = null
+      focoAbrindoRef.current = false
+    }
   }
 
   async function fecharFoco() {
     const dialog = dialogRef.current
-    if (!dialogAberto(dialog) || focoFechandoRef.current || focoAbrindoRef.current) return
+    if (!dialogAberto(dialog) || focoFechandoRef.current) return
 
     focoFechandoRef.current = true
     setFocoFechando(true)
 
     const imagemFoco = imagemFocoRef.current
     const miniatura = imagemRef.current
-    const quadro = imagemFoco && miniatura && !reduzirMovimento()
+    const movimentoPermitido = !reduzirMovimento()
+    const quadro = imagemFoco && miniatura && movimentoPermitido
       ? calcularQuadroDaMiniatura(imagemFoco, miniatura)
       : null
 
     let animacao = null
-    if (quadro && typeof imagemFoco.animate === 'function') {
-      animacao = imagemFoco.animate(
-        [
-          { transform: SEM_TRANSFORMACAO, clipPath: SEM_RECORTE },
-          { transform: quadro.transform, clipPath: quadro.clipPath },
-        ],
-        { duration: 460, easing: EASE_FECHAR, fill: 'both' },
-      )
-      await Promise.race([animacao.finished.catch(() => {}), esperar(700)])
+    if (imagemFoco) {
+      // Captura o quadro visual antes de cancelar a abertura. Assim, se a pessoa
+      // fechar no meio do zoom, a volta começa exatamente de onde a imagem está.
+      const estiloAtual = getComputedStyle(imagemFoco)
+      const transformAtual = estiloAtual.transform === 'none' ? SEM_TRANSFORMACAO : estiloAtual.transform
+      const recorteAtual = estiloAtual.clipPath === 'none' ? SEM_RECORTE : estiloAtual.clipPath
+      animacaoFocoRef.current?.cancel()
+      animacaoFocoRef.current = null
+      focoAbrindoRef.current = false
+
+      if (quadro && typeof imagemFoco.animate === 'function') {
+        animacao = imagemFoco.animate(
+          [
+            { transform: transformAtual, clipPath: recorteAtual },
+            { transform: quadro.transform, clipPath: quadro.clipPath },
+          ],
+          { duration: 460, easing: EASE_FECHAR, fill: 'both' },
+        )
+        animacaoFocoRef.current = animacao
+        await Promise.race([animacao.finished.catch(() => {}), esperar(700)])
+      }
     }
 
     // Mostra a miniatura e fecha o dialog no mesmo quadro: a imagem "pousa" no card.
     flushSync(() => setFocoAberto(false))
     fecharDialog(dialog)
+    if (animacaoFocoRef.current === animacao) animacaoFocoRef.current = null
     animacao?.cancel()
     document.body.style.overflow = overflowAnteriorRef.current
     setFocoFechando(false)

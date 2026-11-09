@@ -297,6 +297,48 @@ test('na lista desktop, o texto do carrossel fica centralizado verticalmente', a
   await expect(texto).toHaveCSS('justify-content', 'center')
 })
 
+test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual e limpa a animação', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  const card = page.locator('.galeria-grade-global .obra').first()
+  await card.locator('.obra-zoom-trigger').click()
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  await expect(dialog).toHaveAttribute('open', '')
+  const imagem = dialog.locator('.obra-focus-imagem')
+
+  // Garante que o fechamento aconteça enquanto o zoom de entrada ainda está ativo.
+  await expect.poll(() => imagem.evaluate(element =>
+    element.getAnimations().some(animation => animation.playState === 'running')
+  )).toBe(true)
+
+  await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+  await expect(dialog).not.toHaveAttribute('open', '')
+  await expect.poll(() => imagem.evaluate(element => element.getAnimations().length)).toBe(0)
+  await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+  await expect(card.locator('.obra-zoom-trigger')).toBeVisible()
+})
+
+test('abrir e fechar o foco repetidamente não deixa transformações residuais na imagem', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  const card = page.locator('.galeria-grade-global .obra').first()
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  const imagem = dialog.locator('.obra-focus-imagem')
+
+  for (let tentativa = 0; tentativa < 2; tentativa += 1) {
+    await card.locator('.obra-zoom-trigger').click()
+    await expect(dialog).toHaveAttribute('open', '')
+    await expect(dialog.getByRole('button', { name: 'Fechar visualização' })).toBeVisible()
+    await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+    await expect(dialog).not.toHaveAttribute('open', '')
+    await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+    await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).clipPath)).toBe('none')
+  }
+})
+
+
 test('no foco mobile, a obra e o título aparecem antes das informações adicionais', async ({ page }) => {
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 390, height: 844 })
