@@ -27,7 +27,7 @@
   box-shadow:0 18px 60px rgba(0,0,0,.25); backdrop-filter:blur(14px); transform:translateX(50%);
 }
 .obra-focus-caption > span { color:var(--azul-claro); font-size:.65rem; font-weight:750; letter-spacing:.18em; text-transform:uppercase; }
-.obra-focus-info-toggle {
+.obra-focus-caption .obra-focus-info-toggle {
   display:none; align-items:center; justify-content:space-between; gap:.8rem;
   width:100%; margin:.75rem 0 0; padding:.65rem .85rem;
   border:1px solid rgba(127,178,224,.45); border-radius:999px;
@@ -73,7 +73,7 @@
   .obras-lista.modo-grade .obra .obra-imagem { aspect-ratio:1.12; }
   .obras-lista.modo-grade .obra .obra-texto { padding:1.15rem; }
   .obra-focus-caption { bottom:calc(.65rem + env(safe-area-inset-bottom)); max-height:34vh; padding:.9rem 1rem; }
-  .obra-focus-info-toggle { display:flex; }
+  .obra-focus-caption .obra-focus-info-toggle { display:flex; color:#edf6fc; }
   .obra-focus-metadados { display:none; margin-top:.65rem; }
   .obra-focus-metadados.expandido { display:block; }
   .obra-focus-caption { max-height:40vh; }
