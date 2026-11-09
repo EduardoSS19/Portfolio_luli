@@ -154,8 +154,17 @@ def portfolio_data(request):
     frames = BackgroundFrame.objects.filter(is_active=True)
     social_links = SocialLink.objects.filter(is_active=True)
 
+    appearance = SiteAppearance.get_solo()
     payload = {
-            "aparencia": {\n                "accent": appearance.accent,\n                "background": appearance.background,\n                "backgroundAlt": appearance.background_alt,\n                "surface": appearance.surface,\n                "text": appearance.text,\n                "border": appearance.border,\n            },\n            "sobre": (
+            "aparencia": {
+                "accent": appearance.accent,
+                "background": appearance.background,
+                "backgroundAlt": appearance.background_alt,
+                "surface": appearance.surface,
+                "text": appearance.text,
+                "border": appearance.border,
+            },
+            "sobre": (
                 {
                     "nome": profile.name,
                     "frase": profile.tagline,
