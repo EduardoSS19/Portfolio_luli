@@ -433,18 +433,18 @@ test('as entradas do modo lista acontecem uma vez e respeitam a técnica da obra
 })
 
 
-test('a navegação desktop mantém as seções em um menu compacto', async ({ page }) => {
+test('a navegação editorial desktop apresenta as seções em uma sobreposição', async ({ page }) => {
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 1440, height: 900 })
-  const menu = page.locator('.nav-desktop-toggle')
-  const links = page.locator('.nav-links')
+  const menu = page.locator('.editorial-menu-trigger')
+  const overlay = page.getByRole('dialog', { name: 'Menu do portfólio' })
   await expect(menu).toBeVisible()
-  await expect(links).toBeHidden()
-  await expect(page.locator('.nav-mobile-toggle')).toBeHidden()
+  await expect(menu).toHaveAttribute('aria-expanded', 'false')
+  await expect(overlay).toBeHidden()
   await menu.click()
-  await expect(links).toBeVisible()
-  await expect(links.locator('button')).toHaveCount(6)
-  await links.getByRole('button', { name: 'Cerâmica' }).click()
-  await expect(links).toBeHidden()
-  await expect(menu).toContainText('Cerâmica')
+  await expect(overlay).toBeVisible()
+  await expect(overlay.locator('.nav-overlay-link')).toHaveCount(6)
+  await overlay.getByRole('button', { name: /cerâmica/i }).click()
+  await expect(overlay).toBeHidden()
+  await expect(menu).toHaveAttribute('aria-expanded', 'false')
 })
