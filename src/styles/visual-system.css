@@ -1220,3 +1220,48 @@ nav.site-nav.editorial-nav{
 :root[data-theme="claro"] .obra-ficha-item dd,
 :root[data-theme="claro"] .obra-focus-ficha dd{color:rgba(23,43,59,.86)}
 :root[data-theme="claro"] .voltar-topo{color:#172b3b;background:rgba(247,251,254,.92);border-color:rgba(40,95,141,.4)}
+
+/* Rodapé no fim da janela em páginas curtas, sem espaço residual no mobile. */
+.site-shell{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  min-height:100svh;
+}
+.rodape{ margin-top:auto; }
+@media(max-width:760px){
+  .site-shell{ padding-bottom:0; }
+}
+
+/* Crédito do desenvolvedor como detalhe discreto, sem competir com o contato da artista. */
+.rodape-creditos .rodape-contato-dev{
+  min-height:0;
+  margin-left:.35rem;
+  padding:0;
+  border:0;
+  border-radius:0;
+  color:rgba(239,247,255,.48);
+  background:transparent;
+  font-size:.68rem;
+  font-weight:400;
+  letter-spacing:.015em;
+  text-decoration:none;
+  opacity:.82;
+}
+.rodape-creditos .rodape-contato-dev:hover{
+  color:rgba(239,247,255,.78);
+  border:0;
+  background:transparent;
+  text-decoration:underline;
+  transform:none;
+}
+:root[data-theme="claro"] .rodape-creditos .rodape-contato-dev{
+  color:rgba(23,43,59,.52);
+  border:0;
+  background:transparent;
+}
+:root[data-theme="claro"] .rodape-creditos .rodape-contato-dev:hover{
+  color:rgba(23,43,59,.82);
+  border:0;
+  background:transparent;
+}
