@@ -20,7 +20,7 @@ export function Footer({ nome, instagram, email, redes = [] }) {
       <small>© {new Date().getFullYear()} — Todos os direitos reservados</small>
       <div className="rodape-creditos">
         <span>Desenvolvido por <strong>Eduardo</strong></span>
-        <a href="mailto:leduardoss19@gmail.com">leduardoss19@gmail.com</a>
+        <a className="rodape-contato-dev" href="mailto:leduardoss19@gmail.com">Contato do desenvolvedor</a>
       </div>
     </footer>
   );
