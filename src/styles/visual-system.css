@@ -1338,7 +1338,6 @@ nav.site-nav.editorial-nav{
 html {
   background-color: #061522;
   color-scheme: dark;
-  overscroll-behavior-y: none;
 }
 :root[data-theme="claro"] {
   background-color: #f8fbfd;
