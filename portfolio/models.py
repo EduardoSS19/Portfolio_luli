@@ -211,3 +211,50 @@ class ReferenceLink(models.Model):
 
     def __str__(self):
         return self.text
+
+class SiteAppearance(models.Model):
+    """Identidade visual única, compartilhada pelo site público e pelo painel."""
+
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    accent = models.CharField(
+        "cor de destaque", max_length=7, default="#93C8F2",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+        help_text="Links, botões, detalhes e elementos em evidência.",
+    )
+    background = models.CharField(
+        "fundo principal", max_length=7, default="#061522",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    background_alt = models.CharField(
+        "fundo secundário", max_length=7, default="#102F4C",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    surface = models.CharField(
+        "superfícies e cartões", max_length=7, default="#0B2943",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    text = models.CharField(
+        "texto principal", max_length=7, default="#EFF7FF",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+    )
+    border = models.CharField(
+        "bordas e divisórias", max_length=7, default="#93C8F2",
+        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+        help_text="A intensidade é suavizada automaticamente para manter a delicadeza das linhas.",
+    )
+
+    class Meta:
+        verbose_name = "identidade visual"
+        verbose_name_plural = "identidade visual"
+
+    def __str__(self):
+        return "Identidade visual do portfólio"
+
+    @classmethod
+    def get_solo(cls):
+        appearance, _ = cls.objects.get_or_create(pk=1)
+        return appearance
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
