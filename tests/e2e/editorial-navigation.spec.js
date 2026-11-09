@@ -139,5 +139,6 @@ test('menu reúne tema claro/escuro e alternância única entre lista e grade', 
   await expect(alternar).toBeVisible()
   await alternar.click()
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
-  await expect(dialog.getByRole('button', { name: 'Alternar para visualização em lista' })).toBeVisible()
+  await expect(dialog).toBeHidden()
+  await expect(page.locator('.editorial-menu-trigger')).toHaveAttribute('aria-expanded', 'false')
 })
