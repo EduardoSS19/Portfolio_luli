@@ -297,6 +297,26 @@ test('na lista desktop, o texto do carrossel fica centralizado verticalmente', a
   await expect(texto).toHaveCSS('justify-content', 'center')
 })
 
+test('no foco mobile, a obra e o título aparecem antes das informações adicionais', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const card = page.locator('.galeria-grade-global .obra').first()
+  await card.locator('.obra-zoom-trigger').click()
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  await expect(dialog).toHaveAttribute('open', '')
+  await expect(dialog.locator('.obra-focus-caption h2')).toHaveText('Ruído cromático')
+  const metadados = dialog.locator('.obra-focus-metadados')
+  await expect(metadados).toBeHidden()
+  const toggle = dialog.getByRole('button', { name: 'Ver informações da obra' })
+  await expect(toggle).toBeVisible()
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(metadados).toBeVisible()
+  await expect(metadados).toContainText('Estudo de cor e interferência.')
+  await dialog.getByRole('button', { name: 'Ocultar informações' }).click()
+  await expect(metadados).toBeHidden()
+})
+
 test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplicado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
