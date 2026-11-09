@@ -575,7 +575,16 @@ class ReferenceAdmin(admin.ModelAdmin):
 # ---------------------------------------------------------------------------
 
 @admin.register(SiteAppearance)
+class SiteAppearanceForm(forms.ModelForm):
+    class Meta:
+        model = SiteAppearance
+        fields = (\"accent\", \"background\", \"background_alt\", \"surface\", \"text\", \"border\")
+        widgets = {name: forms.TextInput(attrs={\"type\": \"color\", \"class\": \"appearance-color-input\"}) for name in fields}
+
+
+@admin.register(SiteAppearance)
 class SiteAppearanceAdmin(admin.ModelAdmin):
+    form = SiteAppearanceForm
     list_display = ("__str__",)
     fieldsets = (
         ("Cores do site", {
