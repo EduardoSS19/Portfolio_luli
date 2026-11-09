@@ -70,11 +70,11 @@ jobs:
         run: npm run build
 
       - name: Install cross-browser test runner
-        run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+        run: npx --yes --package=@playwright/test@1.56.1 playwright --version
 
       - name: Install browser engines
-        run: npx playwright install --with-deps chromium
+        run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium
 
       - name: Diagnose first responsive gallery failure
         timeout-minutes: 4
-        run: npx playwright test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
+        run: npx --yes --package=@playwright/test@1.56.1 playwright test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
