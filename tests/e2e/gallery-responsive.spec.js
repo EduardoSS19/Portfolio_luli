@@ -493,10 +493,23 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
 
   const rodape = page.locator('.rodape')
   await expect(rodape).toBeVisible()
-  const fundo = await rodape.evaluate(element => getComputedStyle(element).backgroundColor)
-  expect(fundo).toBe('rgb(4, 17, 28)')
+  const estilosRodape = await rodape.evaluate(element => {
+    const style = getComputedStyle(element)
+    return {
+      fundo: style.backgroundColor,
+      imagem: style.backgroundImage,
+      opacidade: style.opacity,
+      posicao: style.position,
+    }
+  })
+  expect(estilosRodape.fundo).toBe('rgb(2, 7, 13)')
+  expect(estilosRodape.imagem).toBe('none')
+  expect(estilosRodape.opacidade).toBe('1')
+  expect(estilosRodape.posicao).toBe('relative')
 
   await expect(rodape.getByText('Desenvolvido por')).toBeVisible()
   await expect(rodape.getByText('Eduardo', { exact: true })).toBeVisible()
-  await expect(rodape.getByRole('link', { name: 'leduardoss19@gmail.com' })).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
+  const contatoDev = rodape.getByRole('link', { name: 'Contato do desenvolvedor' })
+  await expect(contatoDev).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
+  await expect(rodape.getByText('leduardoss19@gmail.com', { exact: true })).toHaveCount(0)
 })
