@@ -38,6 +38,7 @@ test('menu editorial abre em tela cheia, navega e fecha após selecionar uma se�
 
   await expect(dialog).toBeHidden()
   await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
 })
 
 test('Escape fecha o menu e devolve o foco ao botão que o abriu', async ({ page }) => {
@@ -85,4 +86,40 @@ test('menu editorial mantém alvos de toque e conteúdo dentro da tela em celula
       expect(link.right).toBeLessThanOrEqual(width + 1)
     }
   }
+})
+
+test('navegação por toque fecha o menu e rola até a seção no mobile', async ({ browser }) => {
+  // Este teste roda no projeto chromium-desktop do CI, então cria explicitamente
+  // um contexto mobile com suporte a toque em vez de depender do device do projeto.
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 1,
+    isMobile: true,
+    hasTouch: true,
+  })
+  const page = await context.newPage()
+
+  try {
+    await abrirPortfolio(page)
+    const trigger = page.locator('.editorial-menu-trigger')
+    await trigger.tap()
+    const dialog = page.getByRole('dialog', { name: 'Menu do portfólio' })
+    await expect(dialog).toBeVisible()
+    await dialog.getByRole('button', { name: /cerâmica/i }).tap()
+    await expect(dialog).toBeHidden()
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeGreaterThan(100)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  } finally {
+    await context.close()
+  }
+})
+
+test('links do menu recebem entrada escalonada e títulos de seção podem animar', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.locator('.editorial-menu-trigger').click()
+  const link = page.locator('.nav-overlay-link').filter({ hasText: 'Cerâmica' })
+  await expect(link).toHaveClass(/entrada-ceramica/)
+  await expect(link).toHaveAttribute('style', /--menu-index/)
+  await link.click()
+  await expect(page.locator('.secao-cabecalho.arte-ceramica')).toBeVisible()
 })

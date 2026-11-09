@@ -12,7 +12,7 @@ function tipoDeArte(titulo, chave) {
   return 'obra'
 }
 
-export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0 }) {
+export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0, animando = false }) {
   const tipo = tipoDeArte(titulo, chave)
   const [cabecalhoRef, cabecalhoVisivel] = useScrollReveal()
 
@@ -20,7 +20,7 @@ export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualiza
     <section className="secao" id={titulo}>
       <header
         ref={cabecalhoRef}
-        className={`secao-cabecalho arte-${tipo} ${cabecalhoVisivel ? 'visivel' : ''}`}
+        className={`secao-cabecalho arte-${tipo} ${cabecalhoVisivel ? 'visivel' : ''} ${animando ? 'animando' : ''}`}
       >
         <span className="secao-indice">SÉRIE {String(indice + 1).padStart(2, '0')}</span>
         <h2>{titulo}</h2>

@@ -15,7 +15,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
-  const overflowAnteriorRef = useRef('')
+  const overflowAnteriorRef = useRef({ body: '', html: '' })
   const categoriaAtual = categorias.find(cat => cat.titulo === categoriaAtiva)
   const animacaoAtual = categoriaAtual && animando === categoriaAtual.chave
     ? `anim-${tipoDeAnimacao(categoriaAtual)}`
@@ -25,8 +25,12 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     if (!menuAberto) return undefined
 
     const focoAnterior = document.activeElement
-    overflowAnteriorRef.current = document.body.style.overflow
+    overflowAnteriorRef.current = {
+      body: document.body.style.overflow,
+      html: document.documentElement.style.overflow,
+    }
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
     primeiroLinkRef.current?.focus()
 
     function tratarTeclado(evento) {
@@ -52,16 +56,20 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     document.addEventListener('keydown', tratarTeclado)
     return () => {
       document.removeEventListener('keydown', tratarTeclado)
-      document.body.style.overflow = overflowAnteriorRef.current
+      document.body.style.overflow = overflowAnteriorRef.current.body
+      document.documentElement.style.overflow = overflowAnteriorRef.current.html
       if (focoAnterior instanceof HTMLElement) focoAnterior.focus()
     }
   }, [menuAberto])
 
   function selecionar(titulo) {
     // Libera a rolagem antes de iniciar o scroll suave da seção selecionada.
-    document.body.style.overflow = overflowAnteriorRef.current
+    document.body.style.overflow = overflowAnteriorRef.current.body
+    document.documentElement.style.overflow = overflowAnteriorRef.current.html
     setMenuAberto(false)
-    aoSelecionar(titulo)
+    // Aguarda o overlay sair da árvore de interação antes de rolar. Isso evita
+    // o scrollIntoView ser consumido pelo scroll-lock do Safari/iOS.
+    requestAnimationFrame(() => requestAnimationFrame(() => aoSelecionar(titulo)))
   }
 
   function fecharAoClicarNoFundo(evento) {
@@ -105,7 +113,8 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
                 ref={indice === 0 ? primeiroLinkRef : undefined}
                 type="button"
                 key={cat.titulo}
-                className={`nav-overlay-link ${cat.titulo === categoriaAtiva ? 'ativo' : ''} ${animando === cat.chave ? `anim-${tipoDeAnimacao(cat)}` : ''}`}
+                className={`nav-overlay-link ${cat.titulo === categoriaAtiva ? 'ativo' : ''} ${menuAberto ? `entrada-${tipoDeAnimacao(cat)}` : ''} ${animando === cat.chave ? `anim-${tipoDeAnimacao(cat)}` : ''}`}
+                style={{ '--menu-index': indice }}
                 aria-current={cat.titulo === categoriaAtiva ? 'location' : undefined}
                 onClick={() => selecionar(cat.titulo)}
               >

@@ -146,9 +146,20 @@ export default function App() {
 
     // A seleção explícita deve refletir imediatamente na navegação.
     definirSecaoAtiva(titulo)
+    const comportamentoRolagem = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    const rolarPara = (elemento, alinhamento = 'start') => {
+      const retangulo = elemento.getBoundingClientRect()
+      const margem = alinhamento === 'center'
+        ? (window.innerHeight - retangulo.height) / 2
+        : 24
+      window.scrollTo({
+        top: Math.max(0, window.scrollY + retangulo.top - margem),
+        behavior: comportamentoRolagem,
+      })
+    }
     const secao = document.getElementById(titulo)
     if (secao) {
-      secao.scrollIntoView({ behavior: 'smooth' })
+      rolarPara(secao)
       return
     }
     const categoria = categorias.find(item => item.titulo === titulo)
@@ -170,7 +181,7 @@ export default function App() {
       }
       scrollEndHandlerRef.current = confirmarDestino
       window.addEventListener('scrollend', confirmarDestino, { once: true })
-      primeiraObra.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      rolarPara(primeiraObra, 'center')
       selecaoCategoriaTimerRef.current = window.setTimeout(() => {
         window.removeEventListener('scrollend', confirmarDestino)
         confirmarDestino()
@@ -229,6 +240,7 @@ export default function App() {
             chave={cat.chave}
             obras={cat.obras}
             indice={indice}
+            animando={animando === cat.chave}
           />
         ))
       )}
