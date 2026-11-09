@@ -222,7 +222,7 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
       expect(metrics.imageHeight, `${chave} image height at ${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
       expect(metrics.naturalWidth, `${chave} real photo loaded at ${width}px`).toBeGreaterThan(100)
       const animacoesPorTecnica = {
-        ceramica: 'ceramicaAmassada',
+        ceramica: 'ceramicaNoTorno',
         gravura: 'gravuraPrensa',
         desenhos: 'desenhoEsbocado',
         fotografia: 'fotoRevelada',
