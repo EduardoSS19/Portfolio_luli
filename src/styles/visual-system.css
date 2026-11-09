@@ -1270,3 +1270,79 @@ nav.site-nav.editorial-nav{
   border:0;
   background:transparent;
 }
+
+
+/* Controles flutuantes: voltar ao topo acima do seletor de grade/lista. */
+.controles-flutuantes {
+  position: fixed;
+  z-index: 22;
+  right: max(1.1rem, env(safe-area-inset-right));
+  bottom: max(1.1rem, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .65rem;
+}
+.controles-flutuantes .voltar-topo {
+  position: static;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+}
+.controles-flutuantes .voltar-topo:not(.visivel) {
+  display: none;
+}
+.alternar-modo-flutuante {
+  display: inline-flex;
+  min-width: 3.4rem;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .55rem .8rem;
+  border: 1px solid rgba(147,200,242,.4);
+  border-radius: 999px;
+  color: var(--texto);
+  background: rgba(5,20,33,.9);
+  box-shadow: 0 8px 26px rgba(0,0,0,.24);
+  backdrop-filter: blur(12px);
+  font: 600 .72rem/1 "Segoe UI",system-ui,sans-serif;
+  cursor: pointer;
+  transition: background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.alternar-modo-flutuante > span:first-child { color: var(--azul-claro); font-size: 1.05rem; }
+.alternar-modo-flutuante:hover { border-color: var(--azul-claro); background: rgba(11,41,67,.98); transform: translateY(-2px); }
+.alternar-modo-flutuante:focus-visible { outline: 2px solid var(--azul-claro); outline-offset: 3px; }
+:root[data-theme="claro"] .alternar-modo-flutuante {
+  color: #172b3b;
+  border-color: rgba(40,95,141,.4);
+  background: rgba(247,251,254,.94);
+}
+:root[data-theme="claro"] .alternar-modo-flutuante:hover { background: #e5eff6; }
+:root[data-theme="claro"] .site-shell:has(.site-nav.menu-aberto) .controles-flutuantes {
+  visibility: hidden;
+  pointer-events: none;
+}
+@media (max-width:760px) {
+  .controles-flutuantes {
+    right: max(.85rem, env(safe-area-inset-right));
+    bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+  .site-shell:has(.site-nav.menu-aberto) .controles-flutuantes {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* A cor do canvas do documento também acompanha o tema durante o overscroll do Safari. */
+html {
+  background-color: #061522;
+  color-scheme: dark;
+  overscroll-behavior-y: none;
+}
+:root[data-theme="claro"] {
+  background-color: #f8fbfd;
+}
+:root[data-theme="claro"] body {
+  background-color: #f8fbfd;
+}
