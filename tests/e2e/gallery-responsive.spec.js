@@ -710,3 +710,29 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
     expect(Math.abs(depois.height - antes.height)).toBeLessThanOrEqual(1)
   }
 })
+
+
+test('o botão flutuante fica mais baixo e mantém margem segura no mobile', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.evaluate(() => window.scrollTo(0, 900))
+  const botao = page.locator('.alternar-modo-flutuante')
+  await expect(botao).toBeVisible()
+  const botaoBox = await botao.boundingBox()
+  expect(botaoBox).not.toBeNull()
+  const distanciaDaBordaInferior = 844 - (botaoBox.y + botaoBox.height)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(60)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(75)
+})
+
+test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.locator('.editorial-menu-trigger').click()
+  await page.getByRole('button', { name: 'Ativar tema claro' }).click()
+  const rodape = page.locator('.rodape')
+  await expect(rodape).toBeVisible()
+  await expect(rodape).toHaveCSS('background-color', 'rgb(241, 246, 250)')
+  await expect(rodape).toHaveCSS('color', 'rgb(23, 43, 59)')
+  await expect(rodape.locator('small')).toHaveCSS('color', 'rgba(23, 43, 59, 0.66)')
+  await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(23, 43, 59)')
+})
