@@ -63,12 +63,64 @@
 .secao-contato .secao-cabecalho{ opacity:1; transform:none; }
 
 .obra-imagem img{ transition:transform 1.1s cubic-bezier(.2,.7,.2,1), filter 0.7s ease; }
-.obra.arte-ceramica.visivel .obra-imagem .obra-zoom-trigger img{ animation:ceramicaAmassada 0.9s cubic-bezier(.2,.8,.2,1) both; }
-@keyframes ceramicaAmassada{
-  0%{ opacity:.55; transform:scale(.88) translateY(14px); }
-  58%{ opacity:1; transform:scale(1.025) translateY(-2px); }
-  78%{ transform:scale(.995) translateY(1px); }
-  100%{ transform:scale(1) translateY(0); }
+/* Cerâmica: a peça nasce no torno. A forma se ergue do centro, ganha volume
+   e recebe as marcas circulares do movimento do torno antes de assentar. */
+.obra.arte-ceramica .obra-imagem{ perspective:900px; isolation:isolate; }
+.obra.arte-ceramica .obra-imagem::before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:42% 0 0;
+  pointer-events:none;
+  opacity:0;
+  background:
+    repeating-radial-gradient(ellipse at 50% 112%, rgba(246,205,164,.38) 0 1px, transparent 1px 8px),
+    linear-gradient(0deg, rgba(211,151,105,.22), transparent 75%);
+  mix-blend-mode:screen;
+  transform:scaleX(.35) translateY(12%);
+  transform-origin:50% 100%;
+}
+.obra.arte-ceramica.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:ceramicaNoTorno 1.55s cubic-bezier(.2,.75,.25,1) both;
+  transform-origin:50% 85%;
+}
+.obra.arte-ceramica.visivel .obra-imagem::before{
+  animation:marcasDoTorno 1.45s ease-out both;
+}
+@keyframes ceramicaNoTorno{
+  0%{
+    opacity:.55;
+    clip-path:ellipse(16% 8% at 50% 92%);
+    transform:perspective(900px) rotateX(24deg) scale(.62,.48);
+    filter:saturate(.72) brightness(.78);
+  }
+  34%{
+    opacity:.88;
+    clip-path:ellipse(42% 34% at 50% 76%);
+    transform:perspective(900px) rotateX(13deg) scale(.82,.78);
+  }
+  62%{
+    opacity:1;
+    clip-path:ellipse(76% 82% at 50% 55%);
+    transform:perspective(900px) rotateX(-3deg) scale(1.035,1.07);
+    filter:saturate(1.04) brightness(1.02);
+  }
+  82%{
+    clip-path:ellipse(100% 100% at 50% 50%);
+    transform:perspective(900px) rotateX(1deg) scale(.99,1.015);
+  }
+  100%{
+    opacity:1;
+    clip-path:inset(0);
+    transform:perspective(900px) rotateX(0) scale(1);
+    filter:none;
+  }
+}
+@keyframes marcasDoTorno{
+  0%{ opacity:0; transform:scaleX(.35) translateY(12%); }
+  28%{ opacity:.7; }
+  72%{ opacity:.35; transform:scaleX(1.12) translateY(0); }
+  100%{ opacity:0; transform:scaleX(1.2) translateY(-5%); }
 }
 /* Gravura: a imagem entra como uma impressão feita na prensa.
    A matriz revela a imagem em pressão vertical; um rolo de tinta cruza o papel
