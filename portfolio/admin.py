@@ -583,8 +583,12 @@ class SiteAppearanceForm(forms.ModelForm):
             "border_color",
         )
         widgets = {
-            field: forms.TextInput(attrs={"type": "color"})
-            for field in fields
+            "background_start": forms.TextInput(attrs={"type": "color"}),
+            "background_middle": forms.TextInput(attrs={"type": "color"}),
+            "background_end": forms.TextInput(attrs={"type": "color"}),
+            "accent_color": forms.TextInput(attrs={"type": "color"}),
+            "text_color": forms.TextInput(attrs={"type": "color"}),
+            "border_color": forms.TextInput(attrs={"type": "color"}),
         }
 
 
