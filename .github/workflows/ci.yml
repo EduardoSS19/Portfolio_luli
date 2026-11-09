@@ -22,6 +22,7 @@ jobs:
   backend:
     name: Django checks and tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,6 +52,7 @@ jobs:
   frontend:
     name: Build React frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,4 +76,5 @@ jobs:
         run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Test responsive gallery across browser engines
+        timeout-minutes: 8
         run: npm run test:e2e
