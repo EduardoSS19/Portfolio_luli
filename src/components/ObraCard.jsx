@@ -267,46 +267,56 @@ export function ObraCard({
 
     const imagemFoco = imagemFocoRef.current
     const miniatura = imagemRef.current
-    const movimentoPermitido = !reduzirMovimento()
-    const quadro = imagemFoco && miniatura && movimentoPermitido
-      ? calcularQuadroDaMiniatura(imagemFoco, miniatura)
-      : null
+    let animacaoFechamento = null
 
-    let animacao = null
-    if (imagemFoco) {
-      // Captura o quadro visual antes de cancelar a abertura. Assim, se a pessoa
-      // fechar no meio do zoom, a volta começa exatamente de onde a imagem está.
-      const estiloAtual = getComputedStyle(imagemFoco)
-      const transformAtual = estiloAtual.transform === 'none' ? SEM_TRANSFORMACAO : estiloAtual.transform
-      const recorteAtual = estiloAtual.clipPath === 'none' ? SEM_RECORTE : estiloAtual.clipPath
+    try {
+      if (imagemFoco && !reduzirMovimento() && typeof imagemFoco.animate === 'function') {
+        // A transformação atual é relativa à caixa natural da imagem no dialog.
+        // Capture-a e cancele o zoom ANTES de medir a caixa de destino: getBoundingClientRect()
+        // inclui transformações WAAPI ativas, então medi-la antes deslocava o alvo no Safari.
+        const estiloAtual = getComputedStyle(imagemFoco)
+        const transformAtual = estiloAtual.transform === 'none' ? SEM_TRANSFORMACAO : estiloAtual.transform
+        const recorteAtual = estiloAtual.clipPath === 'none' ? SEM_RECORTE : estiloAtual.clipPath
+
+        animacaoFocoRef.current?.cancel()
+        animacaoFocoRef.current = null
+        focoAbrindoRef.current = false
+
+        // Agora a caixa de layout voltou ao tamanho natural; o quadro calculado
+        // representa a posição real da miniatura, sem incorporar o zoom interrompido.
+        const quadro = miniatura ? calcularQuadroDaMiniatura(imagemFoco, miniatura) : null
+        if (quadro) {
+          try {
+            animacaoFechamento = imagemFoco.animate(
+              [
+                { transform: transformAtual, clipPath: recorteAtual },
+                { transform: quadro.transform, clipPath: quadro.clipPath },
+              ],
+              { duration: 460, easing: EASE_FECHAR, fill: 'both' },
+            )
+            animacaoFocoRef.current = animacaoFechamento
+            await Promise.race([animacaoFechamento.finished.catch(() => {}), esperar(520)])
+          } catch {
+            // Uma falha de WAAPI nunca pode impedir o fechamento do dialog.
+          }
+        }
+      }
+    } finally {
+      // A limpeza é obrigatória mesmo se o WebKit rejeitar a animação ou o cálculo.
+      flushSync(() => setFocoAberto(false))
+      fecharDialog(dialog)
+      if (animacaoFocoRef.current === animacaoFechamento) animacaoFocoRef.current = null
       animacaoFocoRef.current?.cancel()
+      animacaoFechamento?.cancel()
       animacaoFocoRef.current = null
       focoAbrindoRef.current = false
-
-      if (quadro && typeof imagemFoco.animate === 'function') {
-        animacao = imagemFoco.animate(
-          [
-            { transform: transformAtual, clipPath: recorteAtual },
-            { transform: quadro.transform, clipPath: quadro.clipPath },
-          ],
-          { duration: 460, easing: EASE_FECHAR, fill: 'both' },
-        )
-        animacaoFocoRef.current = animacao
-        await Promise.race([animacao.finished.catch(() => {}), esperar(700)])
-      }
+      document.body.style.overflow = overflowAnteriorRef.current
+      setFocoFechando(false)
+      setVideoFocoAtivo(false)
+      setFichaFocoExpandida(false)
+      focoFechandoRef.current = false
+      imagemRef.current?.focus({ preventScroll: true })
     }
-
-    // Mostra a miniatura e fecha o dialog no mesmo quadro: a imagem "pousa" no card.
-    flushSync(() => setFocoAberto(false))
-    fecharDialog(dialog)
-    if (animacaoFocoRef.current === animacao) animacaoFocoRef.current = null
-    animacao?.cancel()
-    document.body.style.overflow = overflowAnteriorRef.current
-    setFocoFechando(false)
-    setVideoFocoAtivo(false)
-    setFichaFocoExpandida(false)
-    focoFechandoRef.current = false
-    imagemRef.current?.focus({ preventScroll: true })
   }
 
   function alternarDetalhes() {
