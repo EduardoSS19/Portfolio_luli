@@ -22,6 +22,15 @@ const categorias = [
   ] },
 ]
 
+async function alternarModoGaleria(page, nomeBotao) {
+  const menu = page.locator('.editorial-menu-trigger')
+  if (await menu.getAttribute('aria-expanded') !== 'true') {
+    await menu.click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+  }
+  await page.getByRole('button', { name: nomeBotao }).click()
+}
+
 async function abrirPortfolio(page, semIntersectionObserver = false) {
   await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200,
@@ -42,7 +51,7 @@ async function abrirPortfolio(page, semIntersectionObserver = false) {
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.locator('.editorial-menu-trigger').click()
-  await page.getByRole('button', { name: 'Alternar para visualização em grade' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em grade')
   const primeiroCard = page.locator('.galeria-grade-global .obra').first()
   await expect(page.locator('.galeria-grade-global .obra')).toHaveCount(8)
   // Com IntersectionObserver ativo, apenas cards próximos ao viewport devem revelar.
@@ -86,7 +95,7 @@ test('a grade mantém todas as categorias e cartões em vários tamanhos, mesmo 
 
 test('alternar lista e grade preserva as oito obras', async ({ page }) => {
   await abrirPortfolio(page)
-  await page.getByRole('button', { name: 'Alternar para visualização em lista' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obras-lista .obra')).toHaveCount(8)
 })
@@ -128,7 +137,7 @@ test('o modo leve não remove animações artísticas e movimento reduzido conti
   await page.goto('/?leve', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.locator('.editorial-menu-trigger').click()
-  await page.getByRole('button', { name: 'Alternar para visualização em grade' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em grade')
   const glitch = page.locator('.galeria-grade-global .obra.arte-glitch').first()
   await glitch.scrollIntoViewIfNeeded()
   await expect.poll(() => glitch.evaluate(card => getComputedStyle(card.querySelector('.obra-zoom-trigger img')).animationName)).toContain('glitchConstrucao')
@@ -167,7 +176,7 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
   await page.locator('.editorial-menu-trigger').click()
-  await page.getByRole('button', { name: 'Alternar para visualização em grade' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em grade')
 
   const cards = page.locator('.galeria-grade-global .obra')
   await expect(cards).toHaveCount(7)
@@ -282,7 +291,7 @@ test('em qualquer viewport touch a grade mantém o +N e esconde as setas', async
 test('na lista desktop, o texto do carrossel fica centralizado verticalmente', async ({ page }) => {
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 1440, height: 1000 })
-  await page.getByRole('button', { name: 'Alternar para visualização em lista' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
   const texto = page.locator('.secao:not(.sobre-secao) .obra.tem-carrossel .obra-texto').first()
   await expect(texto).toBeVisible()
   await expect(texto).toHaveCSS('justify-content', 'center')
@@ -323,7 +332,7 @@ test('o carrossel da grade ocupa toda a altura do card sem reservar faixa de min
 
 test('na lista, as miniaturas ficam sobre a mídia sem reservar altura extra', async ({ page }) => {
   await abrirPortfolio(page)
-  await page.getByRole('button', { name: 'Alternar para visualização em lista' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
   const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
   const galeria = card.locator('.obra-galeria')
   const imagem = card.locator('.obra-imagem')
@@ -360,7 +369,7 @@ test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o ca
 test('o carrossel também pausa durante interação por toque no modo lista', async ({ page }) => {
   await page.clock.install()
   await abrirPortfolio(page)
-  await page.getByRole('button', { name: 'Alternar para visualização em lista' }).click()
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
   const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra.tem-carrossel').first()
   // A lista pode reposicionar o primeiro carrossel fora da viewport.
   // O autoplay só roda depois que o card foi revelado pelo IntersectionObserver.
