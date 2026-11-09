@@ -1074,3 +1074,27 @@ input:focus, textarea:focus, select:focus {
   cursor: pointer;
 }
 .appearance-preview-actions { margin: 0 0 16px; }
+
+.portfolio-welcome {
+  border-color: var(--portfolio-border) !important;
+  background: linear-gradient(115deg,
+    color-mix(in srgb, var(--site-surface, #0b2943) 92%, var(--site-accent, #93c8f2)) 0%,
+    var(--site-surface, #0b2943) 58%,
+    color-mix(in srgb, var(--site-background-alt, #102f4c) 88%, var(--site-accent, #93c8f2)) 100%) !important;
+}
+.portfolio-welcome h1, .portfolio-welcome p:not(.portfolio-eyebrow) {
+  color: var(--site-text, #eff7ff) !important;
+}
+.portfolio-eyebrow, .portfolio-welcome h1 span { color: var(--site-accent, #93c8f2) !important; }
+.portfolio-welcome-link {
+  background: var(--site-accent, #93c8f2) !important;
+  color: var(--site-background, #061522) !important;
+}
+.portfolio-action, .portfolio-action-public, .portfolio-stats > *,
+.portfolio-quick-actions, .portfolio-dashboard-content {
+  border-color: var(--portfolio-border) !important;
+  background: var(--site-surface, #0b2943) !important;
+  color: var(--site-text, #eff7ff) !important;
+}
+.portfolio-action strong, .portfolio-help strong { color: var(--site-text, #eff7ff) !important; }
+.portfolio-action small, .portfolio-help { color: var(--portfolio-muted) !important; }
