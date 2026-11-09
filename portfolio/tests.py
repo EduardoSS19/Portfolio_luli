@@ -821,6 +821,7 @@ class SiteAppearanceTests(TestCase):
             email="admin@example.com",
             password="test-password-123",
         )
+        SiteAppearance.get_solo()
         self.client.force_login(admin_user)
 
         response = self.client.get(reverse("admin:portfolio_siteappearance_change", args=[1]))
