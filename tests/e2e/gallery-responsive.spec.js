@@ -636,9 +636,20 @@ test('o seletor de grade/lista fica fora do menu e abaixo do botão voltar ao to
   expect(topoBox).not.toBeNull()
   expect(modoBox).not.toBeNull()
   expect(modoBox.y).toBeGreaterThan(topoBox.y + topoBox.height)
+
+  // O controle flutuante e o menu devem refletir a mesma fonte de estado.
   await modo.click()
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obra').first()).toBeVisible()
+  await expect(controles.getByRole('button', { name: 'Alternar para visualização em grade' })).toBeVisible()
+
+  await page.locator('.editorial-menu-trigger').click()
+  const controleMenu = page.locator('.editorial-menu-controls')
+    .getByRole('button', { name: 'Alternar para visualização em grade' })
+  await expect(controleMenu).toBeVisible()
+  await controleMenu.click()
+  await expect(page.locator('.galeria-grade-global')).toBeVisible()
+  await expect(controles.getByRole('button', { name: 'Alternar para visualização em lista' })).toBeVisible()
 })
 
 test('links de referências têm contraste legível no tema claro sem hover', async ({ page }) => {
@@ -674,10 +685,12 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
   const imagem = dialog.locator('.obra-focus-imagem')
 
   for (const atraso of [90, 260, 430]) {
-    const antes = await trigger.boundingBox()
     await trigger.click()
     await expect(dialog).toHaveAttribute('open', '')
     await page.waitForTimeout(atraso)
+    // A abertura centraliza o card antes do foco; a referência correta é
+    // a miniatura já centralizada, imediatamente antes de iniciar o retorno.
+    const antes = await trigger.boundingBox()
     await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
     await expect(dialog).not.toHaveAttribute('open', '')
     await expect.poll(() => imagem.evaluate(element => ({
