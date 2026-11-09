@@ -466,6 +466,35 @@ test('as entradas do modo lista acontecem uma vez e respeitam a técnica da obra
 })
 
 
+test('o título de Cerâmica anima suavemente apenas após navegação explícita', async ({ page }) => {
+  await abrirPortfolio(page)
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
+
+  const cabecalho = page.locator('.secao-cabecalho.arte-ceramica')
+  await cabecalho.scrollIntoViewIfNeeded()
+  await expect(cabecalho).toHaveClass(/visivel/)
+  // A rolagem manual apenas atualiza a seção ativa; não deve disparar a animação de navegação.
+  await expect(cabecalho).not.toHaveClass(/animando/)
+
+  const menu = page.locator('.editorial-menu-trigger')
+  await menu.click()
+  await page.getByRole('dialog', { name: 'Menu do portfólio' })
+    .getByRole('button', { name: /cerâmica/i }).click()
+
+  await expect(cabecalho).toHaveClass(/animando/)
+  const titulo = cabecalho.locator('h2')
+  await expect.poll(() => titulo.evaluate(element =>
+    element.getAnimations().filter(animation => animation.animationName === 'tituloCeramica').length
+  )).toBe(1)
+
+  // Atualizações de scroll não podem reiniciar nem duplicar a animação.
+  await page.evaluate(() => window.dispatchEvent(new Event('scroll')))
+  await expect.poll(() => titulo.evaluate(element =>
+    element.getAnimations().filter(animation => animation.animationName === 'tituloCeramica').length
+  )).toBe(1)
+})
+
+
 test('a navegação editorial desktop apresenta as seções em uma sobreposição', async ({ page }) => {
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 1440, height: 900 })
