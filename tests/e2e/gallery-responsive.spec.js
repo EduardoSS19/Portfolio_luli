@@ -481,3 +481,22 @@ test('a navegação editorial desktop apresenta as seções em uma sobreposiçã
   await expect(overlay).toBeHidden()
   await expect(menu).toHaveAttribute('aria-expanded', 'false')
 })
+
+
+test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo sólido e crédito do desenvolvedor', async ({ page }) => {
+  await abrirPortfolio(page)
+  await alternarModoGaleria(page, 'Alternar para visualização em lista')
+
+  const miniaturas = page.locator('.carrossel-miniaturas').first()
+  await expect(miniaturas).toBeVisible()
+  await expect.poll(() => miniaturas.evaluate(element => getComputedStyle(element).borderTopWidth)).toBe('0px')
+
+  const rodape = page.locator('.rodape')
+  await expect(rodape).toBeVisible()
+  const fundo = await rodape.evaluate(element => getComputedStyle(element).backgroundColor)
+  expect(fundo).toBe('rgb(4, 17, 28)')
+
+  await expect(rodape.getByText('Desenvolvido por')).toBeVisible()
+  await expect(rodape.getByText('Eduardo', { exact: true })).toBeVisible()
+  await expect(rodape.getByRole('link', { name: 'leduardoss19@gmail.com' })).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
+})
