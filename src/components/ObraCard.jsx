@@ -264,6 +264,9 @@ export function ObraCard({
 
     focoFechandoRef.current = true
     setFocoFechando(true)
+    // Guardamos a rolagem do quadro já centralizado. Alguns navegadores ajustam
+    // o scroll ao fechar <dialog> e devolver o foco ao botão de origem.
+    const scrollAntesDeFechar = window.scrollY
 
     const imagemFoco = imagemFocoRef.current
     const miniatura = imagemRef.current
@@ -316,6 +319,9 @@ export function ObraCard({
       setFichaFocoExpandida(false)
       focoFechandoRef.current = false
       imagemRef.current?.focus({ preventScroll: true })
+      // Neutraliza qualquer restauração automática de scroll disparada pelo
+      // fechamento nativo do dialog, mantendo a miniatura no mesmo retângulo.
+      window.scrollTo({ top: scrollAntesDeFechar, behavior: 'auto' })
     }
   }
 
