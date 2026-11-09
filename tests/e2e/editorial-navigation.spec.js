@@ -123,3 +123,21 @@ test('links do menu recebem entrada escalonada e títulos de seção podem anima
   await link.click()
   await expect(page.locator('.secao-cabecalho.arte-ceramica')).toBeVisible()
 })
+
+
+test('menu reúne tema claro/escuro e alternância única entre lista e grade', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.locator('.editorial-menu-trigger').click()
+  const dialog = page.getByRole('dialog', { name: 'Menu do portfólio' })
+  const tema = dialog.getByRole('button', { name: 'Ativar tema claro' })
+  await expect(tema).toBeVisible()
+  await tema.click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'claro')
+  await expect(dialog.getByRole('button', { name: 'Ativar tema escuro' })).toBeVisible()
+
+  const alternar = dialog.getByRole('button', { name: 'Alternar para visualização em grade' })
+  await expect(alternar).toBeVisible()
+  await alternar.click()
+  await expect(page.locator('.galeria-grade-global')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Alternar para visualização em lista' })).toBeVisible()
+})
