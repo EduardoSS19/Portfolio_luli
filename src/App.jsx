@@ -5,6 +5,7 @@ import { Nav } from './components/Nav.jsx'
 import { Sobre } from './components/Sobre.jsx'
 import { SecaoCategoria } from './components/SecaoCategoria.jsx'
 import { GaleriaGrade } from './components/GaleriaGrade.jsx'
+import { GaleriaGradeDiagnostico } from './components/GaleriaGradeDiagnostico.jsx'
 import { Referencias } from './components/Referencias.jsx'
 import { Footer } from './components/Footer.jsx'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
@@ -192,6 +193,12 @@ export default function App() {
         <span className="carregando-texto">Carregando</span>
       </div>
     )
+  }
+
+  const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
+
+  if (modoDiagnosticoGrade) {
+    return <GaleriaGradeDiagnostico categorias={categorias} />
   }
 
   return (
