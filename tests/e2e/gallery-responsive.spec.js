@@ -612,3 +612,51 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
   await expect(contatoDev).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
   await expect(rodape.getByText('leduardoss19@gmail.com', { exact: true })).toHaveCount(0)
 })
+
+
+test('o tema inicia sempre escuro mesmo se houver uma preferência clara antiga salva', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('portfolio-tema', 'claro'))
+  await abrirPortfolio(page)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'escuro')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+})
+
+test('o seletor de grade/lista fica fora do menu e abaixo do botão voltar ao topo', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.evaluate(() => window.scrollTo(0, 900))
+  const controles = page.locator('.controles-flutuantes')
+  const topo = controles.getByRole('button', { name: 'Voltar ao topo' })
+  const modo = controles.getByRole('button', { name: 'Alternar para visualização em lista' })
+  await expect(topo).toBeVisible()
+  await expect(modo).toBeVisible()
+  const [topoBox, modoBox] = await Promise.all([topo.boundingBox(), modo.boundingBox()])
+  expect(topoBox).not.toBeNull()
+  expect(modoBox).not.toBeNull()
+  expect(modoBox.y).toBeGreaterThan(topoBox.y + topoBox.height)
+  await modo.click()
+  await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra').first()).toBeVisible()
+})
+
+test('links de referências têm contraste legível no tema claro sem hover', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: categorias.slice(0, 1),
+      referencias: [{ titulo: 'Exposição', periodo: '2025', links: [{ texto: 'Catálogo', url: 'https://example.com' }] }],
+      frames: [],
+      redes: [],
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+    }),
+  }))
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+  await page.locator('.editorial-menu-trigger').click()
+  await page.getByRole('button', { name: 'Ativar tema claro' }).click()
+  const link = page.getByRole('link', { name: 'Catálogo' })
+  await expect(link).toBeVisible()
+  const cor = await link.evaluate(element => getComputedStyle(element).color)
+  expect(cor).toBe('rgba(23, 43, 59, 0.88)')
+  await expect(page.locator('html')).toHaveCSS('background-color', 'rgb(248, 251, 253)')
+})
