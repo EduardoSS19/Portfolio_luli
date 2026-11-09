@@ -221,10 +221,15 @@ test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou gli
       expect(metrics.imageWidth, `${chave} image width at ${width}px`).toBeGreaterThan(metrics.cardWidth * 0.9)
       expect(metrics.imageHeight, `${chave} image height at ${width}px`).toBeGreaterThan(metrics.cardHeight * 0.9)
       expect(metrics.naturalWidth, `${chave} real photo loaded at ${width}px`).toBeGreaterThan(100)
+      const animacoesPorTecnica = {
+        ceramica: 'ceramicaAmassada',
+        gravura: 'gravuraPrensa',
+        desenhos: 'desenhoEsbocado',
+        fotografia: 'fotoRevelada',
+        outras: 'obraRevelada',
+      }
       if (testInfo.project.name === 'webkit-iphone' || testInfo.project.name === 'chromium-android') {
-        expect(metrics.clipPath, `${chave} image clip-path at ${width}px`).toBe('none')
-        expect(metrics.transform, `${chave} image transform at ${width}px`).toBe('none')
-        expect(metrics.animation, `${chave} image animation at ${width}px`).toBe('none')
+        expect(metrics.animation).toContain(animacoesPorTecnica[chave])
       }
     }
   }
@@ -282,4 +287,33 @@ test('a grade usa altura explícita e igual para todos os cards, com mídia ocup
     expect(metrics.heights[0], `non-collapsed card at ${width}px`).toBeGreaterThanOrEqual(230)
     expect(Math.min(...metrics.mediaHeights), `media area at ${width}px`).toBeGreaterThanOrEqual(180)
   }
+})
+
+
+test('as entradas do modo lista acontecem uma vez e respeitam a técnica da obra', async ({ page }) => {
+  const dados = [{
+    titulo: 'Gravura',
+    chave: 'gravura',
+    obras: [{ titulo: 'Obra Gravura', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }], tipoDeArte: 'gravura' }],
+  }]
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: dados,
+      referencias: [],
+      frames: [],
+      redes: [],
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+    }),
+  }))
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+  const card = page.locator('.secao:not(.sobre-secao) .obra').first()
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => card.evaluate(el => Number.parseFloat(getComputedStyle(el).opacity))).toBeGreaterThanOrEqual(.95)
+  await expect.poll(() => card.locator('.obra-zoom-trigger img').evaluate(img => getComputedStyle(img).animationName)).toContain('gravuraPrensa')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await card.scrollIntoViewIfNeeded()
+  await expect(card).toHaveClass(/visivel/)
 })
