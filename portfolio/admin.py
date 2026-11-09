@@ -574,6 +574,17 @@ class ReferenceAdmin(admin.ModelAdmin):
 # Identidade visual compartilhada pelo site e pelo painel
 # ---------------------------------------------------------------------------
 
+def _luminancia_hex(color):
+    channels = [int(color[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+    linear = [value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4 for value in channels]
+    return sum(value * weight for value, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
+
+
+def _contraste_hex(first, second):
+    light, dark = sorted((_luminancia_hex(first), _luminancia_hex(second)), reverse=True)
+    return (light + 0.05) / (dark + 0.05)
+
+
 class SiteAppearanceForm(forms.ModelForm):
     class Meta:
         model = SiteAppearance
@@ -582,6 +593,20 @@ class SiteAppearanceForm(forms.ModelForm):
             name: forms.TextInput(attrs={"type": "color", "class": "appearance-color-input"})
             for name in fields
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        text = cleaned.get("text")
+        background = cleaned.get("background")
+        surface = cleaned.get("surface")
+        accent = cleaned.get("accent")
+        if text and background and _contraste_hex(text, background) < 4.5:
+            self.add_error("text", "Para leitura confortável, o texto precisa de contraste mínimo de 4,5:1 com o fundo principal.")
+        if text and surface and _contraste_hex(text, surface) < 4.5:
+            self.add_error("text", "O texto também precisa de contraste mínimo de 4,5:1 com a cor das superfícies.")
+        if accent and background and _contraste_hex(accent, background) < 3:
+            self.add_error("accent", "A cor de destaque precisa de contraste mínimo de 3:1 com o fundo.")
+        return cleaned
 
 
 @admin.register(SiteAppearance)
@@ -593,7 +618,7 @@ class SiteAppearanceAdmin(admin.ModelAdmin):
             "fields": ("accent", "background", "background_alt", "surface", "text", "border"),
             "description": (
                 "Estas cores são aplicadas ao portfólio público e ao painel. "
-                "Use a prévia para conferir a combinação antes de salvar."
+                "As cores do site e deste painel mudam juntas. A prévia é imediata; o botão Restaurar cores originais recupera a paleta atual."
             ),
         }),
     )
