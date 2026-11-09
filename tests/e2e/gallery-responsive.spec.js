@@ -265,6 +265,7 @@ test('no celular a grade mantém o +N e esconde as setas do carrossel', async ({
   await page.setViewportSize({ width: 390, height: 844 })
   const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
   await expect(card.locator('.grade-midia-contagem')).toContainText('+')
+  await expect(card.locator('.grade-midia-contagem')).toBeVisible()
   await expect(card.locator('.carrossel-seta')).toHaveCount(2)
   await expect(card.locator('.carrossel-seta').first()).toBeHidden()
   await expect(card.locator('.carrossel-seta').last()).toBeHidden()
