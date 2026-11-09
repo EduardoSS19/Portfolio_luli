@@ -338,4 +338,5 @@ def frontend(request):
     # metadados são montados no Django antes de entregar o index do frontend.
     html = html.replace("</head>", "\n    " + "\n    ".join(tags) + "\n  </head>", 1)
     if '<title>Portfólio</title>' in html:
+        html = html.replace('<title>Portfólio</title>', f'<title>{escape(titulo)}</title>', 1)
     return HttpResponse(html, content_type="text/html; charset=utf-8")
