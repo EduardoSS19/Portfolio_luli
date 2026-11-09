@@ -260,14 +260,26 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
-test('no celular a grade mantém o +N e esconde as setas do carrossel', async ({ page }) => {
+test('em qualquer viewport touch a grade mantém o +N e esconde as setas', async ({ page }, testInfo) => {
   await abrirPortfolio(page)
-  await page.setViewportSize({ width: 390, height: 844 })
-  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
-  await expect(card.locator('.grade-midia-contagem')).toContainText('+')
-  await expect(card.locator('.carrossel-seta')).toHaveCount(2)
-  await expect(card.locator('.carrossel-seta').first()).toBeHidden()
-  await expect(card.locator('.carrossel-seta').last()).toBeHidden()
+  const viewports = ['webkit-iphone', 'chromium-android'].includes(testInfo.project.name)
+    ? [390, 768, 820, 1024]
+    : [390]
+
+  for (const width of viewports) {
+    await page.setViewportSize({ width, height: 900 })
+    if (['webkit-iphone', 'chromium-android'].includes(testInfo.project.name)) {
+      expect(await page.evaluate(() => matchMedia('(hover: none), (pointer: coarse)').matches))
+        .toBe(true)
+    }
+    const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+    const contador = card.locator('.grade-midia-contagem')
+    await expect(contador).toContainText('+')
+    await expect(contador).toBeVisible()
+    await expect(card.locator('.carrossel-seta')).toHaveCount(2)
+    await expect(card.locator('.carrossel-seta').first()).toBeHidden()
+    await expect(card.locator('.carrossel-seta').last()).toBeHidden()
+  }
 })
 
 test('na lista desktop, o texto do carrossel fica centralizado verticalmente', async ({ page }) => {
