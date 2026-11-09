@@ -23,8 +23,32 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     setMenuAberto(false)
   }
 
+  function alternarMenu() {
+    setMenuAberto(aberto => !aberto)
+  }
+
   return (
-    <nav className={`site-nav ${menuAberto ? 'menu-aberto' : ''}`}>
+    <nav
+      className={`site-nav ${menuAberto ? 'menu-aberto' : ''}`}
+      aria-label="Navegação principal"
+      onKeyDown={evento => {
+        if (evento.key === 'Escape') setMenuAberto(false)
+      }}
+    >
+      <button
+        type="button"
+        className="nav-desktop-toggle"
+        aria-expanded={menuAberto}
+        aria-controls="site-navigation"
+        onClick={alternarMenu}
+      >
+        <span className="nav-desktop-context">
+          <span>EXPLORAR</span>
+          <strong className={animacaoAtual}>{categoriaAtiva || 'Início'}</strong>
+        </span>
+        <span className={`nav-desktop-chevron ${menuAberto ? 'aberto' : ''}`} aria-hidden="true">⌄</span>
+      </button>
+
       <div className="nav-links" id="site-navigation">
         {categorias.map(cat => (
           <button
@@ -38,6 +62,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
           </button>
         ))}
       </div>
+
       <div className="nav-gallery-switch" role="group" aria-label="Visualização das obras">
         <button type="button" aria-label="Visualizar em lista" title="Lista" className={modoGaleria === 'lista' ? 'ativo' : ''} aria-pressed={modoGaleria === 'lista'} onClick={() => aoTrocarModo('lista')}>
           <span aria-hidden="true">☷</span><span>Lista</span>
@@ -46,12 +71,13 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
           <span aria-hidden="true">▦</span><span>Grade</span>
         </button>
       </div>
+
       <button
         type="button"
         className="nav-mobile-toggle"
         aria-expanded={menuAberto}
         aria-controls="site-navigation"
-        onClick={() => setMenuAberto(aberto => !aberto)}
+        onClick={alternarMenu}
       >
         <span className="nav-mobile-context">
           <span>NAVEGAR</span>

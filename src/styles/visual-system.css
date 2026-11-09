@@ -841,3 +841,90 @@ nav button.ativo{
 .obra-ficha-item dd,.obra-focus-ficha dd{margin:0;color:rgba(239,247,255,.86);font-size:.86rem;line-height:1.5;overflow-wrap:anywhere}
 .obra-focus-ficha{max-width:620px;margin-top:1rem}
 @media(max-width:520px){.obra-ficha-tecnica,.obra-focus-ficha{grid-template-columns:1fr 1fr;gap:.7rem}}
+
+
+/* Navegação desktop compacta: as seções ficam em um menu, não em uma faixa longa. */
+nav.site-nav {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.85rem;
+}
+.site-nav .nav-desktop-toggle {
+  display: inline-flex;
+  min-width: 13rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.55rem 0.9rem 0.55rem 1rem;
+  border: 1px solid rgba(195,225,249,0.2);
+  border-radius: 0.85rem;
+  background: rgba(4,17,29,0.72);
+  color: var(--texto);
+  text-align: left;
+}
+.nav-desktop-context { display: grid; gap: 0.12rem; }
+.nav-desktop-context > span {
+  color: var(--azul-claro);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+.nav-desktop-context strong {
+  max-width: 15rem;
+  overflow: hidden;
+  font-family: Georgia,"Times New Roman",serif;
+  font-size: 0.98rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-desktop-chevron {
+  color: var(--azul-claro);
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.nav-desktop-chevron.aberto { transform: rotate(180deg); }
+.site-nav .nav-links {
+  display: none;
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.55rem);
+  left: 50%;
+  width: min(90vw, 34rem);
+  max-height: min(70vh, 30rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.7rem;
+  overflow-y: auto;
+  border: 1px solid rgba(195,225,249,0.2);
+  border-radius: 1rem;
+  background: rgba(5,20,33,0.98);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.38);
+  transform: translateX(-50%);
+}
+.site-nav.menu-aberto .nav-links { display: grid; }
+.site-nav .nav-links button {
+  min-width: 0;
+  min-height: 2.65rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(195,225,249,0.1);
+  border-radius: 0.7rem;
+  background: rgba(255,255,255,0.035);
+  color: rgba(239,247,255,0.82);
+  text-align: left;
+}
+.site-nav .nav-links button.ativo {
+  border-color: rgba(147,200,242,0.55);
+  background: rgba(147,200,242,0.16);
+  color: #d5ecff;
+}
+.site-nav .nav-gallery-switch { margin-left: 0; }
+
+@media (max-width: 760px) {
+  .site-nav .nav-desktop-toggle { display: none; }
+}
