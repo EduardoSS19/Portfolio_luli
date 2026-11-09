@@ -249,20 +249,26 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
-test('a grade mostra a faixa de miniaturas e mantém a galeria completa no foco', async ({ page }) => {
+test('a grade mostra apenas a contagem de mídias extras e mantém a galeria completa no foco', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
-  const faixa = card.locator('.carrossel-miniaturas.grade-miniaturas')
-  await expect(faixa).toBeVisible()
-  await expect(faixa.locator('button')).toHaveCount(2)
-  await faixa.getByRole('button', { name: 'Mostrar imagem 2 de Ruído cromático' }).click()
-  await expect(faixa.locator('button').nth(1)).toHaveAttribute('aria-current', 'true')
+  await expect(card.locator('.grade-midia-contagem')).toHaveText('+1 imagem')
+  await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await card.locator('.obra-zoom-trigger').click()
   const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
   await expect(dialog).toHaveAttribute('open', '')
   await expect(dialog.locator('.obra-focus-proxima')).toBeVisible()
   await dialog.locator('.obra-focus-proxima').click()
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
+})
+
+test('a visualização em lista mantém as miniaturas do carrossel', async ({ page }) => {
+  await abrirPortfolio(page)
+  await page.getByRole('button', { name: 'Visualizar em lista' }).click()
+  const card = page.locator('.secao:not(.sobre-secao) .obras-lista .obra').first()
+  const faixa = card.locator('.carrossel-miniaturas')
+  await expect(faixa).toBeVisible()
+  await expect(faixa.locator('button')).toHaveCount(2)
 })
 
 
