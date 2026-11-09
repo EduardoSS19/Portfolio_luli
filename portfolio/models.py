@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator, RegexValidator
 
 
 class ArtistProfile(models.Model):
@@ -218,7 +218,7 @@ class SiteAppearance(models.Model):
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     accent = models.CharField(
         "cor de destaque", max_length=7, default="#93C8F2",
-        validators=[models.validators.RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Use uma cor hexadecimal no formato #RRGGBB.")],
         help_text="Links, botões, detalhes e elementos em evidência.",
     )
     background = models.CharField(
