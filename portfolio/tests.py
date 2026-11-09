@@ -753,8 +753,10 @@ class SocialPreviewMetadataTests(TestCase):
                 response = frontend(RequestFactory().get("/"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '<meta property="og:title" content="Ciclos | Luli Becker" />')
-        self.assertContains(response, "Uma experiência audiovisual sobre ciclos.")
+        self.assertContains(response, '<meta property="og:title" content="Luli Becker" />')
+        self.assertContains(response, '<meta property="og:description" content="Portfólio digital" />')
+        self.assertNotContains(response, "Ciclos | Luli Becker")
+        self.assertNotContains(response, "Uma experiência audiovisual sobre ciclos.")
         self.assertContains(response, "https://res.cloudinary.com/demo/image/upload/ciclos.jpg")
         self.assertContains(response, '<meta name="twitter:card" content="summary_large_image" />')
 
@@ -772,7 +774,8 @@ class SocialPreviewMetadataTests(TestCase):
             with override_settings(DEBUG=False, FRONTEND_DIST=Path(directory)):
                 response = frontend(RequestFactory().get("/"))
 
-        self.assertContains(response, '<meta property="og:title" content="Luli Becker | Portfólio" />')
-        self.assertContains(response, "Artista visual e pesquisadora.")
+        self.assertContains(response, '<meta property="og:title" content="Luli Becker" />')
+        self.assertContains(response, '<meta property="og:description" content="Portfólio digital" />')
+        self.assertNotContains(response, "Artista visual e pesquisadora.")
         self.assertNotContains(response, 'property="og:image"')
 
