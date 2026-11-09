@@ -691,6 +691,7 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
     // A abertura centraliza o card antes do foco; a referência correta é
     // a miniatura já centralizada, imediatamente antes de iniciar o retorno.
     const antes = await trigger.boundingBox()
+    const scrollAntes = await page.evaluate(() => window.scrollY)
     await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
     await expect(dialog).not.toHaveAttribute('open', '')
     await expect.poll(() => imagem.evaluate(element => ({
@@ -699,9 +700,12 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
       animations: element.getAnimations().length,
     }))).toEqual({ transform: 'none', clipPath: 'none', animations: 0 })
     const depois = await trigger.boundingBox()
+    const scrollDepois = await page.evaluate(() => window.scrollY)
     expect(depois).not.toBeNull()
     expect(Math.abs(depois.x - antes.x)).toBeLessThanOrEqual(1)
-    expect(Math.abs(depois.y - antes.y)).toBeLessThanOrEqual(1)
+    // O desbloqueio do body no Safari/Chromium pode ajustar a rolagem da janela.
+    // Compare a coordenada no documento, não a posição transitória na viewport.
+    expect(Math.abs((depois.y + scrollDepois) - (antes.y + scrollAntes))).toBeLessThanOrEqual(1)
     expect(Math.abs(depois.width - antes.width)).toBeLessThanOrEqual(1)
     expect(Math.abs(depois.height - antes.height)).toBeLessThanOrEqual(1)
   }
