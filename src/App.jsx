@@ -35,6 +35,13 @@ export default function App() {
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
   const [modoGaleria, setModoGaleria] = useState('lista')
+  const [tema, setTema] = useState(() => window.localStorage.getItem('portfolio-tema') === 'claro' ? 'claro' : 'escuro')
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = tema
+    window.localStorage.setItem('portfolio-tema', tema)
+    document.documentElement.style.colorScheme = tema === 'claro' ? 'light' : 'dark'
+  }, [tema])
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
@@ -228,6 +235,8 @@ export default function App() {
         aoSelecionar={selecionarCategoria}
         modoGaleria={modoGaleria}
         aoTrocarModo={trocarModoGaleria}
+        tema={tema}
+        aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
       />
       <Sobre perfil={sobre} />
       {modoGaleria === 'grade' ? (
