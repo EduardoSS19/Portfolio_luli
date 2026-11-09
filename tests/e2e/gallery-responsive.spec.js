@@ -254,15 +254,15 @@ test('a grade exibe as obras mesmo sem IntersectionObserver e carrega as miniatu
   await expect.poll(() => cards.first().locator('.obra-zoom-trigger img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
 })
 
-test('a grade indica carrossel com contador e setas, sem miniaturas ou rótulo VISTA', async ({ page }) => {
+test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplicado', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
   await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await expect(card.locator('.grade-midia-contagem')).toHaveText('+1 imagem')
-  await expect(card.locator('.carrossel-indice')).not.toContainText('VISTA')
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
   await expect(card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' })).toBeVisible()
   await card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' }).click()
-  await expect(card.locator('.carrossel-indice')).toContainText('02')
+  await expect(card.locator('.carrossel-indice')).toHaveCount(0)
   await card.locator('.obra-zoom-trigger').click()
   const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
   await expect(dialog).toHaveAttribute('open', '')
