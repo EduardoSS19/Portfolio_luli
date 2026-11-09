@@ -75,6 +75,11 @@
         <span class="portfolio-task-icon" aria-hidden="true">▧</span><span class="portfolio-task-text"><strong>Trocar imagens de fundo</strong><small>Atualize o clima visual da página</small></span><span class="portfolio-task-arrow">→</span>
       </a>
       {% endif %}
+      {% if perms.portfolio.change_siteappearance %}
+      <a class="portfolio-task" href="{% url 'admin:portfolio_siteappearance_changelist' %}">
+        <span class="portfolio-task-icon" aria-hidden="true">◉</span><span class="portfolio-task-text"><strong>Personalizar aparência</strong><small>Cores do fundo, textos e destaques</small></span><span class="portfolio-task-arrow">→</span>
+      </a>
+      {% endif %}
     </div>
   </section>
 

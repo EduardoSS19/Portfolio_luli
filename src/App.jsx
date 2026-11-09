@@ -28,6 +28,7 @@ export default function App() {
     frames: [],
     redes: [],
     sobre: null,
+    aparencia: null,
   })
   const [carregando, setCarregando] = useState(true)
   const [previsualizacao, setPrevisualizacao] = useState(null)
@@ -42,6 +43,27 @@ export default function App() {
     window.localStorage.setItem('portfolio-tema', tema)
     document.documentElement.style.colorScheme = tema === 'claro' ? 'light' : 'dark'
   }, [tema])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const propriedades = ['--azul-escuro', '--azul-medio', '--azul-claro', '--texto', '--linha', '--site-background-end']
+    if (tema === 'claro' || !conteudo.aparencia) {
+      propriedades.forEach(propriedade => root.style.removeProperty(propriedade))
+      return
+    }
+    const aparencia = conteudo.aparencia
+    const valores = {
+      '--azul-escuro': aparencia.fundoInicio,
+      '--azul-medio': aparencia.fundoMeio,
+      '--site-background-end': aparencia.fundoFim,
+      '--azul-claro': aparencia.destaque,
+      '--texto': aparencia.texto,
+      '--linha': aparencia.bordas,
+    }
+    Object.entries(valores).forEach(([propriedade, valor]) => {
+      if (typeof valor === 'string') root.style.setProperty(propriedade, valor)
+    })
+  }, [conteudo.aparencia, tema])
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
@@ -112,6 +134,7 @@ export default function App() {
           frames: Array.isArray(data.frames) ? data.frames : [],
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
+          aparencia: data.aparencia && typeof data.aparencia === 'object' ? data.aparencia : null,
         }))
         setPrevisualizacao(data.preview ?? null)
       })

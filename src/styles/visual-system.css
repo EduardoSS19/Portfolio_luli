@@ -5,13 +5,14 @@
   --azul-claro:#93c8f2;
   --texto:#eff7ff;
   --linha:rgba(195,225,249,0.16);
+  --site-background-end:#102f4c;
 }
 html{ scroll-behavior:smooth; scroll-padding-top:6rem; }
 body{
   min-width:320px;
   background:
     radial-gradient(ellipse at 50% -20%, rgba(52,113,166,0.32), transparent 55%),
-    linear-gradient(160deg, #061522 0%, #0a233a 58%, #102f4c 100%);
+    linear-gradient(160deg, var(--azul-escuro) 0%, var(--azul-medio) 58%, var(--site-background-end) 100%);
   color:var(--texto);
 }
 .site-shell{ position:relative; z-index:1; overflow:clip; }

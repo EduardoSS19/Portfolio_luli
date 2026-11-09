@@ -15,7 +15,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import ArtistProfile, BackgroundFrame, Category, Reference, SocialLink, Work
+from .models import ArtistProfile, BackgroundFrame, Category, Reference, SiteAppearance, SocialLink, Work
 
 
 logger = logging.getLogger(__name__)
@@ -154,7 +154,20 @@ def portfolio_data(request):
     frames = BackgroundFrame.objects.filter(is_active=True)
     social_links = SocialLink.objects.filter(is_active=True)
 
+    appearance = SiteAppearance.objects.first()
     payload = {
+            "aparencia": (
+                {
+                    "fundoInicio": appearance.background_start,
+                    "fundoMeio": appearance.background_middle,
+                    "fundoFim": appearance.background_end,
+                    "destaque": appearance.accent_color,
+                    "texto": appearance.text_color,
+                    "bordas": appearance.border_color,
+                }
+                if appearance
+                else None
+            ),
             "sobre": (
                 {
                     "nome": profile.name,

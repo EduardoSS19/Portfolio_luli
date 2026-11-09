@@ -16,6 +16,7 @@ from .models import (
     Reference,
     ReferenceLink,
     SocialLink,
+    SiteAppearance,
     Work,
     WorkImage,
     WorkVideo,
@@ -568,3 +569,42 @@ class ReferenceAdmin(admin.ModelAdmin):
     list_per_page = 30
     save_on_top = True
     inlines = (ReferenceLinkInline,)
+
+
+class SiteAppearanceForm(forms.ModelForm):
+    class Meta:
+        model = SiteAppearance
+        fields = (
+            "background_start",
+            "background_middle",
+            "background_end",
+            "accent_color",
+            "text_color",
+            "border_color",
+        )
+        widgets = {
+            field: forms.TextInput(attrs={"type": "color"})
+            for field in fields
+        }
+
+
+@admin.register(SiteAppearance)
+class SiteAppearanceAdmin(admin.ModelAdmin):
+    form = SiteAppearanceForm
+    fields = (
+        "background_start",
+        "background_middle",
+        "background_end",
+        "accent_color",
+        "text_color",
+        "border_color",
+        "updated_at",
+    )
+    readonly_fields = ("updated_at",)
+    save_on_top = True
+
+    def has_add_permission(self, request):
+        return not SiteAppearance.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

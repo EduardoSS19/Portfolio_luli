@@ -21,6 +21,7 @@ from .models import (
     Category,
     Reference,
     SocialLink,
+    SiteAppearance,
     Work,
     WorkImage,
     WorkVideo,
@@ -779,3 +780,49 @@ class SocialPreviewMetadataTests(TestCase):
         self.assertNotContains(response, "Artista visual e pesquisadora.")
         self.assertNotContains(response, 'property="og:image"')
 
+
+
+class SiteAppearanceApiTests(TestCase):
+    def test_public_api_returns_saved_site_appearance(self):
+        SiteAppearance.objects.create(
+            background_start="#101820",
+            background_middle="#243447",
+            background_end="#40566f",
+            accent_color="#e0a458",
+            text_color="#fafafa",
+            border_color="#7890a8",
+        )
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["aparencia"], {
+            "fundoInicio": "#101820",
+            "fundoMeio": "#243447",
+            "fundoFim": "#40566f",
+            "destaque": "#e0a458",
+            "texto": "#fafafa",
+            "bordas": "#7890a8",
+        })
+
+    def test_public_api_returns_null_when_site_appearance_is_not_configured(self):
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json()["aparencia"])
+
+    def test_site_appearance_admin_uses_native_color_inputs(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="appearance-admin",
+            email="admin@example.com",
+            password="test-password-123",
+        )
+        appearance = SiteAppearance.objects.create()
+        self.client.force_login(admin_user)
+
+        response = self.client.get(
+            reverse("admin:portfolio_siteappearance_change", args=[appearance.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'type="color"')
