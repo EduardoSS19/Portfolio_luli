@@ -729,6 +729,9 @@ class EditorialWorkflowTests(TestCase):
 
 
 class SocialPreviewMetadataTests(TestCase):
+    def setUp(self):
+        ArtistProfile.objects.all().delete()
+
     def test_homepage_uses_selected_published_work_for_social_preview(self):
         category = Category.objects.create(title="Videoarte", key="videoarte")
         Work.objects.create(
