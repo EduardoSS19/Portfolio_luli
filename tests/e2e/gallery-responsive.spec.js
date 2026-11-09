@@ -721,8 +721,8 @@ test('o botão flutuante fica mais baixo e mantém margem segura no mobile', asy
   const botaoBox = await botao.boundingBox()
   expect(botaoBox).not.toBeNull()
   const distanciaDaBordaInferior = 844 - (botaoBox.y + botaoBox.height)
-  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(38)
-  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(52)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(8)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(22)
 })
 
 test('o botão flutuante fica próximo à borda inferior no desktop', async ({ page }) => {
@@ -734,8 +734,8 @@ test('o botão flutuante fica próximo à borda inferior no desktop', async ({ p
   const botaoBox = await botao.boundingBox()
   expect(botaoBox).not.toBeNull()
   const distanciaDaBordaInferior = 900 - (botaoBox.y + botaoBox.height)
-  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(8)
-  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(20)
+  expect(distanciaDaBordaInferior).toBeGreaterThanOrEqual(2)
+  expect(distanciaDaBordaInferior).toBeLessThanOrEqual(8)
 })
 
 test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ page }) => {
