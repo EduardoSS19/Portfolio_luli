@@ -90,6 +90,7 @@ export function ObraCard({
   const fichaFocoId = useId()
   const [hoverNoCard, setHoverNoCard] = useState(false)
   const [indiceImagem, setIndiceImagem] = useState(0)
+  const [indiceImagemFoco, setIndiceImagemFoco] = useState(0)
   const [direcao, setDirecao] = useState(1)
   const [focoAberto, setFocoAberto] = useState(false)
   const [focoFechando, setFocoFechando] = useState(false)
@@ -124,6 +125,7 @@ export function ObraCard({
     .map((midia, indice) => midia.tipo === 'imagem' ? indice : -1)
     .filter(indice => indice >= 0)
   const midiaAtiva = midias[indiceImagem]
+  const midiaFocoAtiva = midias[indiceImagemFoco]
   const dimensoes = fichaTecnica.dimensoes || {}
   const valoresTecnicos = [
     ['Técnica', fichaTecnica.tecnica], ['Material', fichaTecnica.material],
@@ -220,7 +222,8 @@ export function ObraCard({
     // A imagem grande só começa a carregar no primeiro uso (ou ao passar o mouse).
     flushSync(() => {
       setFocoPreparado(true)
-      setVideoFocoAtivo(midiaAtiva?.tipo === 'youtube')
+      setIndiceImagemFoco(indiceImagem)
+      setVideoFocoAtivo(midias[indiceImagem]?.tipo === 'youtube')
     })
 
     const imagemFoco = imagemFocoRef.current
@@ -360,10 +363,10 @@ export function ObraCard({
 
   function navegarImagemFoco(direcao) {
     if (indicesImagem.length < 2) return
-    const indiceAtual = indicesImagem.indexOf(indiceImagem)
+    const indiceAtual = indicesImagem.indexOf(indiceImagemFoco)
     const proximo = (indiceAtual + direcao + indicesImagem.length) % indicesImagem.length
     setDirecao(direcao)
-    setIndiceImagem(indicesImagem[proximo])
+    setIndiceImagemFoco(indicesImagem[proximo])
   }
 
   function iniciarArrasteFoco(event) {
@@ -649,7 +652,7 @@ export function ObraCard({
       </article>
       <dialog
         ref={dialogRef}
-        className={`obra-focus ${focoFechando ? 'fechando' : ''} ${midiaAtiva?.tipo === 'youtube' ? 'obra-focus-com-video' : ''} ${(descricao?.length || 0) + (detalhe?.length || 0) > 220 ? 'obra-focus-texto-longo' : ''}`}
+        className={`obra-focus ${focoFechando ? 'fechando' : ''} ${midiaFocoAtiva?.tipo === 'youtube' ? 'obra-focus-com-video' : ''} ${(descricao?.length || 0) + (detalhe?.length || 0) > 220 ? 'obra-focus-texto-longo' : ''}`}
         aria-label={`Visualização ampliada de ${titulo}`}
         onCancel={event => {
           event.preventDefault()
@@ -684,16 +687,16 @@ export function ObraCard({
                 <span aria-hidden="true">→</span>
               </button>
               <span className="obra-focus-contagem" aria-live="polite">
-                {String(indicesImagem.indexOf(indiceImagem) + 1).padStart(2, '0')} <i aria-hidden="true">/</i> {String(indicesImagem.length).padStart(2, '0')}
+                {String(indicesImagem.indexOf(indiceImagemFoco) + 1).padStart(2, '0')} <i aria-hidden="true">/</i> {String(indicesImagem.length).padStart(2, '0')}
               </span>
             </>
           )}
-          <div className={`obra-focus-media ${midiaAtiva?.tipo === 'youtube' ? 'tem-video' : ''}`}>
-            {videoFocoAtivo && midiaAtiva?.tipo === 'youtube' ? (
+          <div className={`obra-focus-media ${midiaFocoAtiva?.tipo === 'youtube' ? 'tem-video' : ''}`}>
+            {videoFocoAtivo && midiaFocoAtiva?.tipo === 'youtube' ? (
               <iframe
                 className="obra-focus-video"
-                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaAtiva.videoId)}?autoplay=1&controls=1&playsinline=1`}
-                title={midiaAtiva.titulo || `Vídeo de ${titulo}`}
+                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(midiaFocoAtiva.videoId)}?autoplay=1&controls=1&playsinline=1`}
+                title={midiaFocoAtiva.titulo || `Vídeo de ${titulo}`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -702,7 +705,7 @@ export function ObraCard({
               <img
                 ref={imagemFocoRef}
                 className="obra-focus-imagem"
-                src={focoPreparado ? (midiaAtiva?.src || midiaAtiva?.miniatura) : undefined}
+                src={focoPreparado ? (midiaFocoAtiva?.src || midiaFocoAtiva?.miniatura) : undefined}
                 alt={`${titulo} — visualização ampliada`}
                 draggable="false"
                 onPointerDown={iniciarArrasteFoco}
@@ -710,7 +713,7 @@ export function ObraCard({
                 onPointerCancel={() => { inicioArrasteFocoRef.current = null }}
               />
             )}
-            {midiaAtiva?.tipo === 'youtube' && !videoFocoAtivo && (
+            {midiaFocoAtiva?.tipo === 'youtube' && !videoFocoAtivo && (
               <button
                 type="button"
                 className="obra-focus-video-play"
