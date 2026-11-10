@@ -1,4 +1,4 @@
-const containerId = import.meta.env.VITE_GTM_ID
+const containerId = import.meta.env.VITE_GTM_ID || 'GTM-5ZQX38KB'
 
 let analyticsEnabled = false
 
