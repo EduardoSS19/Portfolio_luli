@@ -1,5 +1,6 @@
 from django import template
 
+from portfolio.analytics import get_ga4_dashboard_data
 from portfolio.models import (
     ArtistProfile,
     BackgroundFrame,
@@ -29,3 +30,9 @@ def dashboard_stats():
         "social_links": SocialLink.objects.count(),
         "profile_ready": ArtistProfile.objects.exists(),
     }
+
+
+@register.simple_tag
+def ga4_dashboard():
+    """Métricas agregadas do GA4, com cache e sem expor dados sensíveis."""
+    return get_ga4_dashboard_data()
