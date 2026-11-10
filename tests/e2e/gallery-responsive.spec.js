@@ -805,8 +805,10 @@ test('fotografia permanece totalmente renderizada após ciclos repetidos de abri
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+  await page.locator('.editorial-menu-trigger').click()
+  await alternarModoGaleria(page, 'Alternar para visualização em grade')
 
-  const card = page.locator('.galeria-grade-global .obra.arte-fotografia').first()
+  const card = page.locator('.galeria-grade-global .obra.categoria-fotografia').first()
   await card.scrollIntoViewIfNeeded()
   const trigger = card.locator('.obra-zoom-trigger')
   const miniatura = trigger.locator('img')
