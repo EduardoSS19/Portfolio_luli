@@ -71,19 +71,31 @@
         <h2 id="portfolio-analytics-title">Seu público, em números</h2>
         <p>Dados reais do Google Analytics 4. Atualização automática a cada 5 minutos.</p>
       </div>
-      {% if ga4.status == "ok" %}<span class="portfolio-analytics-period">{{ ga4.period }}</span>{% endif %}
+      {% if ga4.realtime.status == "ok" %}<span class="portfolio-analytics-period">● AO VIVO · últimos 30 minutos</span>{% endif %}
     </div>
-    {% if ga4.status == "ok" %}
-    <div class="portfolio-analytics-grid">
-      <article class="portfolio-analytics-card"><span>Usuários ativos</span><strong>{{ ga4.metrics.active_users }}</strong></article>
-      <article class="portfolio-analytics-card"><span>Sessões</span><strong>{{ ga4.metrics.sessions }}</strong></article>
-      <article class="portfolio-analytics-card"><span>Visualizações</span><strong>{{ ga4.metrics.page_views }}</strong></article>
-      <article class="portfolio-analytics-card"><span>Eventos registrados</span><strong>{{ ga4.metrics.events }}</strong></article>
-    </div>
-    {% elif ga4.status == "not_configured" %}
+    {% if ga4.status == "not_configured" %}
     <div class="portfolio-analytics-state">A conexão ainda não está configurada. Confira as variáveis <strong>GOOGLE_SERVICE_ACCOUNT_JSON</strong> e <strong>GA4_PROPERTY_ID</strong> no serviço Django do Railway.</div>
+    {% elif ga4.status == "error" %}
+    <div class="portfolio-analytics-state">Não foi possível conectar ao Google Analytics agora. Confira as permissões da conta de serviço e os logs do serviço Django no Railway.</div>
     {% else %}
-    <div class="portfolio-analytics-state">Não foi possível consultar o Google Analytics agora. Confira as permissões da conta de serviço e os logs do serviço Django no Railway. O restante do painel continua funcionando normalmente.</div>
+    <div class="portfolio-analytics-grid">
+      <article class="portfolio-analytics-card" style="border-color:#397b65;background:#102d2a;">
+        <span>● Usuários ativos agora</span>
+        <strong>{% if ga4.realtime.status == "ok" %}{{ ga4.realtime.active_users }}{% else %}—{% endif %}</strong>
+        <small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 30 minutos</small>
+      </article>
+      {% if ga4.historical.status == "ok" %}
+      <article class="portfolio-analytics-card"><span>Usuários ativos</span><strong>{{ ga4.historical.metrics.active_users }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
+      <article class="portfolio-analytics-card"><span>Sessões</span><strong>{{ ga4.historical.metrics.sessions }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
+      <article class="portfolio-analytics-card"><span>Visualizações</span><strong>{{ ga4.historical.metrics.page_views }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
+      <article class="portfolio-analytics-card"><span>Eventos registrados</span><strong>{{ ga4.historical.metrics.events }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
+      {% else %}
+      <article class="portfolio-analytics-card" style="grid-column:1 / -1;"><span>Relatórios históricos</span><strong style="font-size:18px;">{% if ga4.historical.status == "no_data" %}Aguardando processamento{% else %}Indisponíveis no momento{% endif %}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Os dados históricos podem levar algum tempo para aparecer no GA4.</small></article>
+      {% endif %}
+    </div>
+    {% if ga4.realtime.status == "error" %}
+    <p class="portfolio-analytics-state" style="margin-top:12px;">O relatório em tempo real está indisponível no momento; os dados históricos continuam sendo consultados separadamente.</p>
+    {% endif %}
     {% endif %}
   </section>
 
