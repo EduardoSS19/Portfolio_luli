@@ -788,7 +788,7 @@ test('fotografia permanece totalmente renderizada após ciclos repetidos de abri
       titulo: 'Luz persistente',
       imagem: imagemFotoReal,
       tipoDeArte: 'fotografia',
-      midias: [{ tipo: 'imagem', src: imagemFotoReal }, { tipo: 'imagem', src: imagemFotoAlternativa }],
+      midias: [{ tipo: 'imagem', src: imagemFotoReal }, { tipo: 'imagem', src: imagemTesteAlternativa }],
     }],
   }]
   await page.route('**/api/portfolio/**', route => route.fulfill({
