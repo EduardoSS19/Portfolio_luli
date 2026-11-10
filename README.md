@@ -56,6 +56,19 @@ Variáveis principais no serviço web do Railway:
 
 O Django deriva as origens CSRF HTTPS dos hosts configurados. Depois de apontar o DNS e publicar, teste a página inicial, o login em `/admin/` e o formulário de contato.
 
+## Métricas de acesso (Google Analytics 4)
+
+A integração com o GA4 é opcional e não adiciona dependências npm nem serviços ao Railway. Sem a variável abaixo, nenhuma tag do Google é carregada.
+
+1. Crie uma propriedade no [Google Analytics](https://analytics.google.com/) e um fluxo de dados da Web para o domínio do portfólio.
+2. Copie o ID de medição, no formato `G-XXXXXXXXXX`.
+3. No serviço web do Railway, adicione a variável `VITE_GA_MEASUREMENT_ID` com esse ID.
+4. Faça um novo deploy para que o Vite incorpore a variável na compilação do frontend.
+
+A integração registra visualizações de página e eventos de interesse: abertura de uma obra (`view_artwork`), envio bem-sucedido do formulário (`generate_lead`), clique no contato por e-mail (`contact_click`), saída para redes sociais (`outbound_click`) e troca do modo da galeria (`gallery_view_change`). Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas.
+
+O GA4 só começa a coletar dados depois da instalação; ele não recupera visitas anteriores. Os eventos podem aparecer no relatório em tempo real em poucos minutos, enquanto relatórios consolidados podem levar até 24–48 horas. Revise a política de privacidade e as informações de cookies do site antes de publicar a medição.
+
 ## Limpeza de imagens do Cloudinary
 
 Ao substituir uma imagem ou excluir o registro que a utiliza, o Django agenda a remoção do arquivo antigo após a transação ser confirmada. Também existe a rotina `python manage.py limpar_cloudinary`, que primeiro lista imagens órfãs sem apagar nada. Para apagar, use `python manage.py limpar_cloudinary --apagar --idade-minima-horas 24`.
