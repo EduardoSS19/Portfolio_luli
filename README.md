@@ -58,16 +58,14 @@ O Django deriva as origens CSRF HTTPS dos hosts configurados. Depois de apontar 
 
 ## Métricas de acesso (Google Tag Manager + Google Analytics 4)
 
-A integração é opcional e não adiciona dependências npm nem serviços ao Railway. Sem a variável abaixo, nenhuma tag do Google é carregada.
+A integração usa o contêiner Web do Google Tag Manager configurado como padrão no frontend: `GTM-5ZQX38KB`. Não é necessário adicionar variável no Railway. Se necessário, `VITE_GTM_ID` pode sobrescrever o contêiner padrão.
 
-1. No [Google Tag Manager](https://tagmanager.google.com/), use o contêiner Web cujo ID começa com `GTM-`.
-2. No serviço web do Railway, adicione `VITE_GTM_ID` com o ID do contêiner, por exemplo `GTM-5B9Z7J7C`.
-3. No Tag Manager, crie uma tag **Google tag** com o ID de medição do GA4 (formato `G-XXXXXXXXXX`) e acionador **Initialization - All Pages** (ou **All Pages**).
-4. Publique o contêiner no Tag Manager e faça um novo deploy do site no Railway para incorporar a variável.
+1. No [Google Tag Manager](https://tagmanager.google.com/), abra o contêiner `GTM-5ZQX38KB`.
+2. Crie uma tag **Google tag** com o ID de medição do GA4 `G-CQV1EDT3CC` e acionador **Initialization - All Pages** (ou **All Pages**).
+3. Publique o contêiner no Tag Manager. Depois que esta alteração for integrada e implantada, o site começará a carregar o contêiner automaticamente.
+4. Para enviar os eventos de interação ao GA4, crie tags de evento do Google Analytics 4 com acionadores de **Evento personalizado** para: `view_artwork`, `generate_lead`, `contact_click`, `outbound_click` e `gallery_view_change`. Mapeie os parâmetros desejados como variáveis da camada de dados.
 
-O site envia eventos personalizados ao dataLayer: abertura de uma obra (`view_artwork`), envio bem-sucedido do formulário (`generate_lead`), clique no contato por e-mail (`contact_click`), saída para redes sociais (`outbound_click`) e troca do modo da galeria (`gallery_view_change`). Para enviar esses eventos ao GA4, crie no Tag Manager uma tag **Google Analytics: evento do GA4** para cada evento, usando o mesmo nome como acionador de **Evento personalizado**. Mapeie os parâmetros desejados como variáveis da camada de dados. Configure também a tag Google para enviar a visualização de página inicial. Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas.
-
-O GA4 só começa a coletar dados depois da instalação; ele não recupera visitas anteriores. Os eventos podem aparecer no relatório em tempo real em poucos minutos, enquanto relatórios consolidados podem levar até 24–48 horas. Revise a política de privacidade e as informações de cookies do site antes de publicar a medição.
+Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas. O GA4 só começa a coletar dados depois da instalação; ele não recupera visitas anteriores. Os eventos podem aparecer no relatório em tempo real em poucos minutos, enquanto relatórios consolidados podem levar até 24–48 horas. Revise a política de privacidade e as informações de cookies do site antes de publicar a medição.
 
 ## Limpeza de imagens do Cloudinary
 
