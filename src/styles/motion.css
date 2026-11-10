@@ -352,13 +352,16 @@
 /* ===== Fotografia: a imagem se revela como numa câmara escura (abertura de íris) ===== */
 .secao-cabecalho.arte-fotografia{ transform:none; clip-path:inset(50% 0 50% 0); }
 .secao-cabecalho.arte-fotografia.visivel{ opacity:1; clip-path:inset(0); }
+/* O estado final fica retido enquanto o botão é temporariamente ocultado
+   pelo visualizador. Isso evita que WebKit/Chromium reaplique o quadro inicial
+   da revelação quando o foco é fechado. */
 .obra.arte-fotografia.visivel .obra-imagem .obra-zoom-trigger img{
-  animation:fotoRevelada 1.6s cubic-bezier(.22,.7,.2,1) backwards;
+  animation:fotoRevelada 1.6s cubic-bezier(.22,.7,.2,1) both;
 }
 @keyframes fotoRevelada{
   0%{ opacity:0; transform:scale(1.14); clip-path:circle(0% at 50% 50%); }
   30%{ opacity:1; }
-  100%{ opacity:1; transform:scale(1); clip-path:circle(75% at 50% 50%); }
+  100%{ opacity:1; transform:scale(1); clip-path:inset(0); }
 }
 .obra.arte-fotografia.visivel .obra-texto h3{ animation:fotoTitulo 1.2s cubic-bezier(.22,.7,.2,1) 0.35s backwards; }
 @keyframes fotoTitulo{
