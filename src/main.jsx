@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './styles/index.css'
 import { initializeAnalytics } from './utils/analytics.js'
 
-// A coleta só é ativada quando VITE_GA_MEASUREMENT_ID estiver configurada.
+// O snippet do Google Tag Manager já foi inicializado no HTML, antes do React.
 initializeAnalytics()
 
 // O modo leve depende de sinais diretamente relacionados a desempenho/conforto.

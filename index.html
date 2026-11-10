@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:," />
     <title>Portfólio</title>
+    <!-- Google Tag Manager: carregado antes da aplicação React. -->
+    <script>
+      (function (w, d, s, l, i) {
+        var params = new URLSearchParams(w.location.search)
+        if (params.has('preview_token') || params.get('grade-debug') === '1') return
+        w[l] = w[l] || []
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' })
+        var firstScript = d.getElementsByTagName(s)[0]
+        var gtmScript = d.createElement(s)
+        var dataLayerParam = l !== 'dataLayer' ? '&l=' + l : ''
+        gtmScript.async = true
+        gtmScript.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dataLayerParam
+        firstScript.parentNode.insertBefore(gtmScript, firstScript)
+      })(window, document, 'script', 'dataLayer', 'GTM-5ZQX38KB')
+    </script>
+    <!-- End Google Tag Manager -->
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+      <iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-5ZQX38KB"
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden"
+        title="Google Tag Manager"
+      ></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
