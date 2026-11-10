@@ -20,7 +20,7 @@ def get_ga4_dashboard_data():
 
     try:
         from google.analytics.data_v1beta import BetaAnalyticsDataClient
-        from google.analytics.data_v1beta.types import DateRange, Metric, RealtimeReportRequest, RunReportRequest
+        from google.analytics.data_v1beta.types import DateRange, Metric, RunRealtimeReportRequest, RunReportRequest
 
         credentials_info = json.loads(credentials_json)
         client = BetaAnalyticsDataClient.from_service_account_info(credentials_info)
@@ -68,7 +68,7 @@ def get_ga4_dashboard_data():
     if realtime is None:
         try:
             response = client.run_realtime_report(
-                RealtimeReportRequest(
+                RunRealtimeReportRequest(
                     property=f"properties/{property_id}",
                     metrics=[Metric(name="activeUsers")],
                 )
