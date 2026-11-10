@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
+import { trackAnalyticsEvent } from '../utils/analytics.js'
 
 function lerCookie(nome) {
   const cookie = document.cookie
@@ -39,6 +40,7 @@ export function Contato({ endpoint, email }) {
         },
       })
       if (resposta.ok) {
+        trackAnalyticsEvent('generate_lead', { method: 'contact_form' })
         setStatus('sucesso')
         formulario.reset()
       } else {
