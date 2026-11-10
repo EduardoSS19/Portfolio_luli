@@ -56,6 +56,17 @@ Variáveis principais no serviço web do Railway:
 
 O Django deriva as origens CSRF HTTPS dos hosts configurados. Depois de apontar o DNS e publicar, teste a página inicial, o login em `/admin/` e o formulário de contato.
 
+## Métricas de acesso (Google Tag Manager + Google Analytics 4)
+
+A integração usa o contêiner Web do Google Tag Manager configurado como padrão no frontend: `GTM-5ZQX38KB`. Não é necessário adicionar variável no Railway. Se necessário, `VITE_GTM_ID` pode sobrescrever o contêiner padrão.
+
+1. No [Google Tag Manager](https://tagmanager.google.com/), abra o contêiner `GTM-5ZQX38KB`.
+2. Crie uma tag **Google tag** com o ID de medição do GA4 `G-CQV1EDT3CC` e acionador **Initialization - All Pages** (ou **All Pages**).
+3. Publique o contêiner no Tag Manager. Depois que esta alteração for integrada e implantada, o site começará a carregar o contêiner automaticamente.
+4. Para enviar os eventos de interação ao GA4, crie tags de evento do Google Analytics 4 com acionadores de **Evento personalizado** para: `view_artwork`, `generate_lead`, `contact_click`, `outbound_click` e `gallery_view_change`. Mapeie os parâmetros desejados como variáveis da camada de dados.
+
+Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas. O GA4 só começa a coletar dados depois da instalação; ele não recupera visitas anteriores. Os eventos podem aparecer no relatório em tempo real em poucos minutos, enquanto relatórios consolidados podem levar até 24–48 horas. Revise a política de privacidade e as informações de cookies do site antes de publicar a medição.
+
 ## Limpeza de imagens do Cloudinary
 
 Ao substituir uma imagem ou excluir o registro que a utiliza, o Django agenda a remoção do arquivo antigo após a transação ser confirmada. Também existe a rotina `python manage.py limpar_cloudinary`, que primeiro lista imagens órfãs sem apagar nada. Para apagar, use `python manage.py limpar_cloudinary --apagar --idade-minima-horas 24`.

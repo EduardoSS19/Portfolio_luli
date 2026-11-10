@@ -10,6 +10,7 @@ import { Referencias } from './components/Referencias.jsx'
 import { Footer } from './components/Footer.jsx'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
+import { trackAnalyticsEvent } from './utils/analytics.js'
 
 const perfilInicial = {
   nome: 'Nome da artista',
@@ -59,6 +60,7 @@ export default function App() {
 
   function trocarModoGaleria(novoModo) {
     if (novoModo === modoGaleria) return
+    trackAnalyticsEvent('gallery_view_change', { view_mode: novoModo })
     const cards = [...document.querySelectorAll('.galeria-grade-global .obra, .secao .obra')]
     const centro = window.innerHeight / 2
     const cardAtual = cards

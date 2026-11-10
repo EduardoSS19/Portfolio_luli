@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
+import { trackAnalyticsEvent } from '../utils/analytics.js'
 import { useCardEmFoco } from '../hooks/useCardEmFoco.js'
 
 const EASE_ABRIR = 'cubic-bezier(0.22, 1, 0.36, 1)'
@@ -233,6 +234,11 @@ export function ObraCard({
     // Esconde a miniatura e abre o dialog no mesmo quadro: sem piscar e sem teletransporte.
     flushSync(() => setFocoAberto(true))
     abrirDialog(dialog)
+    trackAnalyticsEvent('view_artwork', {
+      artwork_name: titulo,
+      artwork_category: categoriaNome || categoria || 'Sem categoria',
+      artwork_type: midiaAtiva?.tipo || 'imagem',
+    })
 
     const miniatura = imagemRef.current
     if (!imagemFoco || !miniatura || typeof imagemFoco.animate !== 'function' || reduzirMovimento()) return
