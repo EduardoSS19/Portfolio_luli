@@ -56,16 +56,16 @@ Variáveis principais no serviço web do Railway:
 
 O Django deriva as origens CSRF HTTPS dos hosts configurados. Depois de apontar o DNS e publicar, teste a página inicial, o login em `/admin/` e o formulário de contato.
 
-## Métricas de acesso (Google Analytics 4)
+## Métricas de acesso (Google Tag Manager + Google Analytics 4)
 
-A integração com o GA4 é opcional e não adiciona dependências npm nem serviços ao Railway. Sem a variável abaixo, nenhuma tag do Google é carregada.
+A integração é opcional e não adiciona dependências npm nem serviços ao Railway. Sem a variável abaixo, nenhuma tag do Google é carregada.
 
-1. Crie uma propriedade no [Google Analytics](https://analytics.google.com/) e um fluxo de dados da Web para o domínio do portfólio.
-2. Copie o ID de medição, no formato `G-XXXXXXXXXX`.
-3. No serviço web do Railway, adicione a variável `VITE_GA_MEASUREMENT_ID` com esse ID.
-4. Faça um novo deploy para que o Vite incorpore a variável na compilação do frontend.
+1. No [Google Tag Manager](https://tagmanager.google.com/), use o contêiner Web cujo ID começa com `GTM-`.
+2. No serviço web do Railway, adicione `VITE_GTM_ID` com o ID do contêiner, por exemplo `GTM-5B9Z7J7C`.
+3. No Tag Manager, crie uma tag **Google tag** com o ID de medição do GA4 (formato `G-XXXXXXXXXX`) e acionador **Initialization - All Pages** (ou **All Pages**).
+4. Publique o contêiner no Tag Manager e faça um novo deploy do site no Railway para incorporar a variável.
 
-A integração registra visualizações de página e eventos de interesse: abertura de uma obra (`view_artwork`), envio bem-sucedido do formulário (`generate_lead`), clique no contato por e-mail (`contact_click`), saída para redes sociais (`outbound_click`) e troca do modo da galeria (`gallery_view_change`). Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas.
+O site envia eventos personalizados ao dataLayer: abertura de uma obra (`view_artwork`), envio bem-sucedido do formulário (`generate_lead`), clique no contato por e-mail (`contact_click`), saída para redes sociais (`outbound_click`) e troca do modo da galeria (`gallery_view_change`). Para enviar esses eventos ao GA4, crie no Tag Manager uma tag **Google Analytics: evento do GA4** para cada evento, usando o mesmo nome como acionador de **Evento personalizado**. Mapeie os parâmetros desejados como variáveis da camada de dados. Configure também a tag Google para enviar a visualização de página inicial. Pré-visualizações privadas e a tela de diagnóstico da grade não são contabilizadas.
 
 O GA4 só começa a coletar dados depois da instalação; ele não recupera visitas anteriores. Os eventos podem aparecer no relatório em tempo real em poucos minutos, enquanto relatórios consolidados podem levar até 24–48 horas. Revise a política de privacidade e as informações de cookies do site antes de publicar a medição.
 
