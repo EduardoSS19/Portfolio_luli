@@ -5,3 +5,4 @@ gunicorn>=23,<24
 Pillow>=11,<13
 psycopg[binary]>=3.2,<4
 whitenoise>=6.8,<7
+google-analytics-data>=0.18,<0.20
