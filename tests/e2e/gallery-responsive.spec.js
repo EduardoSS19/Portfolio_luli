@@ -639,7 +639,7 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
   expect(estilosRodape.contato.peso).toBe('400')
 
   await expect(rodape.getByText('Desenvolvido por')).toBeVisible()
-  await expect(rodape.getByText('Eduardo', { exact: true })).toBeVisible()
+  await expect(rodape.getByText('Eduardo Souza', { exact: true })).toBeVisible()
   const contatoDev = rodape.getByRole('link', { name: 'Contato do desenvolvedor' })
   await expect(contatoDev).toHaveAttribute('href', 'mailto:leduardoss19@gmail.com')
   await expect(rodape.getByText('leduardoss19@gmail.com', { exact: true })).toHaveCount(0)
@@ -777,4 +777,75 @@ test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ pag
   await expect(rodape).toHaveCSS('color', 'rgb(23, 43, 59)')
   await expect(rodape.locator('small')).toHaveCSS('color', 'rgba(23, 43, 59, 0.66)')
   await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(23, 43, 59)')
+})
+
+
+test('fotografia permanece totalmente renderizada após ciclos repetidos de abrir e fechar o foco no mobile', async ({ page }) => {
+  const categoriasFotografia = [{
+    titulo: 'Fotografia',
+    chave: 'fotografia',
+    obras: [{
+      titulo: 'Luz persistente',
+      imagem: imagemFotoReal,
+      tipoDeArte: 'fotografia',
+      midias: [{ tipo: 'imagem', src: imagemFotoReal }, { tipo: 'imagem', src: imagemFotoAlternativa }],
+    }],
+  }]
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: categoriasFotografia,
+      referencias: [],
+      frames: [],
+      redes: [],
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+    }),
+  }))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Luli')
+
+  const card = page.locator('.galeria-grade-global .obra.arte-fotografia').first()
+  await card.scrollIntoViewIfNeeded()
+  const trigger = card.locator('.obra-zoom-trigger')
+  const miniatura = trigger.locator('img')
+  await expect.poll(() => miniatura.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
+  await expect.poll(() => miniatura.evaluate(img =>
+    img.getAnimations().every(animation => animation.playState === 'finished')
+  ), { timeout: 5000 }).toBe(true)
+
+  const dialog = page.getByLabel('Visualização ampliada de Luz persistente')
+  for (let tentativa = 0; tentativa < 5; tentativa += 1) {
+    await trigger.click()
+    await expect(dialog).toHaveAttribute('open', '')
+    await expect.poll(() => dialog.locator('.obra-focus-imagem').evaluate(img =>
+      img.complete && img.naturalWidth > 0
+    )).toBe(true)
+    await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+    await expect(dialog).not.toHaveAttribute('open', '')
+    await expect(trigger).toBeVisible()
+    await expect.poll(() => miniatura.evaluate(img => {
+      const style = getComputedStyle(img)
+      const rect = img.getBoundingClientRect()
+      return {
+        carregada: img.complete && img.naturalWidth > 0,
+        opacidade: style.opacity,
+        visibilidade: style.visibility,
+        recorte: style.clipPath,
+        largura: rect.width,
+        altura: rect.height,
+      }
+    })).toEqual({
+      carregada: true,
+      opacidade: '1',
+      visibilidade: 'visible',
+      recorte: 'inset(0px)',
+      largura: expect.any(Number),
+      altura: expect.any(Number),
+    })
+    const caixa = await miniatura.boundingBox()
+    expect(caixa?.width || 0).toBeGreaterThan(100)
+    expect(caixa?.height || 0).toBeGreaterThan(100)
+  }
 })
