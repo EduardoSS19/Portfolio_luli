@@ -380,6 +380,35 @@ test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplic
   await expect(dialog.locator('.obra-focus-contagem')).toContainText('02')
 })
 
+test('navegar no foco e fechar preserva a capa do card sem recarregamento no mobile', async ({ page }, testInfo) => {
+  await abrirPortfolio(page)
+  if (testInfo.project.name === 'chromium-android') {
+    await page.setViewportSize({ width: 390, height: 844 })
+  }
+
+  const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
+  const miniatura = card.locator('.obra-zoom-trigger img')
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => miniatura.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
+  const capaOriginal = await miniatura.getAttribute('src')
+
+  await card.locator('.obra-zoom-trigger').click()
+  const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
+  await expect(dialog).toHaveAttribute('open', '')
+  const imagemAmpliada = dialog.locator('.obra-focus-imagem')
+  await expect.poll(() => imagemAmpliada.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
+
+  await dialog.locator('.obra-focus-proxima').click()
+  await expect.poll(() => imagemAmpliada.getAttribute('src')).not.toBe(capaOriginal)
+  await expect(miniatura).toHaveAttribute('src', capaOriginal)
+
+  await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
+  await expect(dialog).not.toHaveAttribute('open', '')
+  await expect(miniatura).toHaveAttribute('src', capaOriginal)
+  await expect.poll(() => miniatura.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true)
+  await expect(miniatura).toBeVisible()
+})
+
 test('o carrossel da grade ocupa toda a altura do card sem reservar faixa de miniaturas', async ({ page }) => {
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
