@@ -78,7 +78,7 @@
     {% elif ga4.status == "error" %}
     <div class="portfolio-analytics-state">Não foi possível conectar ao Google Analytics agora. Confira as permissões da conta de serviço e os logs do serviço Django no Railway.</div>
     {% else %}
-    <div class="portfolio-analytics-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+    <div class="portfolio-analytics-grid">
       <article class="portfolio-analytics-card" style="border-color:#397b65;background:#102d2a;">
         <span>● Usuários ativos agora</span>
         <strong>{% if ga4.realtime.status == "ok" %}{{ ga4.realtime.active_users }}{% else %}—{% endif %}</strong>
@@ -88,8 +88,9 @@
       <article class="portfolio-analytics-card"><span>Usuários ativos</span><strong>{{ ga4.historical.metrics.active_users }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
       <article class="portfolio-analytics-card"><span>Sessões</span><strong>{{ ga4.historical.metrics.sessions }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
       <article class="portfolio-analytics-card"><span>Visualizações</span><strong>{{ ga4.historical.metrics.page_views }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
+      <article class="portfolio-analytics-card"><span>Eventos registrados</span><strong>{{ ga4.historical.metrics.events }}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Últimos 28 dias</small></article>
       {% else %}
-      <article class="portfolio-analytics-card" style="grid-column:span 3;"><span>Relatórios históricos</span><strong style="font-size:18px;">{% if ga4.historical.status == "no_data" %}Aguardando processamento{% else %}Indisponíveis no momento{% endif %}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Os dados históricos podem levar algum tempo para aparecer no GA4.</small></article>
+      <article class="portfolio-analytics-card" style="grid-column:1 / -1;"><span>Relatórios históricos</span><strong style="font-size:18px;">{% if ga4.historical.status == "no_data" %}Aguardando processamento{% else %}Indisponíveis no momento{% endif %}</strong><small style="display:block;margin-top:7px;color:#a9c1d2;">Os dados históricos podem levar algum tempo para aparecer no GA4.</small></article>
       {% endif %}
     </div>
     {% if ga4.realtime.status == "error" %}
