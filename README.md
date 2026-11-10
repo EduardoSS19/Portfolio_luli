@@ -53,10 +53,14 @@ Variáveis principais no serviço web do Railway:
 - `RESEND_API_KEY` e `DEFAULT_FROM_EMAIL`: remetente verificado no Resend.
 - `DATABASE_URL`: conexão do banco PostgreSQL do Railway.
 - `YOUTUBE_API_KEY`: necessária para buscar metadados ao cadastrar vídeos do YouTube.
+- `GA4_PROPERTY_ID=563474943`: ID numérico da propriedade do Google Analytics 4.
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: conteúdo integral do JSON da conta de serviço, armazenado somente como variável secreta no Railway (nunca versionar). A conta precisa ter acesso **Leitor** à propriedade GA4 e a Google Analytics Data API precisa estar ativada no projeto Google Cloud.
 
 O Django deriva as origens CSRF HTTPS dos hosts configurados. Depois de apontar o DNS e publicar, teste a página inicial, o login em `/admin/` e o formulário de contato.
 
 ## Métricas de acesso (Google Tag Manager + Google Analytics 4)
+
+O painel administrativo consulta a Google Analytics Data API no backend Django. As métricas agregadas dos últimos 28 dias são armazenadas em cache por cinco minutos. A credencial da conta de serviço fica exclusivamente no Railway; o navegador não recebe a chave privada.
 
 A integração usa o contêiner Web do Google Tag Manager configurado como padrão no frontend: `GTM-5ZQX38KB`. Não é necessário adicionar variável no Railway. Se necessário, `VITE_GTM_ID` pode sobrescrever o contêiner padrão.
 
