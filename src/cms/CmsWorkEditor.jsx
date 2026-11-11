@@ -109,7 +109,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish, onDelete, canDelete = false }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onReplaceGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onUpdateVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish, onDelete, canDelete = false }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -225,6 +225,18 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
 
+  const editVideo = async item => {
+    const nextUrl = window.prompt('Cole o novo link do YouTube:', item.youtubeUrl)
+    if (nextUrl == null || !nextUrl.trim() || nextUrl.trim() === item.youtubeUrl) return
+    setVideoBusyId(item.id); setVideoError(''); setVideoNotice('')
+    try {
+      const updated = await onUpdateVideo(work.id, item.id, nextUrl.trim())
+      setVideos(current => current.map(video => video.id === item.id ? updated : video))
+      setVideoNotice('Link e miniatura do vídeo atualizados.')
+    } catch (err) { setVideoError(err.message || 'Não foi possível atualizar o vídeo.') }
+    finally { setVideoBusyId(null) }
+  }
+
   const deleteVideo = async item => {
     if (!window.confirm('Remover este vídeo da obra? Esta ação não pode ser desfeita.')) return
     setVideoBusyId(item.id)
@@ -314,6 +326,23 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     } finally {
       setGalleryUploading(false)
     }
+  }
+
+  const replaceGalleryItem = async (item, event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (file.size > 15 * 1024 * 1024) {
+      setGalleryError('A imagem deve ter no máximo 15 MB.')
+      return
+    }
+    setGalleryBusyId(item.id); setGalleryError(''); setGalleryNotice('')
+    try {
+      const updated = await onReplaceGalleryImage(work.id, item.id, file)
+      setGallery(current => current.map(image => image.id === item.id ? updated : image))
+      setGalleryNotice('Imagem substituída.')
+    } catch (err) { setGalleryError(err.message || 'Não foi possível substituir a imagem.') }
+    finally { setGalleryBusyId(null) }
   }
 
   const deleteGalleryItem = async item => {
@@ -422,6 +451,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
               <div className="cms-gallery-item-actions">
                 <button type="button" aria-label="Mover imagem para a esquerda" title="Mover para a esquerda" disabled={index === 0 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, -1)}>←</button>
                 <button type="button" aria-label="Mover imagem para a direita" title="Mover para a direita" disabled={index === gallery.length - 1 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, 1)}>→</button>
+                <label className="cms-gallery-replace">Substituir<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => replaceGalleryItem(item, event)} disabled={galleryBusyId === item.id} /></label>
                 <button type="button" className="delete" disabled={galleryBusyId === item.id} onClick={() => deleteGalleryItem(item)}>{galleryBusyId === item.id ? '…' : 'Remover'}</button>
               </div>
             </article>)}
@@ -458,6 +488,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
                   <div className="cms-video-actions">
                     <button type="button" aria-label="Mover vídeo para cima" title="Mover para cima" disabled={index === 0 || videoBusyId === item.id} onClick={() => moveVideo(index, -1)}>↑</button>
                     <button type="button" aria-label="Mover vídeo para baixo" title="Mover para baixo" disabled={index === videos.length - 1 || videoBusyId === item.id} onClick={() => moveVideo(index, 1)}>↓</button>
+                    <button type="button" disabled={videoBusyId === item.id} onClick={() => editVideo(item)}>Editar link</button>
                     <button type="button" className="delete" disabled={videoBusyId === item.id} onClick={() => deleteVideo(item)}>{videoBusyId === item.id ? '…' : 'Remover'}</button>
                   </div>
                 </article>)}
