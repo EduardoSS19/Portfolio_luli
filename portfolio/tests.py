@@ -1260,6 +1260,11 @@ class CmsWorkCoverUploadApiTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission
 
+        self.media_dir = TemporaryDirectory()
+        self.addCleanup(self.media_dir.cleanup)
+        media_settings = override_settings(MEDIA_ROOT=self.media_dir.name)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
         Work.objects.all().delete()
         Category.objects.all().delete()
         self.category = Category.objects.create(title="Pintura", key="capa-pintura")
@@ -1292,7 +1297,6 @@ class CmsWorkCoverUploadApiTests(TestCase):
         return client.post(
             reverse("cms-work-cover-upload", args=[self.work.pk]),
             {"image": file},
-            format="multipart",
         )
 
     def test_anonymous_user_cannot_upload_cover(self):
