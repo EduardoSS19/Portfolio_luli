@@ -855,6 +855,7 @@ class CmsReadApiTests(TestCase):
             "categoryOptions": [{"id": self.category.pk, "key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
+            "permissions": {"canCreateWork": False, "canEditWork": False},
         })
         self.assertEqual(response["Cache-Control"], "max-age=0, no-cache, no-store, must-revalidate, private")
 
@@ -1130,3 +1131,97 @@ class CmsWorkDetailApiTests(TestCase):
         self.assertEqual(update_response.json()["error"], "work_edit_permission_required")
         self.work.refresh_from_db()
         self.assertEqual(self.work.title, "Estudo inicial")
+
+
+class CmsWorkCreateApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        self.category = Category.objects.create(title="Pintura", key="pintura")
+        self.staff = get_user_model().objects.create_user(
+            username="cms-work-creator",
+            password="test-password-123",
+            is_staff=True,
+        )
+        self.add_permission = Permission.objects.get(
+            content_type__app_label="portfolio",
+            codename="add_work",
+        )
+        self.change_permission = Permission.objects.get(
+            content_type__app_label="portfolio",
+            codename="change_work",
+        )
+
+    def post_work(self, payload, client=None):
+        client = client or self.client
+        return client.post(
+            reverse("cms-work-create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+    def test_anonymous_user_cannot_create_work(self):
+        response = self.post_work({"title": "Obra nova", "category": self.category.pk})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(Work.objects.count(), 0)
+
+    def test_staff_without_add_permission_cannot_create_work(self):
+        self.client.force_login(self.staff)
+
+        response = self.post_work({"title": "Obra nova", "category": self.category.pk})
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "work_create_permission_required")
+        self.assertEqual(Work.objects.count(), 0)
+
+    def test_authorized_editor_creates_new_work_as_draft(self):
+        self.staff.user_permissions.add(self.add_permission, self.change_permission)
+        self.client.force_login(self.staff)
+
+        response = self.post_work({
+            "title": "Obra em preparação",
+            "category": self.category.pk,
+            "description": "Ainda em edição",
+            "technique": "Acrílica",
+            "position": 3,
+        })
+
+        self.assertEqual(response.status_code, 201)
+        work = Work.objects.get(pk=response.json()["id"])
+        self.assertEqual(work.title, "Obra em preparação")
+        self.assertEqual(work.description, "Ainda em edição")
+        self.assertFalse(work.is_active)
+        self.assertFalse(work.is_share_image)
+        self.assertEqual(response.json()["published"], False)
+
+    def test_create_endpoint_rejects_publication_and_media_fields(self):
+        self.staff.user_permissions.add(self.add_permission)
+        self.client.force_login(self.staff)
+
+        response = self.post_work({
+            "title": "Não deve ser criada",
+            "category": self.category.pk,
+            "is_active": True,
+            "image_url": "https://example.com/image.jpg",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "unknown_fields")
+        self.assertEqual(Work.objects.count(), 0)
+
+    def test_invalid_required_fields_are_rejected_without_creating_work(self):
+        self.staff.user_permissions.add(self.add_permission)
+        self.client.force_login(self.staff)
+
+        response = self.post_work({
+            "title": "",
+            "category": self.category.pk,
+            "year": "não é um ano",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "validation_error")
+        self.assertEqual(Work.objects.count(), 0)
