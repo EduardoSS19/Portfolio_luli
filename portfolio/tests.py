@@ -852,7 +852,7 @@ class CmsReadApiTests(TestCase):
         self.assertEqual(response.json(), {
             "works": {"total": 2, "published": 1, "drafts": 1},
             "categories": 1,
-            "categoryOptions": [{"key": "cms-ceramica", "title": "Cerâmica"}],
+            "categoryOptions": [{"id": self.category.pk, "key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
         })
@@ -1043,6 +1043,8 @@ class CmsWorkUpdateApiTests(TestCase):
 
     def test_csrf_is_required_for_authenticated_editor(self):
         csrf_client = Client(enforce_csrf_checks=True)
+        login_page = csrf_client.get(reverse("admin:login"))
+        token = login_page.cookies["csrftoken"].value
         csrf_client.force_login(self.editor)
 
         rejected = csrf_client.patch(
@@ -1052,8 +1054,6 @@ class CmsWorkUpdateApiTests(TestCase):
         )
         self.assertEqual(rejected.status_code, 403)
 
-        login_page = csrf_client.get(reverse("admin:login"))
-        token = login_page.cookies["csrftoken"].value
         accepted = csrf_client.patch(
             reverse("cms-work-update", args=[self.work.pk]),
             data=json.dumps({"title": "Com token"}),
