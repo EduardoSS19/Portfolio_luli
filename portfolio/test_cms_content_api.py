@@ -134,3 +134,42 @@ class CmsContentApiTests(TestCase):
                     list(BackgroundFrame.objects.order_by("position").values_list("position", flat=True)),
                     [0, 1],
                 )
+
+    def test_content_listing_requires_django_view_or_change_permission(self):
+        response = self.client.get(self.url + "?type=social-links")
+        self.assertEqual(response.status_code, 403)
+        self.grant("view_sociallink")
+        response = self.client.get(self.url + "?type=social-links")
+        self.assertEqual(response.status_code, 200)
+
+    def test_work_share_image_url_and_bulk_publication_are_available_in_cms(self):
+        from .models import Category, Work
+
+        self.grant("add_work", "change_work")
+        category = Category.objects.create(title="Pintura", key="pintura")
+        first = Work.objects.create(
+            category=category, title="Primeira", image_url="https://example.com/first.jpg",
+            is_share_image=True, is_active=False,
+        )
+        response = self.client.post(
+            reverse("cms-work-create"),
+            data=json.dumps({
+                "category": category.pk, "title": "Segunda", "position": 1,
+                "image_url": "https://example.com/second.jpg", "is_share_image": True,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+        first.refresh_from_db()
+        second = Work.objects.get(pk=response.json()["id"])
+        self.assertFalse(first.is_share_image)
+        self.assertTrue(second.is_share_image)
+
+        response = self.client.post(
+            reverse("cms-work-bulk-publish"),
+            data=json.dumps({"ids": [first.pk, second.pk], "published": True}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["updated"], 2)
+        self.assertEqual(Work.objects.filter(pk__in=[first.pk, second.pk], is_active=True).count(), 2)
