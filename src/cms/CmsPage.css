@@ -327,3 +327,25 @@
 .cms-editor-collapsible>.cms-gallery-heading .cms-cover-upload{margin:0}
 .cms-editor-collapsible>.cms-editor-fields{padding:0 20px 20px}
 @media(max-width:700px){.cms-category-work-pagination{align-items:flex-start;flex-direction:column}.cms-category-work-pagination>div{width:100%}.cms-category-work-pagination button{flex:1}.cms-editor-collapsible>summary{padding:16px}.cms-editor-collapsible>.cms-cover-layout,.cms-editor-collapsible>.cms-gallery-grid,.cms-editor-collapsible>.cms-gallery-empty,.cms-editor-collapsible>.cms-video-add-form,.cms-editor-collapsible>.cms-video-list,.cms-editor-collapsible>.cms-gallery-progress,.cms-editor-collapsible>.cms-editor-message{margin-left:16px;margin-right:16px}.cms-editor-collapsible>.cms-editor-fields{padding:0 16px 16px}}
+
+
+/* Visual drag-and-drop ordering for desktop category management */
+.cms-category-drag-hint{margin:14px 0 8px;color:var(--cms-muted);font-size:10px;line-height:1.5}
+.cms-category-work-card{grid-template-columns:32px 76px minmax(0,1fr) 22px auto;gap:13px;padding:12px 10px;border:1px solid transparent;border-radius:8px;transition:background .16s ease,border-color .16s ease,opacity .16s ease}
+.cms-category-work-card:hover{background:#20211d;border-color:var(--cms-line)}
+.cms-category-work-card[draggable="true"]{cursor:grab}
+.cms-category-work-card[draggable="true"]:active{cursor:grabbing}
+.cms-category-work-card.is-dragging{opacity:.38}
+.cms-category-work-card.is-drop-target{border-color:var(--cms-accent);background:#c9d39a12;box-shadow:inset 3px 0 0 var(--cms-accent)}
+.cms-category-work-thumb{width:76px;height:66px;overflow:hidden;border-radius:5px;background:#292b24;display:grid;place-items:center;color:var(--cms-accent)}
+.cms-category-work-thumb img{width:100%;height:100%;display:block;object-fit:cover}
+.cms-category-work-info{min-width:0;display:grid;gap:7px;justify-items:start}
+.cms-category-work-info strong{font:600 12px 'DM Sans';overflow-wrap:anywhere}
+.cms-category-drag-handle{font-size:22px;line-height:1;color:var(--cms-muted);cursor:grab;user-select:none}
+.cms-category-work-move-buttons{display:flex;gap:5px}
+@media(max-width:760px){
+  .cms-category-work-card{grid-template-columns:28px 58px minmax(0,1fr);gap:9px;padding:10px 0}
+  .cms-category-work-thumb{width:58px;height:54px}
+  .cms-category-drag-handle{display:none}
+  .cms-category-work-move-buttons{grid-column:3;justify-content:flex-end}
+}
