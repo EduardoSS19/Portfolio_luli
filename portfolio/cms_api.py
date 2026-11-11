@@ -4,7 +4,6 @@ All endpoints require an authenticated staff user. Mutations are intentionally
 not exposed here; they will be added only with dedicated validation and tests.
 """
 from django.contrib.auth.decorators import user_passes_test
-from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -92,8 +91,7 @@ def cms_works(request):
 
     queryset = queryset.order_by("category__position", "position", "pk")
     total = queryset.count()
-    page = Paginator(queryset, limit).get_page((offset // limit) + 1)
-    works = list(page.object_list)
+    works = list(queryset[offset:offset + limit])
 
     results = []
     for work in works:
