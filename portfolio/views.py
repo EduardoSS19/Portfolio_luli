@@ -117,6 +117,24 @@ def _work_data(work):
 @ensure_csrf_cookie
 def portfolio_data(request):
     preview_work = None
+    category_preview = None
+    preview_category = None
+    category_preview_token = request.GET.get("category_preview_token")
+    if category_preview_token:
+        try:
+            category_preview = signing.loads(
+                category_preview_token,
+                salt="portfolio.category-order-preview",
+                max_age=600,
+            )
+            preview_category = Category.objects.get(pk=category_preview.get("category"), is_active=True)
+            current_ids = set(Work.objects.filter(category=preview_category).values_list("pk", flat=True))
+            preview_ids = category_preview.get("work_ids")
+            if not isinstance(preview_ids, list) or set(preview_ids) != current_ids or len(preview_ids) != len(current_ids):
+                raise ValueError("invalid category order")
+        except (BadSignature, SignatureExpired, Category.DoesNotExist, ValueError, TypeError):
+            return JsonResponse({"erro": "Esta prévia expirou ou não é mais válida. Gere outro link pelo painel."}, status=403)
+
     preview_token = request.GET.get("preview_token")
     if preview_token:
         if not request.user.is_authenticated or not request.user.is_staff:
@@ -179,7 +197,13 @@ def portfolio_data(request):
                 {
                     "titulo": category.title,
                     "chave": category.key,
-                    "obras": [_work_data(work) for work in category.works.all()],
+                    "obras": [
+                        _work_data(work) for work in (
+                            sorted(category.works.all(), key=lambda work: category_preview["work_ids"].index(work.pk))
+                            if category_preview and category.pk == category_preview["category"]
+                            else category.works.all()
+                        )
+                    ],
                 }
                 for category in categories
             ],
@@ -197,6 +221,8 @@ def portfolio_data(request):
         }
     if preview_work:
         payload["preview"] = {"id": preview_work.pk, "titulo": preview_work.title}
+    elif category_preview:
+        payload["preview"] = {"category": True, "titulo": f"Organização: {preview_category.title}"}
     return JsonResponse(payload)
 
 
