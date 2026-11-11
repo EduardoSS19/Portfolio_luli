@@ -4,6 +4,7 @@ import { CmsWorkEditor } from './CmsWorkEditor.jsx'
 import { CmsAnalytics } from './CmsAnalytics.jsx'
 import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 import { CmsProfileManager } from './CmsProfileManager.jsx'
+import { CmsContentManager } from './CmsContentManager.jsx'
 
 const PAGE_SIZE = 24
 
@@ -410,6 +411,7 @@ export function CmsPage() {
   const isOverview = section === 'overview'
   const isCategories = section === 'categories'
   const isProfile = section === 'profile'
+  const isContent = section === 'content'
 
   return (
     <div className="cms-shell">
@@ -424,6 +426,7 @@ export function CmsPage() {
           <button className={!isOverview ? 'active' : ''} onClick={() => setSection('library')}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
           <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
           <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
+          <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Conteúdo</button>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />
@@ -434,7 +437,7 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isContent ? 'CONTEÚDO' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
             <a href="/" target="_blank" rel="noreferrer">Ver portfólio ↗</a>
