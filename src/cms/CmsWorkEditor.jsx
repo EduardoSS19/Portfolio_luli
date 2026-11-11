@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const SECTIONS = [
   {
@@ -105,7 +105,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -114,6 +114,23 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const [uploadingCover, setUploadingCover] = useState(false)
   const [coverError, setCoverError] = useState('')
   const [coverSaved, setCoverSaved] = useState(false)
+  const [gallery, setGallery] = useState([])
+  const [galleryLoading, setGalleryLoading] = useState(false)
+  const [galleryUploading, setGalleryUploading] = useState(false)
+  const [galleryError, setGalleryError] = useState('')
+  const [galleryNotice, setGalleryNotice] = useState('')
+  const [galleryBusyId, setGalleryBusyId] = useState(null)
+
+  useEffect(() => {
+    if (!work.id) return
+    let active = true
+    setGalleryLoading(true)
+    onLoadGallery(work.id)
+      .then(items => { if (active) setGallery(items) })
+      .catch(err => { if (active) setGalleryError(err.message || 'Não foi possível carregar a galeria.') })
+      .finally(() => { if (active) setGalleryLoading(false) })
+    return () => { active = false }
+  }, [work.id, onLoadGallery])
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
@@ -142,6 +159,66 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       setCoverError(err.message || 'Não foi possível enviar a imagem.')
     } finally {
       setUploadingCover(false)
+    }
+  }
+
+  const uploadGallery = async event => {
+    const files = Array.from(event.target.files || [])
+    event.target.value = ''
+    if (!files.length) return
+    const tooLarge = files.find(file => file.size > 15 * 1024 * 1024)
+    if (tooLarge) {
+      setGalleryError('Cada imagem deve ter no máximo 15 MB.')
+      return
+    }
+    setGalleryUploading(true)
+    setGalleryError('')
+    setGalleryNotice('')
+    try {
+      for (const file of files) {
+        const item = await onUploadGalleryImage(work.id, file)
+        setGallery(current => [...current, item])
+      }
+      setGalleryNotice(files.length === 1 ? 'Imagem adicionada à galeria.' : files.length + ' imagens adicionadas à galeria.')
+    } catch (err) {
+      setGalleryError(err.message || 'Não foi possível enviar as imagens.')
+      try { setGallery(await onLoadGallery(work.id)) } catch { /* preserve the upload error */ }
+    } finally {
+      setGalleryUploading(false)
+    }
+  }
+
+  const deleteGalleryItem = async item => {
+    if (!window.confirm('Remover esta imagem da galeria? Esta ação não pode ser desfeita.')) return
+    setGalleryBusyId(item.id)
+    setGalleryError('')
+    setGalleryNotice('')
+    try {
+      await onDeleteGalleryImage(work.id, item.id)
+      setGallery(current => current.filter(image => image.id !== item.id))
+      setGalleryNotice('Imagem removida da galeria.')
+    } catch (err) {
+      setGalleryError(err.message || 'Não foi possível remover a imagem.')
+    } finally {
+      setGalleryBusyId(null)
+    }
+  }
+
+  const moveGalleryItem = async (index, direction) => {
+    const next = [...gallery]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setGallery(next)
+    setGalleryError('')
+    setGalleryNotice('')
+    try {
+      const savedItems = await onReorderGalleryImages(work.id, next.map(item => item.id))
+      setGallery(savedItems)
+      setGalleryNotice('Ordem da galeria atualizada.')
+    } catch (err) {
+      setGalleryError(err.message || 'Não foi possível reorganizar a galeria.')
+      try { setGallery(await onLoadGallery(work.id)) } catch { /* preserve the reorder error */ }
     }
   }
 
@@ -197,6 +274,28 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
             {coverSaved && <div className="cms-editor-message success" role="status">Capa atualizada com sucesso.</div>}
           </div>
         </div>
+      </section>
+
+      <section className="cms-editor-section cms-gallery-section">
+        <div className="cms-editor-section-heading cms-gallery-heading">
+          <div><h2>Galeria de imagens</h2><p>Adicione detalhes, ângulos e registros do processo. A capa permanece separada.</p></div>
+          {work.id && <label className={'cms-cover-upload' + (galleryUploading ? ' disabled' : '')}>{galleryUploading ? 'Enviando…' : '＋ Adicionar imagens'}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={uploadGallery} disabled={galleryUploading} /></label>}
+        </div>
+        {!work.id ? <div className="cms-gallery-empty">Salve a obra primeiro para começar a montar a galeria.</div> : galleryLoading ? <div className="cms-gallery-empty">Carregando imagens…</div> : gallery.length ? (
+          <div className="cms-gallery-grid">
+            {gallery.map((item, index) => <article className="cms-gallery-item" key={item.id}>
+              <div className="cms-gallery-thumb">{item.url ? <img src={item.url} alt={'Imagem adicional ' + (index + 1) + ' de ' + (work.title || 'obra')} loading="lazy" /> : <span>Imagem indisponível</span>}<small>{String(index + 1).padStart(2, '0')}</small></div>
+              <div className="cms-gallery-item-actions">
+                <button type="button" aria-label="Mover imagem para a esquerda" title="Mover para a esquerda" disabled={index === 0 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, -1)}>←</button>
+                <button type="button" aria-label="Mover imagem para a direita" title="Mover para a direita" disabled={index === gallery.length - 1 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, 1)}>→</button>
+                <button type="button" className="delete" disabled={galleryBusyId === item.id} onClick={() => deleteGalleryItem(item)}>{galleryBusyId === item.id ? '…' : 'Remover'}</button>
+              </div>
+            </article>)}
+          </div>
+        ) : <div className="cms-gallery-empty"><span>✳</span><strong>Nenhuma imagem adicional ainda</strong><small>Use “Adicionar imagens” para incluir fotos da obra.</small></div>}
+        {galleryUploading && <div className="cms-gallery-progress" role="status">Enviando imagens para o acervo…</div>}
+        {galleryError && <div className="cms-editor-message error" role="alert">{galleryError}</div>}
+        {galleryNotice && <div className="cms-editor-message success" role="status">{galleryNotice}</div>}
       </section>
       <form onSubmit={submit}>
         {SECTIONS.map(section => (
