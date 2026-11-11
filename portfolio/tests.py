@@ -1197,6 +1197,34 @@ class CmsWorkCreateApiTests(TestCase):
         self.assertFalse(work.is_share_image)
         self.assertEqual(response.json()["published"], False)
 
+    def test_create_endpoint_requires_csrf_for_authenticated_editor(self):
+        self.staff.user_permissions.add(self.add_permission)
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.staff)
+        overview = csrf_client.get(reverse("cms-overview"))
+        token = overview.cookies["csrftoken"].value
+        payload = {
+            "title": "Obra protegida por CSRF",
+            "category": self.category.pk,
+            "position": 0,
+        }
+
+        rejected = csrf_client.post(
+            reverse("cms-work-create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        accepted = csrf_client.post(
+            reverse("cms-work-create"),
+            data=json.dumps(payload),
+            content_type="application/json",
+            HTTP_X_CSRFTOKEN=token,
+        )
+
+        self.assertEqual(rejected.status_code, 403)
+        self.assertEqual(accepted.status_code, 201)
+        self.assertEqual(Work.objects.count(), 1)
+
     def test_create_endpoint_rejects_publication_and_media_fields(self):
         self.staff.user_permissions.add(self.add_permission)
         self.client.force_login(self.staff)
