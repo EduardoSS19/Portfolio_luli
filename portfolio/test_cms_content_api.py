@@ -177,6 +177,7 @@ class CmsContentApiTests(TestCase):
     def test_category_order_and_cascade_delete_are_available(self):
         from .models import Category, Work
 
+        Category.objects.all().delete()
         self.grant("change_category", "delete_category")
         first = Category.objects.create(title="A", key="cms-a", position=0)
         second = Category.objects.create(title="B", key="cms-b", position=1)
@@ -206,9 +207,14 @@ class CmsContentApiTests(TestCase):
         Image.new("RGB", (10, 10), "purple").save(output, format="PNG")
         upload = SimpleUploadedFile("replacement.png", output.getvalue(), content_type="image/png")
         with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
-            response = self.client.patch(
+            from django.test.client import MULTIPART_CONTENT, encode_multipart
+            boundary = "cms-gallery-replacement-boundary"
+            body = encode_multipart(boundary, {"image": upload})
+            response = self.client.generic(
+                "PATCH",
                 reverse("cms-work-gallery-item", args=[work.pk, old.pk]),
-                data={"image": upload},
+                data=body,
+                content_type=MULTIPART_CONTENT + "; boundary=" + boundary,
             )
             self.assertEqual(response.status_code, 200, response.content)
             old.refresh_from_db()
