@@ -301,10 +301,10 @@
 .cms-category-work-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--cms-line)}
 .cms-category-work-position{font:600 11px 'Manrope';color:var(--cms-accent)}
 .cms-category-work-row strong{font:500 12px 'DM Sans';overflow-wrap:anywhere}
-.cms-category-work-row>div{display:flex;gap:5px}
+.cms-category-work-row>.cms-category-work-move-buttons{display:flex;gap:5px}
 .cms-category-work-row button{width:32px;height:30px;border:1px solid var(--cms-line);border-radius:5px;background:#24261f;color:var(--cms-accent);cursor:pointer}
 .cms-category-work-row button:disabled{opacity:.35;cursor:not-allowed}
-@media(max-width:760px){.cms-category-work-order{grid-column:auto;padding:16px}.cms-category-work-order-heading{flex-direction:column}.cms-category-work-order select{max-width:none;width:100%}.cms-category-work-row{grid-template-columns:28px minmax(0,1fr) auto}.cms-category-work-row>div{grid-column:2/-1;justify-content:flex-end}}
+@media(max-width:760px){.cms-category-work-order{grid-column:auto;padding:16px}.cms-category-work-order-heading{flex-direction:column}.cms-category-work-order select{max-width:none;width:100%}.cms-category-work-row{grid-template-columns:28px minmax(0,1fr) auto}.cms-category-work-row>.cms-category-work-move-buttons{grid-column:2/-1;justify-content:flex-end}}
 
 
 /* Scalable category ordering and progressive disclosure in the work editor */
