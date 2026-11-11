@@ -921,6 +921,35 @@ def cms_work_preview(request, work_id):
     })
 
 
+@require_http_methods(["DELETE"])
+@never_cache
+@csrf_protect
+def cms_work_delete(request, work_id):
+    """Delete a work when the editor has the matching Django delete permission."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.delete_work"):
+        return JsonResponse({"error": "work_delete_permission_required"}, status=403)
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+    stored_names = []
+    if work.image:
+        stored_names.append(work.image.name)
+    stored_names.extend(work.gallery_images.values_list("image", flat=True))
+    work.delete()
+    for name in stored_names:
+        if name:
+            try:
+                default_storage.delete(name)
+            except Exception:
+                logger.exception("Could not delete media for removed CMS work %s", work_id)
+    return JsonResponse({"deleted": work_id})
+
+
 @require_POST
 @never_cache
 @csrf_protect
