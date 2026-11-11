@@ -262,3 +262,7 @@
 .cms-bulk-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;padding:12px 14px;border:1px solid var(--cms-line,#444);border-radius:10px;background:var(--cms-panel,#202020)}
 .cms-bulk-actions strong{margin-right:auto;font-size:13px}
 .cms-bulk-actions button{border:1px solid var(--cms-line,#444);border-radius:7px;background:transparent;color:inherit;padding:8px 11px;cursor:pointer;font-size:12px}
+
+
+.cms-content-select{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--cms-muted,#999);flex:none}
+.cms-content-select input{accent-color:currentColor}
