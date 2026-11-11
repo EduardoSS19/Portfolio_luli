@@ -1954,3 +1954,21 @@ class CmsArtistProfileApiTests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 403)
+
+    def test_editor_can_upload_profile_photo_and_replace_legacy_photo_url(self):
+        media_dir = TemporaryDirectory()
+        self.addCleanup(media_dir.cleanup)
+        settings_override = override_settings(MEDIA_ROOT=media_dir.name)
+        settings_override.enable()
+        self.addCleanup(settings_override.disable)
+        content = BytesIO()
+        Image.new("RGB", (32, 24), "navy").save(content, format="PNG")
+        uploaded = SimpleUploadedFile("profile.png", content.getvalue(), content_type="image/png")
+        self.client.force_login(self.editor)
+
+        response = self.client.post(reverse("cms-profile-photo-upload"), {"image": uploaded})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["photo"])
+        self.profile.refresh_from_db()
+        self.assertTrue(self.profile.photo.name.endswith(".png"))
