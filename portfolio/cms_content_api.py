@@ -3,6 +3,7 @@ import json
 import logging
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.http import JsonResponse
@@ -237,9 +238,11 @@ def cms_content_detail(request, content_type, item_id):
             return JsonResponse({"error": "unknown_fields"}, status=400)
         for field in allowed & set(payload):
             setattr(item, field, payload[field])
+        if not payload:
+            return JsonResponse({"error": "empty_payload"}, status=400)
         try:
             item.full_clean()
-        except forms.ValidationError as error:
+        except ValidationError as error:
             return JsonResponse({"error": "validation_error", "fields": error.message_dict}, status=400)
         item.save(update_fields=list(allowed & set(payload)))
     else:
