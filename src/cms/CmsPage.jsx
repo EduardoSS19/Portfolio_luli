@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './CmsPage.css'
 import { CmsWorkEditor } from './CmsWorkEditor.jsx'
+import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 
 const PAGE_SIZE = 24
 
@@ -361,6 +362,7 @@ export function CmsPage() {
   if (error?.code === 'authentication_required') return <LoginRequired />
 
   const isOverview = section === 'overview'
+  const isCategories = section === 'categories'
 
   return (
     <div className="cms-shell">
@@ -373,6 +375,7 @@ export function CmsPage() {
         <nav className="cms-nav" aria-label="Menu do painel">
           <button className={isOverview ? 'active' : ''} onClick={() => setSection('overview')}><span>◫</span> Visão geral</button>
           <button className={!isOverview ? 'active' : ''} onClick={() => setSection('library')}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
+          <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />
@@ -383,7 +386,7 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
             <a href="/" target="_blank" rel="noreferrer">Ver portfólio ↗</a>
@@ -391,7 +394,9 @@ export function CmsPage() {
         </header>
 
         <div className="cms-content">
-          {isOverview ? (
+          {isCategories ? (
+            <CmsCategoryManager onChanged={() => setLibraryRefresh(value => value + 1)} />
+          ) : isOverview ? (
             <>
               <section className="cms-welcome">
                 <div>
