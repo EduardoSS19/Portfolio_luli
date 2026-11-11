@@ -914,3 +914,161 @@ class CmsReadApiTests(TestCase):
         self.assertEqual(invalid.json(), {"error": "invalid_pagination"})
         self.assertEqual(invalid_status.status_code, 400)
         self.assertEqual(invalid_status.json(), {"error": "invalid_status"})
+
+
+class CmsWorkUpdateApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        self.category = Category.objects.create(title="Pintura", key="pintura")
+        self.other_category = Category.objects.create(title="Desenho", key="desenho")
+        self.work = Work.objects.create(
+            category=self.category,
+            title="Estudo inicial",
+            description="Descrição original",
+            technique="Acrílica",
+            year=2024,
+            is_active=False,
+        )
+        self.editor = get_user_model().objects.create_user(
+            username="cms-work-editor",
+            password="test-password-123",
+            is_staff=True,
+        )
+        self.editor.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="portfolio",
+                codename="change_work",
+            )
+        )
+
+    def patch_work(self, payload, client=None, work_id=None, **extra):
+        client = client or self.client
+        return client.patch(
+            reverse("cms-work-update", args=[work_id or self.work.pk]),
+            data=json.dumps(payload),
+            content_type="application/json",
+            **extra,
+        )
+
+    def test_anonymous_user_cannot_update_work(self):
+        response = self.patch_work({"title": "Alteração indevida"})
+
+        self.assertEqual(response.status_code, 401)
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Estudo inicial")
+
+    def test_staff_without_change_permission_cannot_update_work(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-read-only-staff",
+            password="test-password-123",
+            is_staff=True,
+        )
+        self.client.force_login(staff)
+
+        response = self.patch_work({"title": "Alteração indevida"})
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "work_edit_permission_required")
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Estudo inicial")
+
+    def test_editor_can_partially_update_metadata_without_changing_other_fields(self):
+        self.client.force_login(self.editor)
+
+        response = self.patch_work({
+            "title": "Obra revisada",
+            "category": self.other_category.pk,
+            "description": "Nova descrição",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Obra revisada")
+        self.assertEqual(self.work.category, self.other_category)
+        self.assertEqual(self.work.description, "Nova descrição")
+        self.assertEqual(self.work.technique, "Acrílica")
+        self.assertEqual(self.work.year, 2024)
+        self.assertFalse(self.work.is_active)
+        self.assertEqual(response.json()["category"]["key"], "desenho")
+
+    def test_editor_cannot_change_publication_or_media_through_metadata_endpoint(self):
+        self.client.force_login(self.editor)
+
+        response = self.patch_work({
+            "title": "Título alterado",
+            "is_active": True,
+            "image_url": "https://example.com/unsafe.jpg",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "unknown_fields")
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Estudo inicial")
+        self.assertFalse(self.work.is_active)
+
+    def test_invalid_values_are_rejected_without_partial_save(self):
+        self.client.force_login(self.editor)
+
+        response = self.patch_work({
+            "title": "Título que não deve salvar",
+            "year": "não é um ano",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "validation_error")
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Estudo inicial")
+
+    def test_invalid_json_and_wrong_content_type_are_rejected(self):
+        self.client.force_login(self.editor)
+
+        malformed = self.client.patch(
+            reverse("cms-work-update", args=[self.work.pk]),
+            data="{",
+            content_type="application/json",
+        )
+        wrong_type = self.client.patch(
+            reverse("cms-work-update", args=[self.work.pk]),
+            data="title=Outra",
+            content_type="application/x-www-form-urlencoded",
+        )
+
+        self.assertEqual(malformed.status_code, 400)
+        self.assertEqual(malformed.json()["error"], "invalid_json")
+        self.assertEqual(wrong_type.status_code, 415)
+        self.assertEqual(wrong_type.json()["error"], "application_json_required")
+
+    def test_csrf_is_required_for_authenticated_editor(self):
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.editor)
+
+        rejected = csrf_client.patch(
+            reverse("cms-work-update", args=[self.work.pk]),
+            data=json.dumps({"title": "Sem token"}),
+            content_type="application/json",
+        )
+        self.assertEqual(rejected.status_code, 403)
+
+        login_page = csrf_client.get(reverse("admin:login"))
+        token = login_page.cookies["csrftoken"].value
+        accepted = csrf_client.patch(
+            reverse("cms-work-update", args=[self.work.pk]),
+            data=json.dumps({"title": "Com token"}),
+            content_type="application/json",
+            HTTP_X_CSRFTOKEN=token,
+        )
+
+        self.assertEqual(accepted.status_code, 200)
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Com token")
+
+    def test_unknown_work_returns_404(self):
+        self.client.force_login(self.editor)
+
+        response = self.patch_work({"title": "Não existe"}, work_id=999999)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "work_not_found")
