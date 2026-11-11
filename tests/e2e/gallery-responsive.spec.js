@@ -31,6 +31,35 @@ async function alternarModoGaleria(page, nomeBotao) {
   await page.locator('.editorial-menu-controls').getByRole('button', { name: nomeBotao }).click()
 }
 
+
+async function aguardarQuadroEstavel(locator) {
+  // Fechar <dialog> pode disparar restauração de foco e scroll em uma tarefa
+  // posterior. Aguarda quatro frames consecutivos com a geometria do card
+  // estável antes de comparar a posição final (sem ampliar a tolerância).
+  await locator.evaluate(element => new Promise(resolve => {
+    let anterior = null
+    let quadrosEstaveis = 0
+
+    function verificar() {
+      const rect = element.getBoundingClientRect()
+      const atual = [rect.x + window.scrollX, rect.y + window.scrollY, rect.width, rect.height]
+      if (anterior && atual.every((valor, indice) => Math.abs(valor - anterior[indice]) <= 0.25)) {
+        quadrosEstaveis += 1
+      } else {
+        quadrosEstaveis = 0
+      }
+      anterior = atual
+      if (quadrosEstaveis >= 4) {
+        resolve()
+      } else {
+        requestAnimationFrame(verificar)
+      }
+    }
+
+    requestAnimationFrame(verificar)
+  }))
+}
+
 async function abrirPortfolio(page, semIntersectionObserver = false) {
   await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200,
@@ -719,6 +748,7 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
     await page.waitForTimeout(atraso)
     // A abertura centraliza o card antes do foco; a referência correta é
     // a miniatura já centralizada, imediatamente antes de iniciar o retorno.
+    await aguardarQuadroEstavel(trigger)
     const antes = await trigger.boundingBox()
     const scrollAntes = await page.evaluate(() => window.scrollY)
     await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
@@ -728,6 +758,7 @@ test('fechar o foco em diferentes pontos do zoom sempre devolve a miniatura ao m
       clipPath: getComputedStyle(element).clipPath,
       animations: element.getAnimations().length,
     }))).toEqual({ transform: 'none', clipPath: 'none', animations: 0 })
+    await aguardarQuadroEstavel(trigger)
     const depois = await trigger.boundingBox()
     const scrollDepois = await page.evaluate(() => window.scrollY)
     expect(depois).not.toBeNull()
