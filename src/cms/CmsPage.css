@@ -197,3 +197,24 @@
 .cms-category-form-actions button{cursor:pointer}
 .cms-category-notice{font-size:11px;line-height:1.5;color:var(--cms-accent)}
 @media(max-width:760px){.cms-category-page{grid-template-columns:1fr}.cms-category-list,.cms-category-form{padding:16px}}
+
+
+/* CMS artist profile */
+.cms-profile-form{display:grid;gap:22px;background:var(--cms-panel);border:1px solid var(--cms-line);border-radius:9px;padding:24px;max-width:980px}
+.cms-profile-preview{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--cms-line)}
+.cms-profile-preview>img,.cms-profile-preview>.cms-no-image{width:92px;height:92px;flex:0 0 92px;object-fit:cover;border-radius:8px}
+.cms-profile-preview strong{display:block;font:600 13px 'Manrope';color:var(--cms-text)}
+.cms-profile-preview p{max-width:560px;margin:6px 0 0;color:var(--cms-muted);font-size:11px;line-height:1.6}
+.cms-profile-form .cms-editor-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cms-profile-form .cms-editor-field{display:grid;gap:7px;color:var(--cms-muted);font-size:11px;font-weight:600}
+.cms-profile-form .cms-editor-field input,.cms-profile-form .cms-editor-field textarea{width:100%;min-width:0;background:#111210;border:1px solid #ffffff20;border-radius:6px;color:var(--cms-text);padding:11px 12px;font:12px 'DM Sans';resize:vertical}
+.cms-profile-form .cms-editor-field input:focus,.cms-profile-form .cms-editor-field textarea:focus{outline:none;border-color:var(--cms-accent);box-shadow:0 0 0 2px #c9d39a20}
+.cms-profile-form .cms-editor-actions{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.cms-profile-form .cms-editor-actions>span{font-size:10px;color:var(--cms-muted)}
+@media(max-width:700px){.cms-profile-form{padding:16px}.cms-profile-form .cms-editor-fields{grid-template-columns:1fr}.cms-profile-form .cms-editor-actions{align-items:stretch;flex-direction:column}.cms-profile-preview{align-items:flex-start}}
+
+.cms-profile-photo-controls{min-width:0;flex:1}
+.cms-profile-photo-controls>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.cms-profile-photo-controls input[type=file]{max-width:100%;color:var(--cms-muted);font:10px 'DM Sans'}
+.cms-profile-photo-controls .cms-cover-upload{border:1px solid var(--cms-line);background:#24261f;color:var(--cms-accent);border-radius:5px;padding:9px 12px;font:600 10px 'DM Sans';cursor:pointer}
+.cms-profile-photo-controls .cms-cover-upload:disabled{opacity:.45;cursor:not-allowed}
