@@ -95,7 +95,7 @@ def cms_content(request):
             payload = json.loads(request.body.decode("utf-8")) if request.content_type == "application/json" else {}
         except (UnicodeDecodeError, json.JSONDecodeError):
             return JsonResponse({"error": "invalid_json"}, status=400)
-        content_type = payload.get("type", "") if isinstance(payload, dict) else ""
+        content_type = (payload.get("type", "") if isinstance(payload, dict) else "") or request.GET.get("type", "")
     if content_type not in {"social-links", "backgrounds", "references"}:
         return JsonResponse({"error": "invalid_content_type"}, status=400)
 
