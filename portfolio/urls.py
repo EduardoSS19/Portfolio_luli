@@ -3,7 +3,7 @@ from django.urls import path
 from .cms_analytics import cms_analytics
 from .cms_content_api import cms_content, cms_content_detail, cms_content_toggle
 
-from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_video_delete, cms_work_videos, cms_work_update, cms_work_preview, cms_work_publish, cms_work_bulk_publish, cms_works, cms_categories, cms_category_update, cms_profile, cms_profile_photo_upload
+from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_video_delete, cms_work_videos, cms_work_update, cms_work_preview, cms_work_publish, cms_work_bulk_publish, cms_work_delete, cms_works, cms_categories, cms_category_update, cms_profile, cms_profile_photo_upload
 from .views import contact, portfolio_data
 
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path("cms/categories/<int:category_id>/", cms_category_update, name="cms-category-update"),
     path("cms/works/create/", cms_work_create, name="cms-work-create"),
     path("cms/works/bulk-publish/", cms_work_bulk_publish, name="cms-work-bulk-publish"),
+    path("cms/works/<int:work_id>/delete/", cms_work_delete, name="cms-work-delete"),
     path("cms/works/<int:work_id>/", cms_work_update, name="cms-work-update"),
     path("cms/works/<int:work_id>/preview/", cms_work_preview, name="cms-work-preview"),
     path("cms/works/<int:work_id>/publish/", cms_work_publish, name="cms-work-publish"),
