@@ -741,6 +741,36 @@ def cms_work_preview(request, work_id):
     })
 
 
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_publish(request, work_id):
+    """Publish or unpublish one work without changing its editorial metadata."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    if request.content_type != "application/json":
+        return JsonResponse({"error": "application_json_required"}, status=415)
+    if len(request.body) > 4096:
+        return JsonResponse({"error": "payload_too_large"}, status=413)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    if not isinstance(payload, dict) or set(payload) != {"published"} or not isinstance(payload["published"], bool):
+        return JsonResponse({"error": "invalid_publication_state"}, status=400)
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+    work.is_active = payload["published"]
+    work.save(update_fields=["is_active"])
+    return JsonResponse({"id": work.pk, "published": work.is_active})
+
+
 @require_http_methods(["GET", "POST"])
 @never_cache
 @ensure_csrf_cookie
