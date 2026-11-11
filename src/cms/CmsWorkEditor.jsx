@@ -387,9 +387,10 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     const payload = Object.fromEntries(SECTIONS.flatMap(section => section.fields).map(field => [field.name, form[field.name]]))
     payload.category = Number(form.category)
     payload.signed = form.signed === '' || form.signed == null ? null : form.signed === true || form.signed === 'true'
+    const addAnother = event.nativeEvent.submitter?.value === 'add-another'
     try {
-      await onSave(payload)
-      if (isNew) setCreated(true)
+      await onSave(payload, { addAnother })
+      if (isNew && !addAnother) setCreated(true)
       setDirty(false)
       setSaved(true)
     } catch (err) {
@@ -516,8 +517,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}
         <div className="cms-editor-actions">
-          <button className="cms-editor-cancel" type="button" onClick={onCancel}>Cancelar</button>
-          <button className="cms-primary-button" type="submit" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Criar rascunho' : 'Salvar alterações'} <span>↗</span></button>
+          <button className="cms-editor-cancel" type="button" onClick={onCancel}>← Voltar para obras</button>
+          <div className="cms-editor-save-actions">
+            {isNew && <button className="cms-editor-cancel" type="submit" value="add-another" disabled={saving}>{saving ? 'Salvando…' : 'Salvar e adicionar outra'}</button>}
+            <button className="cms-primary-button" type="submit" value="save" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Salvar obra' : 'Salvar e continuar editando'} <span>↗</span></button>
+          </div>
         </div>
       </form>
     </section>
