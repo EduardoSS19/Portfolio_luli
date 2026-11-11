@@ -1729,6 +1729,25 @@ class CmsWorkPreviewApiTests(TestCase):
         self.assertEqual(preview_response.status_code, 200)
         self.assertEqual(preview_response.json()["preview"]["id"], self.work.pk)
 
+    def test_private_preview_contains_only_the_selected_work(self):
+        from urllib.parse import urlparse, parse_qs
+
+        Work.objects.create(category=self.category, title="Outra obra publicada", is_active=True)
+        other_category = Category.objects.create(title="Outra categoria", key="preview-outra")
+        Work.objects.create(category=other_category, title="Obra de outra categoria", is_active=True)
+        self.staff.user_permissions.add(self.view_permission)
+        self.client.force_login(self.staff)
+
+        generated = self.client.post(reverse("cms-work-preview", args=[self.work.pk]))
+        token = parse_qs(urlparse(generated.json()["url"]).query)["preview_token"][0]
+        response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
+
+        self.assertEqual(response.status_code, 200)
+        categories = response.json()["categorias"]
+        self.assertEqual(len(categories), 1)
+        self.assertEqual(len(categories[0]["obras"]), 1)
+        self.assertEqual(categories[0]["obras"][0]["titulo"], self.work.title)
+
     def test_preview_generation_requires_csrf(self):
         from django.contrib.auth.models import Permission
 
