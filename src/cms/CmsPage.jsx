@@ -4,6 +4,7 @@ import { CmsWorkEditor } from './CmsWorkEditor.jsx'
 import { CmsAnalytics } from './CmsAnalytics.jsx'
 import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 import { CmsProfileManager } from './CmsProfileManager.jsx'
+import { CmsContentManager } from './CmsContentManager.jsx'
 
 const PAGE_SIZE = 24
 
@@ -78,6 +79,7 @@ export function CmsPage() {
   const [editError, setEditError] = useState(null)
   const [creatingWork, setCreatingWork] = useState(false)
   const [libraryRefresh, setLibraryRefresh] = useState(0)
+  const [selectedWorkIds, setSelectedWorkIds] = useState([])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
@@ -222,6 +224,20 @@ export function CmsPage() {
     return result
   }, [])
 
+  const replaceGalleryImage = useCallback(async (workId, imageId, file) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await fetch('/api/cms/works/' + workId + '/gallery/' + imageId + '/', {
+      method: 'POST', credentials: 'same-origin', cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: formData,
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'image_too_large' ? 'A imagem deve ter no máximo 15 MB.' : 'Não foi possível substituir esta imagem.')
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
   const deleteGalleryImage = useCallback(async (workId, imageId) => {
     const response = await fetch('/api/cms/works/' + workId + '/gallery/' + imageId + '/delete/', {
       method: 'POST',
@@ -270,6 +286,18 @@ export function CmsPage() {
       }
       throw new Error(messages[result.error] || 'Não foi possível adicionar o vídeo.')
     }
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
+  const updateWorkVideo = useCallback(async (workId, videoId, youtubeUrl) => {
+    const response = await fetch('/api/cms/works/' + workId + '/videos/' + videoId + '/', {
+      method: 'PATCH', credentials: 'same-origin', cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ youtubeUrl }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.message || (result.error === 'video_already_attached' ? 'Este vídeo já está vinculado à obra.' : 'Não foi possível atualizar o vídeo.'))
     setLibraryRefresh(value => value + 1)
     return result
   }, [])
@@ -342,6 +370,37 @@ export function CmsPage() {
     setLibraryRefresh(value => value + 1)
     return result
   }, [])
+  const deleteWork = async workId => {
+    const response = await fetch('/api/cms/works/' + workId + '/delete/', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'work_delete_permission_required' ? 'Sua conta não tem permissão para excluir obras.' : 'Não foi possível excluir esta obra.')
+    setSelectedWork(null)
+    setCreatingWork(false)
+    setLibraryRefresh(value => value + 1)
+  }
+
+  const bulkSetPublication = async published => {
+    if (!selectedWorkIds.length) return
+    const action = published ? 'publicar' : 'despublicar'
+    if (!window.confirm(action[0].toUpperCase() + action.slice(1) + ' ' + selectedWorkIds.length + ' obra(s) selecionada(s)?')) return
+    const response = await fetch('/api/cms/works/bulk-publish/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ ids: selectedWorkIds, published }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'work_edit_permission_required' ? 'Sua conta não tem permissão para publicar obras.' : 'Não foi possível atualizar as obras selecionadas.')
+    setSelectedWorkIds([])
+    setLibraryRefresh(value => value + 1)
+  }
+
   const readCookie = name => {
     const prefix = name + '='
     const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
@@ -359,6 +418,7 @@ export function CmsPage() {
       ])
       setOverview(summary)
       setWorks(library.results || [])
+      setSelectedWorkIds(current => current.filter(id => (library.results || []).some(item => item.id === id)))
       setPagination(library.pagination || { total: 0, hasMore: false })
       setForbidden(false)
     } catch (err) {
@@ -410,6 +470,7 @@ export function CmsPage() {
   const isOverview = section === 'overview'
   const isCategories = section === 'categories'
   const isProfile = section === 'profile'
+  const isContent = section === 'content'
 
   return (
     <div className="cms-shell">
@@ -424,6 +485,7 @@ export function CmsPage() {
           <button className={!isOverview ? 'active' : ''} onClick={() => setSection('library')}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
           <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
           <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
+          <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Conteúdo</button>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />
@@ -434,7 +496,7 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isContent ? 'CONTEÚDO' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
             <a href="/" target="_blank" rel="noreferrer">Ver portfólio ↗</a>
@@ -497,14 +559,18 @@ export function CmsPage() {
                   onUploadCover={uploadWorkCover}
                   onLoadGallery={loadWorkGallery}
                   onUploadGalleryImage={uploadGalleryImage}
+                  onReplaceGalleryImage={replaceGalleryImage}
                   onDeleteGalleryImage={deleteGalleryImage}
                   onReorderGalleryImages={reorderGalleryImages}
                   onLoadVideos={loadWorkVideos}
                   onAddVideo={addWorkVideo}
+                  onUpdateVideo={updateWorkVideo}
                   onDeleteVideo={deleteWorkVideo}
                   onReorderVideos={reorderWorkVideos}
                   onPreview={createWorkPreview}
                   onPublish={setWorkPublication}
+                  onDelete={deleteWork}
+                  canDelete={overview?.permissions?.canDeleteWork}
                 />
               ) : editLoading ? (
                 <div className="cms-loading">Abrindo a ficha da obra…</div>
@@ -530,11 +596,13 @@ export function CmsPage() {
                 </select>
               </section>
               {error && <div className="cms-error" role="alert">{error.message}<button onClick={() => load()}>Tentar novamente</button></div>}
+              {selectedWorkIds.length > 0 && overview?.permissions?.canEditWork && <div className="cms-bulk-actions"><strong>{selectedWorkIds.length} obra(s) selecionada(s)</strong><button type="button" onClick={() => bulkSetPublication(true)}>Publicar selecionadas</button><button type="button" onClick={() => bulkSetPublication(false)}>Despublicar selecionadas</button><button type="button" onClick={() => setSelectedWorkIds([])}>Limpar seleção</button></div>}
               {loading ? <div className="cms-loading">Atualizando biblioteca…</div> : works.length ? (
                 <>
                   <section className="cms-work-grid" aria-label="Obras cadastradas">
                     {works.map(work => (
                       <article className="cms-work-card" key={work.id}>
+                        <label className="cms-work-select"><input type="checkbox" checked={selectedWorkIds.includes(work.id)} onChange={event => setSelectedWorkIds(current => event.target.checked ? [...current, work.id] : current.filter(id => id !== work.id))} aria-label={'Selecionar ' + work.title} /> Selecionar</label>
                         <div className="cms-work-image">
                           {work.image ? <img src={work.image} alt="" loading="lazy" /> : <div className="cms-no-image"><span>✳</span><small>SEM IMAGEM</small></div>}
                           <span className={`cms-work-status ${work.published ? 'published' : 'draft'}`}>{work.published ? 'Publicada' : 'Rascunho'}</span>

@@ -61,6 +61,7 @@ def cms_overview(request):
         "permissions": {
             "canCreateWork": request.user.has_perm("portfolio.add_work"),
             "canEditWork": request.user.has_perm("portfolio.change_work"),
+            "canDeleteWork": request.user.has_perm("portfolio.delete_work"),
         },
     })
 
@@ -330,8 +331,14 @@ class CmsWorkEditForm(forms.ModelForm):
             "category", "title", "description", "detail", "technique", "material",
             "support", "year", "height", "width", "depth", "dimension_unit",
             "price", "currency", "availability", "series", "edition", "print_run",
-            "signed", "creation_location", "condition", "exhibitions", "position",
+            "signed", "creation_location", "condition", "exhibitions", "position", "image_url", "is_share_image",
         )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("is_share_image") and not (self.instance.image or cleaned.get("image_url")):
+            self.add_error("is_share_image", "Escolha uma imagem de capa antes de usar esta obra no compartilhamento.")
+        return cleaned
 
 
 @require_http_methods(["GET", "PATCH"])
@@ -362,6 +369,8 @@ def cms_work_update(request, work_id):
         return JsonResponse({
             "id": work.pk,
             "image": cover_url,
+            "image_url": work.image_url,
+            "is_share_image": work.is_share_image,
             "category": work.category_id,
             "title": work.title,
             "description": work.description,
@@ -427,6 +436,8 @@ def cms_work_update(request, work_id):
             }, status=400)
 
         work = form.save()
+        if work.is_share_image:
+            Work.objects.exclude(pk=work.pk).filter(is_share_image=True).update(is_share_image=False)
 
     return JsonResponse({
         "id": work.pk,
@@ -458,6 +469,8 @@ def cms_work_update(request, work_id):
         "exhibitions": work.exhibitions,
         "position": work.position,
         "published": work.is_active,
+        "image_url": work.image_url,
+        "is_share_image": work.is_share_image,
     }, encoder=DjangoJSONEncoder)
 
 
@@ -503,8 +516,9 @@ def cms_work_create(request):
     with transaction.atomic():
         work = form.save(commit=False)
         work.is_active = False
-        work.is_share_image = False
         work.save()
+        if work.is_share_image:
+            Work.objects.exclude(pk=work.pk).filter(is_share_image=True).update(is_share_image=False)
 
     return JsonResponse({
         "id": work.pk,
@@ -536,6 +550,8 @@ def cms_work_create(request):
         "exhibitions": work.exhibitions,
         "position": work.position,
         "published": work.is_active,
+        "image_url": work.image_url,
+        "is_share_image": work.is_share_image,
     }, status=201, encoder=DjangoJSONEncoder)
 
 
@@ -742,6 +758,54 @@ def cms_work_gallery(request, work_id):
 @require_POST
 @never_cache
 @csrf_protect
+def cms_work_gallery_item(request, work_id, image_id):
+    """Replace one existing gallery image without changing its order."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    try:
+        item = WorkImage.objects.select_related("work").get(pk=image_id, work_id=work_id)
+    except WorkImage.DoesNotExist:
+        return JsonResponse({"error": "gallery_image_not_found"}, status=404)
+    if not request.content_type.startswith("multipart/form-data"):
+        return JsonResponse({"error": "multipart_form_data_required"}, status=415)
+    if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+        return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+    uploaded = request.FILES["image"]
+    validation_error = _validate_cms_gallery_image(uploaded)
+    if validation_error:
+        return JsonResponse({"error": validation_error}, status=413 if validation_error == "image_too_large" else 400)
+    old_name = item.image.name
+    extension = ALLOWED_COVER_FORMATS[Image.open(uploaded).format]
+    uploaded.seek(0)
+    filename = item.image.field.generate_filename(item, f"gallery-{item.position + 1}.{extension}")
+    stored_name = ""
+    try:
+        stored_name = default_storage.save(filename, uploaded)
+        item.image.name = stored_name
+        item.save(update_fields=["image"])
+    except Exception:
+        if stored_name:
+            try:
+                default_storage.delete(stored_name)
+            except Exception:
+                logger.exception("Could not clean up failed gallery replacement %s", stored_name)
+        logger.exception("CMS gallery replacement failed for work %s", work_id)
+        return JsonResponse({"error": "image_storage_failed"}, status=503)
+    if old_name and old_name != stored_name:
+        try:
+            default_storage.delete(old_name)
+        except Exception:
+            logger.exception("Could not delete replaced gallery image %s", old_name)
+    return JsonResponse({"id": item.pk, "url": _cms_image_url(item.image), "position": item.position})
+
+
+@require_POST
+@never_cache
+@csrf_protect
 def cms_work_gallery_delete(request, work_id, image_id):
     """Delete only an additional image belonging to the requested work."""
     if not request.user.is_authenticated:
@@ -860,6 +924,44 @@ def cms_work_videos(request, work_id):
     return JsonResponse({"results": [_cms_video_payload(item) for item in videos], "total": videos.count()})
 
 
+@require_http_methods(["PATCH"])
+@never_cache
+@csrf_protect
+def cms_work_video_update(request, work_id, video_id):
+    """Update a YouTube URL and refresh its metadata, matching Django Admin behavior."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    try:
+        video = WorkVideo.objects.get(pk=video_id, work_id=work_id)
+    except WorkVideo.DoesNotExist:
+        return JsonResponse({"error": "video_not_found"}, status=404)
+    if request.content_type != "application/json" or len(request.body) > 8192:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    youtube_url = payload.get("youtubeUrl") if isinstance(payload, dict) else None
+    if not isinstance(youtube_url, str) or not youtube_url.strip() or len(youtube_url) > 500:
+        return JsonResponse({"error": "invalid_youtube_url"}, status=400)
+    try:
+        metadata = fetch_youtube_video_metadata(youtube_url.strip())
+    except YouTubeMetadataError as error:
+        return JsonResponse({"error": "youtube_metadata_error", "message": str(error)}, status=400)
+    if WorkVideo.objects.filter(work_id=work_id, video_id=metadata["video_id"]).exclude(pk=video.pk).exists():
+        return JsonResponse({"error": "video_already_attached"}, status=409)
+    video.youtube_url = youtube_url.strip()
+    video.video_id = metadata["video_id"]
+    video.video_title = metadata["title"][:255]
+    video.thumbnail_url = metadata["thumbnail_url"]
+    video.save(update_fields=["youtube_url", "video_id", "video_title", "thumbnail_url"])
+    return JsonResponse(_cms_video_payload(video))
+
+
 @require_POST
 @never_cache
 @csrf_protect
@@ -906,6 +1008,65 @@ def cms_work_preview(request, work_id):
     })
 
 
+@require_http_methods(["DELETE"])
+@never_cache
+@csrf_protect
+def cms_work_delete(request, work_id):
+    """Delete a work when the editor has the matching Django delete permission."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.delete_work"):
+        return JsonResponse({"error": "work_delete_permission_required"}, status=403)
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+    stored_names = []
+    if work.image:
+        stored_names.append(work.image.name)
+    stored_names.extend(work.gallery_images.values_list("image", flat=True))
+    work.delete()
+    for name in stored_names:
+        if name:
+            try:
+                default_storage.delete(name)
+            except Exception:
+                logger.exception("Could not delete media for removed CMS work %s", work_id)
+    return JsonResponse({"deleted": work_id})
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_bulk_publish(request):
+    """Apply the Django Admin publish/unpublish action to selected works."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 16384:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    ids = payload.get("ids") if isinstance(payload, dict) else None
+    published = payload.get("published") if isinstance(payload, dict) else None
+    if not isinstance(ids, list) or not ids or any(type(value) is not int or value <= 0 for value in ids):
+        return JsonResponse({"error": "invalid_work_selection"}, status=400)
+    if len(ids) != len(set(ids)) or type(published) is not bool:
+        return JsonResponse({"error": "invalid_bulk_publication"}, status=400)
+    queryset = Work.objects.filter(pk__in=ids)
+    if queryset.count() != len(ids):
+        return JsonResponse({"error": "work_selection_mismatch"}, status=400)
+    updated = queryset.update(is_active=published)
+    return JsonResponse({"updated": updated, "published": published})
+
+
 @require_POST
 @never_cache
 @csrf_protect
@@ -936,7 +1097,7 @@ def cms_work_publish(request, work_id):
     return JsonResponse({"id": work.pk, "published": work.is_active})
 
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "POST", "PATCH"])
 @never_cache
 @ensure_csrf_cookie
 @csrf_protect
@@ -946,6 +1107,26 @@ def cms_categories(request):
     if not request.user.is_staff:
         return JsonResponse({"error": "staff_required"}, status=403)
     if request.method == "GET":
+        items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
+        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
+    if request.method == "PATCH":
+        if not request.user.has_perm("portfolio.change_category"):
+            return JsonResponse({"error": "category_edit_permission_required"}, status=403)
+        if request.content_type != "application/json" or len(request.body) > 8192:
+            return JsonResponse({"error": "invalid_request"}, status=400)
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return JsonResponse({"error": "invalid_json"}, status=400)
+        ids = payload.get("ids") if isinstance(payload, dict) else None
+        if not isinstance(ids, list) or any(type(value) is not int for value in ids) or len(ids) != len(set(ids)):
+            return JsonResponse({"error": "invalid_category_order"}, status=400)
+        with transaction.atomic():
+            current = list(Category.objects.select_for_update().values_list("pk", flat=True))
+            if set(ids) != set(current) or len(ids) != len(current):
+                return JsonResponse({"error": "category_order_mismatch"}, status=400)
+            for position, item_id in enumerate(ids):
+                Category.objects.filter(pk=item_id).update(position=position)
         items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
         return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
     if not request.user.has_perm("portfolio.add_category"):
@@ -973,7 +1154,7 @@ def cms_categories(request):
     return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
 
 
-@require_POST
+@require_http_methods(["POST", "DELETE"])
 @never_cache
 @csrf_protect
 def cms_category_update(request, category_id):
@@ -981,6 +1162,16 @@ def cms_category_update(request, category_id):
         return JsonResponse({"error": "authentication_required"}, status=401)
     if not request.user.is_staff:
         return JsonResponse({"error": "staff_required"}, status=403)
+    if request.method == "DELETE":
+        if not request.user.has_perm("portfolio.delete_category"):
+            return JsonResponse({"error": "category_delete_permission_required"}, status=403)
+        try:
+            item = Category.objects.get(pk=category_id)
+        except Category.DoesNotExist:
+            return JsonResponse({"error": "category_not_found"}, status=404)
+        deleted_works = item.works.count()
+        item.delete()
+        return JsonResponse({"deleted": category_id, "deletedWorks": deleted_works})
     if not request.user.has_perm("portfolio.change_category"):
         return JsonResponse({"error": "category_edit_permission_required"}, status=403)
     if request.content_type != "application/json" or len(request.body) > 8192:

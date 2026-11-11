@@ -52,6 +52,8 @@ const SECTIONS = [
       { name: 'condition', label: 'Estado de conservação' },
       { name: 'position', label: 'Ordem no portfólio', type: 'number', required: true },
       { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
+      { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true },
+      { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true },
     ],
   },
 ]
@@ -85,6 +87,8 @@ function Field({ field, value, categories, onChange }) {
         <option value="not_for_sale">Não está à venda</option>
       </select>
     )
+  } else if (field.type === 'checkbox') {
+    control = <input {...common} type="checkbox" checked={Boolean(value)} onChange={event => onChange(field.name, event.target.checked)} />
   } else if (field.type === 'signed') {
     control = (
       <select {...common} value={value == null ? '' : String(value)}>
@@ -105,7 +109,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onReplaceGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onUpdateVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish, onDelete, canDelete = false }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -173,6 +177,18 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       setPublishing(false)
     }
   }
+  const deleteWork = async () => {
+    if (!window.confirm('Excluir esta obra e todas as imagens e vídeos vinculados? Esta ação não pode ser desfeita.')) return
+    setSaving(true)
+    setError('')
+    try {
+      await onDelete(work.id)
+    } catch (err) {
+      setError(err.message || 'Não foi possível excluir a obra.')
+      setSaving(false)
+    }
+  }
+
   const previewWork = async () => {
     const previewWindow = window.open('about:blank', '_blank')
     if (!previewWindow) {
@@ -207,6 +223,18 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     } finally {
       setVideoAdding(false)
     }
+  }
+
+  const editVideo = async item => {
+    const nextUrl = window.prompt('Cole o novo link do YouTube:', item.youtubeUrl)
+    if (nextUrl == null || !nextUrl.trim() || nextUrl.trim() === item.youtubeUrl) return
+    setVideoBusyId(item.id); setVideoError(''); setVideoNotice('')
+    try {
+      const updated = await onUpdateVideo(work.id, item.id, nextUrl.trim())
+      setVideos(current => current.map(video => video.id === item.id ? updated : video))
+      setVideoNotice('Link e miniatura do vídeo atualizados.')
+    } catch (err) { setVideoError(err.message || 'Não foi possível atualizar o vídeo.') }
+    finally { setVideoBusyId(null) }
   }
 
   const deleteVideo = async item => {
@@ -300,6 +328,23 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
 
+  const replaceGalleryItem = async (item, event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (file.size > 15 * 1024 * 1024) {
+      setGalleryError('A imagem deve ter no máximo 15 MB.')
+      return
+    }
+    setGalleryBusyId(item.id); setGalleryError(''); setGalleryNotice('')
+    try {
+      const updated = await onReplaceGalleryImage(work.id, item.id, file)
+      setGallery(current => current.map(image => image.id === item.id ? updated : image))
+      setGalleryNotice('Imagem substituída.')
+    } catch (err) { setGalleryError(err.message || 'Não foi possível substituir a imagem.') }
+    finally { setGalleryBusyId(null) }
+  }
+
   const deleteGalleryItem = async item => {
     if (!window.confirm('Remover esta imagem da galeria? Esta ação não pode ser desfeita.')) return
     setGalleryBusyId(item.id)
@@ -364,6 +409,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           <p>Atualize os detalhes da obra. As alterações ficam salvas, mas não mudam o estado de publicação.</p>
         </div>
         <div className="cms-editor-heading-actions">
+          {!isNew && work.id && canDelete && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving}>Excluir obra</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork}>Visualizar prévia ↗</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
@@ -405,6 +451,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
               <div className="cms-gallery-item-actions">
                 <button type="button" aria-label="Mover imagem para a esquerda" title="Mover para a esquerda" disabled={index === 0 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, -1)}>←</button>
                 <button type="button" aria-label="Mover imagem para a direita" title="Mover para a direita" disabled={index === gallery.length - 1 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, 1)}>→</button>
+                <label className="cms-gallery-replace">Substituir<input type="file" accept="image/jpeg,image/png,image/webp" onChange={event => replaceGalleryItem(item, event)} disabled={galleryBusyId === item.id} /></label>
                 <button type="button" className="delete" disabled={galleryBusyId === item.id} onClick={() => deleteGalleryItem(item)}>{galleryBusyId === item.id ? '…' : 'Remover'}</button>
               </div>
             </article>)}
@@ -441,6 +488,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
                   <div className="cms-video-actions">
                     <button type="button" aria-label="Mover vídeo para cima" title="Mover para cima" disabled={index === 0 || videoBusyId === item.id} onClick={() => moveVideo(index, -1)}>↑</button>
                     <button type="button" aria-label="Mover vídeo para baixo" title="Mover para baixo" disabled={index === videos.length - 1 || videoBusyId === item.id} onClick={() => moveVideo(index, 1)}>↓</button>
+                    <button type="button" disabled={videoBusyId === item.id} onClick={() => editVideo(item)}>Editar link</button>
                     <button type="button" className="delete" disabled={videoBusyId === item.id} onClick={() => deleteVideo(item)}>{videoBusyId === item.id ? '…' : 'Remover'}</button>
                   </div>
                 </article>)}

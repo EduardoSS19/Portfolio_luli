@@ -855,7 +855,7 @@ class CmsReadApiTests(TestCase):
             "categoryOptions": [{"id": self.category.pk, "key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
-            "permissions": {"canCreateWork": False, "canEditWork": False},
+            "permissions": {"canCreateWork": False, "canEditWork": False, "canDeleteWork": False},
         })
         self.assertEqual(response["Cache-Control"], "max-age=0, no-cache, no-store, must-revalidate, private")
 
@@ -1883,6 +1883,7 @@ class CmsCategoryManagementApiTests(TestCase):
 class CmsArtistProfileApiTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission
+        ArtistProfile.objects.all().delete()
         self.editor = get_user_model().objects.create_user(
             username="cms-profile-editor", is_staff=True
         )
