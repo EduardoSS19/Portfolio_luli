@@ -255,3 +255,10 @@
 .cms-content-link-fields button{border:0;background:transparent;color:inherit;font-size:20px;cursor:pointer}
 @media(max-width:900px){.cms-content-layout{grid-template-columns:1fr}}
 @media(max-width:600px){.cms-content-item{align-items:flex-start;flex-wrap:wrap}.cms-content-item-main{flex-basis:calc(100% - 95px)}.cms-content-item-actions{width:100%;justify-content:flex-start}.cms-content-intro{align-items:flex-start}.cms-content-link-fields{grid-template-columns:1fr}.cms-content-link-fields button{justify-self:end}}
+
+
+.cms-work-select{display:flex;align-items:center;gap:7px;padding:8px 12px;color:var(--cms-muted,#aaa);font-size:12px}
+.cms-work-select input{accent-color:currentColor}
+.cms-bulk-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:14px 0;padding:12px 14px;border:1px solid var(--cms-line,#444);border-radius:10px;background:var(--cms-panel,#202020)}
+.cms-bulk-actions strong{margin-right:auto;font-size:13px}
+.cms-bulk-actions button{border:1px solid var(--cms-line,#444);border-radius:7px;background:transparent;color:inherit;padding:8px 11px;cursor:pointer;font-size:12px}
