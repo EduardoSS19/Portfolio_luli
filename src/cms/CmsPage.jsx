@@ -79,6 +79,7 @@ export function CmsPage() {
   const [editError, setEditError] = useState(null)
   const [creatingWork, setCreatingWork] = useState(false)
   const [libraryRefresh, setLibraryRefresh] = useState(0)
+  const [selectedWorkIds, setSelectedWorkIds] = useState([])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
@@ -343,6 +344,23 @@ export function CmsPage() {
     setLibraryRefresh(value => value + 1)
     return result
   }, [])
+  const bulkSetPublication = async published => {
+    if (!selectedWorkIds.length) return
+    const action = published ? 'publicar' : 'despublicar'
+    if (!window.confirm(action[0].toUpperCase() + action.slice(1) + ' ' + selectedWorkIds.length + ' obra(s) selecionada(s)?')) return
+    const response = await fetch('/api/cms/works/bulk-publish/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ ids: selectedWorkIds, published }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'work_edit_permission_required' ? 'Sua conta não tem permissão para publicar obras.' : 'Não foi possível atualizar as obras selecionadas.')
+    setSelectedWorkIds([])
+    setLibraryRefresh(value => value + 1)
+  }
+
   const readCookie = name => {
     const prefix = name + '='
     const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
@@ -360,6 +378,7 @@ export function CmsPage() {
       ])
       setOverview(summary)
       setWorks(library.results || [])
+      setSelectedWorkIds(current => current.filter(id => (library.results || []).some(item => item.id === id)))
       setPagination(library.pagination || { total: 0, hasMore: false })
       setForbidden(false)
     } catch (err) {
@@ -533,11 +552,13 @@ export function CmsPage() {
                 </select>
               </section>
               {error && <div className="cms-error" role="alert">{error.message}<button onClick={() => load()}>Tentar novamente</button></div>}
+              {selectedWorkIds.length > 0 && overview?.permissions?.canEditWork && <div className="cms-bulk-actions"><strong>{selectedWorkIds.length} obra(s) selecionada(s)</strong><button type="button" onClick={() => bulkSetPublication(true)}>Publicar selecionadas</button><button type="button" onClick={() => bulkSetPublication(false)}>Despublicar selecionadas</button><button type="button" onClick={() => setSelectedWorkIds([])}>Limpar seleção</button></div>}
               {loading ? <div className="cms-loading">Atualizando biblioteca…</div> : works.length ? (
                 <>
                   <section className="cms-work-grid" aria-label="Obras cadastradas">
                     {works.map(work => (
                       <article className="cms-work-card" key={work.id}>
+                        <label className="cms-work-select"><input type="checkbox" checked={selectedWorkIds.includes(work.id)} onChange={event => setSelectedWorkIds(current => event.target.checked ? [...current, work.id] : current.filter(id => id !== work.id))} aria-label={'Selecionar ' + work.title} /> Selecionar</label>
                         <div className="cms-work-image">
                           {work.image ? <img src={work.image} alt="" loading="lazy" /> : <div className="cms-no-image"><span>✳</span><small>SEM IMAGEM</small></div>}
                           <span className={`cms-work-status ${work.published ? 'published' : 'draft'}`}>{work.published ? 'Publicada' : 'Rascunho'}</span>
