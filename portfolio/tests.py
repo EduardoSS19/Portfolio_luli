@@ -1381,3 +1381,33 @@ class CmsWorkCoverUploadApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
+
+
+    def test_successful_replacement_removes_old_stored_cover(self):
+        self.client.force_login(self.editor)
+        self.work.image.save("previous.png", self.make_image(), save=True)
+        old_name = self.work.image.name
+        old_storage = self.work.image.storage
+        self.assertTrue(old_storage.exists(old_name))
+
+        response = self.upload(self.make_image(name="replacement.png"))
+
+        self.assertEqual(response.status_code, 200)
+        self.work.refresh_from_db()
+        self.assertNotEqual(self.work.image.name, old_name)
+        self.assertFalse(old_storage.exists(old_name))
+        self.assertTrue(old_storage.exists(self.work.image.name))
+
+    def test_storage_failure_preserves_existing_cover(self):
+        self.client.force_login(self.editor)
+        self.work.image.save("keep.png", self.make_image(), save=True)
+        old_name = self.work.image.name
+        old_storage = self.work.image.storage
+
+        with patch("portfolio.cms_api.default_storage.save", side_effect=OSError("storage unavailable")):
+            response = self.upload(self.make_image(name="replacement.png"))
+
+        self.assertEqual(response.status_code, 503)
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.image.name, old_name)
+        self.assertTrue(old_storage.exists(old_name))
