@@ -951,7 +951,7 @@ def cms_work_publish(request, work_id):
     return JsonResponse({"id": work.pk, "published": work.is_active})
 
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "POST", "PATCH"])
 @never_cache
 @ensure_csrf_cookie
 @csrf_protect
@@ -961,6 +961,26 @@ def cms_categories(request):
     if not request.user.is_staff:
         return JsonResponse({"error": "staff_required"}, status=403)
     if request.method == "GET":
+        items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
+        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
+    if request.method == "PATCH":
+        if not request.user.has_perm("portfolio.change_category"):
+            return JsonResponse({"error": "category_edit_permission_required"}, status=403)
+        if request.content_type != "application/json" or len(request.body) > 8192:
+            return JsonResponse({"error": "invalid_request"}, status=400)
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return JsonResponse({"error": "invalid_json"}, status=400)
+        ids = payload.get("ids") if isinstance(payload, dict) else None
+        if not isinstance(ids, list) or any(type(value) is not int for value in ids) or len(ids) != len(set(ids)):
+            return JsonResponse({"error": "invalid_category_order"}, status=400)
+        with transaction.atomic():
+            current = list(Category.objects.select_for_update().values_list("pk", flat=True))
+            if set(ids) != set(current) or len(ids) != len(current):
+                return JsonResponse({"error": "category_order_mismatch"}, status=400)
+            for position, item_id in enumerate(ids):
+                Category.objects.filter(pk=item_id).update(position=position)
         items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
         return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
     if not request.user.has_perm("portfolio.add_category"):
