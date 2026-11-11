@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './CmsPage.css'
 import { CmsWorkEditor } from './CmsWorkEditor.jsx'
+import { CmsAnalytics } from './CmsAnalytics.jsx'
 import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 
 const PAGE_SIZE = 24
@@ -59,6 +60,7 @@ function LoginRequired({ forbidden = false }) {
 
 export function CmsPage() {
   const [overview, setOverview] = useState(null)
+  const [analytics, setAnalytics] = useState(null)
   const [works, setWorks] = useState([])
   const [pagination, setPagination] = useState({ total: 0, hasMore: false })
   const [query, setQuery] = useState('')
@@ -375,6 +377,27 @@ export function CmsPage() {
   }, [load])
 
   useEffect(() => {
+    if (section !== 'overview') {
+      setAnalytics(null)
+      return
+    }
+
+    const controller = new AbortController()
+    setAnalytics(null)
+    requestJson('/api/cms/analytics/', controller.signal)
+      .then(data => {
+        if (!controller.signal.aborted) setAnalytics(data)
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError' && !controller.signal.aborted) {
+          setAnalytics({ status: 'error' })
+        }
+      })
+
+    return () => controller.abort()
+  }, [section])
+
+  useEffect(() => {
     document.title = 'Painel editorial · Luli Becker'
     document.documentElement.dataset.theme = 'escuro'
     return () => { document.title = 'Portfólio' }
@@ -440,6 +463,7 @@ export function CmsPage() {
                   <StatCard label="Categorias" value={overview?.categories} detail="Organização do acervo" icon="▦" />
                 </section>
               )}
+              <CmsAnalytics data={analytics} />
               <section className="cms-lower-grid">
                 <article className="cms-feature-card">
                   <div className="cms-feature-symbol">✳</div>
