@@ -783,6 +783,10 @@ class SocialPreviewMetadataTests(TestCase):
 
 class CmsReadApiTests(TestCase):
     def setUp(self):
+        # The initial migrations seed sample portfolio data; isolate these tests.
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        Reference.objects.all().delete()
         self.category = Category.objects.create(
             title="Cerâmica", key="cms-ceramica", position=1
         )
