@@ -431,11 +431,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         </div>
       </header>
 
-      <section className="cms-editor-section cms-cover-section">
-        <div className="cms-editor-section-heading">
-          <h2>Imagem de capa</h2>
-          <p>Esta é a imagem principal que representa a obra na grade do portfólio.</p>
-        </div>
+      <details className="cms-editor-section cms-cover-section cms-editor-collapsible">
+        <summary className="cms-editor-section-heading"><span><h2>Imagem de capa</h2><p>Esta é a imagem principal que representa a obra na grade do portfólio.</p></span><span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span></summary>
         <div className="cms-cover-layout">
           <div className="cms-cover-preview">
             {work.image ? <img src={work.image} alt={'Capa de ' + (work.title || 'obra')} /> : <div className="cms-cover-placeholder"><span>✳</span><small>SEM CAPA</small></div>}
@@ -452,13 +449,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
             {coverSaved && <div className="cms-editor-message success" role="status">Capa atualizada com sucesso.</div>}
           </div>
         </div>
-      </section>
+      </details>
 
-      <section className="cms-editor-section cms-gallery-section">
-        <div className="cms-editor-section-heading cms-gallery-heading">
-          <div><h2>Galeria de imagens</h2><p>Adicione detalhes, ângulos e registros do processo. A capa permanece separada.</p></div>
-          {work.id && <label className={'cms-cover-upload' + (galleryUploading ? ' disabled' : '')}>{galleryUploading ? 'Enviando…' : '＋ Adicionar imagens'}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={uploadGallery} disabled={galleryUploading} /></label>}
-        </div>
+      <details className="cms-editor-section cms-gallery-section cms-editor-collapsible">
+        <summary className="cms-editor-section-heading"><span><h2>Galeria de imagens</h2><p>Adicione detalhes, ângulos e registros do processo. A capa permanece separada.</p></span><span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span></summary>
+        {work.id && <label className={'cms-cover-upload cms-gallery-add-control' + (galleryUploading ? ' disabled' : '')}>{galleryUploading ? 'Enviando…' : '＋ Adicionar imagens'}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={uploadGallery} disabled={galleryUploading} /></label>}
         {!work.id ? <div className="cms-gallery-empty">Salve a obra primeiro para começar a montar a galeria.</div> : galleryLoading ? <div className="cms-gallery-empty">Carregando imagens…</div> : gallery.length ? (
           <div className="cms-gallery-grid">
             {gallery.map((item, index) => <article className="cms-gallery-item" key={item.id}>
@@ -475,12 +470,9 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {galleryUploading && <div className="cms-gallery-progress" role="status">Enviando imagens para o acervo…</div>}
         {galleryError && <div className="cms-editor-message error" role="alert">{galleryError}</div>}
         {galleryNotice && <div className="cms-editor-message success" role="status">{galleryNotice}</div>}
-      </section>
-      <section className="cms-editor-section cms-videos-section">
-        <div className="cms-editor-section-heading">
-          <h2>Vídeos do YouTube</h2>
-          <p>Vincule vídeos publicados no YouTube à obra. O painel salva o link e busca automaticamente título e miniatura.</p>
-        </div>
+      </details>
+      <details className="cms-editor-section cms-videos-section cms-editor-collapsible">
+        <summary className="cms-editor-section-heading"><span><h2>Vídeos do YouTube</h2><p>Vincule vídeos publicados no YouTube à obra. O painel salva o link e busca automaticamente título e miniatura.</p></span><span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span></summary>
         {!work.id ? <div className="cms-gallery-empty">Salve a obra primeiro para adicionar vídeos.</div> : (
           <>
             <form className="cms-video-add-form" onSubmit={addVideo}>
@@ -513,20 +505,20 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         )}
         {videoError && <div className="cms-editor-message error" role="alert">{videoError}</div>}
         {videoNotice && <div className="cms-editor-message success" role="status">{videoNotice}</div>}
-      </section>
+      </details>
       <form onSubmit={submit}>
         {SECTIONS.map(section => (
-          <section className="cms-editor-section" key={section.title}>
-            <div className="cms-editor-section-heading">
-              <h2>{section.title}</h2>
-              <p>{section.description}</p>
-            </div>
+          <details className="cms-editor-section cms-editor-collapsible" key={section.title} open={section.title === 'Identificação'}>
+              <summary className="cms-editor-section-heading">
+                <div><h2>{section.title}</h2><p>{section.description}</p></div>
+                <span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span>
+              </summary>
             <div className="cms-editor-fields">
               {section.fields.map(field => (
                 <Field key={field.name} field={field} value={form[field.name]} categories={categories} onChange={changeField} />
               ))}
             </div>
-          </section>
+        </details>
         ))}
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}

@@ -41,6 +41,9 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryWorks, setCategoryWorks] = useState([])
   const [worksLoading, setWorksLoading] = useState(false)
+  const [workQuery, setWorkQuery] = useState('')
+  const [workPage, setWorkPage] = useState(0)
+  const WORKS_PER_PAGE = 10
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -77,7 +80,11 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
     finally { setWorksLoading(false) }
   }, [items])
 
-  useEffect(() => { loadCategoryWorks(selectedCategoryId) }, [selectedCategoryId, loadCategoryWorks])
+  useEffect(() => { loadCategoryWorks(selectedCategoryId); setWorkPage(0); setWorkQuery('') }, [selectedCategoryId, loadCategoryWorks])
+
+  const filteredWorks = categoryWorks.filter(work => (work.title || '').toLocaleLowerCase('pt-BR').includes(workQuery.trim().toLocaleLowerCase('pt-BR')))
+  const totalWorkPages = Math.max(1, Math.ceil(filteredWorks.length / WORKS_PER_PAGE))
+  const visibleWorks = filteredWorks.slice(workPage * WORKS_PER_PAGE, (workPage + 1) * WORKS_PER_PAGE)
 
   const moveWork = async (index, direction) => {
     const next = [...categoryWorks]
@@ -238,14 +245,26 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
               {items.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
             </select>
           </div>
-          {worksLoading ? <div className="cms-loading">Carregando obras…</div> : categoryWorks.length ? categoryWorks.map((work, index) => (
-            <article className="cms-category-work-row" key={work.id}>
-              <span className="cms-category-work-position">{String(index + 1).padStart(2, '0')}</span>
-              <strong>{work.title}</strong>
-              <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
-              <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
-            </article>
-          )) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use as setas para reorganizar a sequência de exibição.</small></div>}
+          {worksLoading ? <div className="cms-loading">Carregando obras…</div> : categoryWorks.length ? (
+            <>
+              <label className="cms-category-work-search">Buscar obra nesta categoria
+                <input type="search" value={workQuery} onChange={event => { setWorkQuery(event.target.value); setWorkPage(0) }} placeholder="Digite o nome da obra…" />
+              </label>
+              {visibleWorks.length ? visibleWorks.map(work => {
+                const index = categoryWorks.findIndex(item => item.id === work.id)
+                return <article className="cms-category-work-row" key={work.id}>
+                  <span className="cms-category-work-position">{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{work.title}</strong>
+                  <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+                  <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
+                </article>
+              }) : <div className="cms-gallery-empty"><strong>Nenhuma obra encontrada</strong><small>Tente outro termo de busca.</small></div>}
+              <div className="cms-category-work-pagination">
+                <span>{filteredWorks.length} {filteredWorks.length === 1 ? 'obra encontrada' : 'obras encontradas'} · Página {workPage + 1} de {totalWorkPages}</span>
+                <div><button type="button" onClick={() => setWorkPage(value => Math.max(0, value - 1))} disabled={workPage === 0}>← Anterior</button><button type="button" onClick={() => setWorkPage(value => Math.min(totalWorkPages - 1, value + 1))} disabled={workPage >= totalWorkPages - 1}>Próxima →</button></div>
+              </div>
+            </>
+          ) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use a busca para localizar uma obra ou as setas para reorganizar a sequência.</small></div>}
         </section>
         <form className="cms-category-form" onSubmit={save}>
           <div>
