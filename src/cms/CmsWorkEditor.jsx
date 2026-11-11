@@ -105,7 +105,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -149,6 +149,23 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       .finally(() => { if (active) setVideosLoading(false) })
     return () => { active = false }
   }, [work.id, onLoadVideos])
+
+  const previewWork = async () => {
+    const previewWindow = window.open('about:blank', '_blank')
+    if (!previewWindow) {
+      setError('Permita a abertura de novas janelas para visualizar a prévia.')
+      return
+    }
+    previewWindow.opener = null
+    setError('')
+    try {
+      const url = await onPreview(work.id)
+      previewWindow.location = url
+    } catch (err) {
+      previewWindow.close()
+      setError(err.message || 'Não foi possível gerar a prévia desta obra.')
+    }
+  }
 
   const addVideo = async event => {
     event.preventDefault()
@@ -321,7 +338,10 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           <h1>{work.title || (isNew ? 'Nova obra' : 'Obra')}<span>.</span></h1>
           <p>Atualize os detalhes da obra. As alterações ficam salvas, mas não mudam o estado de publicação.</p>
         </div>
-        <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+        <div className="cms-editor-heading-actions">
+          {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork}>Visualizar prévia ↗</button>}
+          <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+        </div>
       </header>
 
       <section className="cms-editor-section cms-cover-section">

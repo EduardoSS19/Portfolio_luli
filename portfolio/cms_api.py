@@ -4,6 +4,7 @@ import logging
 from functools import wraps
 
 from PIL import Image, UnidentifiedImageError
+from django.core import signing
 from django.core.files.storage import default_storage
 
 from django import forms
@@ -710,3 +711,30 @@ def cms_work_video_delete(request, work_id, video_id):
         return JsonResponse({"error": "video_not_found"}, status=404)
     video.delete()
     return JsonResponse({"deleted": video_id})
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_preview(request, work_id):
+    """Issue a short-lived, user-bound URL to preview one work on the public site."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.view_work") and not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_view_permission_required"}, status=403)
+
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+
+    token = signing.dumps(
+        {"work": work.pk, "user": request.user.pk},
+        salt="portfolio.work-preview",
+    )
+    return JsonResponse({
+        "url": request.build_absolute_uri(f"/?preview_token={token}"),
+        "expiresIn": 600,
+    })
