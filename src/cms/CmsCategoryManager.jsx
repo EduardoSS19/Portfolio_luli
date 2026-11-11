@@ -11,7 +11,8 @@ async function categoryRequest(url, options = {}) {
     cache: 'no-store',
     headers: {
       Accept: 'application/json',
-      ...(options.body ? { 'Content-Type': 'application/json', 'X-CSRFToken': readCsrf() } : {}),
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.method && options.method !== 'GET' ? { 'X-CSRFToken': readCsrf() } : {}),
       ...options.headers,
     },
     ...options,
