@@ -1154,6 +1154,40 @@ def cms_categories(request):
     return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
 
 
+@require_POST
+@never_cache
+@csrf_protect
+def cms_category_work_order(request, category_id):
+    """Persist the order of works inside one category as a single atomic operation."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 32768:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    work_ids = payload.get("workIds") if isinstance(payload, dict) else None
+    if not isinstance(work_ids, list) or any(type(value) is not int for value in work_ids) or len(work_ids) != len(set(work_ids)):
+        return JsonResponse({"error": "invalid_work_order"}, status=400)
+    try:
+        with transaction.atomic():
+            category = Category.objects.select_for_update().get(pk=category_id)
+            current = list(Work.objects.select_for_update().filter(category=category).order_by("position", "pk").values_list("pk", flat=True))
+            if len(work_ids) != len(current) or set(work_ids) != set(current):
+                return JsonResponse({"error": "work_order_mismatch"}, status=400)
+            for position, work_id in enumerate(work_ids):
+                Work.objects.filter(pk=work_id, category=category).update(position=position)
+    except Category.DoesNotExist:
+        return JsonResponse({"error": "category_not_found"}, status=404)
+    works = Work.objects.filter(category_id=category_id).order_by("position", "pk").values("id", "title", "position", "is_active")
+    return JsonResponse({"results": [{"id": item["id"], "title": item["title"], "position": item["position"], "published": item["is_active"]} for item in works]})
+
+
 @require_http_methods(["POST", "DELETE"])
 @never_cache
 @csrf_protect
