@@ -166,6 +166,38 @@ export function CmsPage() {
     return result
   }
 
+  const uploadCover = async (workId, file) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await fetch('/api/cms/works/' + workId + '/cover/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+        'X-CSRFToken': readCookie('csrftoken'),
+      },
+      body: formData,
+    })
+    if (response.status === 401) throw new Error('Sua sessão expirou. Entre novamente para continuar.')
+    if (response.status === 403) throw new Error('Sua conta não tem permissão para alterar imagens desta obra.')
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const messages = {
+        image_too_large: 'A imagem deve ter no máximo 15 MB.',
+        unsupported_image_format: 'Use uma imagem JPG, PNG ou WebP.',
+        invalid_image_file: 'O arquivo enviado não é uma imagem válida.',
+        invalid_image_dimensions: 'A imagem excede as dimensões permitidas.',
+        image_storage_failed: 'Não foi possível armazenar a imagem. A capa anterior foi preservada.',
+      }
+      throw new Error(messages[result.error] || 'Não foi possível enviar a imagem. Tente novamente.')
+    }
+    setSelectedWork(current => current ? { ...current, image: result.image } : current)
+    setWorks(current => current.map(item => item.id === result.id ? { ...item, image: result.image, media: { ...item.media, images: 1 } } : item))
+    setLibraryRefresh(value => value + 1)
+    return result
+  }
+
   const readCookie = name => {
     const prefix = name + '='
     const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
@@ -288,6 +320,7 @@ export function CmsPage() {
                   isNew={creatingWork}
                   onCancel={() => { setSelectedWork(null); setCreatingWork(false); setEditError(null) }}
                   onSave={saveWork}
+                  onUploadCover={uploadCover}
                 />
               ) : editLoading ? (
                 <div className="cms-loading">Abrindo a ficha da obra…</div>
