@@ -344,6 +344,20 @@ export function CmsPage() {
     setLibraryRefresh(value => value + 1)
     return result
   }, [])
+  const deleteWork = async workId => {
+    const response = await fetch('/api/cms/works/' + workId + '/delete/', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'work_delete_permission_required' ? 'Sua conta não tem permissão para excluir obras.' : 'Não foi possível excluir esta obra.')
+    setSelectedWork(null)
+    setCreatingWork(false)
+    setLibraryRefresh(value => value + 1)
+  }
+
   const bulkSetPublication = async published => {
     if (!selectedWorkIds.length) return
     const action = published ? 'publicar' : 'despublicar'
@@ -527,6 +541,8 @@ export function CmsPage() {
                   onReorderVideos={reorderWorkVideos}
                   onPreview={createWorkPreview}
                   onPublish={setWorkPublication}
+                  onDelete={deleteWork}
+                  canDelete={overview?.permissions?.canDeleteWork}
                 />
               ) : editLoading ? (
                 <div className="cms-loading">Abrindo a ficha da obra…</div>
