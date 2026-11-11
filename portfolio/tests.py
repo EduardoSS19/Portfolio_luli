@@ -1527,3 +1527,130 @@ class CmsWorkGalleryApiTests(TestCase):
         ))
         self.assertEqual(response.status_code, 404)
         self.assertTrue(WorkImage.objects.filter(pk=image.pk).exists())
+
+
+
+class CmsWorkVideoApiTests(TestCase):
+    def setUp(self):
+        category = Category.objects.create(title="Vídeo", key="cms-video")
+        self.work = Work.objects.create(category=category, title="Obra com vídeo")
+        self.editor = get_user_model().objects.create_user(
+            username="cms-video-editor", password="test-password-123", is_staff=True
+        )
+        from django.contrib.auth.models import Permission
+        self.editor.user_permissions.add(Permission.objects.get(
+            content_type__app_label="portfolio", codename="change_work"
+        ))
+        self.metadata = {
+            "video_id": "AbCdEf01234",
+            "title": "Processo artístico",
+            "thumbnail_url": "https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        }
+
+    def endpoint(self):
+        return reverse("cms-work-videos", args=[self.work.pk])
+
+    def add_video(self, url="https://youtu.be/AbCdEf01234", metadata=None):
+        with patch("portfolio.cms_api.fetch_youtube_video_metadata", return_value=metadata or self.metadata):
+            return self.client.post(
+                self.endpoint(),
+                data=json.dumps({"youtubeUrl": url}),
+                content_type="application/json",
+            )
+
+    def test_video_list_requires_staff(self):
+        self.assertEqual(self.client.get(self.endpoint()).status_code, 401)
+        regular = get_user_model().objects.create_user(username="cms-video-regular")
+        self.client.force_login(regular)
+        self.assertEqual(self.client.get(self.endpoint()).status_code, 403)
+
+    def test_editor_can_add_list_reorder_and_delete_videos(self):
+        self.client.force_login(self.editor)
+        first = self.add_video()
+        self.assertEqual(first.status_code, 201)
+        second_metadata = {**self.metadata, "video_id": "ZyXwVu98765", "title": "Making of"}
+        second = self.add_video("https://www.youtube.com/watch?v=ZyXwVu98765", second_metadata)
+        self.assertEqual(second.status_code, 201)
+        first_id, second_id = first.json()["id"], second.json()["id"]
+
+        listing = self.client.get(self.endpoint())
+        self.assertEqual([item["id"] for item in listing.json()["results"]], [first_id, second_id])
+        self.assertEqual(listing.json()["results"][0]["title"], "Processo artístico")
+
+        reordered = self.client.patch(
+            self.endpoint(),
+            data=json.dumps({"videoIds": [second_id, first_id]}),
+            content_type="application/json",
+        )
+        self.assertEqual(reordered.status_code, 200)
+        self.assertEqual([item["id"] for item in reordered.json()["results"]], [second_id, first_id])
+
+        deleted = self.client.post(reverse(
+            "cms-work-video-delete", args=[self.work.pk, second_id]
+        ))
+        self.assertEqual(deleted.status_code, 200)
+        self.assertFalse(WorkVideo.objects.filter(pk=second_id).exists())
+
+    def test_video_metadata_validation_and_duplicate_protection(self):
+        self.client.force_login(self.editor)
+        with patch("portfolio.cms_api.fetch_youtube_video_metadata", side_effect=YouTubeMetadataError("Link inválido.")):
+            invalid = self.client.post(self.endpoint(), data=json.dumps({"youtubeUrl": "https://example.com"}), content_type="application/json")
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(invalid.json()["error"], "youtube_metadata_error")
+
+        self.assertEqual(self.add_video().status_code, 201)
+        duplicate = self.add_video()
+        self.assertEqual(duplicate.status_code, 409)
+        self.assertEqual(WorkVideo.objects.filter(work=self.work).count(), 1)
+
+    def test_video_reordering_requires_exact_owned_ids(self):
+        self.client.force_login(self.editor)
+        video = self.add_video().json()
+        response = self.client.patch(
+            self.endpoint(),
+            data=json.dumps({"videoIds": [video["id"], 999999]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "video_order_mismatch")
+
+    def test_user_without_change_permission_cannot_mutate_videos(self):
+        staff = get_user_model().objects.create_user(username="cms-video-readonly", is_staff=True)
+        self.client.force_login(staff)
+        response = self.add_video()
+        self.assertEqual(response.status_code, 403)
+
+    def test_video_mutations_require_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.editor)
+        rejected = client.post(
+            self.endpoint(),
+            data=json.dumps({"youtubeUrl": "https://youtu.be/AbCdEf01234"}),
+            content_type="application/json",
+        )
+        self.assertEqual(rejected.status_code, 403)
+        token = client.get(self.endpoint()).cookies["csrftoken"].value
+        with patch("portfolio.cms_api.fetch_youtube_video_metadata", return_value=self.metadata):
+            accepted = client.post(
+                self.endpoint(),
+                data=json.dumps({"youtubeUrl": "https://youtu.be/AbCdEf01234"}),
+                content_type="application/json",
+                HTTP_X_CSRFTOKEN=token,
+            )
+        self.assertEqual(accepted.status_code, 201)
+
+    def test_cannot_delete_video_from_another_work(self):
+        self.client.force_login(self.editor)
+        other = Work.objects.create(category=self.work.category, title="Outra obra")
+        video = WorkVideo.objects.create(
+            work=other,
+            youtube_url="https://youtu.be/AbCdEf01234",
+            video_id="AbCdEf01234",
+            video_title="Vídeo de outra obra",
+            thumbnail_url="https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        )
+        response = self.client.post(reverse(
+            "cms-work-video-delete", args=[self.work.pk, video.pk]
+        ))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(WorkVideo.objects.filter(pk=video.pk).exists())

@@ -18,6 +18,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from django.db.models import Max
 
 from .models import Category, Reference, Work, WorkImage, WorkVideo
+from .youtube import YouTubeMetadataError, fetch_youtube_video_metadata
 
 
 logger = logging.getLogger(__name__)
@@ -596,3 +597,116 @@ def cms_work_gallery_delete(request, work_id, image_id):
         except Exception:
             logger.exception("Could not delete CMS gallery image file %s", stored_name)
     return JsonResponse({"deleted": image_id})
+
+
+
+def _cms_video_payload(video):
+    return {
+        "id": video.pk,
+        "youtubeUrl": video.youtube_url,
+        "videoId": video.video_id,
+        "title": video.video_title,
+        "thumbnail": video.thumbnail_url,
+        "position": video.position,
+    }
+
+
+@require_http_methods(["GET", "POST", "PATCH"])
+@never_cache
+@ensure_csrf_cookie
+@csrf_protect
+def cms_work_videos(request, work_id):
+    """List, add and reorder YouTube videos attached to a work."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if request.method != "GET" and not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+
+    if request.method == "GET":
+        videos = work.youtube_videos.all().order_by("position", "pk")
+        return JsonResponse({"results": [_cms_video_payload(item) for item in videos], "total": videos.count()})
+
+    if request.method == "POST":
+        if request.content_type != "application/json":
+            return JsonResponse({"error": "application_json_required"}, status=415)
+        if len(request.body) > 8192:
+            return JsonResponse({"error": "payload_too_large"}, status=413)
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return JsonResponse({"error": "invalid_json"}, status=400)
+        if not isinstance(payload, dict) or set(payload) != {"youtubeUrl"}:
+            return JsonResponse({"error": "invalid_payload"}, status=400)
+        youtube_url = payload.get("youtubeUrl")
+        if not isinstance(youtube_url, str) or not youtube_url.strip() or len(youtube_url) > 500:
+            return JsonResponse({"error": "invalid_youtube_url"}, status=400)
+        try:
+            metadata = fetch_youtube_video_metadata(youtube_url.strip())
+        except YouTubeMetadataError as error:
+            return JsonResponse({"error": "youtube_metadata_error", "message": str(error)}, status=400)
+
+        with transaction.atomic():
+            locked_work = Work.objects.select_for_update().get(pk=work_id)
+            if WorkVideo.objects.filter(work=locked_work, video_id=metadata["video_id"]).exists():
+                return JsonResponse({"error": "video_already_attached"}, status=409)
+            last_position = locked_work.youtube_videos.aggregate(value=Max("position"))["value"]
+            video = WorkVideo.objects.create(
+                work=locked_work,
+                youtube_url=youtube_url.strip(),
+                video_id=metadata["video_id"],
+                video_title=metadata["title"][:255],
+                thumbnail_url=metadata["thumbnail_url"],
+                position=0 if last_position is None else last_position + 1,
+            )
+        return JsonResponse(_cms_video_payload(video), status=201)
+
+    if request.content_type != "application/json":
+        return JsonResponse({"error": "application_json_required"}, status=415)
+    if len(request.body) > 16384:
+        return JsonResponse({"error": "payload_too_large"}, status=413)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    video_ids = payload.get("videoIds") if isinstance(payload, dict) else None
+    if not isinstance(video_ids, list) or any(type(item) is not int for item in video_ids):
+        return JsonResponse({"error": "invalid_video_order"}, status=400)
+    if len(video_ids) != len(set(video_ids)):
+        return JsonResponse({"error": "duplicate_video_ids"}, status=400)
+
+    with transaction.atomic():
+        locked_work = Work.objects.select_for_update().get(pk=work_id)
+        existing_ids = list(WorkVideo.objects.filter(work=locked_work).values_list("pk", flat=True))
+        if set(video_ids) != set(existing_ids) or len(video_ids) != len(existing_ids):
+            return JsonResponse({"error": "video_order_mismatch"}, status=400)
+        for position, video_id in enumerate(video_ids):
+            WorkVideo.objects.filter(pk=video_id, work=locked_work).update(position=position)
+
+    videos = work.youtube_videos.all().order_by("position", "pk")
+    return JsonResponse({"results": [_cms_video_payload(item) for item in videos], "total": videos.count()})
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_video_delete(request, work_id, video_id):
+    """Delete a YouTube video only when it belongs to the requested work."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    try:
+        video = WorkVideo.objects.get(pk=video_id, work_id=work_id)
+    except WorkVideo.DoesNotExist:
+        return JsonResponse({"error": "video_not_found"}, status=404)
+    video.delete()
+    return JsonResponse({"deleted": video_id})
