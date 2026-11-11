@@ -3,7 +3,7 @@ from django.urls import path
 from .cms_analytics import cms_analytics
 from .cms_content_api import cms_content, cms_content_detail, cms_content_toggle
 
-from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_video_delete, cms_work_videos, cms_work_update, cms_work_preview, cms_work_publish, cms_work_bulk_publish, cms_work_delete, cms_works, cms_categories, cms_category_update, cms_profile, cms_profile_photo_upload
+from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_gallery_item, cms_work_video_delete, cms_work_video_update, cms_work_videos, cms_work_update, cms_work_preview, cms_work_publish, cms_work_bulk_publish, cms_work_delete, cms_works, cms_categories, cms_category_update, cms_profile, cms_profile_photo_upload
 from .views import contact, portfolio_data
 
 
@@ -28,7 +28,9 @@ urlpatterns = [
     path("cms/works/<int:work_id>/publish/", cms_work_publish, name="cms-work-publish"),
     path("cms/works/<int:work_id>/cover/", cms_work_cover_upload, name="cms-work-cover-upload"),
     path("cms/works/<int:work_id>/gallery/", cms_work_gallery, name="cms-work-gallery"),
+    path("cms/works/<int:work_id>/gallery/<int:image_id>/", cms_work_gallery_item, name="cms-work-gallery-item"),
     path("cms/works/<int:work_id>/gallery/<int:image_id>/delete/", cms_work_gallery_delete, name="cms-work-gallery-delete"),
     path("cms/works/<int:work_id>/videos/", cms_work_videos, name="cms-work-videos"),
+    path("cms/works/<int:work_id>/videos/<int:video_id>/", cms_work_video_update, name="cms-work-video-update"),
     path("cms/works/<int:work_id>/videos/<int:video_id>/delete/", cms_work_video_delete, name="cms-work-video-delete"),
 ]
