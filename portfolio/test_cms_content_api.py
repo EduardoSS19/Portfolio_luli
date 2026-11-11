@@ -207,13 +207,9 @@ class CmsContentApiTests(TestCase):
         Image.new("RGB", (10, 10), "purple").save(output, format="PNG")
         upload = SimpleUploadedFile("replacement.png", output.getvalue(), content_type="image/png")
         with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
-            from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
-            body = encode_multipart(BOUNDARY, {"image": upload})
-            response = self.client.generic(
-                "PATCH",
+            response = self.client.post(
                 reverse("cms-work-gallery-item", args=[work.pk, old.pk]),
-                data=body,
-                content_type=MULTIPART_CONTENT,
+                data={"image": upload},
             )
             self.assertEqual(response.status_code, 200, response.content)
             old.refresh_from_db()
