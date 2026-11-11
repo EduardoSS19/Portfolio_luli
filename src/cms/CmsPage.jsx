@@ -72,6 +72,8 @@ export function CmsPage() {
   const [selectedWork, setSelectedWork] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
   const [editError, setEditError] = useState(null)
+  const [creatingWork, setCreatingWork] = useState(false)
+  const [libraryRefresh, setLibraryRefresh] = useState(0)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
@@ -83,6 +85,7 @@ export function CmsPage() {
   const categoryOptions = overview?.categoryOptions || []
 
   const openWork = async workId => {
+    setCreatingWork(false)
     setSelectedWork(null)
     setEditError(null)
     setEditLoading(true)
@@ -97,9 +100,44 @@ export function CmsPage() {
     }
   }
 
+  const startNewWork = () => {
+    setEditError(null)
+    setCreatingWork(true)
+    setSelectedWork({
+      id: null,
+      category: categoryOptions[0]?.id ?? '',
+      title: '',
+      description: '',
+      detail: '',
+      technique: '',
+      material: '',
+      support: '',
+      year: '',
+      height: '',
+      width: '',
+      depth: '',
+      dimension_unit: 'cm',
+      price: '',
+      currency: 'BRL',
+      availability: '',
+      series: '',
+      edition: '',
+      print_run: '',
+      signed: null,
+      creation_location: '',
+      condition: '',
+      exhibitions: '',
+      position: 0,
+      published: false,
+    })
+    setSection('library')
+  }
+
   const saveWork = async payload => {
-    const response = await fetch('/api/cms/works/' + selectedWork.id + '/', {
-      method: 'PATCH',
+    const creating = creatingWork
+    const endpoint = creating ? '/api/cms/works/create/' : '/api/cms/works/' + selectedWork.id + '/'
+    const response = await fetch(endpoint, {
+      method: creating ? 'POST' : 'PATCH',
       credentials: 'same-origin',
       cache: 'no-store',
       headers: {
@@ -110,16 +148,21 @@ export function CmsPage() {
       body: JSON.stringify(payload),
     })
     if (response.status === 401) throw new Error('Sua sessão expirou. Entre novamente para continuar.')
-    if (response.status === 403) throw new Error('Sua conta não tem permissão para editar obras. Verifique o acesso de equipe.')
+    if (response.status === 403) throw new Error(creating ? 'Sua conta não tem permissão para cadastrar obras.' : 'Sua conta não tem permissão para editar obras. Verifique o acesso de equipe.')
     const result = await response.json().catch(() => ({}))
     if (!response.ok) {
       const messages = Object.values(result.fields || {}).flat().map(item => item.message).filter(Boolean)
       throw new Error(messages.join(' · ') || 'Não foi possível salvar. Revise os campos e tente novamente.')
     }
     setSelectedWork({ ...selectedWork, ...result, category: result.category.id })
-    setWorks(current => current.map(item => item.id === result.id
-      ? { ...item, title: result.title, category: result.category }
-      : item))
+    if (creating) {
+      setCreatingWork(false)
+      setLibraryRefresh(value => value + 1)
+    } else {
+      setWorks(current => current.map(item => item.id === result.id
+        ? { ...item, title: result.title, category: result.category }
+        : item))
+    }
     return result
   }
 
@@ -150,7 +193,7 @@ export function CmsPage() {
     } finally {
       if (!signal?.aborted) setLoading(false)
     }
-  }, [category, debouncedQuery, offset, status])
+  }, [category, debouncedQuery, offset, status, libraryRefresh])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -242,7 +285,8 @@ export function CmsPage() {
                 <CmsWorkEditor
                   work={selectedWork}
                   categories={categoryOptions}
-                  onCancel={() => { setSelectedWork(null); setEditError(null) }}
+                  isNew={creatingWork}
+                  onCancel={() => { setSelectedWork(null); setCreatingWork(false); setEditError(null) }}
                   onSave={saveWork}
                 />
               ) : editLoading ? (
@@ -253,7 +297,10 @@ export function CmsPage() {
               <>
               <section className="cms-library-heading">
                 <div><p className="cms-eyebrow">ACERVO COMPLETO</p><h1>Biblioteca<span>.</span></h1><p>Encontre e acompanhe as obras do seu portfólio.</p></div>
-                <span className="cms-total-pill">{formatNumber(pagination.total)} obras</span>
+                <div className="cms-library-heading-actions">
+                  <span className="cms-total-pill">{formatNumber(pagination.total)} obras</span>
+                  {overview?.permissions?.canCreateWork && <button className="cms-primary-button" type="button" onClick={startNewWork} disabled={!categoryOptions.length}>+ Nova obra</button>}
+                </div>
               </section>
               <section className="cms-library-tools" aria-label="Filtros da biblioteca">
                 <label className="cms-search"><span aria-hidden="true">⌕</span><input value={query} onChange={event => { setQuery(event.target.value); setOffset(0) }} placeholder="Buscar por nome, descrição…" /></label>
@@ -277,7 +324,7 @@ export function CmsPage() {
                         </div>
                         <div className="cms-work-info"><div><h3>{work.title}</h3><p>{work.category?.title || 'Sem categoria'}</p></div><span className="cms-work-arrow">↗</span></div>
                         <div className="cms-work-meta"><span>{work.media?.images + work.media?.gallery || 0} imagens</span><span>{work.media?.videos || 0} vídeos</span></div>
-                        <button className="cms-work-edit" type="button" onClick={() => openWork(work.id)}>Editar obra <span>→</span></button>
+                        {overview?.permissions?.canEditWork && <button className="cms-work-edit" type="button" onClick={() => openWork(work.id)}>Editar obra <span>→</span></button>}
                       </article>
                     ))}
                   </section>

@@ -10,7 +10,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .models import Category, Reference, Work, WorkVideo
 
@@ -30,6 +30,7 @@ def _staff_required(view):
 
 @require_GET
 @never_cache
+@ensure_csrf_cookie
 @_staff_required
 def cms_overview(request):
     """Small editorial summary for the CMS home screen."""
@@ -43,6 +44,10 @@ def cms_overview(request):
         "categoryOptions": list(Category.objects.order_by("position", "pk").values("id", "key", "title")),
         "references": Reference.objects.count(),
         "videos": WorkVideo.objects.count(),
+        "permissions": {
+            "canCreateWork": request.user.has_perm("portfolio.add_work"),
+            "canEditWork": request.user.has_perm("portfolio.change_work"),
+        },
     })
 
 
@@ -266,3 +271,81 @@ def cms_work_update(request, work_id):
         "position": work.position,
         "published": work.is_active,
     }, encoder=DjangoJSONEncoder)
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_create(request):
+    """Create a new unpublished work from allowlisted editorial metadata."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.add_work"):
+        return JsonResponse({"error": "work_create_permission_required"}, status=403)
+    if request.content_type != "application/json":
+        return JsonResponse({"error": "application_json_required"}, status=415)
+    if len(request.body) > 65536:
+        return JsonResponse({"error": "payload_too_large"}, status=413)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    if not isinstance(payload, dict) or not payload:
+        return JsonResponse({"error": "invalid_payload"}, status=400)
+
+    allowed_fields = set(CmsWorkEditForm.Meta.fields)
+    unknown_fields = sorted(set(payload) - allowed_fields)
+    if unknown_fields:
+        return JsonResponse({
+            "error": "unknown_fields",
+            "fields": unknown_fields,
+        }, status=400)
+
+    form = CmsWorkEditForm(data=payload)
+    if not form.is_valid():
+        return JsonResponse({
+            "error": "validation_error",
+            "fields": form.errors.get_json_data(),
+        }, status=400)
+
+    with transaction.atomic():
+        work = form.save(commit=False)
+        work.is_active = False
+        work.is_share_image = False
+        work.save()
+
+    return JsonResponse({
+        "id": work.pk,
+        "title": work.title,
+        "category": {
+            "id": work.category_id,
+            "key": work.category.key,
+            "title": work.category.title,
+        },
+        "description": work.description,
+        "detail": work.detail,
+        "technique": work.technique,
+        "material": work.material,
+        "support": work.support,
+        "year": work.year,
+        "height": work.height,
+        "width": work.width,
+        "depth": work.depth,
+        "dimension_unit": work.dimension_unit,
+        "price": work.price,
+        "currency": work.currency,
+        "availability": work.availability,
+        "series": work.series,
+        "edition": work.edition,
+        "print_run": work.print_run,
+        "signed": work.signed,
+        "creation_location": work.creation_location,
+        "condition": work.condition,
+        "exhibitions": work.exhibitions,
+        "position": work.position,
+        "published": work.is_active,
+    }, status=201, encoder=DjangoJSONEncoder)
