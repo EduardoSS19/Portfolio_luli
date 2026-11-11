@@ -330,8 +330,14 @@ class CmsWorkEditForm(forms.ModelForm):
             "category", "title", "description", "detail", "technique", "material",
             "support", "year", "height", "width", "depth", "dimension_unit",
             "price", "currency", "availability", "series", "edition", "print_run",
-            "signed", "creation_location", "condition", "exhibitions", "position",
+            "signed", "creation_location", "condition", "exhibitions", "position", "image_url", "is_share_image",
         )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("is_share_image") and not (self.instance.image or cleaned.get("image_url")):
+            self.add_error("is_share_image", "Escolha uma imagem de capa antes de usar esta obra no compartilhamento.")
+        return cleaned
 
 
 @require_http_methods(["GET", "PATCH"])
@@ -362,6 +368,8 @@ def cms_work_update(request, work_id):
         return JsonResponse({
             "id": work.pk,
             "image": cover_url,
+            "image_url": work.image_url,
+            "is_share_image": work.is_share_image,
             "category": work.category_id,
             "title": work.title,
             "description": work.description,
@@ -427,6 +435,8 @@ def cms_work_update(request, work_id):
             }, status=400)
 
         work = form.save()
+        if work.is_share_image:
+            Work.objects.exclude(pk=work.pk).filter(is_share_image=True).update(is_share_image=False)
 
     return JsonResponse({
         "id": work.pk,
@@ -458,6 +468,8 @@ def cms_work_update(request, work_id):
         "exhibitions": work.exhibitions,
         "position": work.position,
         "published": work.is_active,
+        "image_url": work.image_url,
+        "is_share_image": work.is_share_image,
     }, encoder=DjangoJSONEncoder)
 
 
@@ -503,8 +515,9 @@ def cms_work_create(request):
     with transaction.atomic():
         work = form.save(commit=False)
         work.is_active = False
-        work.is_share_image = False
         work.save()
+        if work.is_share_image:
+            Work.objects.exclude(pk=work.pk).filter(is_share_image=True).update(is_share_image=False)
 
     return JsonResponse({
         "id": work.pk,
@@ -536,6 +549,8 @@ def cms_work_create(request):
         "exhibitions": work.exhibitions,
         "position": work.position,
         "published": work.is_active,
+        "image_url": work.image_url,
+        "is_share_image": work.is_share_image,
     }, status=201, encoder=DjangoJSONEncoder)
 
 
