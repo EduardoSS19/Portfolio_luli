@@ -105,6 +105,8 @@ def cms_content(request):
     permissions = _content_permissions(request.user, model_name)
 
     if request.method == "GET":
+        if not permissions["canView"]:
+            return JsonResponse({"error": "content_view_permission_required"}, status=403)
         items = [_serialize_content(content_type, item) for item in _content_queryset(content_type)]
         return JsonResponse({"results": items, "permissions": permissions})
 
