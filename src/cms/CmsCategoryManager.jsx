@@ -97,6 +97,27 @@ export function CmsCategoryManager({ onChanged }) {
     }
   }
 
+  const move = async (index, direction) => {
+    const next = [...items]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setSaving(true)
+    setError('')
+    try {
+      const result = await categoryRequest('/api/cms/categories/', {
+        method: 'PATCH',
+        body: JSON.stringify({ ids: next.map(item => item.id) }),
+      })
+      setItems(result.results || [])
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const toggleActive = async item => {
     setSaving(true)
     setError('')
@@ -138,6 +159,8 @@ export function CmsCategoryManager({ onChanged }) {
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
+                <button type="button" onClick={() => move(items.indexOf(item), -1)} disabled={saving || items.indexOf(item) === 0}>↑</button>
+                <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1}>↓</button>
                 <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
                 <button type="button" onClick={() => toggleActive(item)} disabled={saving}>{item.active ? 'Desativar' : 'Ativar'}</button>
               </div>
