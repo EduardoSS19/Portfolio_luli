@@ -1878,3 +1878,79 @@ class CmsCategoryManagementApiTests(TestCase):
         accepted = client.post(reverse("cms-categories"), data=json.dumps({"title": "Nova"}), content_type="application/json", HTTP_X_CSRFTOKEN=token)
         self.assertEqual(rejected.status_code, 403)
         self.assertEqual(accepted.status_code, 201)
+
+
+class CmsArtistProfileApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+        self.editor = get_user_model().objects.create_user(
+            username="cms-profile-editor", is_staff=True
+        )
+        permissions = Permission.objects.filter(
+            content_type__app_label="portfolio",
+            codename__in=["view_artistprofile", "change_artistprofile"],
+        )
+        self.editor.user_permissions.add(*permissions)
+        self.profile = ArtistProfile.objects.create(
+            name="Artista",
+            tagline="Arte e pesquisa",
+            bio="Primeiro parágrafo.\\n\\nSegundo parágrafo.",
+            instagram_url="https://instagram.com/artista",
+            contact_email="artista@example.com",
+            contact_form_url="https://example.com/form",
+        )
+
+    def test_staff_can_read_profile_and_existing_photo_url(self):
+        self.client.force_login(self.editor)
+        response = self.client.get(reverse("cms-profile"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["profile"]["name"], "Artista")
+        self.assertEqual(response.json()["profile"]["bio"], "Primeiro parágrafo.\\n\\nSegundo parágrafo.")
+        self.assertTrue(response.json()["permissions"]["canChange"])
+
+    def test_editor_can_update_profile_fields_without_losing_line_breaks(self):
+        self.client.force_login(self.editor)
+        response = self.client.patch(
+            reverse("cms-profile"),
+            data=json.dumps({
+                "name": "Artista Atualizada",
+                "tagline": "Novos trabalhos",
+                "photo_url": "https://example.com/foto.webp",
+                "bio": "Linha um\\nLinha dois\\n\\nNovo parágrafo",
+                "instagram_url": "https://instagram.com/nova",
+                "contact_email": "novo@example.com",
+                "contact_form_url": "",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.name, "Artista Atualizada")
+        self.assertEqual(self.profile.bio, "Linha um\\nLinha dois\\n\\nNovo parágrafo")
+        self.assertEqual(self.profile.contact_email, "novo@example.com")
+
+    def test_invalid_profile_fields_are_rejected(self):
+        self.client.force_login(self.editor)
+        response = self.client.patch(
+            reverse("cms-profile"),
+            data=json.dumps({
+                "name": "",
+                "bio": "Bio",
+                "instagram_url": "not-a-url",
+                "contact_email": "not-an-email",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.name, "Artista")
+
+    def test_staff_without_profile_permission_cannot_update(self):
+        staff = get_user_model().objects.create_user(username="cms-profile-readonly", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.patch(
+            reverse("cms-profile"),
+            data=json.dumps({"name": "Não autorizado"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
