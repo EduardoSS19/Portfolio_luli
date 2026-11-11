@@ -84,7 +84,13 @@ def cms_profile(request):
     profile = ArtistProfile.objects.order_by("pk").first()
     if request.method == "GET":
         if not profile:
-            return JsonResponse({"profile": None})
+            return JsonResponse({
+                "profile": None,
+                "permissions": {
+                    "canAdd": request.user.has_perm("portfolio.add_artistprofile"),
+                    "canChange": request.user.has_perm("portfolio.change_artistprofile"),
+                },
+            })
         return JsonResponse({
             "profile": {
                 "id": profile.pk,
