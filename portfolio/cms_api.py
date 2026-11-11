@@ -1,31 +1,28 @@
-"""Read-only endpoints for the first React CMS library screen.
+"""Authenticated CMS read endpoints and a narrowly scoped work metadata update API."""
+import json
+from functools import wraps
 
-All endpoints require an authenticated staff user. Mutations are intentionally
-not exposed here; they will be added only with dedicated validation and tests.
-"""
-from django.contrib.auth.decorators import user_passes_test
+from django import forms
+from django.db import transaction
 from django.db.models import Count, Q
+from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_GET, require_http_methods
 
 from .models import Category, Reference, Work, WorkVideo
 
 
 def _staff_required(view):
     """Return JSON authorization errors instead of redirecting API clients."""
-    def check(user):
-        return user.is_authenticated and user.is_staff
-
-    protected = user_passes_test(check, login_url=None)(view)
-
+    @wraps(view)
     def wrapped(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({"error": "authentication_required"}, status=401)
         if not request.user.is_staff:
             return JsonResponse({"error": "staff_required"}, status=403)
-        return protected(request, *args, **kwargs)
+        return view(request, *args, **kwargs)
 
     return wrapped
 
@@ -42,7 +39,7 @@ def cms_overview(request):
             "drafts": Work.objects.filter(is_active=False).count(),
         },
         "categories": Category.objects.count(),
-        "categoryOptions": list(Category.objects.order_by("position", "pk").values("key", "title")),
+        "categoryOptions": list(Category.objects.order_by("position", "pk").values("id", "key", "title")),
         "references": Reference.objects.count(),
         "videos": WorkVideo.objects.count(),
     })
@@ -136,4 +133,109 @@ def cms_works(request):
             "category": category_key,
             "status": status,
         },
+    })
+
+
+class CmsWorkEditForm(forms.ModelForm):
+    """Allowlisted editorial fields; publication and media are separate workflows."""
+
+    class Meta:
+        model = Work
+        fields = (
+            "category", "title", "description", "detail", "technique", "material",
+            "support", "year", "height", "width", "depth", "dimension_unit",
+            "price", "currency", "availability", "series", "edition", "print_run",
+            "signed", "creation_location", "condition", "exhibitions", "position",
+        )
+
+
+def _work_editor_required(view):
+    """Require staff status and the specific Django change_work permission."""
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "authentication_required"}, status=401)
+        if not request.user.is_staff:
+            return JsonResponse({"error": "staff_required"}, status=403)
+        if not request.user.has_perm("portfolio.change_work"):
+            return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+        return view(request, *args, **kwargs)
+
+    return wrapped
+
+
+@require_http_methods(["PATCH"])
+@never_cache
+@_work_editor_required
+@csrf_protect
+def cms_work_update(request, work_id):
+    """Partially update editorial metadata without touching publication or media."""
+    if request.content_type != "application/json":
+        return JsonResponse({"error": "application_json_required"}, status=415)
+    if len(request.body) > 65536:
+        return JsonResponse({"error": "payload_too_large"}, status=413)
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    if not isinstance(payload, dict) or not payload:
+        return JsonResponse({"error": "invalid_payload"}, status=400)
+
+    allowed_fields = set(CmsWorkEditForm.Meta.fields)
+    unknown_fields = sorted(set(payload) - allowed_fields)
+    if unknown_fields:
+        return JsonResponse({
+            "error": "unknown_fields",
+            "fields": unknown_fields,
+        }, status=400)
+
+    with transaction.atomic():
+        try:
+            work = Work.objects.select_for_update().select_related("category").get(pk=work_id)
+        except Work.DoesNotExist:
+            return JsonResponse({"error": "work_not_found"}, status=404)
+
+        form_data = model_to_dict(work, fields=CmsWorkEditForm.Meta.fields)
+        form_data.update(payload)
+        form = CmsWorkEditForm(data=form_data, instance=work)
+        if not form.is_valid():
+            return JsonResponse({
+                "error": "validation_error",
+                "fields": form.errors.get_json_data(),
+            }, status=400)
+
+        work = form.save()
+
+    return JsonResponse({
+        "id": work.pk,
+        "title": work.title,
+        "category": {
+            "id": work.category_id,
+            "key": work.category.key,
+            "title": work.category.title,
+        },
+        "description": work.description,
+        "detail": work.detail,
+        "technique": work.technique,
+        "material": work.material,
+        "support": work.support,
+        "year": work.year,
+        "height": work.height,
+        "width": work.width,
+        "depth": work.depth,
+        "dimension_unit": work.dimension_unit,
+        "price": work.price,
+        "currency": work.currency,
+        "availability": work.availability,
+        "series": work.series,
+        "edition": work.edition,
+        "print_run": work.print_run,
+        "signed": work.signed,
+        "creation_location": work.creation_location,
+        "condition": work.condition,
+        "exhibitions": work.exhibitions,
+        "position": work.position,
+        "published": work.is_active,
     })
