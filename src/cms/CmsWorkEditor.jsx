@@ -139,12 +139,10 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     setCoverError('')
     setCoverSaved(false)
     try {
-      let workId = work.id
-      if (!workId) {
-        const result = await onSave(payload)
-        workId = result.id
+      if (!work.id) {
+        throw new Error('Salve o rascunho antes de enviar a imagem de capa.')
       }
-      const result = await onUploadCover(workId, selectedCover)
+      const result = await onUploadCover(work.id, selectedCover)
       setCoverImage(result.image || '')
       setSelectedCover(null)
       setCoverSaved(true)
@@ -217,8 +215,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
                 />
               </label>
               {selectedCover && <p className="cms-cover-filename">{selectedCover.name}</p>}
-              <button className="cms-primary-button" type="button" onClick={uploadCover} disabled={!selectedCover || uploadingCover}>
-                {uploadingCover ? 'Enviando…' : work.id ? 'Enviar capa' : 'Salvar rascunho e enviar capa'} <span>↗</span>
+              <button className="cms-primary-button" type="button" onClick={uploadCover} disabled={!selectedCover || !work.id || uploadingCover}>
+                {uploadingCover ? 'Enviando…' : work.id ? 'Enviar capa' : 'Salve o rascunho para enviar'} <span>↗</span>
               </button>
               <p className="cms-cover-help">A capa atual só é substituída depois que o novo arquivo é validado e armazenado.</p>
             </div>
