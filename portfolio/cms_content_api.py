@@ -50,6 +50,7 @@ def _content_model(content_type):
 
 def _content_permissions(user, model_name):
     return {
+        "canView": user.has_perm(f"portfolio.view_{model_name}") or user.has_perm(f"portfolio.change_{model_name}"),
         "canAdd": user.has_perm(f"portfolio.add_{model_name}"),
         "canChange": user.has_perm(f"portfolio.change_{model_name}"),
         "canDelete": user.has_perm(f"portfolio.delete_{model_name}"),
