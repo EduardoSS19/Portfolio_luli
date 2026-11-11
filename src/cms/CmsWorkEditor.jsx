@@ -508,8 +508,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       </details>
       <form onSubmit={submit}>
         {SECTIONS.map(section => (
-          <section className="cms-editor-section" key={section.title}>
-            <details className="cms-editor-section cms-editor-collapsible" open={section.title === 'Identificação'}>
+          <details className="cms-editor-section cms-editor-collapsible" key={section.title} open={section.title === 'Identificação'}>
               <summary className="cms-editor-section-heading">
                 <div><h2>{section.title}</h2><p>{section.description}</p></div>
                 <span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span>
@@ -519,8 +518,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
                 <Field key={field.name} field={field} value={form[field.name]} categories={categories} onChange={changeField} />
               ))}
             </div>
-            </details>
-          </section>
+        </details>
         ))}
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}
