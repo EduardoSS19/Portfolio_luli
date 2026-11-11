@@ -15,8 +15,9 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from django.db.models import Max
 
-from .models import Category, Reference, Work, WorkVideo
+from .models import Category, Reference, Work, WorkImage, WorkVideo
 
 
 logger = logging.getLogger(__name__)
@@ -448,3 +449,150 @@ def cms_work_cover_upload(request, work_id):
         "image": image_url,
         "filename": stored_name.rsplit("/", 1)[-1],
     }, status=200)
+
+
+
+def _cms_image_url(image_field):
+    try:
+        return image_field.url if image_field else ""
+    except ValueError:
+        return ""
+
+
+def _validate_cms_gallery_image(uploaded):
+    if uploaded.size <= 0:
+        return "empty_image"
+    if uploaded.size > MAX_COVER_UPLOAD_SIZE:
+        return "image_too_large"
+    try:
+        uploaded.seek(0)
+        with Image.open(uploaded) as image:
+            image_format = image.format
+            width, height = image.size
+            if image_format not in ALLOWED_COVER_FORMATS:
+                return "unsupported_image_format"
+            if width <= 0 or height <= 0 or width * height > MAX_COVER_PIXELS:
+                return "invalid_image_dimensions"
+            image.verify()
+        uploaded.seek(0)
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+        return "invalid_image_file"
+    return None
+
+
+@require_http_methods(["GET", "POST", "PATCH"])
+@never_cache
+@ensure_csrf_cookie
+@csrf_protect
+def cms_work_gallery(request, work_id):
+    """List, upload, and reorder additional images for one work."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if request.method != "GET" and not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+
+    if request.method == "GET":
+        images = [{
+            "id": item.pk,
+            "url": _cms_image_url(item.image),
+            "position": item.position,
+        } for item in work.gallery_images.all().order_by("position", "pk")]
+        return JsonResponse({"results": images, "total": len(images)})
+
+    if request.method == "POST":
+        if not request.content_type.startswith("multipart/form-data"):
+            return JsonResponse({"error": "multipart_form_data_required"}, status=415)
+        if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+            return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+        uploaded = request.FILES["image"]
+        validation_error = _validate_cms_gallery_image(uploaded)
+        if validation_error:
+            status = 413 if validation_error == "image_too_large" else 400
+            return JsonResponse({"error": validation_error, "maxBytes": MAX_COVER_UPLOAD_SIZE} if status == 413 else {"error": validation_error}, status=status)
+
+        extension = ALLOWED_COVER_FORMATS[Image.open(uploaded).format]
+        uploaded.seek(0)
+        last_position = work.gallery_images.aggregate(value=Max("position"))["value"]
+        position = 0 if last_position is None else last_position + 1
+        filename = work.image.field.generate_filename(work, f"gallery-{position + 1}.{extension}")
+        stored_name = ""
+        try:
+            stored_name = default_storage.save(filename, uploaded)
+            gallery_image = WorkImage.objects.create(work=work, image=stored_name, position=position)
+        except Exception:
+            if stored_name:
+                try:
+                    default_storage.delete(stored_name)
+                except Exception:
+                    logger.exception("Could not clean up failed CMS gallery upload %s", stored_name)
+            logger.exception("CMS gallery upload failed for work %s", work_id)
+            return JsonResponse({"error": "image_storage_failed"}, status=503)
+
+        return JsonResponse({
+            "id": gallery_image.pk,
+            "url": _cms_image_url(gallery_image.image),
+            "position": gallery_image.position,
+        }, status=201)
+
+    if request.content_type != "application/json":
+        return JsonResponse({"error": "application_json_required"}, status=415)
+    if len(request.body) > 16384:
+        return JsonResponse({"error": "payload_too_large"}, status=413)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    image_ids = payload.get("imageIds") if isinstance(payload, dict) else None
+    if not isinstance(image_ids, list) or any(type(item) is not int for item in image_ids):
+        return JsonResponse({"error": "invalid_image_order"}, status=400)
+    if len(image_ids) != len(set(image_ids)):
+        return JsonResponse({"error": "duplicate_image_ids"}, status=400)
+
+    with transaction.atomic():
+        locked_work = Work.objects.select_for_update().get(pk=work_id)
+        existing_ids = list(WorkImage.objects.filter(work=locked_work).values_list("pk", flat=True))
+        if set(image_ids) != set(existing_ids) or len(image_ids) != len(existing_ids):
+            return JsonResponse({"error": "image_order_mismatch"}, status=400)
+        for position, image_id in enumerate(image_ids):
+            WorkImage.objects.filter(pk=image_id, work=locked_work).update(position=position)
+
+    images = [{
+        "id": item.pk,
+        "url": _cms_image_url(item.image),
+        "position": item.position,
+    } for item in work.gallery_images.all().order_by("position", "pk")]
+    return JsonResponse({"results": images, "total": len(images)})
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_gallery_delete(request, work_id, image_id):
+    """Delete only an additional image belonging to the requested work."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+
+    try:
+        image = WorkImage.objects.get(pk=image_id, work_id=work_id)
+    except WorkImage.DoesNotExist:
+        return JsonResponse({"error": "gallery_image_not_found"}, status=404)
+
+    stored_name = image.image.name
+    image.delete()
+    if stored_name:
+        try:
+            default_storage.delete(stored_name)
+        except Exception:
+            logger.exception("Could not delete CMS gallery image file %s", stored_name)
+    return JsonResponse({"deleted": image_id})
