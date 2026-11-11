@@ -61,6 +61,7 @@ def cms_overview(request):
         "permissions": {
             "canCreateWork": request.user.has_perm("portfolio.add_work"),
             "canEditWork": request.user.has_perm("portfolio.change_work"),
+            "canDeleteWork": request.user.has_perm("portfolio.delete_work"),
         },
     })
 
