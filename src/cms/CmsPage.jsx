@@ -296,6 +296,26 @@ export function CmsPage() {
     return result.results || []
   }, [])
 
+  const createWorkPreview = useCallback(async workId => {
+    const response = await fetch('/api/cms/works/' + workId + '/preview/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const messages = {
+        authentication_required: 'Sua sessão expirou. Entre novamente para continuar.',
+        staff_required: 'Sua conta não tem acesso ao painel.',
+        work_view_permission_required: 'Sua conta não tem permissão para visualizar esta obra.',
+        work_not_found: 'Esta obra não foi encontrada.',
+      }
+      throw new Error(messages[result.error] || 'Não foi possível gerar a prévia.')
+    }
+    return result.url
+  }, [])
+
   const readCookie = name => {
     const prefix = name + '='
     const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
