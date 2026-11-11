@@ -9,7 +9,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
 from .cms_api import (
     ALLOWED_COVER_FORMATS,
