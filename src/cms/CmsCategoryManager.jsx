@@ -135,15 +135,22 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
 
   const previewWorkOrder = async () => {
     if (!selectedCategoryId) return
+    const previewWindow = window.open('about:blank', '_blank')
+    if (!previewWindow) {
+      setError('O navegador bloqueou a nova aba. Permita pop-ups para abrir a prévia.')
+      return
+    }
     setPreviewing(true); setError('')
     try {
       const response = await categoryRequest('/api/cms/categories/' + selectedCategoryId + '/works/preview/', {
         method: 'POST', body: JSON.stringify({ workIds: categoryWorks.map(item => item.id) }),
       })
-      window.open(response.url, '_blank', 'noopener,noreferrer')
+      previewWindow.location = response.url
       setNotice('Prévia aberta. O link temporário pode ser compartilhado com o cliente por 10 minutos.')
-    } catch (err) { setError(err.message) }
-    finally { setPreviewing(false) }
+    } catch (err) {
+      previewWindow.close()
+      setError(err.message)
+    } finally { setPreviewing(false) }
   }
 
   const moveWork = (index, direction) => {
