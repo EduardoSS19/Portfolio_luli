@@ -139,7 +139,7 @@ export function CmsPage() {
     setSection('library')
   }
 
-  const saveWork = async payload => {
+  const saveWork = async (payload, { addAnother = false } = {}) => {
     const creating = creatingWork
     const endpoint = creating ? '/api/cms/works/create/' : '/api/cms/works/' + selectedWork.id + '/'
     const response = await fetch(endpoint, {
@@ -162,8 +162,13 @@ export function CmsPage() {
     }
     setSelectedWork({ ...selectedWork, ...result, category: result.category.id })
     if (creating) {
-      setCreatingWork(false)
       setLibraryRefresh(value => value + 1)
+      if (addAnother) {
+        setCreatingWork(true)
+        setSelectedWork({ id: null, category: String(result.category.id), title: '', description: '', detail: '', technique: '', material: '', support: '', year: '', height: '', width: '', depth: '', dimension_unit: 'cm', price: '', currency: 'BRL', availability: '', series: '', edition: '', print_run: '', signed: null, creation_location: '', condition: '', exhibitions: '', position: Number(result.position || 0) + 1, published: false })
+      } else {
+        setCreatingWork(false)
+      }
     } else {
       setWorks(current => current.map(item => item.id === result.id
         ? { ...item, title: result.title, category: result.category }
@@ -438,7 +443,7 @@ export function CmsPage() {
   }, [load])
 
   useEffect(() => {
-    if (section !== 'overview') {
+    if (section !== 'analytics') {
       setAnalytics(null)
       return
     }
@@ -471,6 +476,8 @@ export function CmsPage() {
   const isCategories = section === 'categories'
   const isProfile = section === 'profile'
   const isContent = section === 'content'
+  const isLibrary = section === 'library'
+  const isAnalytics = section === 'analytics'
 
   return (
     <div className="cms-shell">
@@ -482,10 +489,11 @@ export function CmsPage() {
         <div className="cms-sidebar-label">ESPAÇO DE TRABALHO</div>
         <nav className="cms-nav" aria-label="Menu do painel">
           <button className={isOverview ? 'active' : ''} onClick={() => setSection('overview')}><span>◫</span> Visão geral</button>
-          <button className={!isOverview ? 'active' : ''} onClick={() => setSection('library')}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
+          <button className={isLibrary ? 'active' : ''} onClick={() => { setSelectedWork(null); setCreatingWork(false); setSection('library') }}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
           <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
           <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
           <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Conteúdo</button>
+          <button className={isAnalytics ? 'active' : ''} onClick={() => setSection('analytics')}><span>◷</span> Estatísticas</button>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />
@@ -496,18 +504,21 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isContent ? 'CONTEÚDO' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isContent ? 'CONTEÚDO' : isAnalytics ? 'ESTATÍSTICAS' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
+            <button className="cms-home-shortcut" type="button" onClick={() => { setSelectedWork(null); setCreatingWork(false); setEditError(null); setSection('overview') }}>← Início do painel</button>
             <a href="/" target="_blank" rel="noreferrer">Ver portfólio ↗</a>
           </div>
         </header>
 
         <div className="cms-content">
-          {isProfile ? (
+          {isAnalytics ? (
+            <><section className="cms-library-heading"><div><p className="cms-eyebrow">DESEMPENHO DO PORTFÓLIO</p><h1>Estatísticas<span>.</span></h1><p>Acompanhe como as pessoas encontram e navegam pelo site.</p></div></section><CmsAnalytics data={analytics} /></>
+          ) : isProfile ? (
             <CmsProfileManager />
           ) : isCategories ? (
-            <CmsCategoryManager onChanged={() => setLibraryRefresh(value => value + 1)} />
+            <CmsCategoryManager canEditWorks={overview?.permissions?.canEditWork} onChanged={() => setLibraryRefresh(value => value + 1)} />
           ) : isOverview ? (
             <>
               <section className="cms-welcome">
@@ -530,7 +541,8 @@ export function CmsPage() {
                   <StatCard label="Categorias" value={overview?.categories} detail="Organização do acervo" icon="▦" />
                 </section>
               )}
-              <CmsAnalytics data={analytics} />
+              <section className="cms-section-heading cms-analytics-shortcut"><div><p className="cms-eyebrow">GOOGLE ANALYTICS 4</p><h2>Entenda o alcance do seu trabalho</h2></div><button className="cms-text-button" onClick={() => setSection('analytics')}>Abrir estatísticas ↗</button></section>
+              <section className="cms-dashboard-shortcuts" aria-label="Atalhos de gestão"><button type="button" onClick={() => setSection('categories')}><strong>Categorias</strong><span>Organize as seções e a ordem do acervo →</span></button><button type="button" onClick={() => setSection('profile')}><strong>Perfil</strong><span>Edite apresentação e contato →</span></button><button type="button" onClick={() => setSection('content')}><strong>Conteúdo complementar</strong><span>Redes sociais, referências e fundos →</span></button></section>
               <section className="cms-lower-grid">
                 <article className="cms-feature-card">
                   <div className="cms-feature-symbol">✳</div>
@@ -541,9 +553,9 @@ export function CmsPage() {
                 </article>
                 <article className="cms-quick-card">
                   <p className="cms-eyebrow">CONTEÚDO DO SITE</p>
-                  <div><span>Referências</span><strong>{formatNumber(overview?.references)}</strong></div>
-                  <div><span>Vídeos vinculados</span><strong>{formatNumber(overview?.videos)}</strong></div>
-                  <div><span>Estado do site</span><strong className="cms-published-state">Publicado</strong></div>
+                  <button type="button" onClick={() => setSection('content')}><span>Referências</span><strong>{formatNumber(overview?.references)} ↗</strong></button>
+                  <button type="button" onClick={() => setSection('library')}><span>Vídeos vinculados</span><strong>{formatNumber(overview?.videos)} ↗</strong></button>
+                  <button type="button" onClick={() => setSection('profile')}><span>Perfil do portfólio</span><strong>Editar ↗</strong></button>
                 </article>
               </section>
             </>

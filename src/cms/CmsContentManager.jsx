@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 
 const TYPES = [
-  { id: 'social-links', label: 'Redes sociais', title: 'Redes sociais', description: 'Links externos exibidos no portfólio.' },
-  { id: 'references', label: 'Referências', title: 'Referências', description: 'Clientes, publicações e projetos com seus links relacionados.' },
-  { id: 'backgrounds', label: 'Imagens de fundo', title: 'Imagens de fundo', description: 'Gerencie a sequência visual de fundos do site.' },
+  { id: 'social-links', label: 'Redes sociais', title: 'Redes sociais', description: 'Links como Instagram e Behance exibidos junto aos contatos no rodapé do site.' },
+  { id: 'references', label: 'Referências', title: 'Referências', description: 'Registros exibidos na seção Referências do portfólio, com período e links para clientes, publicações, exposições ou projetos.' },
+  { id: 'backgrounds', label: 'Imagens de fundo', title: 'Imagens de fundo', description: 'Gerencie as imagens que formam o fundo visual do site. A ordem define a sequência em que aparecem.' },
 ]
 
 function csrf() {
@@ -159,7 +159,7 @@ export function CmsContentManager() {
   return (
     <section className="cms-content-manager">
       <header className="cms-library-heading">
-        <div><p className="cms-eyebrow">CONTEÚDO DO PORTFÓLIO</p><h1>Conteúdo<span>.</span></h1><p>Redes, referências e imagens que complementam o seu trabalho.</p></div>
+        <div><p className="cms-eyebrow">ELEMENTOS COMPLEMENTARES DO SITE</p><h1>Conteúdo complementar<span>.</span></h1><p>Esta área não cadastra obras: ela controla os links do rodapé, a seção Referências e as imagens de fundo do portfólio.</p></div>
       </header>
       <nav className="cms-content-tabs" aria-label="Tipos de conteúdo">
         {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => setType(item.id)}>{item.label}</button>)}

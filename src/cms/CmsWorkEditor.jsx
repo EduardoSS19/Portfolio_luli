@@ -50,7 +50,7 @@ const SECTIONS = [
     fields: [
       { name: 'creation_location', label: 'Local de criação' },
       { name: 'condition', label: 'Estado de conservação' },
-      { name: 'position', label: 'Ordem no portfólio', type: 'number', required: true },
+      { name: 'position', label: 'Ordem dentro da categoria', type: 'number', required: true },
       { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
       { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true },
       { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true },
@@ -387,11 +387,26 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     const payload = Object.fromEntries(SECTIONS.flatMap(section => section.fields).map(field => [field.name, form[field.name]]))
     payload.category = Number(form.category)
     payload.signed = form.signed === '' || form.signed == null ? null : form.signed === true || form.signed === 'true'
+    const addAnother = event.nativeEvent.submitter?.value === 'add-another'
     try {
-      await onSave(payload)
-      if (isNew) setCreated(true)
-      setDirty(false)
-      setSaved(true)
+      await onSave(payload, { addAnother })
+      if (isNew && addAnother) {
+        setForm(current => ({ ...current, id: null, title: '', description: '', detail: '', technique: '', material: '', support: '', year: '', height: '', width: '', depth: '', price: '', availability: '', series: '', edition: '', print_run: '', signed: null, creation_location: '', condition: '', exhibitions: '', is_share_image: false, image_url: '', position: Number(payload.position || 0) + 1, published: false }))
+        setCreated(false)
+        setSaved(false)
+        setDirty(false)
+        setCoverError('')
+        setCoverSaved(false)
+        setGallery([])
+        setVideos([])
+        setVideoUrl('')
+        setVideoError('')
+        setGalleryError('')
+      } else {
+        if (isNew) setCreated(true)
+        setDirty(false)
+        setSaved(true)
+      }
     } catch (err) {
       setError(err.message || 'Não foi possível salvar as alterações.')
     } finally {
@@ -516,8 +531,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}
         <div className="cms-editor-actions">
-          <button className="cms-editor-cancel" type="button" onClick={onCancel}>Cancelar</button>
-          <button className="cms-primary-button" type="submit" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Criar rascunho' : 'Salvar alterações'} <span>↗</span></button>
+          <button className="cms-editor-cancel" type="button" onClick={onCancel}>← Voltar para obras</button>
+          <div className="cms-editor-save-actions">
+            {isNew && <button className="cms-editor-cancel" type="submit" value="add-another" disabled={saving}>{saving ? 'Salvando…' : 'Salvar e adicionar outra'}</button>}
+            <button className="cms-primary-button" type="submit" value="save" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Salvar obra' : 'Salvar e continuar editando'} <span>↗</span></button>
+          </div>
         </div>
       </form>
     </section>

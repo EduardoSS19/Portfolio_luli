@@ -29,7 +29,7 @@ async function categoryRequest(url, options = {}) {
   return data
 }
 
-export function CmsCategoryManager({ onChanged }) {
+export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -38,6 +38,9 @@ export function CmsCategoryManager({ onChanged }) {
   const [editing, setEditing] = useState(null)
   const [title, setTitle] = useState('')
   const [key, setKey] = useState('')
+  const [selectedCategoryId, setSelectedCategoryId] = useState('')
+  const [categoryWorks, setCategoryWorks] = useState([])
+  const [worksLoading, setWorksLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -45,6 +48,7 @@ export function CmsCategoryManager({ onChanged }) {
     try {
       const result = await categoryRequest('/api/cms/categories/')
       setItems(result.results || [])
+      setSelectedCategoryId(current => current || String(result.results?.[0]?.id || ''))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -53,6 +57,47 @@ export function CmsCategoryManager({ onChanged }) {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  const loadCategoryWorks = useCallback(async categoryId => {
+    if (!categoryId) { setCategoryWorks([]); return }
+    setWorksLoading(true)
+    try {
+      const key = items.find(item => String(item.id) === String(categoryId))?.key || ''
+      let offset = 0
+      let all = []
+      let hasMore = true
+      while (hasMore) {
+        const result = await categoryRequest('/api/cms/works/?category=' + encodeURIComponent(key) + '&limit=50&offset=' + offset + '&status=all')
+        all = all.concat(result.results || [])
+        hasMore = Boolean(result.pagination?.hasMore)
+        offset += result.pagination?.limit || 50
+      }
+      setCategoryWorks(all)
+    } catch (err) { setError(err.message) }
+    finally { setWorksLoading(false) }
+  }, [items])
+
+  useEffect(() => { loadCategoryWorks(selectedCategoryId) }, [selectedCategoryId, loadCategoryWorks])
+
+  const moveWork = async (index, direction) => {
+    const next = [...categoryWorks]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setCategoryWorks(next)
+    setSaving(true); setError(''); setNotice('')
+    try {
+      const response = await categoryRequest('/api/cms/categories/' + selectedCategoryId + '/works/order/', {
+        method: 'POST', body: JSON.stringify({ workIds: next.map(item => item.id) }),
+      })
+      setCategoryWorks(response.results || [])
+      setNotice('Ordem das obras nesta categoria atualizada.')
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+      await loadCategoryWorks(selectedCategoryId)
+    } finally { setSaving(false) }
+  }
 
   const reset = () => {
     setEditing(null)
@@ -176,6 +221,7 @@ export function CmsCategoryManager({ onChanged }) {
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
+                <button type="button" onClick={() => setSelectedCategoryId(String(item.id))} disabled={saving || !canEditWorks} title={!canEditWorks ? 'Sua conta não tem permissão para reorganizar obras.' : 'Organizar a ordem das obras nesta categoria'}>Organizar obras</button>
                 <button type="button" onClick={() => move(items.indexOf(item), -1)} disabled={saving || items.indexOf(item) === 0}>↑</button>
                 <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1}>↓</button>
                 <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
@@ -184,6 +230,22 @@ export function CmsCategoryManager({ onChanged }) {
               </div>
             </article>
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
+        </section>
+        <section className="cms-category-work-order">
+          <div className="cms-category-work-order-heading"><div><h2>Ordem das obras</h2><p>Esta sequência define como as obras aparecem dentro da categoria no portfólio.</p></div>
+            <select aria-label="Categoria para organizar obras" value={selectedCategoryId} onChange={event => setSelectedCategoryId(event.target.value)}>
+              <option value="">Selecione uma categoria</option>
+              {items.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
+            </select>
+          </div>
+          {worksLoading ? <div className="cms-loading">Carregando obras…</div> : categoryWorks.length ? categoryWorks.map((work, index) => (
+            <article className="cms-category-work-row" key={work.id}>
+              <span className="cms-category-work-position">{String(index + 1).padStart(2, '0')}</span>
+              <strong>{work.title}</strong>
+              <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+              <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
+            </article>
+          )) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use as setas para reorganizar a sequência de exibição.</small></div>}
         </section>
         <form className="cms-category-form" onSubmit={save}>
           <div>

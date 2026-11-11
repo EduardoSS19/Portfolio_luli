@@ -1888,6 +1888,48 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual(create.status_code, 403)
         self.assertEqual(update.status_code, 403)
 
+    def test_work_order_is_saved_atomically_within_selected_category(self):
+        from django.contrib.auth.models import Permission
+        second = Work.objects.create(category=self.category, title="Segunda obra", position=1)
+        other_category = Category.objects.create(title="Escultura", key="escultura-ordem-isolamento")
+        other_work = Work.objects.create(category=other_category, title="Não deve mudar", position=0)
+        self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="change_work"))
+        self.client.force_login(self.editor)
+        response = self.client.post(
+            reverse("cms-category-work-order", args=[self.category.pk]),
+            data=json.dumps({"workIds": [second.pk, self.work.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.work.refresh_from_db()
+        second.refresh_from_db()
+        other_work.refresh_from_db()
+        self.assertEqual((second.position, self.work.position), (0, 1))
+        self.assertEqual(other_work.position, 0)
+
+    def test_work_order_rejects_missing_or_foreign_ids(self):
+        from django.contrib.auth.models import Permission
+        other_category = Category.objects.create(title="Escultura", key="escultura-ordem-invalida")
+        foreign_work = Work.objects.create(category=other_category, title="Outra categoria")
+        self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="change_work"))
+        self.client.force_login(self.editor)
+        response = self.client.post(
+            reverse("cms-category-work-order", args=[self.category.pk]),
+            data=json.dumps({"workIds": [foreign_work.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "work_order_mismatch")
+
+    def test_work_order_requires_change_work_permission(self):
+        self.client.force_login(self.editor)
+        response = self.client.post(
+            reverse("cms-category-work-order", args=[self.category.pk]),
+            data=json.dumps({"workIds": [self.work.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+
     def test_mutations_require_csrf(self):
         client = Client(enforce_csrf_checks=True)
         client.force_login(self.editor)
