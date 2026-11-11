@@ -173,3 +173,83 @@ class CmsContentApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["updated"], 2)
         self.assertEqual(Work.objects.filter(pk__in=[first.pk, second.pk], is_active=True).count(), 2)
+
+    def test_category_order_and_cascade_delete_are_available(self):
+        from .models import Category, Work
+
+        self.grant("change_category", "delete_category")
+        first = Category.objects.create(title="A", key="cms-a", position=0)
+        second = Category.objects.create(title="B", key="cms-b", position=1)
+        work = Work.objects.create(category=first, title="Obra da categoria")
+        response = self.client.patch(
+            reverse("cms-categories"),
+            data=json.dumps({"ids": [second.pk, first.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        second.refresh_from_db()
+        self.assertEqual(second.position, 0)
+
+        response = self.client.delete(reverse("cms-category-update", args=[first.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Category.objects.filter(pk=first.pk).exists())
+        self.assertFalse(Work.objects.filter(pk=work.pk).exists())
+
+    def test_gallery_image_can_be_replaced_without_changing_position(self):
+        from .models import Category, Work, WorkImage
+
+        self.grant("change_work")
+        category = Category.objects.create(title="Foto", key="cms-photo")
+        work = Work.objects.create(category=category, title="Obra")
+        old = WorkImage.objects.create(work=work, image="obras/old-gallery.png", position=4)
+        output = BytesIO()
+        Image.new("RGB", (10, 10), "purple").save(output, format="PNG")
+        upload = SimpleUploadedFile("replacement.png", output.getvalue(), content_type="image/png")
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            response = self.client.patch(
+                reverse("cms-work-gallery-item", args=[work.pk, old.pk]),
+                data={"image": upload},
+            )
+            self.assertEqual(response.status_code, 200, response.content)
+            old.refresh_from_db()
+            self.assertEqual(old.position, 4)
+            self.assertTrue(old.image.name.endswith(".png"))
+
+    def test_existing_video_url_can_be_updated_with_fresh_metadata(self):
+        from unittest.mock import patch
+        from .models import Category, Work, WorkVideo
+
+        self.grant("change_work")
+        category = Category.objects.create(title="Vídeo", key="cms-video-update")
+        work = Work.objects.create(category=category, title="Obra")
+        video = WorkVideo.objects.create(
+            work=work, youtube_url="https://youtu.be/OldVideo123",
+            video_id="OldVideo123", video_title="Título antigo",
+            thumbnail_url="https://example.com/old.jpg",
+        )
+        metadata = {
+            "video_id": "NewVideo123", "title": "Título novo",
+            "thumbnail_url": "https://example.com/new.jpg",
+        }
+        with patch("portfolio.cms_api.fetch_youtube_video_metadata", return_value=metadata):
+            response = self.client.patch(
+                reverse("cms-work-video-update", args=[work.pk, video.pk]),
+                data=json.dumps({"youtubeUrl": "https://youtu.be/NewVideo123"}),
+                content_type="application/json",
+            )
+        self.assertEqual(response.status_code, 200)
+        video.refresh_from_db()
+        self.assertEqual(video.video_id, "NewVideo123")
+        self.assertEqual(video.video_title, "Título novo")
+
+    def test_work_deletion_requires_delete_permission(self):
+        from .models import Category, Work
+
+        category = Category.objects.create(title="Excluir", key="cms-delete-work")
+        work = Work.objects.create(category=category, title="Obra")
+        response = self.client.delete(reverse("cms-work-delete", args=[work.pk]))
+        self.assertEqual(response.status_code, 403)
+        self.grant("delete_work")
+        response = self.client.delete(reverse("cms-work-delete", args=[work.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Work.objects.filter(pk=work.pk).exists())
