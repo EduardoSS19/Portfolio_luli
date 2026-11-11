@@ -109,7 +109,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish, onDelete, canDelete = false }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -177,6 +177,18 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       setPublishing(false)
     }
   }
+  const deleteWork = async () => {
+    if (!window.confirm('Excluir esta obra e todas as imagens e vídeos vinculados? Esta ação não pode ser desfeita.')) return
+    setSaving(true)
+    setError('')
+    try {
+      await onDelete(work.id)
+    } catch (err) {
+      setError(err.message || 'Não foi possível excluir a obra.')
+      setSaving(false)
+    }
+  }
+
   const previewWork = async () => {
     const previewWindow = window.open('about:blank', '_blank')
     if (!previewWindow) {
@@ -368,6 +380,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           <p>Atualize os detalhes da obra. As alterações ficam salvas, mas não mudam o estado de publicação.</p>
         </div>
         <div className="cms-editor-heading-actions">
+          {!isNew && work.id && canDelete && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving}>Excluir obra</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork}>Visualizar prévia ↗</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
