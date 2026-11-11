@@ -1107,6 +1107,7 @@ class CmsWorkDetailApiTests(TestCase):
         self.assertEqual(response.json()["category"], self.category.pk)
         self.assertEqual(response.json()["height"], "12.50")
         self.assertEqual(response.json()["price"], "250.00")
+        self.assertEqual(response.json()["image"], "")
         self.assertIsNone(response.json()["signed"])
         self.assertIn("csrftoken", response.cookies)
 
