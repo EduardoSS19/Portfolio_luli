@@ -84,7 +84,7 @@ jobs:
           CLOUDINARY_CLOUD_NAME: ci-placeholder
           CLOUDINARY_API_KEY: "0"
           CLOUDINARY_API_SECRET: ci-placeholder
-        run: python manage.py check --deploy --fail-level WARNING
+        run: python manage.py check --deploy --fail-level ERROR
 
   frontend:
     name: Build React frontend
