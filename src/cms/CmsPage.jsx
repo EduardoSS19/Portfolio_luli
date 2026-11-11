@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './CmsPage.css'
 import { CmsWorkEditor } from './CmsWorkEditor.jsx'
+import { CmsAnalytics } from './CmsAnalytics.jsx'
 
 const PAGE_SIZE = 24
 
@@ -58,6 +59,7 @@ function LoginRequired({ forbidden = false }) {
 
 export function CmsPage() {
   const [overview, setOverview] = useState(null)
+  const [analytics, setAnalytics] = useState(null)
   const [works, setWorks] = useState([])
   const [pagination, setPagination] = useState({ total: 0, hasMore: false })
   const [query, setQuery] = useState('')
@@ -313,6 +315,10 @@ export function CmsPage() {
       ])
       setOverview(summary)
       setWorks(library.results || [])
+      setAnalytics(null)
+      requestJson('/api/cms/analytics/', signal)
+        .then(setAnalytics)
+        .catch(err => { if (err.name !== 'AbortError') setAnalytics({ status: 'error' }) })
       setPagination(library.pagination || { total: 0, hasMore: false })
       setForbidden(false)
     } catch (err) {
@@ -393,6 +399,7 @@ export function CmsPage() {
                   <StatCard label="Categorias" value={overview?.categories} detail="Organização do acervo" icon="▦" />
                 </section>
               )}
+              <CmsAnalytics data={analytics} />
               <section className="cms-lower-grid">
                 <article className="cms-feature-card">
                   <div className="cms-feature-symbol">✳</div>
