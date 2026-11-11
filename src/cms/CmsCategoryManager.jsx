@@ -40,6 +40,8 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [key, setKey] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryWorks, setCategoryWorks] = useState([])
+  const [savedCategoryWorks, setSavedCategoryWorks] = useState([])
+  const [previewing, setPreviewing] = useState(false)
   const [worksLoading, setWorksLoading] = useState(false)
   const [workQuery, setWorkQuery] = useState('')
   const [workPage, setWorkPage] = useState(0)
@@ -87,6 +89,7 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
         offset += result.pagination?.limit || 50
       }
       setCategoryWorks(all)
+      setSavedCategoryWorks(all)
     } catch (err) { setError(err.message) }
     finally { setWorksLoading(false) }
   }, [items])
@@ -97,24 +100,50 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const totalWorkPages = Math.max(1, Math.ceil(filteredWorks.length / WORKS_PER_PAGE))
   const visibleWorks = filteredWorks.slice(workPage * WORKS_PER_PAGE, (workPage + 1) * WORKS_PER_PAGE)
 
-  const persistWorkOrder = async next => {
+  const hasOrderChanges = categoryWorks.length === savedCategoryWorks.length && categoryWorks.some((item, index) => item.id !== savedCategoryWorks[index]?.id)
+
+  const persistWorkOrder = next => {
     setCategoryWorks(next)
+    setNotice('Ordem alterada localmente. Salve para aplicar no portfólio.')
+    setError('')
+    setDraggingWorkId(null)
+    setDragOverWorkId(null)
+  }
+
+  const saveWorkOrder = async () => {
+    if (!hasOrderChanges || !selectedCategoryId) return
     setSaving(true); setError(''); setNotice('')
     try {
       const response = await categoryRequest('/api/cms/categories/' + selectedCategoryId + '/works/order/', {
-        method: 'POST', body: JSON.stringify({ workIds: next.map(item => item.id) }),
+        method: 'POST', body: JSON.stringify({ workIds: categoryWorks.map(item => item.id) }),
       })
-      setCategoryWorks(response.results || [])
-      setNotice('Ordem das obras nesta categoria atualizada.')
+      const refreshed = response.results || categoryWorks
+      setCategoryWorks(refreshed)
+      setSavedCategoryWorks(refreshed)
+      setNotice('Nova organização salva e publicada no portfólio.')
       onChanged?.()
     } catch (err) {
       setError(err.message)
-      await loadCategoryWorks(selectedCategoryId)
-    } finally {
-      setSaving(false)
-      setDraggingWorkId(null)
-      setDragOverWorkId(null)
-    }
+    } finally { setSaving(false) }
+  }
+
+  const discardWorkOrder = () => {
+    setCategoryWorks(savedCategoryWorks)
+    setNotice('Alterações descartadas. A ordem salva foi restaurada.')
+    setError('')
+  }
+
+  const previewWorkOrder = async () => {
+    if (!selectedCategoryId) return
+    setPreviewing(true); setError('')
+    try {
+      const response = await categoryRequest('/api/cms/categories/' + selectedCategoryId + '/works/preview/', {
+        method: 'POST', body: JSON.stringify({ workIds: categoryWorks.map(item => item.id) }),
+      })
+      window.open(response.url, '_blank', 'noopener,noreferrer')
+      setNotice('Prévia aberta. O link temporário pode ser compartilhado com o cliente por 10 minutos.')
+    } catch (err) { setError(err.message) }
+    finally { setPreviewing(false) }
   }
 
   const moveWork = (index, direction) => {
@@ -277,6 +306,14 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
           </div>
           {worksLoading ? <div className="cms-loading">Carregando obras…</div> : categoryWorks.length ? (
             <>
+              <div className="cms-category-order-actions">
+                <span>{hasOrderChanges ? 'Você tem alterações não salvas.' : 'Ordem salva no portfólio.'}</span>
+                <div>
+                  <button type="button" onClick={previewWorkOrder} disabled={previewing || saving}>{previewing ? 'Preparando…' : 'Visualizar prévia ↗'}</button>
+                  <button type="button" onClick={discardWorkOrder} disabled={!hasOrderChanges || saving}>Descartar</button>
+                  <button type="button" className="cms-primary-button" onClick={saveWorkOrder} disabled={!hasOrderChanges || saving}>{saving ? 'Salvando…' : 'Salvar organização'}</button>
+                </div>
+              </div>
               <label className="cms-category-work-search">Buscar obra nesta categoria
                 <input type="search" value={workQuery} onChange={event => { setWorkQuery(event.target.value); setWorkPage(0) }} placeholder="Digite o nome da obra…" />
               </label>
