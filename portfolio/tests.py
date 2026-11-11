@@ -842,6 +842,7 @@ class CmsReadApiTests(TestCase):
         self.assertEqual(response.json(), {
             "works": {"total": 2, "published": 1, "drafts": 1},
             "categories": 1,
+            "categoryOptions": [{"key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
         })
