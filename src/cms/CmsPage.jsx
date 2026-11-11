@@ -68,13 +68,7 @@ export function CmsPage() {
   const [forbidden, setForbidden] = useState(false)
   const [section, setSection] = useState('overview')
 
-  const categories = useMemo(() => {
-    const unique = new Map()
-    works.forEach(work => {
-      if (work.category?.key) unique.set(work.category.key, work.category.title)
-    })
-    return [...unique.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'))
-  }, [works])
+  const categories = useMemo(() => (overview?.categoryOptions || []).map(item => [item.key, item.title]), [overview])
 
   const load = useCallback(async (signal) => {
     setLoading(true)
@@ -148,7 +142,7 @@ export function CmsPage() {
             <>
               <section className="cms-welcome">
                 <div>
-                  <p className="cms-eyebrow">QUARTA-FEIRA · SEU ESPAÇO CRIATIVO</p>
+                  <p className="cms-eyebrow">SEU ESPAÇO CRIATIVO</p>
                   <h1>Olá, Luli<span>.</span></h1>
                   <p>Seu trabalho, organizado em um só lugar.</p>
                 </div>
@@ -189,7 +183,7 @@ export function CmsPage() {
                 <span className="cms-total-pill">{formatNumber(pagination.total)} obras</span>
               </section>
               <section className="cms-library-tools" aria-label="Filtros da biblioteca">
-                <label className="cms-search"><span aria-hidden="true">⌕</span><input value={query} onChange={event => { setQuery(event.target.value); setOffset(0) }} placeholder="Buscar por nome, descrição…" /><kbd>⌘ K</kbd></label>
+                <label className="cms-search"><span aria-hidden="true">⌕</span><input value={query} onChange={event => { setQuery(event.target.value); setOffset(0) }} placeholder="Buscar por nome, descrição…" /></label>
                 <select aria-label="Filtrar por publicação" value={status} onChange={event => { setStatus(event.target.value); setOffset(0) }}>
                   <option value="all">Todas as obras</option><option value="published">Publicadas</option><option value="draft">Rascunhos</option>
                 </select>
