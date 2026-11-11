@@ -141,6 +141,68 @@ def cms_profile(request):
     })
 
 
+@require_POST
+@never_cache
+@csrf_protect
+def cms_profile_photo_upload(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_artistprofile"):
+        return JsonResponse({"error": "profile_edit_permission_required"}, status=403)
+    profile = ArtistProfile.objects.order_by("pk").first()
+    if not profile:
+        return JsonResponse({"error": "profile_not_found"}, status=404)
+    if not request.content_type.startswith("multipart/form-data"):
+        return JsonResponse({"error": "multipart_form_data_required"}, status=415)
+    if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+        return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+
+    uploaded = request.FILES["image"]
+    if uploaded.size <= 0:
+        return JsonResponse({"error": "empty_image"}, status=400)
+    if uploaded.size > MAX_COVER_UPLOAD_SIZE:
+        return JsonResponse({"error": "image_too_large", "maxBytes": MAX_COVER_UPLOAD_SIZE}, status=413)
+    try:
+        uploaded.seek(0)
+        with Image.open(uploaded) as image:
+            image_format = image.format
+            width, height = image.size
+            if image_format not in ALLOWED_COVER_FORMATS:
+                return JsonResponse({"error": "unsupported_image_format"}, status=400)
+            if width <= 0 or height <= 0 or width * height > MAX_COVER_PIXELS:
+                return JsonResponse({"error": "invalid_image_dimensions"}, status=400)
+            image.verify()
+        uploaded.seek(0)
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+        return JsonResponse({"error": "invalid_image_file"}, status=400)
+
+    old_name = profile.photo.name if profile.photo else ""
+    extension = ALLOWED_COVER_FORMATS[image_format]
+    upload_name = profile.photo.field.generate_filename(profile, f"profile.{extension}")
+    stored_name = ""
+    try:
+        stored_name = default_storage.save(upload_name, uploaded)
+        profile.photo.name = stored_name
+        profile.save(update_fields=["photo"])
+    except Exception:
+        if stored_name:
+            try:
+                default_storage.delete(stored_name)
+            except Exception:
+                logger.exception("Could not clean up failed CMS profile photo %s", stored_name)
+        logger.exception("CMS profile photo upload failed")
+        return JsonResponse({"error": "image_storage_failed"}, status=503)
+
+    if old_name and old_name != stored_name:
+        try:
+            default_storage.delete(old_name)
+        except Exception:
+            logger.exception("Could not delete replaced CMS profile photo %s", old_name)
+    return JsonResponse({"photo": _cms_image_url(profile.photo)})
+
+
 @require_GET
 @never_cache
 @_staff_required
