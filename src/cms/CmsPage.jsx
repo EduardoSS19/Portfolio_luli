@@ -139,7 +139,7 @@ export function CmsPage() {
     setSection('library')
   }
 
-  const saveWork = async payload => {
+  const saveWork = async (payload, { addAnother = false } = {}) => {
     const creating = creatingWork
     const endpoint = creating ? '/api/cms/works/create/' : '/api/cms/works/' + selectedWork.id + '/'
     const response = await fetch(endpoint, {
@@ -162,8 +162,13 @@ export function CmsPage() {
     }
     setSelectedWork({ ...selectedWork, ...result, category: result.category.id })
     if (creating) {
-      setCreatingWork(false)
       setLibraryRefresh(value => value + 1)
+      if (addAnother) {
+        setCreatingWork(true)
+        setSelectedWork({ id: null, category: String(result.category.id), title: '', description: '', detail: '', technique: '', material: '', support: '', year: '', height: '', width: '', depth: '', dimension_unit: 'cm', price: '', currency: 'BRL', availability: '', series: '', edition: '', print_run: '', signed: null, creation_location: '', condition: '', exhibitions: '', position: Number(result.position || 0) + 1, published: false })
+      } else {
+        setCreatingWork(false)
+      }
     } else {
       setWorks(current => current.map(item => item.id === result.id
         ? { ...item, title: result.title, category: result.category }
