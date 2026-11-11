@@ -62,8 +62,17 @@ export function CmsCategoryManager({ onChanged }) {
     if (!categoryId) { setCategoryWorks([]); return }
     setWorksLoading(true)
     try {
-      const result = await categoryRequest('/api/cms/works/?category=' + encodeURIComponent(items.find(item => String(item.id) === String(categoryId))?.key || '') + '&limit=50&status=all')
-      setCategoryWorks(result.results || [])
+      const key = items.find(item => String(item.id) === String(categoryId))?.key || ''
+      let offset = 0
+      let all = []
+      let hasMore = true
+      while (hasMore) {
+        const result = await categoryRequest('/api/cms/works/?category=' + encodeURIComponent(key) + '&limit=50&offset=' + offset + '&status=all')
+        all = all.concat(result.results || [])
+        hasMore = Boolean(result.pagination?.hasMore)
+        offset += result.pagination?.limit || 50
+      }
+      setCategoryWorks(all)
     } catch (err) { setError(err.message) }
     finally { setWorksLoading(false) }
   }, [items])
