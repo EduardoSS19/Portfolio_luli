@@ -105,11 +105,12 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, onCancel, onSave }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const [created, setCreated] = useState(false)
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
@@ -125,6 +126,7 @@ export function CmsWorkEditor({ work, categories, onCancel, onSave }) {
     payload.signed = form.signed === '' || form.signed == null ? null : form.signed === true || form.signed === 'true'
     try {
       await onSave(payload)
+      if (isNew) setCreated(true)
       setSaved(true)
     } catch (err) {
       setError(err.message || 'Não foi possível salvar as alterações.')
@@ -138,8 +140,8 @@ export function CmsWorkEditor({ work, categories, onCancel, onSave }) {
       <button className="cms-editor-back" type="button" onClick={onCancel}>← Voltar para a biblioteca</button>
       <header className="cms-editor-heading">
         <div>
-          <p className="cms-eyebrow">EDIÇÃO DE OBRA · #{work.id}</p>
-          <h1>{work.title || 'Obra'}<span>.</span></h1>
+          <p className="cms-eyebrow">{isNew ? 'NOVA OBRA' : 'EDIÇÃO DE OBRA · #' + work.id}</p>
+          <h1>{work.title || (isNew ? 'Nova obra' : 'Obra')}<span>.</span></h1>
           <p>Atualize os detalhes da obra. As alterações ficam salvas, mas não mudam o estado de publicação.</p>
         </div>
         <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
@@ -160,10 +162,10 @@ export function CmsWorkEditor({ work, categories, onCancel, onSave }) {
           </section>
         ))}
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
-        {saved && <div className="cms-editor-message success" role="status">Alterações salvas. A publicação da obra não foi modificada.</div>}
+        {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : 'Alterações salvas. A publicação da obra não foi modificada.'}</div>}
         <div className="cms-editor-actions">
           <button className="cms-editor-cancel" type="button" onClick={onCancel}>Cancelar</button>
-          <button className="cms-primary-button" type="submit" disabled={saving}>{saving ? 'Salvando…' : 'Salvar alterações'} <span>↗</span></button>
+          <button className="cms-primary-button" type="submit" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Criar rascunho' : 'Salvar alterações'} <span>↗</span></button>
         </div>
       </form>
     </section>
