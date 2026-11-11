@@ -917,6 +917,39 @@ class CmsReadApiTests(TestCase):
         self.assertEqual(invalid_status.json(), {"error": "invalid_status"})
 
 
+    def test_library_uses_first_carousel_image_when_work_has_no_cover(self):
+        carousel = Work.objects.create(category=self.category, title="Carrossel sem capa")
+        WorkImage.objects.create(work=carousel, image="obras/carrossel-primeira.webp", position=0)
+        WorkImage.objects.create(work=carousel, image="obras/carrossel-segunda.webp", position=1)
+        staff = get_user_model().objects.create_user(username="cms-carousel-cover", is_staff=True)
+        self.client.force_login(staff)
+
+        response = self.client.get(reverse("cms-works"), {"q": "Carrossel sem capa"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["results"][0]["image"].endswith("/media/obras/carrossel-primeira.webp"))
+
+    def test_library_uses_first_video_thumbnail_when_work_has_no_cover_or_gallery(self):
+        video_work = Work.objects.create(category=self.category, title="Vídeo sem capa")
+        WorkVideo.objects.create(
+            work=video_work,
+            youtube_url="https://youtu.be/ZyXwVu98765",
+            video_id="ZyXwVu98765",
+            video_title="Vídeo de processo",
+            thumbnail_url="https://i.ytimg.com/vi/ZyXwVu98765/hqdefault.jpg",
+        )
+        staff = get_user_model().objects.create_user(username="cms-video-cover", is_staff=True)
+        self.client.force_login(staff)
+
+        response = self.client.get(reverse("cms-works"), {"q": "Vídeo sem capa"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["results"][0]["image"],
+            "https://i.ytimg.com/vi/ZyXwVu98765/hqdefault.jpg",
+        )
+
+
 class CmsWorkUpdateApiTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission
