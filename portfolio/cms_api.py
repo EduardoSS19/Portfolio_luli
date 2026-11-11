@@ -182,8 +182,17 @@ def cms_work_update(request, work_id):
         return JsonResponse({"error": "work_not_found"}, status=404)
 
     if request.method == "GET":
+        cover_url = ""
+        if work.image:
+            try:
+                cover_url = work.image.url
+            except ValueError:
+                cover_url = ""
+        if not cover_url:
+            cover_url = work.image_url or ""
         return JsonResponse({
             "id": work.pk,
+            "image": cover_url,
             "category": work.category_id,
             "title": work.title,
             "description": work.description,
