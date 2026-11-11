@@ -27,6 +27,18 @@ O conteúdo do site é administrado pelo painel do Django (`/admin/`). Não é n
 
 Antes de publicar alterações, confira se a obra está marcada como publicada e se a categoria também está publicada. Para remover algo temporariamente do site, use **Despublicar** em vez de excluir.
 
+## Desenvolvimento local
+
+Por segurança, o projeto assume `DEBUG=false` quando a variável não é definida. Para executar localmente, habilite o modo de desenvolvimento explicitamente e use uma chave exclusiva para sua máquina:
+
+```bash
+export DEBUG=true
+export DJANGO_SECRET_KEY=local-development-only
+python manage.py runserver
+```
+
+Não reutilize essa chave em produção e nunca versione arquivos com segredos.
+
 ## Desenvolvimento e verificações
 
 O projeto usa GitHub Actions para executar os testes do Django e compilar o frontend em pushes e pull requests. Localmente, as verificações principais são:
