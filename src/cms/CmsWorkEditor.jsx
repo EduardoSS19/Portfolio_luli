@@ -50,7 +50,7 @@ const SECTIONS = [
     fields: [
       { name: 'creation_location', label: 'Local de criação' },
       { name: 'condition', label: 'Estado de conservação' },
-      { name: 'position', label: 'Ordem no portfólio', type: 'number', required: true },
+      { name: 'position', label: 'Ordem dentro da categoria', type: 'number', required: true },
       { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
       { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true },
       { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true },
