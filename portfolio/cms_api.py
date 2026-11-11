@@ -755,6 +755,54 @@ def cms_work_gallery(request, work_id):
     return JsonResponse({"results": images, "total": len(images)})
 
 
+@require_http_methods(["PATCH"])
+@never_cache
+@csrf_protect
+def cms_work_gallery_item(request, work_id, image_id):
+    """Replace one existing gallery image without changing its order."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    try:
+        item = WorkImage.objects.select_related("work").get(pk=image_id, work_id=work_id)
+    except WorkImage.DoesNotExist:
+        return JsonResponse({"error": "gallery_image_not_found"}, status=404)
+    if not request.content_type.startswith("multipart/form-data"):
+        return JsonResponse({"error": "multipart_form_data_required"}, status=415)
+    if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+        return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+    uploaded = request.FILES["image"]
+    validation_error = _validate_cms_gallery_image(uploaded)
+    if validation_error:
+        return JsonResponse({"error": validation_error}, status=413 if validation_error == "image_too_large" else 400)
+    old_name = item.image.name
+    extension = ALLOWED_COVER_FORMATS[Image.open(uploaded).format]
+    uploaded.seek(0)
+    filename = item.image.field.generate_filename(item, f"gallery-{item.position + 1}.{extension}")
+    stored_name = ""
+    try:
+        stored_name = default_storage.save(filename, uploaded)
+        item.image.name = stored_name
+        item.save(update_fields=["image"])
+    except Exception:
+        if stored_name:
+            try:
+                default_storage.delete(stored_name)
+            except Exception:
+                logger.exception("Could not clean up failed gallery replacement %s", stored_name)
+        logger.exception("CMS gallery replacement failed for work %s", work_id)
+        return JsonResponse({"error": "image_storage_failed"}, status=503)
+    if old_name and old_name != stored_name:
+        try:
+            default_storage.delete(old_name)
+        except Exception:
+            logger.exception("Could not delete replaced gallery image %s", old_name)
+    return JsonResponse({"id": item.pk, "url": _cms_image_url(item.image), "position": item.position})
+
+
 @require_POST
 @never_cache
 @csrf_protect
@@ -874,6 +922,44 @@ def cms_work_videos(request, work_id):
 
     videos = work.youtube_videos.all().order_by("position", "pk")
     return JsonResponse({"results": [_cms_video_payload(item) for item in videos], "total": videos.count()})
+
+
+@require_http_methods(["PATCH"])
+@never_cache
+@csrf_protect
+def cms_work_video_update(request, work_id, video_id):
+    """Update a YouTube URL and refresh its metadata, matching Django Admin behavior."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    try:
+        video = WorkVideo.objects.get(pk=video_id, work_id=work_id)
+    except WorkVideo.DoesNotExist:
+        return JsonResponse({"error": "video_not_found"}, status=404)
+    if request.content_type != "application/json" or len(request.body) > 8192:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    youtube_url = payload.get("youtubeUrl") if isinstance(payload, dict) else None
+    if not isinstance(youtube_url, str) or not youtube_url.strip() or len(youtube_url) > 500:
+        return JsonResponse({"error": "invalid_youtube_url"}, status=400)
+    try:
+        metadata = fetch_youtube_video_metadata(youtube_url.strip())
+    except YouTubeMetadataError as error:
+        return JsonResponse({"error": "youtube_metadata_error", "message": str(error)}, status=400)
+    if WorkVideo.objects.filter(work_id=work_id, video_id=metadata["video_id"]).exclude(pk=video.pk).exists():
+        return JsonResponse({"error": "video_already_attached"}, status=409)
+    video.youtube_url = youtube_url.strip()
+    video.video_id = metadata["video_id"]
+    video.video_title = metadata["title"][:255]
+    video.thumbnail_url = metadata["thumbnail_url"]
+    video.save(update_fields=["youtube_url", "video_id", "video_title", "thumbnail_url"])
+    return JsonResponse(_cms_video_payload(video))
 
 
 @require_POST
