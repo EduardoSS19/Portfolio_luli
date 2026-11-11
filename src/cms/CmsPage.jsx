@@ -228,7 +228,7 @@ export function CmsPage() {
     const formData = new FormData()
     formData.append('image', file)
     const response = await fetch('/api/cms/works/' + workId + '/gallery/' + imageId + '/', {
-      method: 'PATCH', credentials: 'same-origin', cache: 'no-store',
+      method: 'POST', credentials: 'same-origin', cache: 'no-store',
       headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
       body: formData,
     })
