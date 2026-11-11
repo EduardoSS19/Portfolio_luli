@@ -42,6 +42,7 @@ export function CmsContentManager() {
   const [form, setForm] = useState(emptyForm('social-links'))
   const [editing, setEditing] = useState(null)
   const [files, setFiles] = useState([])
+  const [selectedIds, setSelectedIds] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -58,7 +59,7 @@ export function CmsContentManager() {
     finally { setLoading(false) }
   }, [type])
 
-  useEffect(() => { setEditing(null); setForm(emptyForm(type)); setFiles([]); load(type) }, [type, load])
+  useEffect(() => { setEditing(null); setForm(emptyForm(type)); setFiles([]); setSelectedIds([]); load(type) }, [type, load])
 
   const reset = () => { setEditing(null); setForm(emptyForm(type)); setNotice('') }
   const update = (key, value) => setForm(current => ({ ...current, [key]: value }))
@@ -123,6 +124,18 @@ export function CmsContentManager() {
     finally { setSaving(false) }
   }
 
+  const bulkToggle = async active => {
+    if (!selectedIds.length) return
+    setSaving(true); setError(''); setNotice('')
+    try {
+      await api('/api/cms/content/', { method: 'PATCH', body: JSON.stringify({ type, ids: selectedIds, active }) })
+      setSelectedIds([])
+      await load(type)
+      setNotice(active ? 'Itens selecionados publicados.' : 'Itens selecionados ocultados sem apagar seus dados.')
+    } catch (err) { setError(err.message) }
+    finally { setSaving(false) }
+  }
+
   const move = async (index, delta) => {
     const next = [...items]
     const target = index + delta
@@ -154,10 +167,12 @@ export function CmsContentManager() {
       <div className="cms-content-intro"><div><h2>{current.title}</h2><p>{current.description}</p></div><span>{items.length} {items.length === 1 ? 'item' : 'itens'}</span></div>
       {error && <div className="cms-error" role="alert">{error}<button type="button" onClick={() => load(type)}>Tentar novamente</button></div>}
       {notice && <div className="cms-editor-message success" role="status">{notice}</div>}
+      {selectedIds.length > 0 && <div className="cms-bulk-actions"><strong>{selectedIds.length} item(ns) selecionado(s)</strong><button type="button" onClick={() => bulkToggle(true)} disabled={saving}>Publicar selecionados</button><button type="button" onClick={() => bulkToggle(false)} disabled={saving}>Ocultar selecionados</button><button type="button" onClick={() => setSelectedIds([])}>Limpar seleção</button></div>}
       <div className="cms-content-layout">
         <section className="cms-content-list">
           {loading ? <div className="cms-loading">Carregando conteúdo…</div> : items.length ? items.map((item, index) => (
             <article className="cms-content-item" key={item.id}>
+              <label className="cms-content-select"><input type="checkbox" checked={selectedIds.includes(item.id)} onChange={event => setSelectedIds(current => event.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))} aria-label={'Selecionar ' + (item.title || 'imagem de fundo')} /> Selecionar</label>
               {type === 'backgrounds' && <img className="cms-content-thumb" src={item.image} alt="" loading="lazy" />}
               <div className="cms-content-item-main">
                 <strong>{type === 'backgrounds' ? 'Imagem de fundo ' + (index + 1) : item.title}</strong>
