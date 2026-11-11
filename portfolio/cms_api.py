@@ -755,7 +755,7 @@ def cms_work_gallery(request, work_id):
     return JsonResponse({"results": images, "total": len(images)})
 
 
-@require_http_methods(["PATCH"])
+@require_POST
 @never_cache
 @csrf_protect
 def cms_work_gallery_item(request, work_id, image_id):
