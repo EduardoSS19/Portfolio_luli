@@ -138,10 +138,10 @@ def portfolio_data(request):
     works_queryset = Work.objects.filter(is_active=True)
     categories_queryset = Category.objects.filter(is_active=True, works__is_active=True).distinct()
     if preview_work:
-        works_queryset = Work.objects.filter(Q(is_active=True) | Q(pk=preview_work.pk))
-        categories_queryset = Category.objects.filter(is_active=True).filter(
-            Q(works__is_active=True) | Q(pk=preview_work.category_id)
-        ).distinct()
+        # A prévia do CMS é uma página isolada: não mistura a obra selecionada
+        # com outras obras da categoria nem com o restante do portfólio.
+        works_queryset = Work.objects.filter(pk=preview_work.pk)
+        categories_queryset = Category.objects.filter(pk=preview_work.category_id)
 
     categories = categories_queryset.prefetch_related(
         Prefetch(
