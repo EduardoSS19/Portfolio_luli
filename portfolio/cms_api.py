@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.db.models import Max
 
-from .models import Category, Reference, Work, WorkImage, WorkVideo
+from .models import ArtistProfile, Category, Reference, Work, WorkImage, WorkVideo
 from .youtube import YouTubeMetadataError, fetch_youtube_video_metadata
 
 
@@ -62,6 +62,82 @@ def cms_overview(request):
             "canCreateWork": request.user.has_perm("portfolio.add_work"),
             "canEditWork": request.user.has_perm("portfolio.change_work"),
         },
+    })
+
+
+class CmsArtistProfileForm(forms.ModelForm):
+    class Meta:
+        model = ArtistProfile
+        fields = (
+            "name", "tagline", "photo_url", "bio",
+            "instagram_url", "contact_email", "contact_form_url",
+        )
+
+
+@require_http_methods(["GET", "PATCH"])
+@never_cache
+@ensure_csrf_cookie
+@csrf_protect
+@_staff_required
+def cms_profile(request):
+    """Read and update the artist profile without exposing it publicly to editors."""
+    profile = ArtistProfile.objects.order_by("pk").first()
+    if request.method == "GET":
+        if not profile:
+            return JsonResponse({"profile": None})
+        return JsonResponse({
+            "profile": {
+                "id": profile.pk,
+                "name": profile.name,
+                "tagline": profile.tagline,
+                "photo": _cms_image_url(profile.photo),
+                "photo_url": profile.photo_url,
+                "bio": profile.bio,
+                "instagram_url": profile.instagram_url,
+                "contact_email": profile.contact_email,
+                "contact_form_url": profile.contact_form_url,
+            },
+            "permissions": {
+                "canAdd": request.user.has_perm("portfolio.add_artistprofile"),
+                "canChange": request.user.has_perm("portfolio.change_artistprofile"),
+            },
+        })
+
+    if profile and not request.user.has_perm("portfolio.change_artistprofile"):
+        return JsonResponse({"error": "profile_edit_permission_required"}, status=403)
+    if not profile and not request.user.has_perm("portfolio.add_artistprofile"):
+        return JsonResponse({"error": "profile_add_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 16384:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    if not isinstance(payload, dict):
+        return JsonResponse({"error": "invalid_profile_payload"}, status=400)
+
+    form = CmsArtistProfileForm(payload, instance=profile)
+    if not form.is_valid():
+        return JsonResponse({
+            "error": "invalid_profile",
+            "fields": {
+                field: [{"message": str(error)} for error in errors]
+                for field, errors in form.errors.items()
+            },
+        }, status=400)
+    profile = form.save()
+    return JsonResponse({
+        "profile": {
+            "id": profile.pk,
+            "name": profile.name,
+            "tagline": profile.tagline,
+            "photo": _cms_image_url(profile.photo),
+            "photo_url": profile.photo_url,
+            "bio": profile.bio,
+            "instagram_url": profile.instagram_url,
+            "contact_email": profile.contact_email,
+            "contact_form_url": profile.contact_form_url,
+        }
     })
 
 
