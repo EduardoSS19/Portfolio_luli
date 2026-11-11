@@ -390,9 +390,23 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     const addAnother = event.nativeEvent.submitter?.value === 'add-another'
     try {
       await onSave(payload, { addAnother })
-      if (isNew && !addAnother) setCreated(true)
-      setDirty(false)
-      setSaved(true)
+      if (isNew && addAnother) {
+        setForm(current => ({ ...current, id: null, title: '', description: '', detail: '', technique: '', material: '', support: '', year: '', height: '', width: '', depth: '', price: '', availability: '', series: '', edition: '', print_run: '', signed: null, creation_location: '', condition: '', exhibitions: '', is_share_image: false, image_url: '', position: Number(payload.position || 0) + 1, published: false }))
+        setCreated(false)
+        setSaved(false)
+        setDirty(false)
+        setCoverError('')
+        setCoverSaved(false)
+        setGallery([])
+        setVideos([])
+        setVideoUrl('')
+        setVideoError('')
+        setGalleryError('')
+      } else {
+        if (isNew) setCreated(true)
+        setDirty(false)
+        setSaved(true)
+      }
     } catch (err) {
       setError(err.message || 'Não foi possível salvar as alterações.')
     } finally {
