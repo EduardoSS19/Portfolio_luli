@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './CmsPage.css'
+import { CmsWorkEditor } from './CmsWorkEditor.jsx'
 
 const PAGE_SIZE = 24
 
@@ -68,6 +69,9 @@ export function CmsPage() {
   const [error, setError] = useState(null)
   const [forbidden, setForbidden] = useState(false)
   const [section, setSection] = useState('overview')
+  const [selectedWork, setSelectedWork] = useState(null)
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
@@ -75,6 +79,56 @@ export function CmsPage() {
   }, [query])
 
   const categories = useMemo(() => (overview?.categoryOptions || []).map(item => [item.key, item.title]), [overview])
+
+  const categoryOptions = overview?.categoryOptions || []
+
+  const openWork = async workId => {
+    setSelectedWork(null)
+    setEditError(null)
+    setEditLoading(true)
+    setSection('library')
+    try {
+      const detail = await requestJson('/api/cms/works/' + workId + '/')
+      setSelectedWork(detail)
+    } catch (err) {
+      setEditError(err)
+    } finally {
+      setEditLoading(false)
+    }
+  }
+
+  const saveWork = async payload => {
+    const response = await fetch('/api/cms/works/' + selectedWork.id + '/', {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRFToken': readCookie('csrftoken'),
+      },
+      body: JSON.stringify(payload),
+    })
+    if (response.status === 401) throw new Error('Sua sessão expirou. Entre novamente para continuar.')
+    if (response.status === 403) throw new Error('Sua conta não tem permissão para editar obras. Verifique o acesso de equipe.')
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const messages = Object.values(result.fields || {}).flat().map(item => item.message).filter(Boolean)
+      throw new Error(messages.join(' · ') || 'Não foi possível salvar. Revise os campos e tente novamente.')
+    }
+    setSelectedWork({ ...selectedWork, ...result, category: result.category.id })
+    setWorks(current => current.map(item => item.id === result.id
+      ? { ...item, title: result.title, category: result.category }
+      : item))
+    return result
+  }
+
+  const readCookie = name => {
+    const prefix = name + '='
+    const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
+    return item ? decodeURIComponent(item.slice(prefix.length)) : ''
+  }
+
 
   const load = useCallback(async (signal) => {
     setLoading(true)
@@ -184,6 +238,19 @@ export function CmsPage() {
             </>
           ) : (
             <>
+              {selectedWork ? (
+                <CmsWorkEditor
+                  work={selectedWork}
+                  categories={categoryOptions}
+                  onCancel={() => { setSelectedWork(null); setEditError(null) }}
+                  onSave={saveWork}
+                />
+              ) : editLoading ? (
+                <div className="cms-loading">Abrindo a ficha da obra…</div>
+              ) : editError ? (
+                <div className="cms-error" role="alert">{editError.message}<button onClick={() => setEditError(null)}>Fechar</button></div>
+              ) : (
+              <>
               <section className="cms-library-heading">
                 <div><p className="cms-eyebrow">ACERVO COMPLETO</p><h1>Biblioteca<span>.</span></h1><p>Encontre e acompanhe as obras do seu portfólio.</p></div>
                 <span className="cms-total-pill">{formatNumber(pagination.total)} obras</span>
@@ -210,6 +277,7 @@ export function CmsPage() {
                         </div>
                         <div className="cms-work-info"><div><h3>{work.title}</h3><p>{work.category?.title || 'Sem categoria'}</p></div><span className="cms-work-arrow">↗</span></div>
                         <div className="cms-work-meta"><span>{work.media?.images + work.media?.gallery || 0} imagens</span><span>{work.media?.videos || 0} vídeos</span></div>
+                        <button className="cms-work-edit" type="button" onClick={() => openWork(work.id)}>Editar obra <span>→</span></button>
                       </article>
                     ))}
                   </section>
@@ -219,6 +287,8 @@ export function CmsPage() {
                   </div>
                 </>
               ) : <div className="cms-empty"><span>⌕</span><h3>Nenhuma obra encontrada</h3><p>Tente mudar os filtros ou buscar por outro termo.</p><button onClick={() => { setQuery(''); setStatus('all'); setCategory('all'); setOffset(0) }}>Limpar filtros</button></div>}
+              </>
+              )}
             </>
           )}
           {error && !isOverview && null}
