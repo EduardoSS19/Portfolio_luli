@@ -60,6 +60,7 @@ export function CmsPage() {
   const [works, setWorks] = useState([])
   const [pagination, setPagination] = useState({ total: 0, hasMore: false })
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [status, setStatus] = useState('all')
   const [category, setCategory] = useState('all')
   const [offset, setOffset] = useState(0)
@@ -67,6 +68,11 @@ export function CmsPage() {
   const [error, setError] = useState(null)
   const [forbidden, setForbidden] = useState(false)
   const [section, setSection] = useState('overview')
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
+    return () => window.clearTimeout(timeout)
+  }, [query])
 
   const categories = useMemo(() => (overview?.categoryOptions || []).map(item => [item.key, item.title]), [overview])
 
@@ -76,7 +82,7 @@ export function CmsPage() {
     try {
       const [summary, library] = await Promise.all([
         requestJson('/api/cms/overview/', signal),
-        requestJson('/api/cms/works/?limit=' + PAGE_SIZE + '&offset=' + offset + '&status=' + encodeURIComponent(status) + '&category=' + encodeURIComponent(category === 'all' ? '' : category) + '&q=' + encodeURIComponent(query.trim()), signal),
+        requestJson('/api/cms/works/?limit=' + PAGE_SIZE + '&offset=' + offset + '&status=' + encodeURIComponent(status) + '&category=' + encodeURIComponent(category === 'all' ? '' : category) + '&q=' + encodeURIComponent(debouncedQuery.trim()), signal),
       ])
       setOverview(summary)
       setWorks(library.results || [])
@@ -90,7 +96,7 @@ export function CmsPage() {
     } finally {
       if (!signal?.aborted) setLoading(false)
     }
-  }, [category, offset, query, status])
+  }, [category, debouncedQuery, offset, status])
 
   useEffect(() => {
     const controller = new AbortController()
