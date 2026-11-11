@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const SECTIONS = [
   {
@@ -105,16 +105,54 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [created, setCreated] = useState(false)
+  const [coverImage, setCoverImage] = useState(work.image || '')
+  const [selectedCover, setSelectedCover] = useState(null)
+  const [coverPreview, setCoverPreview] = useState('')
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverError, setCoverError] = useState('')
+  const [coverSaved, setCoverSaved] = useState(false)
+
+  useEffect(() => {
+    if (!selectedCover) {
+      setCoverPreview('')
+      return undefined
+    }
+    const preview = URL.createObjectURL(selectedCover)
+    setCoverPreview(preview)
+    return () => URL.revokeObjectURL(preview)
+  }, [selectedCover])
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
     setSaved(false)
+  }
+
+  const uploadCover = async () => {
+    if (!selectedCover || uploadingCover) return
+    setUploadingCover(true)
+    setCoverError('')
+    setCoverSaved(false)
+    try {
+      let workId = work.id
+      if (!workId) {
+        const result = await onSave(payload)
+        workId = result.id
+      }
+      const result = await onUploadCover(workId, selectedCover)
+      setCoverImage(result.image || '')
+      setSelectedCover(null)
+      setCoverSaved(true)
+    } catch (err) {
+      setCoverError(err.message || 'Não foi possível enviar a imagem.')
+    } finally {
+      setUploadingCover(false)
+    }
   }
 
   const submit = async event => {
@@ -149,6 +187,45 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       </header>
 
       <form onSubmit={submit}>
+        <section className="cms-editor-section cms-cover-section">
+          <div className="cms-editor-section-heading">
+            <h2>Imagem de capa</h2>
+            <p>A imagem principal que representa esta obra no portfólio. JPG, PNG ou WebP · até 15 MB.</p>
+          </div>
+          <div className="cms-cover-manager">
+            <div className="cms-cover-preview">
+              {(coverPreview || coverImage) ? <img src={coverPreview || coverImage} alt="Prévia da capa da obra" /> : <div className="cms-cover-empty"><span>✳</span><small>SEM CAPA</small></div>}
+            </div>
+            <div className="cms-cover-controls">
+              <label className="cms-cover-file">
+                <span>{selectedCover ? 'Trocar arquivo selecionado' : 'Escolher imagem'}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={event => {
+                    const file = event.target.files?.[0] || null
+                    setCoverError('')
+                    setCoverSaved(false)
+                    if (file && file.size > 15 * 1024 * 1024) {
+                      setSelectedCover(null)
+                      setCoverError('A imagem deve ter no máximo 15 MB.')
+                      event.target.value = ''
+                      return
+                    }
+                    setSelectedCover(file)
+                  }}
+                />
+              </label>
+              {selectedCover && <p className="cms-cover-filename">{selectedCover.name}</p>}
+              <button className="cms-primary-button" type="button" onClick={uploadCover} disabled={!selectedCover || uploadingCover}>
+                {uploadingCover ? 'Enviando…' : work.id ? 'Enviar capa' : 'Salvar rascunho e enviar capa'} <span>↗</span>
+              </button>
+              <p className="cms-cover-help">A capa atual só é substituída depois que o novo arquivo é validado e armazenado.</p>
+            </div>
+          </div>
+          {coverError && <div className="cms-editor-message error" role="alert">{coverError}</div>}
+          {coverSaved && <div className="cms-editor-message success" role="status">Imagem de capa atualizada.</div>}
+        </section>
         {SECTIONS.map(section => (
           <section className="cms-editor-section" key={section.title}>
             <div className="cms-editor-section-heading">
