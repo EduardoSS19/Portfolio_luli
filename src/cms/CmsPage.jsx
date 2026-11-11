@@ -442,7 +442,9 @@ export function CmsPage() {
         </header>
 
         <div className="cms-content">
-          {isCategories ? (
+          {isProfile ? (
+            <CmsProfileManager />
+          ) : isCategories ? (
             <CmsCategoryManager onChanged={() => setLibraryRefresh(value => value + 1)} />
           ) : isOverview ? (
             <>
