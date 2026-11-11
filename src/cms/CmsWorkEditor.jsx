@@ -105,7 +105,7 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -120,6 +120,13 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const [galleryError, setGalleryError] = useState('')
   const [galleryNotice, setGalleryNotice] = useState('')
   const [galleryBusyId, setGalleryBusyId] = useState(null)
+  const [videos, setVideos] = useState([])
+  const [videosLoading, setVideosLoading] = useState(false)
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoAdding, setVideoAdding] = useState(false)
+  const [videoBusyId, setVideoBusyId] = useState(null)
+  const [videoError, setVideoError] = useState('')
+  const [videoNotice, setVideoNotice] = useState('')
 
   useEffect(() => {
     if (!work.id) return
@@ -131,6 +138,70 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       .finally(() => { if (active) setGalleryLoading(false) })
     return () => { active = false }
   }, [work.id, onLoadGallery])
+
+  useEffect(() => {
+    if (!work.id) return
+    let active = true
+    setVideosLoading(true)
+    onLoadVideos(work.id)
+      .then(items => { if (active) setVideos(items) })
+      .catch(err => { if (active) setVideoError(err.message || 'Não foi possível carregar os vídeos.') })
+      .finally(() => { if (active) setVideosLoading(false) })
+    return () => { active = false }
+  }, [work.id, onLoadVideos])
+
+  const addVideo = async event => {
+    event.preventDefault()
+    const url = videoUrl.trim()
+    if (!url) return
+    setVideoAdding(true)
+    setVideoError('')
+    setVideoNotice('')
+    try {
+      const item = await onAddVideo(work.id, url)
+      setVideos(current => [...current, item])
+      setVideoUrl('')
+      setVideoNotice('Vídeo adicionado à obra.')
+    } catch (err) {
+      setVideoError(err.message || 'Não foi possível adicionar o vídeo.')
+    } finally {
+      setVideoAdding(false)
+    }
+  }
+
+  const deleteVideo = async item => {
+    if (!window.confirm('Remover este vídeo da obra? Esta ação não pode ser desfeita.')) return
+    setVideoBusyId(item.id)
+    setVideoError('')
+    setVideoNotice('')
+    try {
+      await onDeleteVideo(work.id, item.id)
+      setVideos(current => current.filter(video => video.id !== item.id))
+      setVideoNotice('Vídeo removido da obra.')
+    } catch (err) {
+      setVideoError(err.message || 'Não foi possível remover o vídeo.')
+    } finally {
+      setVideoBusyId(null)
+    }
+  }
+
+  const moveVideo = async (index, direction) => {
+    const next = [...videos]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return
+    ;[next[index], next[target]] = [next[target], next[index]]
+    setVideos(next)
+    setVideoError('')
+    setVideoNotice('')
+    try {
+      const savedItems = await onReorderVideos(work.id, next.map(item => item.id))
+      setVideos(savedItems)
+      setVideoNotice('Ordem dos vídeos atualizada.')
+    } catch (err) {
+      setVideoError(err.message || 'Não foi possível reorganizar os vídeos.')
+      try { setVideos(await onLoadVideos(work.id)) } catch { /* preserve reorder error */ }
+    }
+  }
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
@@ -296,6 +367,43 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {galleryUploading && <div className="cms-gallery-progress" role="status">Enviando imagens para o acervo…</div>}
         {galleryError && <div className="cms-editor-message error" role="alert">{galleryError}</div>}
         {galleryNotice && <div className="cms-editor-message success" role="status">{galleryNotice}</div>}
+      </section>
+      <section className="cms-editor-section cms-videos-section">
+        <div className="cms-editor-section-heading">
+          <h2>Vídeos do YouTube</h2>
+          <p>Vincule vídeos publicados no YouTube à obra. O painel salva o link e busca automaticamente título e miniatura.</p>
+        </div>
+        {!work.id ? <div className="cms-gallery-empty">Salve a obra primeiro para adicionar vídeos.</div> : (
+          <>
+            <form className="cms-video-add-form" onSubmit={addVideo}>
+              <label htmlFor="cms-youtube-url">Link do vídeo</label>
+              <div className="cms-video-add-row">
+                <input id="cms-youtube-url" type="url" value={videoUrl} onChange={event => setVideoUrl(event.target.value)} placeholder="https://www.youtube.com/watch?v=…" required />
+                <button className="cms-cover-upload" type="submit" disabled={videoAdding || !videoUrl.trim()}>{videoAdding ? 'Validando…' : '＋ Adicionar vídeo'}</button>
+              </div>
+              <small>Use um link público e incorporável do YouTube.</small>
+            </form>
+            {videosLoading ? <div className="cms-gallery-empty">Carregando vídeos…</div> : videos.length ? (
+              <div className="cms-video-list">
+                {videos.map((item, index) => <article className="cms-video-item" key={item.id}>
+                  <div className="cms-video-thumb">{item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : <span>▶</span>}</div>
+                  <div className="cms-video-info">
+                    <strong>{item.title || 'Vídeo do YouTube'}</strong>
+                    <a href={item.youtubeUrl} target="_blank" rel="noreferrer">Abrir no YouTube ↗</a>
+                    <small>Vídeo {String(index + 1).padStart(2, '0')}</small>
+                  </div>
+                  <div className="cms-video-actions">
+                    <button type="button" aria-label="Mover vídeo para cima" title="Mover para cima" disabled={index === 0 || videoBusyId === item.id} onClick={() => moveVideo(index, -1)}>↑</button>
+                    <button type="button" aria-label="Mover vídeo para baixo" title="Mover para baixo" disabled={index === videos.length - 1 || videoBusyId === item.id} onClick={() => moveVideo(index, 1)}>↓</button>
+                    <button type="button" className="delete" disabled={videoBusyId === item.id} onClick={() => deleteVideo(item)}>{videoBusyId === item.id ? '…' : 'Remover'}</button>
+                  </div>
+                </article>)}
+              </div>
+            ) : <div className="cms-gallery-empty"><span>▶</span><strong>Nenhum vídeo vinculado</strong><small>Adicione um link do YouTube para apresentar vídeos junto desta obra.</small></div>}
+          </>
+        )}
+        {videoError && <div className="cms-editor-message error" role="alert">{videoError}</div>}
+        {videoNotice && <div className="cms-editor-message success" role="status">{videoNotice}</div>}
       </section>
       <form onSubmit={submit}>
         {SECTIONS.map(section => (
