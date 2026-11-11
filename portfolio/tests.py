@@ -1894,7 +1894,7 @@ class CmsArtistProfileApiTests(TestCase):
         self.profile = ArtistProfile.objects.create(
             name="Artista",
             tagline="Arte e pesquisa",
-            bio="Primeiro parágrafo.\\n\\nSegundo parágrafo.",
+            bio="Primeiro parágrafo.\n\nSegundo parágrafo.",
             instagram_url="https://instagram.com/artista",
             contact_email="artista@example.com",
             contact_form_url="https://example.com/form",
@@ -1905,7 +1905,7 @@ class CmsArtistProfileApiTests(TestCase):
         response = self.client.get(reverse("cms-profile"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["profile"]["name"], "Artista")
-        self.assertEqual(response.json()["profile"]["bio"], "Primeiro parágrafo.\\n\\nSegundo parágrafo.")
+        self.assertEqual(response.json()["profile"]["bio"], "Primeiro parágrafo.\n\nSegundo parágrafo.")
         self.assertTrue(response.json()["permissions"]["canChange"])
 
     def test_editor_can_update_profile_fields_without_losing_line_breaks(self):
@@ -1916,7 +1916,7 @@ class CmsArtistProfileApiTests(TestCase):
                 "name": "Artista Atualizada",
                 "tagline": "Novos trabalhos",
                 "photo_url": "https://example.com/foto.webp",
-                "bio": "Linha um\\nLinha dois\\n\\nNovo parágrafo",
+                "bio": "Linha um\nLinha dois\n\nNovo parágrafo",
                 "instagram_url": "https://instagram.com/nova",
                 "contact_email": "novo@example.com",
                 "contact_form_url": "",
@@ -1926,7 +1926,7 @@ class CmsArtistProfileApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.name, "Artista Atualizada")
-        self.assertEqual(self.profile.bio, "Linha um\\nLinha dois\\n\\nNovo parágrafo")
+        self.assertEqual(self.profile.bio, "Linha um\nLinha dois\n\nNovo parágrafo")
         self.assertEqual(self.profile.contact_email, "novo@example.com")
 
     def test_invalid_profile_fields_are_rejected(self):
