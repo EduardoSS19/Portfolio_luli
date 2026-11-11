@@ -1654,3 +1654,67 @@ class CmsWorkVideoApiTests(TestCase):
         ))
         self.assertEqual(response.status_code, 404)
         self.assertTrue(WorkVideo.objects.filter(pk=video.pk).exists())
+
+
+class CmsWorkPreviewApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+
+        Category.objects.all().delete()
+        self.category = Category.objects.create(title="Pintura", key="preview-pintura")
+        self.work = Work.objects.create(category=self.category, title="Obra em rascunho", is_active=False)
+        self.staff = get_user_model().objects.create_user(
+            username="cms-preview-editor", password="test-password-123", is_staff=True
+        )
+        self.view_permission = Permission.objects.get(
+            content_type__app_label="portfolio", codename="view_work"
+        )
+
+    def test_anonymous_user_cannot_generate_preview(self):
+        response = self.client.post(reverse("cms-work-preview", args=[self.work.pk]))
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["error"], "authentication_required")
+
+    def test_staff_without_work_permission_cannot_generate_preview(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(reverse("cms-work-preview", args=[self.work.pk]))
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "work_view_permission_required")
+
+    def test_authorized_staff_receives_short_lived_private_preview_url(self):
+        from urllib.parse import urlparse, parse_qs
+
+        self.staff.user_permissions.add(self.view_permission)
+        self.client.force_login(self.staff)
+        response = self.client.post(reverse("cms-work-preview", args=[self.work.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["expiresIn"], 600)
+        preview_url = urlparse(response.json()["url"])
+        token = parse_qs(preview_url.query)["preview_token"][0]
+        preview_response = self.client.get(reverse("portfolio-data"), {"preview_token": token})
+        self.assertEqual(preview_response.status_code, 200)
+        self.assertEqual(preview_response.json()["preview"]["id"], self.work.pk)
+
+    def test_preview_generation_requires_csrf(self):
+        from django.contrib.auth.models import Permission
+
+        self.staff.user_permissions.add(self.view_permission)
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.staff)
+        csrf_client.get(reverse("cms-overview"))
+        token = csrf_client.cookies["csrftoken"].value
+
+        rejected = csrf_client.post(reverse("cms-work-preview", args=[self.work.pk]))
+        accepted = csrf_client.post(
+            reverse("cms-work-preview", args=[self.work.pk]), HTTP_X_CSRFTOKEN=token
+        )
+        self.assertEqual(rejected.status_code, 403)
+        self.assertEqual(accepted.status_code, 200)
+
+    def test_unknown_work_returns_404(self):
+        self.staff.user_permissions.add(self.view_permission)
+        self.client.force_login(self.staff)
+        response = self.client.post(reverse("cms-work-preview", args=[999999]))
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "work_not_found")
