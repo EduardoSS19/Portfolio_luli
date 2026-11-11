@@ -77,6 +77,15 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-not-a-production-secret
         run: python manage.py test --verbosity 2
 
+      - name: Check production security settings
+        env:
+          DEBUG: "false"
+          DJANGO_SECRET_KEY: ci-only-not-a-production-secret-with-more-than-fifty-characters
+          CLOUDINARY_CLOUD_NAME: ci-placeholder
+          CLOUDINARY_API_KEY: "0"
+          CLOUDINARY_API_SECRET: ci-placeholder
+        run: python manage.py check --deploy --fail-level WARNING
+
   frontend:
     name: Build React frontend
     needs: changes
