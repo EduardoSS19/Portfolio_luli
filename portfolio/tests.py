@@ -1412,3 +1412,118 @@ class CmsWorkCoverUploadApiTests(TestCase):
         self.work.refresh_from_db()
         self.assertEqual(self.work.image.name, old_name)
         self.assertTrue(old_storage.exists(old_name))
+
+
+
+class CmsWorkGalleryApiTests(TestCase):
+    def setUp(self):
+        self.media_dir = TemporaryDirectory()
+        self.addCleanup(self.media_dir.cleanup)
+        media_settings = override_settings(MEDIA_ROOT=self.media_dir.name)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
+        category = Category.objects.create(title="Pintura", key="cms-gallery-pintura")
+        self.work = Work.objects.create(category=category, title="Obra da galeria")
+        from django.contrib.auth.models import Permission
+        self.editor = get_user_model().objects.create_user(
+            username="cms-gallery-editor", password="test-password-123", is_staff=True
+        )
+        self.editor.user_permissions.add(Permission.objects.get(
+            content_type__app_label="portfolio", codename="change_work"
+        ))
+
+    def make_image(self, name="gallery.png", image_format="PNG"):
+        content = BytesIO()
+        Image.new("RGB", (24, 18), "teal").save(content, format=image_format)
+        return SimpleUploadedFile(name, content.getvalue(), content_type="image/png")
+
+    def endpoint(self):
+        return reverse("cms-work-gallery", args=[self.work.pk])
+
+    def test_gallery_list_requires_staff(self):
+        self.assertEqual(self.client.get(self.endpoint()).status_code, 401)
+        regular = get_user_model().objects.create_user(username="gallery-regular")
+        self.client.force_login(regular)
+        self.assertEqual(self.client.get(self.endpoint()).status_code, 403)
+
+    def test_editor_can_list_upload_reorder_and_delete_gallery_images(self):
+        self.client.force_login(self.editor)
+        first = self.client.post(self.endpoint(), {"image": self.make_image("first.png")})
+        second = self.client.post(self.endpoint(), {"image": self.make_image("second.png")})
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(second.status_code, 201)
+        first_id, second_id = first.json()["id"], second.json()["id"]
+
+        listing = self.client.get(self.endpoint())
+        self.assertEqual([item["id"] for item in listing.json()["results"]], [first_id, second_id])
+
+        reordered = self.client.patch(
+            self.endpoint(),
+            data=json.dumps({"imageIds": [second_id, first_id]}),
+            content_type="application/json",
+        )
+        self.assertEqual(reordered.status_code, 200)
+        self.assertEqual([item["id"] for item in reordered.json()["results"]], [second_id, first_id])
+        self.assertEqual(reordered.json()["results"][0]["position"], 0)
+
+        deleted = self.client.post(reverse(
+            "cms-work-gallery-delete", args=[self.work.pk, second_id]
+        ))
+        self.assertEqual(deleted.status_code, 200)
+        self.assertEqual(deleted.json(), {"deleted": second_id})
+        self.assertEqual(list(self.work.gallery_images.values_list("pk", flat=True)), [first_id])
+
+    def test_upload_rejects_fake_files_and_oversized_images(self):
+        self.client.force_login(self.editor)
+        fake = SimpleUploadedFile("fake.png", b"not an image", content_type="image/png")
+        response = self.client.post(self.endpoint(), {"image": fake})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "invalid_image_file")
+        self.assertEqual(self.work.gallery_images.count(), 0)
+
+        oversized = SimpleUploadedFile("large.png", b"x" * (15 * 1024 * 1024 + 1), content_type="image/png")
+        response = self.client.post(self.endpoint(), {"image": oversized})
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(response.json()["error"], "image_too_large")
+
+    def test_reorder_must_include_exact_owned_image_ids(self):
+        self.client.force_login(self.editor)
+        image = self.client.post(self.endpoint(), {"image": self.make_image()}).json()
+        response = self.client.patch(
+            self.endpoint(),
+            data=json.dumps({"imageIds": [image["id"], 999999]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "image_order_mismatch")
+
+    def test_user_without_change_permission_cannot_mutate_gallery(self):
+        staff = get_user_model().objects.create_user(
+            username="gallery-readonly", is_staff=True
+        )
+        self.client.force_login(staff)
+        response = self.client.post(self.endpoint(), {"image": self.make_image()})
+        self.assertEqual(response.status_code, 403)
+
+    def test_gallery_mutations_require_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.editor)
+        rejected = client.post(self.endpoint(), {"image": self.make_image()})
+        self.assertEqual(rejected.status_code, 403)
+        token_response = client.get(self.endpoint())
+        token = token_response.cookies["csrftoken"].value
+        accepted = client.post(
+            self.endpoint(), {"image": self.make_image()},
+            HTTP_X_CSRFTOKEN=token,
+        )
+        self.assertEqual(accepted.status_code, 201)
+
+    def test_cannot_delete_an_image_from_another_work(self):
+        self.client.force_login(self.editor)
+        other = Work.objects.create(category=self.work.category, title="Outra obra")
+        image = WorkImage.objects.create(work=other, image="obras/outro.webp")
+        response = self.client.post(reverse(
+            "cms-work-gallery-delete", args=[self.work.pk, image.pk]
+        ))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(WorkImage.objects.filter(pk=image.pk).exists())
