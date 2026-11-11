@@ -1,6 +1,10 @@
 """Authenticated CMS read endpoints and a narrowly scoped work metadata update API."""
 import json
+import logging
 from functools import wraps
+
+from PIL import Image, UnidentifiedImageError
+from django.core.files.storage import default_storage
 
 from django import forms
 from django.db import transaction
@@ -13,6 +17,12 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .models import Category, Reference, Work, WorkVideo
+
+
+logger = logging.getLogger(__name__)
+MAX_COVER_UPLOAD_SIZE = 15 * 1024 * 1024
+ALLOWED_COVER_FORMATS = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}
+MAX_COVER_PIXELS = 40_000_000
 
 
 def _staff_required(view):
@@ -349,3 +359,83 @@ def cms_work_create(request):
         "position": work.position,
         "published": work.is_active,
     }, status=201, encoder=DjangoJSONEncoder)
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_work_cover_upload(request, work_id):
+    """Replace one work cover after validating its actual image content."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+
+    try:
+        work = Work.objects.get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+
+    if not request.content_type.startswith("multipart/form-data"):
+        return JsonResponse({"error": "multipart_form_data_required"}, status=415)
+
+    if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+        return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+
+    uploaded = request.FILES["image"]
+    if uploaded.size <= 0:
+        return JsonResponse({"error": "empty_image"}, status=400)
+    if uploaded.size > MAX_COVER_UPLOAD_SIZE:
+        return JsonResponse({"error": "image_too_large", "maxBytes": MAX_COVER_UPLOAD_SIZE}, status=413)
+
+    try:
+        uploaded.seek(0)
+        with Image.open(uploaded) as image:
+            image_format = image.format
+            width, height = image.size
+            if image_format not in ALLOWED_COVER_FORMATS:
+                return JsonResponse({"error": "unsupported_image_format"}, status=400)
+            if width <= 0 or height <= 0 or width * height > MAX_COVER_PIXELS:
+                return JsonResponse({"error": "invalid_image_dimensions"}, status=400)
+            image.verify()
+        uploaded.seek(0)
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+        return JsonResponse({"error": "invalid_image_file"}, status=400)
+
+    old_name = work.image.name if work.image else ""
+    extension = ALLOWED_COVER_FORMATS[image_format]
+    upload_name = work.image.field.generate_filename(work, f"cover.{extension}")
+    stored_name = ""
+    try:
+        stored_name = default_storage.save(upload_name, uploaded)
+        work.image.name = stored_name
+        work.image_url = ""
+        work.save(update_fields=["image", "image_url"])
+    except Exception:
+        if stored_name:
+            try:
+                default_storage.delete(stored_name)
+            except Exception:
+                logger.exception("Could not clean up failed CMS cover upload %s", stored_name)
+        logger.exception("CMS cover upload failed for work %s", work_id)
+        return JsonResponse({"error": "image_storage_failed"}, status=503)
+
+    if old_name and old_name != stored_name:
+        try:
+            default_storage.delete(old_name)
+        except Exception:
+            # The new cover is already committed; keep the successful response and log cleanup.
+            logger.exception("Could not delete replaced CMS cover %s", old_name)
+
+    try:
+        image_url = work.image.url
+    except ValueError:
+        image_url = ""
+
+    return JsonResponse({
+        "id": work.pk,
+        "image": image_url,
+        "filename": stored_name.rsplit("/", 1)[-1],
+    }, status=200)

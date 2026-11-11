@@ -1253,3 +1253,161 @@ class CmsWorkCreateApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "validation_error")
         self.assertEqual(Work.objects.count(), 0)
+
+
+
+class CmsWorkCoverUploadApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+
+        self.media_dir = TemporaryDirectory()
+        self.addCleanup(self.media_dir.cleanup)
+        media_settings = override_settings(MEDIA_ROOT=self.media_dir.name)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        self.category = Category.objects.create(title="Pintura", key="capa-pintura")
+        self.work = Work.objects.create(
+            category=self.category,
+            title="Obra com capa",
+            image_url="https://example.com/legacy-cover.jpg",
+        )
+        self.editor = get_user_model().objects.create_user(
+            username="cms-cover-editor",
+            password="test-password-123",
+            is_staff=True,
+        )
+        self.editor.user_permissions.add(Permission.objects.get(
+            content_type__app_label="portfolio",
+            codename="change_work",
+        ))
+
+    def make_image(self, image_format="PNG", name="cover.png", size=(32, 24)):
+        content = BytesIO()
+        Image.new("RGB", size, "navy").save(content, format=image_format)
+        return SimpleUploadedFile(
+            name,
+            content.getvalue(),
+            content_type="image/png",
+        )
+
+    def upload(self, file, client=None):
+        client = client or self.client
+        return client.post(
+            reverse("cms-work-cover-upload", args=[self.work.pk]),
+            {"image": file},
+        )
+
+    def test_anonymous_user_cannot_upload_cover(self):
+        response = self.upload(self.make_image())
+
+        self.assertEqual(response.status_code, 401)
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.image)
+        self.assertEqual(self.work.image_url, "https://example.com/legacy-cover.jpg")
+
+    def test_staff_without_change_permission_cannot_upload_cover(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-cover-readonly",
+            password="test-password-123",
+            is_staff=True,
+        )
+        self.client.force_login(staff)
+
+        response = self.upload(self.make_image())
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "work_edit_permission_required")
+
+    def test_editor_can_upload_real_image_and_clear_legacy_url(self):
+        self.client.force_login(self.editor)
+
+        response = self.upload(self.make_image())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["image"])
+        self.work.refresh_from_db()
+        self.assertTrue(self.work.image.name.endswith(".png"))
+        self.assertEqual(self.work.image_url, "")
+
+    def test_non_image_content_is_rejected_without_replacing_existing_cover(self):
+        self.client.force_login(self.editor)
+        self.work.image_url = "https://example.com/keep-this.jpg"
+        self.work.save(update_fields=["image_url"])
+        fake = SimpleUploadedFile("fake.png", b"not an image", content_type="image/png")
+
+        response = self.upload(fake)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "invalid_image_file")
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.image)
+        self.assertEqual(self.work.image_url, "https://example.com/keep-this.jpg")
+
+    def test_unsupported_image_format_is_rejected(self):
+        self.client.force_login(self.editor)
+
+        response = self.upload(self.make_image("GIF", "cover.gif"))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "unsupported_image_format")
+
+    def test_upload_requires_csrf(self):
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.editor)
+        token_response = csrf_client.get(reverse("cms-overview"))
+        token = token_response.cookies["csrftoken"].value
+
+        rejected = csrf_client.post(
+            reverse("cms-work-cover-upload", args=[self.work.pk]),
+            {"image": self.make_image()},
+        )
+        accepted = csrf_client.post(
+            reverse("cms-work-cover-upload", args=[self.work.pk]),
+            {"image": self.make_image()},
+            HTTP_X_CSRFTOKEN=token,
+        )
+
+        self.assertEqual(rejected.status_code, 403)
+        self.assertEqual(accepted.status_code, 200)
+
+    def test_unknown_work_returns_404(self):
+        self.client.force_login(self.editor)
+
+        response = self.client.post(
+            reverse("cms-work-cover-upload", args=[999999]),
+            {"image": self.make_image()},
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_successful_replacement_removes_old_stored_cover(self):
+        self.client.force_login(self.editor)
+        self.work.image.save("previous.png", self.make_image(), save=True)
+        old_name = self.work.image.name
+        old_storage = self.work.image.storage
+        self.assertTrue(old_storage.exists(old_name))
+
+        response = self.upload(self.make_image(name="replacement.png"))
+
+        self.assertEqual(response.status_code, 200)
+        self.work.refresh_from_db()
+        self.assertNotEqual(self.work.image.name, old_name)
+        self.assertFalse(old_storage.exists(old_name))
+        self.assertTrue(old_storage.exists(self.work.image.name))
+
+    def test_storage_failure_preserves_existing_cover(self):
+        self.client.force_login(self.editor)
+        self.work.image.save("keep.png", self.make_image(), save=True)
+        old_name = self.work.image.name
+        old_storage = self.work.image.storage
+
+        with patch("portfolio.cms_api.default_storage.save", side_effect=OSError("storage unavailable")):
+            response = self.upload(self.make_image(name="replacement.png"))
+
+        self.assertEqual(response.status_code, 503)
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.image.name, old_name)
+        self.assertTrue(old_storage.exists(old_name))
