@@ -1718,3 +1718,73 @@ class CmsWorkPreviewApiTests(TestCase):
         response = self.client.post(reverse("cms-work-preview", args=[999999]))
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "work_not_found")
+
+
+class CmsWorkPublicationApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+        category = Category.objects.create(title="Pintura", key="publication-pintura")
+        self.work = Work.objects.create(category=category, title="Obra para publicar", is_active=False)
+        self.editor = get_user_model().objects.create_user(username="cms-publication-editor", password="test-password-123", is_staff=True)
+        self.editor.user_permissions.add(Permission.objects.get(content_type__app_label="portfolio", codename="change_work"))
+
+    def endpoint(self):
+        return reverse("cms-work-publish", args=[self.work.pk])
+
+    def publish(self, published):
+        return self.client.post(self.endpoint(), data=json.dumps({"published": published}), content_type="application/json")
+
+    def test_anonymous_user_cannot_change_publication(self):
+        response = self.publish(True)
+        self.assertEqual(response.status_code, 401)
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.is_active)
+
+    def test_staff_without_edit_permission_cannot_change_publication(self):
+        staff = get_user_model().objects.create_user(username="cms-publication-readonly", is_staff=True)
+        self.client.force_login(staff)
+        response = self.publish(True)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "work_edit_permission_required")
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.is_active)
+
+    def test_editor_can_publish_and_unpublish_without_changing_metadata(self):
+        self.client.force_login(self.editor)
+        response = self.publish(True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["published"])
+        self.work.refresh_from_db()
+        self.assertTrue(self.work.is_active)
+        self.assertEqual(self.work.title, "Obra para publicar")
+        response = self.publish(False)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["published"])
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.is_active)
+
+    def test_publication_state_must_be_boolean_and_only_allowed_field(self):
+        self.client.force_login(self.editor)
+        for payload in ({"published": "true"}, {"published": 1}, {"published": True, "title": "Alterada"}, {}):
+            response = self.client.post(self.endpoint(), data=json.dumps(payload), content_type="application/json")
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.json()["error"], "invalid_publication_state")
+        self.work.refresh_from_db()
+        self.assertFalse(self.work.is_active)
+        self.assertEqual(self.work.title, "Obra para publicar")
+
+    def test_publication_change_requires_csrf(self):
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.editor)
+        rejected = csrf_client.post(self.endpoint(), data=json.dumps({"published": True}), content_type="application/json")
+        self.assertEqual(rejected.status_code, 403)
+        csrf_client.get(reverse("cms-overview"))
+        token = csrf_client.cookies["csrftoken"].value
+        accepted = csrf_client.post(self.endpoint(), data=json.dumps({"published": True}), content_type="application/json", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(accepted.status_code, 200)
+
+    def test_unknown_work_returns_404(self):
+        self.client.force_login(self.editor)
+        response = self.client.post(reverse("cms-work-publish", args=[999999]), data=json.dumps({"published": True}), content_type="application/json")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "work_not_found")
