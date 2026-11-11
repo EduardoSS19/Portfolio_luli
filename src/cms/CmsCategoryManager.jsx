@@ -43,7 +43,18 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [worksLoading, setWorksLoading] = useState(false)
   const [workQuery, setWorkQuery] = useState('')
   const [workPage, setWorkPage] = useState(0)
+  const [draggingWorkId, setDraggingWorkId] = useState(null)
+  const [dragOverWorkId, setDragOverWorkId] = useState(null)
+  const [supportsDrag, setSupportsDrag] = useState(false)
   const WORKS_PER_PAGE = 10
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)')
+    const update = () => setSupportsDrag(media.matches)
+    update()
+    media.addEventListener?.('change', update)
+    return () => media.removeEventListener?.('change', update)
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -86,11 +97,7 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const totalWorkPages = Math.max(1, Math.ceil(filteredWorks.length / WORKS_PER_PAGE))
   const visibleWorks = filteredWorks.slice(workPage * WORKS_PER_PAGE, (workPage + 1) * WORKS_PER_PAGE)
 
-  const moveWork = async (index, direction) => {
-    const next = [...categoryWorks]
-    const target = index + direction
-    if (target < 0 || target >= next.length) return
-    ;[next[index], next[target]] = [next[target], next[index]]
+  const persistWorkOrder = async next => {
     setCategoryWorks(next)
     setSaving(true); setError(''); setNotice('')
     try {
@@ -103,7 +110,30 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
     } catch (err) {
       setError(err.message)
       await loadCategoryWorks(selectedCategoryId)
-    } finally { setSaving(false) }
+    } finally {
+      setSaving(false)
+      setDraggingWorkId(null)
+      setDragOverWorkId(null)
+    }
+  }
+
+  const moveWork = (index, direction) => {
+    const next = [...categoryWorks]
+    const target = index + direction
+    if (target < 0 || target >= next.length) return
+    ;[next[index], next[target]] = [next[target], next[index]]
+    persistWorkOrder(next)
+  }
+
+  const dropWork = targetId => {
+    if (!draggingWorkId || draggingWorkId === targetId || workQuery.trim()) return
+    const sourceIndex = categoryWorks.findIndex(item => String(item.id) === String(draggingWorkId))
+    const targetIndex = categoryWorks.findIndex(item => String(item.id) === String(targetId))
+    if (sourceIndex < 0 || targetIndex < 0) return
+    const next = [...categoryWorks]
+    const [dragged] = next.splice(sourceIndex, 1)
+    next.splice(targetIndex, 0, dragged)
+    persistWorkOrder(next)
   }
 
   const reset = () => {
@@ -250,13 +280,40 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
               <label className="cms-category-work-search">Buscar obra nesta categoria
                 <input type="search" value={workQuery} onChange={event => { setWorkQuery(event.target.value); setWorkPage(0) }} placeholder="Digite o nome da obra…" />
               </label>
+              {supportsDrag && !workQuery.trim() && <p className="cms-category-drag-hint">⠿ Arraste as miniaturas para definir a ordem. As setas continuam disponíveis como alternativa.</p>}
+              {workQuery.trim() && supportsDrag && <p className="cms-category-drag-hint">Limpe a busca para reorganizar visualmente as obras.</p>}
               {visibleWorks.length ? visibleWorks.map(work => {
                 const index = categoryWorks.findIndex(item => item.id === work.id)
-                return <article className="cms-category-work-row" key={work.id}>
+                const canDrag = supportsDrag && !workQuery.trim() && canEditWorks && !saving
+                return <article
+                  className={'cms-category-work-row cms-category-work-card' + (draggingWorkId === work.id ? ' is-dragging' : '') + (dragOverWorkId === work.id ? ' is-drop-target' : '')}
+                  key={work.id}
+                  draggable={canDrag}
+                  onDragStart={event => {
+                    if (!canDrag) { event.preventDefault(); return }
+                    setDraggingWorkId(work.id)
+                    event.dataTransfer.effectAllowed = 'move'
+                    event.dataTransfer.setData('text/plain', String(work.id))
+                  }}
+                  onDragOver={event => {
+                    if (!draggingWorkId || workQuery.trim()) return
+                    event.preventDefault()
+                    event.dataTransfer.dropEffect = 'move'
+                    if (dragOverWorkId !== work.id) setDragOverWorkId(work.id)
+                  }}
+                  onDrop={event => { event.preventDefault(); dropWork(work.id) }}
+                  onDragEnd={() => { setDraggingWorkId(null); setDragOverWorkId(null) }}
+                >
                   <span className="cms-category-work-position">{String(index + 1).padStart(2, '0')}</span>
-                  <strong>{work.title}</strong>
-                  <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
-                  <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
+                  <div className="cms-category-work-thumb">
+                    {work.image ? <img src={work.image} alt="" loading="lazy" /> : <span>✳</span>}
+                  </div>
+                  <div className="cms-category-work-info">
+                    <strong>{work.title}</strong>
+                    <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+                  </div>
+                  {supportsDrag && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿</span>}
+                  <div className="cms-category-work-move-buttons"><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
                 </article>
               }) : <div className="cms-gallery-empty"><strong>Nenhuma obra encontrada</strong><small>Tente outro termo de busca.</small></div>}
               <div className="cms-category-work-pagination">
