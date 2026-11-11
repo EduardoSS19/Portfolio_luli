@@ -247,6 +247,34 @@ export default function App() {
     return <GaleriaGradeDiagnostico categorias={categorias} />
   }
 
+  if (previsualizacao) {
+    const categoriaPreview = categorias[0]
+    const obraPreview = categoriaPreview?.obras?.[0]
+    return (
+      <main className="site-shell preview-only-shell">
+        <FundoFantasma frames={conteudo.frames} />
+        <header className="preview-only-header">
+          <div>
+            <span>PRÉVIA PRIVADA · LINK TEMPORÁRIO</span>
+            <h1>{previsualizacao.titulo}</h1>
+            <p>Visualização isolada da obra no design do portfólio. Nada aqui altera a publicação.</p>
+          </div>
+          <a href="/" aria-label="Sair da prévia e voltar ao portfólio">Sair da prévia ↗</a>
+        </header>
+        {categoriaPreview && obraPreview ? (
+          <SecaoCategoria
+            titulo={categoriaPreview.titulo}
+            chave={categoriaPreview.chave}
+            obras={[obraPreview]}
+            indice={0}
+          />
+        ) : (
+          <p className="preview-only-empty">Não foi possível carregar esta obra. Gere uma nova prévia pelo painel.</p>
+        )}
+      </main>
+    )
+  }
+
   return (
     <div className="site-shell">
       {previsualizacao && (
