@@ -150,21 +150,6 @@ class CmsWorkEditForm(forms.ModelForm):
         )
 
 
-def _work_editor_required(view):
-    """Require staff status and the specific Django change_work permission."""
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({"error": "authentication_required"}, status=401)
-        if not request.user.is_staff:
-            return JsonResponse({"error": "staff_required"}, status=403)
-        if not request.user.has_perm("portfolio.change_work"):
-            return JsonResponse({"error": "work_edit_permission_required"}, status=403)
-        return view(request, *args, **kwargs)
-
-    return wrapped
-
-
 @require_http_methods(["GET", "PATCH"])
 @never_cache
 @ensure_csrf_cookie
@@ -232,8 +217,6 @@ def cms_work_update(request, work_id):
             "error": "unknown_fields",
             "fields": unknown_fields,
         }, status=400)
-
-    from django.db import transaction
 
     with transaction.atomic():
         try:
