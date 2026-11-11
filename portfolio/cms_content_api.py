@@ -111,6 +111,16 @@ def cms_content(request):
     if request.method == "PATCH":
         if not permissions["canChange"]:
             return JsonResponse({"error": "content_change_permission_required"}, status=403)
+        if isinstance(payload, dict) and "active" in payload:
+            ids = payload.get("ids")
+            active = payload.get("active")
+            if type(active) is not bool or not isinstance(ids, list) or not ids or any(type(value) is not int for value in ids) or len(ids) != len(set(ids)):
+                return JsonResponse({"error": "invalid_bulk_update"}, status=400)
+            selected = model.objects.filter(pk__in=ids)
+            if selected.count() != len(ids):
+                return JsonResponse({"error": "content_selection_mismatch"}, status=400)
+            selected.update(is_active=active)
+            return JsonResponse({"updated": len(ids), "active": active})
         ids = payload.get("ids") if isinstance(payload, dict) else None
         if not isinstance(ids, list) or any(type(value) is not int for value in ids):
             return JsonResponse({"error": "invalid_order"}, status=400)
