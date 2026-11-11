@@ -924,6 +924,36 @@ def cms_work_preview(request, work_id):
 @require_POST
 @never_cache
 @csrf_protect
+def cms_work_bulk_publish(request):
+    """Apply the Django Admin publish/unpublish action to selected works."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 16384:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    ids = payload.get("ids") if isinstance(payload, dict) else None
+    published = payload.get("published") if isinstance(payload, dict) else None
+    if not isinstance(ids, list) or not ids or any(type(value) is not int or value <= 0 for value in ids):
+        return JsonResponse({"error": "invalid_work_selection"}, status=400)
+    if len(ids) != len(set(ids)) or type(published) is not bool:
+        return JsonResponse({"error": "invalid_bulk_publication"}, status=400)
+    queryset = Work.objects.filter(pk__in=ids)
+    if queryset.count() != len(ids):
+        return JsonResponse({"error": "work_selection_mismatch"}, status=400)
+    updated = queryset.update(is_active=published)
+    return JsonResponse({"updated": updated, "published": published})
+
+
+@require_POST
+@never_cache
+@csrf_protect
 def cms_work_publish(request, work_id):
     """Publish or unpublish one work without changing its editorial metadata."""
     if not request.user.is_authenticated:
