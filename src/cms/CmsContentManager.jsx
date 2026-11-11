@@ -95,7 +95,6 @@ export function CmsContentManager() {
       files.forEach(file => body.append('images', file))
       await api('/api/cms/content/?type=backgrounds', { method: 'POST', body })
       setFiles([])
-      event.currentTarget.reset()
       setNotice('Imagens adicionadas na ordem selecionada.')
       await load('backgrounds')
     } catch (err) { setError(err.message) }
