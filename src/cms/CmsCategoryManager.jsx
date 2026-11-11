@@ -118,6 +118,22 @@ export function CmsCategoryManager({ onChanged }) {
     }
   }
 
+  const remove = async item => {
+    const warning = item.workCount
+      ? 'Excluir esta categoria também excluirá permanentemente ' + item.workCount + ' obra(s) vinculada(s). Continuar?'
+      : 'Excluir esta categoria permanentemente?'
+    if (!window.confirm(warning)) return
+    setSaving(true); setError(''); setNotice('')
+    try {
+      await categoryRequest('/api/cms/categories/' + item.id + '/', { method: 'DELETE' })
+      if (editing === item.id) reset()
+      setNotice('Categoria excluída.')
+      await load()
+      onChanged?.()
+    } catch (err) { setError(err.message) }
+    finally { setSaving(false) }
+  }
+
   const toggleActive = async item => {
     setSaving(true)
     setError('')
@@ -163,6 +179,7 @@ export function CmsCategoryManager({ onChanged }) {
                 <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1}>↓</button>
                 <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
                 <button type="button" onClick={() => toggleActive(item)} disabled={saving}>{item.active ? 'Desativar' : 'Ativar'}</button>
+                <button type="button" onClick={() => remove(item)} disabled={saving}>Excluir</button>
               </div>
             </article>
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
