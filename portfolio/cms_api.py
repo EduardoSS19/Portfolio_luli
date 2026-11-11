@@ -4,11 +4,12 @@ from functools import wraps
 
 from django import forms
 from django.db import transaction
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Q
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods
 
 from .models import Category, Reference, Work, WorkVideo
@@ -164,12 +165,53 @@ def _work_editor_required(view):
     return wrapped
 
 
-@require_http_methods(["PATCH"])
+@require_http_methods(["GET", "PATCH"])
 @never_cache
-@_work_editor_required
+@ensure_csrf_cookie
 @csrf_protect
 def cms_work_update(request, work_id):
-    """Partially update editorial metadata without touching publication or media."""
+    """Read or update editorial metadata without touching publication or media."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+
+    try:
+        work = Work.objects.select_related("category").get(pk=work_id)
+    except Work.DoesNotExist:
+        return JsonResponse({"error": "work_not_found"}, status=404)
+
+    if request.method == "GET":
+        return JsonResponse({
+            "id": work.pk,
+            "category": work.category_id,
+            "title": work.title,
+            "description": work.description,
+            "detail": work.detail,
+            "technique": work.technique,
+            "material": work.material,
+            "support": work.support,
+            "year": work.year,
+            "height": work.height,
+            "width": work.width,
+            "depth": work.depth,
+            "dimension_unit": work.dimension_unit,
+            "price": work.price,
+            "currency": work.currency,
+            "availability": work.availability,
+            "series": work.series,
+            "edition": work.edition,
+            "print_run": work.print_run,
+            "signed": work.signed,
+            "creation_location": work.creation_location,
+            "condition": work.condition,
+            "exhibitions": work.exhibitions,
+            "position": work.position,
+            "published": work.is_active,
+        }, encoder=DjangoJSONEncoder)
+
+    if not request.user.has_perm("portfolio.change_work"):
+        return JsonResponse({"error": "work_edit_permission_required"}, status=403)
     if request.content_type != "application/json":
         return JsonResponse({"error": "application_json_required"}, status=415)
     if len(request.body) > 65536:
@@ -190,6 +232,8 @@ def cms_work_update(request, work_id):
             "error": "unknown_fields",
             "fields": unknown_fields,
         }, status=400)
+
+    from django.db import transaction
 
     with transaction.atomic():
         try:
@@ -238,4 +282,4 @@ def cms_work_update(request, work_id):
         "exhibitions": work.exhibitions,
         "position": work.position,
         "published": work.is_active,
-    })
+    }, encoder=DjangoJSONEncoder)
