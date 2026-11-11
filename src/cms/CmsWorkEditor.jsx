@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 const SECTIONS = [
   {
@@ -50,7 +50,7 @@ const SECTIONS = [
     fields: [
       { name: 'creation_location', label: 'Local de criação' },
       { name: 'condition', label: 'Estado de conservação' },
-      { name: 'position', label: 'Ordem no portfólio', type: 'number' },
+      { name: 'position', label: 'Ordem no portfólio', type: 'number', required: true },
       { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
     ],
   },
@@ -110,11 +110,6 @@ export function CmsWorkEditor({ work, categories, onCancel, onSave }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
-
-  useEffect(() => {
-    setForm({ ...work, category: String(work.category ?? '') })
-    setSaved(false)
-  }, [work])
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
