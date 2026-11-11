@@ -518,7 +518,7 @@ export function CmsPage() {
           ) : isProfile ? (
             <CmsProfileManager />
           ) : isCategories ? (
-            <CmsCategoryManager onChanged={() => setLibraryRefresh(value => value + 1)} />
+            <CmsCategoryManager canEditWorks={overview?.permissions?.canEditWork} onChanged={() => setLibraryRefresh(value => value + 1)} />
           ) : isOverview ? (
             <>
               <section className="cms-welcome">
