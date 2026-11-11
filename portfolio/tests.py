@@ -779,3 +779,127 @@ class SocialPreviewMetadataTests(TestCase):
         self.assertNotContains(response, "Artista visual e pesquisadora.")
         self.assertNotContains(response, 'property="og:image"')
 
+
+
+class CmsReadApiTests(TestCase):
+    def setUp(self):
+        # The initial migrations seed sample portfolio data; isolate these tests.
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        Reference.objects.all().delete()
+        self.category = Category.objects.create(
+            title="Cerâmica", key="cms-ceramica", position=1
+        )
+        self.published = Work.objects.create(
+            category=self.category,
+            title="Vaso azul",
+            description="Peça em cerâmica",
+            is_active=True,
+            image_url="https://example.com/vaso.jpg",
+        )
+        self.draft = Work.objects.create(
+            category=self.category,
+            title="Estudo em argila",
+            is_active=False,
+        )
+        WorkImage.objects.create(
+            work=self.published, image="obras/detalhe.webp", position=0
+        )
+        WorkVideo.objects.create(
+            work=self.published,
+            youtube_url="https://youtu.be/AbCdEf01234",
+            video_id="AbCdEf01234",
+            video_title="Processo",
+            thumbnail_url="https://i.ytimg.com/vi/AbCdEf01234/hqdefault.jpg",
+        )
+
+    def test_anonymous_users_receive_json_401(self):
+        response = self.client.get(reverse("cms-works"))
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json(), {"error": "authentication_required"})
+
+    def test_authenticated_non_staff_users_receive_json_403(self):
+        user = get_user_model().objects.create_user(
+            username="regular-user", password="test-password-123"
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("cms-works"))
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {"error": "staff_required"})
+
+    def test_staff_can_read_overview_without_exposing_credentials(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-staff", password="test-password-123", is_staff=True
+        )
+        self.client.force_login(staff)
+
+        response = self.client.get(reverse("cms-overview"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "works": {"total": 2, "published": 1, "drafts": 1},
+            "categories": 1,
+            "references": 0,
+            "videos": 1,
+        })
+        self.assertEqual(response["Cache-Control"], "max-age=0, no-cache, no-store, must-revalidate, private")
+
+    def test_library_defaults_to_all_works_and_returns_editorial_metadata(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-library", password="test-password-123", is_staff=True
+        )
+        self.client.force_login(staff)
+
+        response = self.client.get(reverse("cms-works"))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["pagination"]["total"], 2)
+        self.assertEqual([item["title"] for item in payload["results"]], [
+            "Vaso azul", "Estudo em argila"
+        ])
+        self.assertEqual(payload["results"][0]["category"], {
+            "key": "cms-ceramica", "title": "Cerâmica"
+        })
+        self.assertEqual(payload["results"][0]["media"], {
+            "images": 1, "gallery": 1, "videos": 1
+        })
+        self.assertTrue(payload["results"][0]["published"])
+        self.assertFalse(payload["results"][1]["published"])
+
+    def test_library_search_and_status_filters_are_applied_on_server(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-filter", password="test-password-123", is_staff=True
+        )
+        self.client.force_login(staff)
+
+        response = self.client.get(
+            reverse("cms-works"),
+            {"q": "argila", "status": "draft", "category": "cms-ceramica"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item["title"] for item in response.json()["results"]], [
+            "Estudo em argila"
+        ])
+        self.assertEqual(response.json()["pagination"]["total"], 1)
+
+    def test_library_caps_page_size_and_rejects_invalid_pagination(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-pagination", password="test-password-123", is_staff=True
+        )
+        self.client.force_login(staff)
+
+        capped = self.client.get(reverse("cms-works"), {"limit": 500})
+        invalid = self.client.get(reverse("cms-works"), {"offset": "-1"})
+        invalid_status = self.client.get(reverse("cms-works"), {"status": "everything"})
+
+        self.assertEqual(capped.status_code, 200)
+        self.assertEqual(capped.json()["pagination"]["limit"], 50)
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(invalid.json(), {"error": "invalid_pagination"})
+        self.assertEqual(invalid_status.status_code, 400)
+        self.assertEqual(invalid_status.json(), {"error": "invalid_status"})
