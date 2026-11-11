@@ -1184,8 +1184,55 @@ def cms_category_work_order(request, category_id):
                 Work.objects.filter(pk=work_id, category=category).update(position=position)
     except Category.DoesNotExist:
         return JsonResponse({"error": "category_not_found"}, status=404)
-    works = Work.objects.filter(category_id=category_id).order_by("position", "pk").values("id", "title", "position", "is_active")
-    return JsonResponse({"results": [{"id": item["id"], "title": item["title"], "position": item["position"], "published": item["is_active"]} for item in works]})
+    works = Work.objects.filter(category_id=category_id).select_related("category").prefetch_related(
+        Prefetch("gallery_images", queryset=WorkImage.objects.only("id", "work_id", "image", "position").order_by("position", "pk"), to_attr="cms_gallery_images"),
+        Prefetch("youtube_videos", queryset=WorkVideo.objects.only("id", "work_id", "thumbnail_url", "position").order_by("position", "pk"), to_attr="cms_videos"),
+    ).order_by("position", "pk")
+    results = []
+    for item in works:
+        image = ""
+        if item.image:
+            try:
+                image = item.image.url
+            except (ValueError, OSError):
+                image = ""
+        if not image:
+            image = item.image_url or ""
+        if not image and item.cms_gallery_images:
+            image = _cms_image_url(item.cms_gallery_images[0].image)
+        if not image and item.cms_videos:
+            image = item.cms_videos[0].thumbnail_url or ""
+        results.append({"id": item.pk, "title": item.title, "position": item.position, "published": item.is_active, "image": image})
+    return JsonResponse({"results": results})
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_category_work_order_preview(request, category_id):
+    """Create a short-lived shareable preview for an unsaved category order."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff or not (request.user.has_perm("portfolio.view_work") or request.user.has_perm("portfolio.change_work")):
+        return JsonResponse({"error": "work_view_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 32768:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    work_ids = payload.get("workIds") if isinstance(payload, dict) else None
+    if not isinstance(work_ids, list) or any(type(value) is not int for value in work_ids) or len(work_ids) != len(set(work_ids)):
+        return JsonResponse({"error": "invalid_work_order"}, status=400)
+    try:
+        category = Category.objects.get(pk=category_id, is_active=True)
+    except Category.DoesNotExist:
+        return JsonResponse({"error": "category_not_found"}, status=404)
+    current_ids = list(Work.objects.filter(category=category).order_by("position", "pk").values_list("pk", flat=True))
+    if len(work_ids) != len(current_ids) or set(work_ids) != set(current_ids):
+        return JsonResponse({"error": "work_order_mismatch"}, status=400)
+    token = signing.dumps({"category": category.pk, "work_ids": work_ids}, salt="portfolio.category-order-preview")
+    return JsonResponse({"url": request.build_absolute_uri(f"/?category_preview_token={token}"), "expiresIn": 600})
 
 
 @require_http_methods(["POST", "DELETE"])
