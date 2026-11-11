@@ -5,6 +5,7 @@ from functools import wraps
 
 from PIL import Image, UnidentifiedImageError
 from django.core import signing
+from django.utils.text import slugify
 from django.core.files.storage import default_storage
 
 from django import forms
@@ -738,3 +739,88 @@ def cms_work_preview(request, work_id):
         "url": request.build_absolute_uri(f"/?preview_token={token}"),
         "expiresIn": 600,
     })
+
+
+@require_http_methods(["GET", "POST"])
+@never_cache
+@ensure_csrf_cookie
+@csrf_protect
+def cms_categories(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if request.method == "GET":
+        items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
+        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
+    if not request.user.has_perm("portfolio.add_category"):
+        return JsonResponse({"error": "category_add_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 8192:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    if not isinstance(data, dict) or set(data) - {"title", "key"} or "title" not in data:
+        return JsonResponse({"error": "invalid_category_payload"}, status=400)
+    title, key = data.get("title"), data.get("key", "")
+    if not isinstance(title, str) or not title.strip() or len(title.strip()) > 100:
+        return JsonResponse({"error": "invalid_category_title"}, status=400)
+    if not isinstance(key, str) or len(key) > 50:
+        return JsonResponse({"error": "invalid_category_key"}, status=400)
+    key = slugify(key.strip() or title.strip())[:50]
+    if not key:
+        return JsonResponse({"error": "invalid_category_key"}, status=400)
+    if Category.objects.filter(key=key).exists():
+        return JsonResponse({"error": "category_key_conflict"}, status=409)
+    last = Category.objects.aggregate(value=Max("position"))["value"]
+    item = Category.objects.create(title=title.strip(), key=key, position=0 if last is None else last + 1)
+    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
+
+
+@require_POST
+@never_cache
+@csrf_protect
+def cms_category_update(request, category_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+    if not request.user.is_staff:
+        return JsonResponse({"error": "staff_required"}, status=403)
+    if not request.user.has_perm("portfolio.change_category"):
+        return JsonResponse({"error": "category_edit_permission_required"}, status=403)
+    if request.content_type != "application/json" or len(request.body) > 8192:
+        return JsonResponse({"error": "invalid_request"}, status=400)
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+    allowed = {"title", "key", "active", "position"}
+    if not isinstance(data, dict) or not data or set(data) - allowed:
+        return JsonResponse({"error": "invalid_category_payload"}, status=400)
+    try:
+        item = Category.objects.get(pk=category_id)
+    except Category.DoesNotExist:
+        return JsonResponse({"error": "category_not_found"}, status=404)
+    if "title" in data:
+        value = data["title"]
+        if not isinstance(value, str) or not value.strip() or len(value.strip()) > 100:
+            return JsonResponse({"error": "invalid_category_title"}, status=400)
+        item.title = value.strip()
+    if "key" in data:
+        value = data["key"]
+        if not isinstance(value, str) or len(value) > 50:
+            return JsonResponse({"error": "invalid_category_key"}, status=400)
+        value = slugify(value.strip())[:50]
+        if not value or Category.objects.filter(key=value).exclude(pk=item.pk).exists():
+            return JsonResponse({"error": "category_key_conflict"}, status=409)
+        item.key = value
+    if "active" in data:
+        if type(data["active"]) is not bool:
+            return JsonResponse({"error": "invalid_category_active"}, status=400)
+        item.is_active = data["active"]
+    if "position" in data:
+        if type(data["position"]) is not int or data["position"] < 0:
+            return JsonResponse({"error": "invalid_category_position"}, status=400)
+        item.position = data["position"]
+    item.save(update_fields=["title", "key", "is_active", "position"])
+    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": item.works.count()})
