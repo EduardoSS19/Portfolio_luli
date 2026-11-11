@@ -112,7 +112,7 @@ jobs:
         run: npx --yes --package=@playwright/test@1.56.1 playwright --version
 
       - name: Install browser engines
-        run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium
+        run: npx --yes --package=@playwright/test@1.56.1 playwright install chromium
 
       - name: Link isolated Playwright package for config resolution
         shell: bash
