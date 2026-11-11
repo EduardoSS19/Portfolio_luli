@@ -3,6 +3,7 @@ import './CmsPage.css'
 import { CmsWorkEditor } from './CmsWorkEditor.jsx'
 import { CmsAnalytics } from './CmsAnalytics.jsx'
 import { CmsCategoryManager } from './CmsCategoryManager.jsx'
+import { CmsProfileManager } from './CmsProfileManager.jsx'
 
 const PAGE_SIZE = 24
 
@@ -408,6 +409,7 @@ export function CmsPage() {
 
   const isOverview = section === 'overview'
   const isCategories = section === 'categories'
+  const isProfile = section === 'profile'
 
   return (
     <div className="cms-shell">
@@ -421,6 +423,7 @@ export function CmsPage() {
           <button className={isOverview ? 'active' : ''} onClick={() => setSection('overview')}><span>◫</span> Visão geral</button>
           <button className={!isOverview ? 'active' : ''} onClick={() => setSection('library')}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
           <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
+          <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />
@@ -431,7 +434,7 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
             <a href="/" target="_blank" rel="noreferrer">Ver portfólio ↗</a>
