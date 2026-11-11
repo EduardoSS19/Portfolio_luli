@@ -406,11 +406,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         <div>
           <p className="cms-eyebrow">{isNew ? 'NOVA OBRA' : 'EDIÇÃO DE OBRA · #' + work.id}</p>
           <h1>{work.title || (isNew ? 'Nova obra' : 'Obra')}<span>.</span></h1>
-          <p>Atualize os detalhes da obra. As alterações ficam salvas, mas não mudam o estado de publicação.</p>
+          <p>Edite os dados da obra. Salvar não altera sua publicação; a prévia mostra a última versão salva.</p>
         </div>
         <div className="cms-editor-heading-actions">
           {!isNew && work.id && canDelete && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving}>Excluir obra</button>}
-          {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork}>Visualizar prévia ↗</button>}
+          {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork} disabled={dirty} title={dirty ? 'Salve as alterações antes de abrir a prévia.' : 'Abrir uma prévia privada desta obra.'}>{dirty ? 'Salve para prévia' : 'Visualizar prévia ↗'}</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
         </div>
@@ -514,7 +514,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           </section>
         ))}
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
-        {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : 'Alterações salvas. A publicação da obra não foi modificada.'}</div>}
+        {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}
         <div className="cms-editor-actions">
           <button className="cms-editor-cancel" type="button" onClick={onCancel}>Cancelar</button>
           <button className="cms-primary-button" type="submit" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Criar rascunho' : 'Salvar alterações'} <span>↗</span></button>
