@@ -1067,7 +1067,7 @@ def cms_categories(request):
     return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
 
 
-@require_POST
+@require_http_methods(["POST", "DELETE"])
 @never_cache
 @csrf_protect
 def cms_category_update(request, category_id):
@@ -1075,6 +1075,16 @@ def cms_category_update(request, category_id):
         return JsonResponse({"error": "authentication_required"}, status=401)
     if not request.user.is_staff:
         return JsonResponse({"error": "staff_required"}, status=403)
+    if request.method == "DELETE":
+        if not request.user.has_perm("portfolio.delete_category"):
+            return JsonResponse({"error": "category_delete_permission_required"}, status=403)
+        try:
+            item = Category.objects.get(pk=category_id)
+        except Category.DoesNotExist:
+            return JsonResponse({"error": "category_not_found"}, status=404)
+        deleted_works = item.works.count()
+        item.delete()
+        return JsonResponse({"deleted": category_id, "deletedWorks": deleted_works})
     if not request.user.has_perm("portfolio.change_category"):
         return JsonResponse({"error": "category_edit_permission_required"}, status=403)
     if request.content_type != "application/json" or len(request.body) > 8192:
