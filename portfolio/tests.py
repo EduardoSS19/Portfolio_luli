@@ -1072,3 +1072,61 @@ class CmsWorkUpdateApiTests(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "work_not_found")
+
+
+class CmsWorkDetailApiTests(TestCase):
+    def setUp(self):
+        Work.objects.all().delete()
+        Category.objects.all().delete()
+        self.category = Category.objects.create(title="Pintura", key="pintura")
+        self.work = Work.objects.create(
+            category=self.category,
+            title="Estudo inicial",
+            description="Descrição original",
+            technique="Acrílica",
+            year=2024,
+            height="12.50",
+            price="250.00",
+            signed=None,
+            is_active=False,
+        )
+        self.staff = get_user_model().objects.create_user(
+            username="cms-work-detail-staff",
+            password="test-password-123",
+            is_staff=True,
+        )
+
+    def test_staff_can_read_work_detail_and_receive_csrf_cookie(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse("cms-work-update", args=[self.work.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["title"], "Estudo inicial")
+        self.assertEqual(response.json()["category"], self.category.pk)
+        self.assertEqual(response.json()["height"], "12.50")
+        self.assertEqual(response.json()["price"], "250.00")
+        self.assertIsNone(response.json()["signed"])
+        self.assertIn("csrftoken", response.cookies)
+
+    def test_anonymous_user_cannot_read_work_detail(self):
+        response = self.client.get(reverse("cms-work-update", args=[self.work.pk]))
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["error"], "authentication_required")
+
+    def test_staff_without_change_permission_can_read_but_not_update(self):
+        self.client.force_login(self.staff)
+
+        read_response = self.client.get(reverse("cms-work-update", args=[self.work.pk]))
+        update_response = self.client.patch(
+            reverse("cms-work-update", args=[self.work.pk]),
+            data=json.dumps({"title": "Não autorizado"}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(read_response.status_code, 200)
+        self.assertEqual(update_response.status_code, 403)
+        self.assertEqual(update_response.json()["error"], "work_edit_permission_required")
+        self.work.refresh_from_db()
+        self.assertEqual(self.work.title, "Estudo inicial")
