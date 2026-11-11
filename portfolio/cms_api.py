@@ -137,7 +137,11 @@ def cms_profile(request):
             "instagram_url": profile.instagram_url,
             "contact_email": profile.contact_email,
             "contact_form_url": profile.contact_form_url,
-        }
+        },
+        "permissions": {
+            "canAdd": request.user.has_perm("portfolio.add_artistprofile"),
+            "canChange": request.user.has_perm("portfolio.change_artistprofile"),
+        },
     })
 
 
