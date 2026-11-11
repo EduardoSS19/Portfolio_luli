@@ -42,6 +42,7 @@ def cms_overview(request):
             "drafts": Work.objects.filter(is_active=False).count(),
         },
         "categories": Category.objects.count(),
+        "categoryOptions": list(Category.objects.order_by("position", "pk").values("key", "title")),
         "references": Reference.objects.count(),
         "videos": WorkVideo.objects.count(),
     })

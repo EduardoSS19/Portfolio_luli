@@ -507,6 +507,16 @@ class PortfolioApiTests(TestCase):
             fetch_redirect_response=False,
         )
 
+    @override_settings(DEBUG=True)
+    def test_debug_nested_frontend_route_is_preserved_for_vite(self):
+        response = self.client.get("/painel/")
+
+        self.assertRedirects(
+            response,
+            "http://127.0.0.1:5173/painel/",
+            fetch_redirect_response=False,
+        )
+
 
 class PortfolioSeedTests(TestCase):
     def test_seed_keeps_categories_and_uses_editable_placeholders(self):
@@ -842,6 +852,7 @@ class CmsReadApiTests(TestCase):
         self.assertEqual(response.json(), {
             "works": {"total": 2, "published": 1, "drafts": 1},
             "categories": 1,
+            "categoryOptions": [{"key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
         })

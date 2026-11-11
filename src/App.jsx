@@ -11,6 +11,7 @@ import { Footer } from './components/Footer.jsx'
 import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
 import { trackAnalyticsEvent } from './utils/analytics.js'
+import { CmsPage } from './cms/CmsPage.jsx'
 
 const perfilInicial = {
   nome: 'Nome da artista',
@@ -96,6 +97,11 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (window.location.pathname === '/painel' || window.location.pathname === '/painel/') {
+      setCarregando(false)
+      return undefined
+    }
+
     const controller = new AbortController()
 
     const previewToken = new URLSearchParams(window.location.search).get('preview_token')
@@ -220,6 +226,10 @@ export default function App() {
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (window.location.pathname === '/painel' || window.location.pathname === '/painel/') {
+    return <CmsPage />
   }
 
   if (carregando) {
