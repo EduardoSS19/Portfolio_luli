@@ -104,10 +104,14 @@ export default function App() {
 
     const controller = new AbortController()
 
-    const previewToken = new URLSearchParams(window.location.search).get('preview_token')
+    const params = new URLSearchParams(window.location.search)
+    const previewToken = params.get('preview_token')
+    const categoryPreviewToken = params.get('category_preview_token')
     const apiUrl = previewToken
       ? `/api/portfolio/?preview_token=${encodeURIComponent(previewToken)}`
-      : '/api/portfolio/'
+      : categoryPreviewToken
+        ? `/api/portfolio/?category_preview_token=${encodeURIComponent(categoryPreviewToken)}`
+        : '/api/portfolio/'
 
     fetch(apiUrl, { signal: controller.signal })
       .then(response => {
@@ -247,7 +251,7 @@ export default function App() {
     return <GaleriaGradeDiagnostico categorias={categorias} />
   }
 
-  if (previsualizacao) {
+  if (previsualizacao && !previsualizacao.category) {
     const categoriaPreview = categorias[0]
     const obraPreview = categoriaPreview?.obras?.[0]
     return (
@@ -277,7 +281,8 @@ export default function App() {
 
   return (
     <div className="site-shell">
-      {previsualizacao && (
+      {previsualizacao?.category && <div className="preview-mode-banner" role="status">PRÉVIA PARA COMPARTILHAMENTO · {previsualizacao.titulo} · não altera o portfólio publicado</div>}
+      {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
         </div>

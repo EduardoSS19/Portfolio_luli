@@ -349,3 +349,12 @@
   .cms-category-drag-handle{display:none}
   .cms-category-work-move-buttons{grid-column:3;justify-content:flex-end}
 }
+
+/* Category order: explicit draft, preview and save actions */
+.cms-category-order-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 14px;margin:12px 0 16px;border:1px solid var(--cms-line);border-radius:9px;background:var(--cms-panel)}
+.cms-category-order-actions>span{font-size:11px;color:var(--cms-muted)}
+.cms-category-order-actions>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cms-category-order-actions button{border:1px solid var(--cms-line);background:var(--cms-panel-2);color:var(--cms-text);border-radius:6px;padding:10px 12px;font:600 10px 'DM Sans';cursor:pointer}
+.cms-category-order-actions button:disabled{opacity:.4;cursor:not-allowed}
+.cms-category-order-actions .cms-primary-button{background:var(--cms-accent);color:#202218;border:0}
+@media(max-width:700px){.cms-category-order-actions{align-items:stretch;flex-direction:column}.cms-category-order-actions>div{display:grid;grid-template-columns:1fr 1fr}.cms-category-order-actions>div button:last-child{grid-column:1/-1}}
