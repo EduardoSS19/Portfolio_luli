@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .cms_analytics import cms_analytics
 from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_video_delete, cms_work_videos, cms_work_update, cms_works
 from .views import contact, portfolio_data
 
@@ -8,6 +9,7 @@ urlpatterns = [
     path("portfolio/", portfolio_data, name="portfolio-data"),
     path("contact/", contact, name="contact"),
     path("cms/overview/", cms_overview, name="cms-overview"),
+    path("cms/analytics/", cms_analytics, name="cms-analytics"),
     path("cms/works/", cms_works, name="cms-works"),
     path("cms/works/create/", cms_work_create, name="cms-work-create"),
     path("cms/works/<int:work_id>/", cms_work_update, name="cms-work-update"),
