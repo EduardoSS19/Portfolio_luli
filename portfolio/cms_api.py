@@ -11,7 +11,7 @@ from django.core.files.storage import default_storage
 from django import forms
 from django.db import transaction
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Count, Q
+from django.db.models import Count, Prefetch, Q
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
@@ -90,6 +90,17 @@ def cms_works(request):
     queryset = Work.objects.select_related("category").annotate(
         gallery_count=Count("gallery_images", distinct=True),
         video_count=Count("youtube_videos", distinct=True),
+    ).prefetch_related(
+        Prefetch(
+            "gallery_images",
+            queryset=WorkImage.objects.only("id", "work_id", "image", "position").order_by("position", "pk"),
+            to_attr="cms_gallery_images",
+        ),
+        Prefetch(
+            "youtube_videos",
+            queryset=WorkVideo.objects.only("id", "work_id", "thumbnail_url", "position").order_by("position", "pk"),
+            to_attr="cms_videos",
+        ),
     )
 
     if status == "published":
@@ -121,6 +132,12 @@ def cms_works(request):
                 image = ""
         if not image:
             image = work.image_url or ""
+
+        # Prefer the first carousel image, then the first video thumbnail.
+        if not image and work.cms_gallery_images:
+            image = _cms_image_url(work.cms_gallery_images[0].image)
+        if not image and work.cms_videos:
+            image = work.cms_videos[0].thumbnail_url or ""
 
         results.append({
             "id": work.pk,
