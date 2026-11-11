@@ -1891,7 +1891,7 @@ class CmsCategoryManagementApiTests(TestCase):
     def test_work_order_is_saved_atomically_within_selected_category(self):
         from django.contrib.auth.models import Permission
         second = Work.objects.create(category=self.category, title="Segunda obra", position=1)
-        other_category = Category.objects.create(title="Escultura", key="escultura")
+        other_category = Category.objects.create(title="Escultura", key="escultura-ordem-isolamento")
         other_work = Work.objects.create(category=other_category, title="Não deve mudar", position=0)
         self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="change_work"))
         self.client.force_login(self.editor)
@@ -1909,7 +1909,7 @@ class CmsCategoryManagementApiTests(TestCase):
 
     def test_work_order_rejects_missing_or_foreign_ids(self):
         from django.contrib.auth.models import Permission
-        other_category = Category.objects.create(title="Escultura", key="escultura")
+        other_category = Category.objects.create(title="Escultura", key="escultura-ordem-invalida")
         foreign_work = Work.objects.create(category=other_category, title="Outra categoria")
         self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="change_work"))
         self.client.force_login(self.editor)
