@@ -469,6 +469,8 @@ export function CmsPage() {
                   onAddVideo={addWorkVideo}
                   onDeleteVideo={deleteWorkVideo}
                   onReorderVideos={reorderWorkVideos}
+                  onPreview={createWorkPreview}
+                  onPublish={setWorkPublication}
                 />
               ) : editLoading ? (
                 <div className="cms-loading">Abrindo a ficha da obra…</div>
