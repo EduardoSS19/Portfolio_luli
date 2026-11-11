@@ -224,6 +224,20 @@ export function CmsPage() {
     return result
   }, [])
 
+  const replaceGalleryImage = useCallback(async (workId, imageId, file) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await fetch('/api/cms/works/' + workId + '/gallery/' + imageId + '/', {
+      method: 'PATCH', credentials: 'same-origin', cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: formData,
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.error === 'image_too_large' ? 'A imagem deve ter no máximo 15 MB.' : 'Não foi possível substituir esta imagem.')
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
   const deleteGalleryImage = useCallback(async (workId, imageId) => {
     const response = await fetch('/api/cms/works/' + workId + '/gallery/' + imageId + '/delete/', {
       method: 'POST',
@@ -272,6 +286,18 @@ export function CmsPage() {
       }
       throw new Error(messages[result.error] || 'Não foi possível adicionar o vídeo.')
     }
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
+  const updateWorkVideo = useCallback(async (workId, videoId, youtubeUrl) => {
+    const response = await fetch('/api/cms/works/' + workId + '/videos/' + videoId + '/', {
+      method: 'PATCH', credentials: 'same-origin', cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ youtubeUrl }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(result.message || (result.error === 'video_already_attached' ? 'Este vídeo já está vinculado à obra.' : 'Não foi possível atualizar o vídeo.'))
     setLibraryRefresh(value => value + 1)
     return result
   }, [])
@@ -533,10 +559,12 @@ export function CmsPage() {
                   onUploadCover={uploadWorkCover}
                   onLoadGallery={loadWorkGallery}
                   onUploadGalleryImage={uploadGalleryImage}
+                  onReplaceGalleryImage={replaceGalleryImage}
                   onDeleteGalleryImage={deleteGalleryImage}
                   onReorderGalleryImages={reorderGalleryImages}
                   onLoadVideos={loadWorkVideos}
                   onAddVideo={addWorkVideo}
+                  onUpdateVideo={updateWorkVideo}
                   onDeleteVideo={deleteWorkVideo}
                   onReorderVideos={reorderWorkVideos}
                   onPreview={createWorkPreview}
