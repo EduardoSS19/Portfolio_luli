@@ -113,7 +113,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
-STATICFILES_DIRS = [FRONTEND_DIST] if FRONTEND_DIST.is_dir() else [BASE_DIR / "public"]
+STATICFILES_DIRS = [FRONTEND_DIST] if FRONTEND_DIST.is_dir() else ([BASE_DIR / "public"] if (BASE_DIR / "public").is_dir() else [])
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
     "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
