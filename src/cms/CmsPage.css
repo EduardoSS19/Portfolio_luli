@@ -175,3 +175,25 @@
 .cms-editor-heading-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .cms-editor-heading-actions .cms-work-status{margin-top:0}
 @media(max-width:700px){.cms-editor-heading-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.cms-editor-heading-actions .cms-cover-upload{width:auto}.cms-editor-heading-actions .cms-work-status{margin-top:0}}
+
+
+.cms-category-page{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);gap:22px;align-items:start}
+.cms-category-list,.cms-category-form{background:var(--cms-panel);border:1px solid var(--cms-line);border-radius:9px;padding:20px;min-width:0}
+.cms-category-list h2,.cms-category-form h2{font:600 15px 'Manrope';margin:0 0 6px}
+.cms-category-list>p,.cms-category-form>p{font-size:11px;color:var(--cms-muted);line-height:1.6;margin:0 0 18px}
+.cms-category-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--cms-line)}
+.cms-category-item strong{display:block;font:600 12px 'Manrope';color:var(--cms-text)}
+.cms-category-item small{display:block;font-size:10px;color:var(--cms-muted);margin-top:4px}
+.cms-category-item-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.cms-category-item button{border:1px solid var(--cms-line);background:#24261f;color:var(--cms-accent);border-radius:5px;padding:8px 11px;font:600 10px 'DM Sans';cursor:pointer}
+.cms-category-item button:disabled{opacity:.45;cursor:not-allowed}
+.cms-category-status{display:inline-flex;margin-top:7px;padding:3px 6px;border-radius:4px;font-size:9px;background:#263326;color:#d5e8c8}
+.cms-category-status.inactive{background:#342b27;color:#e4b9a9}
+.cms-category-form{display:grid;gap:13px}
+.cms-category-form label{display:grid;gap:6px;font-size:10px;color:#c4c6ba;font-weight:600}
+.cms-category-form input{width:100%;min-width:0;background:#111210;border:1px solid #ffffff20;border-radius:6px;color:var(--cms-text);padding:11px 12px;font:12px 'DM Sans'}
+.cms-category-form input:focus{outline:none;border-color:var(--cms-accent);box-shadow:0 0 0 2px #c9d39a20}
+.cms-category-form-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cms-category-form-actions button{cursor:pointer}
+.cms-category-notice{font-size:11px;line-height:1.5;color:var(--cms-accent)}
+@media(max-width:760px){.cms-category-page{grid-template-columns:1fr}.cms-category-list,.cms-category-form{padding:16px}}

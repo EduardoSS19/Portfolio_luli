@@ -1718,3 +1718,60 @@ class CmsWorkPreviewApiTests(TestCase):
         response = self.client.post(reverse("cms-work-preview", args=[999999]))
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "work_not_found")
+
+
+class CmsCategoryManagementApiTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import Permission
+        self.editor = get_user_model().objects.create_user(username="cms-category-editor", is_staff=True)
+        permissions = Permission.objects.filter(content_type__app_label="portfolio", codename__in=["add_category", "change_category"])
+        self.editor.user_permissions.add(*permissions)
+        self.category = Category.objects.create(title="Pintura", key="pintura")
+        self.work = Work.objects.create(category=self.category, title="Obra vinculada")
+
+    def test_staff_can_list_categories_and_work_counts(self):
+        self.assertEqual(self.client.get(reverse("cms-categories")).status_code, 401)
+        self.client.force_login(self.editor)
+        response = self.client.get(reverse("cms-categories"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["results"][0]["workCount"], 1)
+
+    def test_create_generates_slug_key(self):
+        self.client.force_login(self.editor)
+        response = self.client.post(reverse("cms-categories"), data=json.dumps({"title": "Arte têxtil"}), content_type="application/json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["key"], "arte-textil")
+
+    def test_update_and_deactivate_preserve_linked_works(self):
+        self.client.force_login(self.editor)
+        response = self.client.post(reverse("cms-category-update", args=[self.category.pk]), data=json.dumps({"title": "Pintura e desenho", "active": False}), content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.category.refresh_from_db()
+        self.assertFalse(self.category.is_active)
+        self.assertEqual(self.category.title, "Pintura e desenho")
+        self.assertTrue(Work.objects.filter(pk=self.work.pk, category=self.category).exists())
+
+    def test_duplicate_key_and_invalid_boolean_are_rejected(self):
+        self.client.force_login(self.editor)
+        duplicate = self.client.post(reverse("cms-categories"), data=json.dumps({"title": "Outra", "key": "pintura"}), content_type="application/json")
+        invalid = self.client.post(reverse("cms-category-update", args=[self.category.pk]), data=json.dumps({"active": "false"}), content_type="application/json")
+        self.assertEqual(duplicate.status_code, 409)
+        self.assertEqual(invalid.status_code, 400)
+
+    def test_staff_without_category_permissions_cannot_mutate(self):
+        staff = get_user_model().objects.create_user(username="cms-category-readonly", is_staff=True)
+        self.client.force_login(staff)
+        create = self.client.post(reverse("cms-categories"), data=json.dumps({"title": "Nova"}), content_type="application/json")
+        update = self.client.post(reverse("cms-category-update", args=[self.category.pk]), data=json.dumps({"active": False}), content_type="application/json")
+        self.assertEqual(create.status_code, 403)
+        self.assertEqual(update.status_code, 403)
+
+    def test_mutations_require_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.editor)
+        rejected = client.post(reverse("cms-categories"), data=json.dumps({"title": "Nova"}), content_type="application/json")
+        client.get(reverse("cms-categories"))
+        token = client.cookies["csrftoken"].value
+        accepted = client.post(reverse("cms-categories"), data=json.dumps({"title": "Nova"}), content_type="application/json", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(rejected.status_code, 403)
+        self.assertEqual(accepted.status_code, 201)
