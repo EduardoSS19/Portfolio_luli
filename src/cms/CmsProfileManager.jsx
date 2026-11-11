@@ -113,6 +113,7 @@ export function CmsProfileManager() {
         throw new Error(messages.join(' · ') || (data.error === 'profile_edit_permission_required' ? 'Sua conta não tem permissão para editar o perfil.' : 'Não foi possível salvar o perfil.'))
       }
       setProfile(data.profile)
+      if (data.permissions) setPermissions(data.permissions)
       setNotice('Perfil atualizado. As informações foram salvas.')
     } catch (err) {
       setError(err.message || 'Não foi possível salvar o perfil.')
