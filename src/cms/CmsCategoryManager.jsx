@@ -29,7 +29,7 @@ async function categoryRequest(url, options = {}) {
   return data
 }
 
-export function CmsCategoryManager({ onChanged }) {
+export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -221,7 +221,7 @@ export function CmsCategoryManager({ onChanged }) {
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
-                <button type="button" onClick={() => setSelectedCategoryId(String(item.id))} disabled={saving}>Organizar obras</button>
+                <button type="button" onClick={() => setSelectedCategoryId(String(item.id))} disabled={saving || !canEditWorks} title={!canEditWorks ? 'Sua conta não tem permissão para reorganizar obras.' : 'Organizar a ordem das obras nesta categoria'}>Organizar obras</button>
                 <button type="button" onClick={() => move(items.indexOf(item), -1)} disabled={saving || items.indexOf(item) === 0}>↑</button>
                 <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1}>↓</button>
                 <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
@@ -243,7 +243,7 @@ export function CmsCategoryManager({ onChanged }) {
               <span className="cms-category-work-position">{String(index + 1).padStart(2, '0')}</span>
               <strong>{work.title}</strong>
               <span className={'cms-category-status' + (work.published ? '' : ' inactive')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
-              <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
+              <div><button type="button" aria-label={'Mover ' + work.title + ' para cima'} disabled={saving || !canEditWorks || index === 0} onClick={() => moveWork(index, -1)}>↑</button><button type="button" aria-label={'Mover ' + work.title + ' para baixo'} disabled={saving || !canEditWorks || index === categoryWorks.length - 1} onClick={() => moveWork(index, 1)}>↓</button></div>
             </article>
           )) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use as setas para reorganizar a sequência de exibição.</small></div>}
         </section>
