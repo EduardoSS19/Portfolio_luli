@@ -244,6 +244,58 @@ export function CmsPage() {
     return result.results || []
   }, [])
 
+  const loadWorkVideos = useCallback(async workId => {
+    const result = await requestJson('/api/cms/works/' + workId + '/videos/')
+    return result.results || []
+  }, [])
+
+  const addWorkVideo = useCallback(async (workId, youtubeUrl) => {
+    const response = await fetch('/api/cms/works/' + workId + '/videos/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ youtubeUrl }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const messages = {
+        video_already_attached: 'Este vídeo já está vinculado a esta obra.',
+        invalid_youtube_url: 'Informe um link válido do YouTube.',
+        youtube_metadata_error: result.message || 'Não foi possível validar o vídeo. Verifique se ele está público e permite incorporação.',
+      }
+      throw new Error(messages[result.error] || 'Não foi possível adicionar o vídeo.')
+    }
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
+  const deleteWorkVideo = useCallback(async (workId, videoId) => {
+    const response = await fetch('/api/cms/works/' + workId + '/videos/' + videoId + '/delete/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error('Não foi possível remover este vídeo.')
+    setLibraryRefresh(value => value + 1)
+    return result
+  }, [])
+
+  const reorderWorkVideos = useCallback(async (workId, videoIds) => {
+    const response = await fetch('/api/cms/works/' + workId + '/videos/', {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+      body: JSON.stringify({ videoIds }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error('Não foi possível salvar a ordem dos vídeos.')
+    return result.results || []
+  }, [])
+
   const readCookie = name => {
     const prefix = name + '='
     const item = document.cookie.split('; ').find(cookie => cookie.startsWith(prefix))
@@ -371,6 +423,10 @@ export function CmsPage() {
                   onUploadGalleryImage={uploadGalleryImage}
                   onDeleteGalleryImage={deleteGalleryImage}
                   onReorderGalleryImages={reorderGalleryImages}
+                  onLoadVideos={loadWorkVideos}
+                  onAddVideo={addWorkVideo}
+                  onDeleteVideo={deleteWorkVideo}
+                  onReorderVideos={reorderWorkVideos}
                 />
               ) : editLoading ? (
                 <div className="cms-loading">Abrindo a ficha da obra…</div>
