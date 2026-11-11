@@ -23,6 +23,8 @@ export function CmsProfileManager() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [photoFile, setPhotoFile] = useState(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -49,6 +51,43 @@ export function CmsProfileManager() {
   const change = (name, value) => {
     setProfile(current => ({ ...current, [name]: value }))
     setNotice('')
+  }
+
+
+  const uploadPhoto = async () => {
+    if (!photoFile) return
+    setUploadingPhoto(true)
+    setError('')
+    setNotice('')
+    try {
+      const body = new FormData()
+      body.append('image', photoFile)
+      const response = await fetch('/api/cms/profile/photo/', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json', 'X-CSRFToken': readCookie('csrftoken') },
+        body,
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const messages = {
+          invalid_image_file: 'O arquivo não parece ser uma imagem válida.',
+          unsupported_image_format: 'Use uma imagem JPG, PNG ou WebP.',
+          image_too_large: 'A imagem deve ter no máximo 15 MB.',
+          invalid_image_dimensions: 'A imagem tem dimensões muito grandes.',
+          image_storage_failed: 'Não foi possível armazenar a foto. A anterior foi preservada.',
+        }
+        throw new Error(messages[data.error] || 'Não foi possível enviar a foto.')
+      }
+      setProfile(current => ({ ...current, photo: data.photo }))
+      setPhotoFile(null)
+      setNotice('Foto do perfil atualizada.')
+    } catch (err) {
+      setError(err.message || 'Não foi possível enviar a foto.')
+    } finally {
+      setUploadingPhoto(false)
+    }
   }
 
   const save = async event => {
@@ -97,7 +136,7 @@ export function CmsProfileManager() {
       <form className="cms-profile-form" onSubmit={save}>
         <div className="cms-profile-preview">
           {photo ? <img src={photo} alt="Prévia da foto do perfil" /> : <div className="cms-no-image"><span>LB</span><small>SEM FOTO</small></div>}
-          <div><strong>Foto do perfil</strong><p>A imagem enviada pelo painel administrativo continua preservada. O envio e a substituição da foto serão integrados nesta mesma área.</p></div>
+          <div className="cms-profile-photo-controls"><strong>Foto do perfil</strong><p>Envie uma imagem JPG, PNG ou WebP de até 15 MB. A foto anterior só é substituída quando o novo arquivo é validado e salvo.</p><div><input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher foto do perfil" onChange={event => setPhotoFile(event.target.files?.[0] || null)} /><button className="cms-cover-upload" type="button" disabled={!photoFile || uploadingPhoto || !permissions.canChange} onClick={uploadPhoto}>{uploadingPhoto ? 'Enviando…' : 'Atualizar foto'}</button></div></div>
         </div>
         <div className="cms-editor-fields">
           {FIELDS.map(field => (
