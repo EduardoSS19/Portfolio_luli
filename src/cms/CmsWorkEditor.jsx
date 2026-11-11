@@ -105,9 +105,11 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [dirty, setDirty] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [created, setCreated] = useState(false)
@@ -150,6 +152,27 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     return () => { active = false }
   }, [work.id, onLoadVideos])
 
+  const togglePublication = async () => {
+    if (dirty) {
+      setError('Salve as alterações da ficha antes de alterar a publicação.')
+      return
+    }
+    const nextPublished = !work.published
+    const message = nextPublished
+      ? 'Publicar esta obra? Ela ficará visível para todas as pessoas no portfólio.'
+      : 'Despublicar esta obra? Ela deixará de aparecer no portfólio público.'
+    if (!window.confirm(message)) return
+    setPublishing(true)
+    setError('')
+    setSaved(false)
+    try {
+      await onPublish(work.id, nextPublished)
+    } catch (err) {
+      setError(err.message || 'Não foi possível atualizar a publicação.')
+    } finally {
+      setPublishing(false)
+    }
+  }
   const previewWork = async () => {
     const previewWindow = window.open('about:blank', '_blank')
     if (!previewWindow) {
@@ -223,6 +246,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
     setSaved(false)
+    setDirty(true)
   }
 
   const uploadCover = async event => {
@@ -321,6 +345,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     try {
       await onSave(payload)
       if (isNew) setCreated(true)
+      setDirty(false)
       setSaved(true)
     } catch (err) {
       setError(err.message || 'Não foi possível salvar as alterações.')
@@ -340,6 +365,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         </div>
         <div className="cms-editor-heading-actions">
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork}>Visualizar prévia ↗</button>}
+          {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
         </div>
       </header>
