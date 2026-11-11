@@ -358,10 +358,6 @@ export function CmsPage() {
       ])
       setOverview(summary)
       setWorks(library.results || [])
-      setAnalytics(null)
-      requestJson('/api/cms/analytics/', signal)
-        .then(setAnalytics)
-        .catch(err => { if (err.name !== 'AbortError') setAnalytics({ status: 'error' }) })
       setPagination(library.pagination || { total: 0, hasMore: false })
       setForbidden(false)
     } catch (err) {
@@ -379,6 +375,27 @@ export function CmsPage() {
     load(controller.signal)
     return () => controller.abort()
   }, [load])
+
+  useEffect(() => {
+    if (section !== 'overview') {
+      setAnalytics(null)
+      return
+    }
+
+    const controller = new AbortController()
+    setAnalytics(null)
+    requestJson('/api/cms/analytics/', controller.signal)
+      .then(data => {
+        if (!controller.signal.aborted) setAnalytics(data)
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError' && !controller.signal.aborted) {
+          setAnalytics({ status: 'error' })
+        }
+      })
+
+    return () => controller.abort()
+  }, [section])
 
   useEffect(() => {
     document.title = 'Painel editorial · Luli Becker'
