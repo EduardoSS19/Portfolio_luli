@@ -105,16 +105,44 @@ function Field({ field, value, categories, onChange }) {
   )
 }
 
-export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave }) {
+export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover }) {
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [created, setCreated] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverError, setCoverError] = useState('')
+  const [coverSaved, setCoverSaved] = useState(false)
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
     setSaved(false)
+  }
+
+  const uploadCover = async event => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (file.size > 15 * 1024 * 1024) {
+      setCoverError('A imagem deve ter no máximo 15 MB.')
+      return
+    }
+    if (!work.id) {
+      setCoverError('Salve os dados da obra antes de enviar a capa.')
+      return
+    }
+    setUploadingCover(true)
+    setCoverError('')
+    setCoverSaved(false)
+    try {
+      await onUploadCover(file)
+      setCoverSaved(true)
+    } catch (err) {
+      setCoverError(err.message || 'Não foi possível enviar a imagem.')
+    } finally {
+      setUploadingCover(false)
+    }
   }
 
   const submit = async event => {
@@ -148,6 +176,28 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
       </header>
 
+      <section className="cms-editor-section cms-cover-section">
+        <div className="cms-editor-section-heading">
+          <h2>Imagem de capa</h2>
+          <p>Esta é a imagem principal que representa a obra na grade do portfólio.</p>
+        </div>
+        <div className="cms-cover-layout">
+          <div className="cms-cover-preview">
+            {work.image ? <img src={work.image} alt={'Capa de ' + (work.title || 'obra')} /> : <div className="cms-cover-placeholder"><span>✳</span><small>SEM CAPA</small></div>}
+          </div>
+          <div className="cms-cover-controls">
+            <strong>{work.image ? 'Capa atual' : 'Ainda não há uma capa'}</strong>
+            <p>JPG, PNG ou WebP · até 15 MB. A imagem anterior só é substituída quando o novo arquivo é validado e salvo.</p>
+            <label className={'cms-cover-upload' + (uploadingCover || !work.id ? ' disabled' : '')}>
+              {uploadingCover ? 'Enviando imagem…' : work.image ? 'Substituir capa' : 'Escolher imagem'}
+              <input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadCover} disabled={uploadingCover || !work.id} />
+            </label>
+            {!work.id && <small>Salve a obra primeiro para liberar o envio da capa.</small>}
+            {coverError && <div className="cms-editor-message error" role="alert">{coverError}</div>}
+            {coverSaved && <div className="cms-editor-message success" role="status">Capa atualizada com sucesso.</div>}
+          </div>
+        </div>
+      </section>
       <form onSubmit={submit}>
         {SECTIONS.map(section => (
           <section className="cms-editor-section" key={section.title}>

@@ -1104,6 +1104,7 @@ class CmsWorkDetailApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["title"], "Estudo inicial")
+        self.assertEqual(response.json()["image"], "")
         self.assertEqual(response.json()["category"], self.category.pk)
         self.assertEqual(response.json()["height"], "12.50")
         self.assertEqual(response.json()["price"], "250.00")
