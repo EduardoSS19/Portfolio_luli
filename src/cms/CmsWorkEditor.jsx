@@ -52,6 +52,8 @@ const SECTIONS = [
       { name: 'condition', label: 'Estado de conservação' },
       { name: 'position', label: 'Ordem no portfólio', type: 'number', required: true },
       { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
+      { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true },
+      { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true },
     ],
   },
 ]
@@ -85,6 +87,8 @@ function Field({ field, value, categories, onChange }) {
         <option value="not_for_sale">Não está à venda</option>
       </select>
     )
+  } else if (field.type === 'checkbox') {
+    control = <input {...common} type="checkbox" checked={Boolean(value)} onChange={event => onChange(field.name, event.target.checked)} />
   } else if (field.type === 'signed') {
     control = (
       <select {...common} value={value == null ? '' : String(value)}>
