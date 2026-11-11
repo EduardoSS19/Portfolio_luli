@@ -8,7 +8,7 @@ function Metric({ label, value, detail }) {
   return (
     <article className="cms-analytics-metric">
       <span>{label}</span>
-      <strong>{formatNumber(value)}</strong>
+      <strong>{value == null ? '—' : formatNumber(value)}</strong>
       <small>{detail}</small>
     </article>
   )
