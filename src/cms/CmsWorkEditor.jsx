@@ -122,7 +122,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     setSaving(true)
     setError('')
     setSaved(false)
-    const payload = { ...form, category: Number(form.category) }
+    const payload = Object.fromEntries(SECTIONS.flatMap(section => section.fields).map(field => [field.name, form[field.name]]))
+    payload.category = Number(form.category)
     payload.signed = form.signed === '' || form.signed == null ? null : form.signed === true || form.signed === 'true'
     try {
       await onSave(payload)
