@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .cms_api import cms_overview, cms_work_create, cms_work_update, cms_works
+from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_update, cms_works
 from .views import contact, portfolio_data
 
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path("cms/works/", cms_works, name="cms-works"),
     path("cms/works/create/", cms_work_create, name="cms-work-create"),
     path("cms/works/<int:work_id>/", cms_work_update, name="cms-work-update"),
+    path("cms/works/<int:work_id>/cover/", cms_work_cover_upload, name="cms-work-cover-upload"),
 ]
