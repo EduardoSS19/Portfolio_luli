@@ -266,3 +266,8 @@
 
 .cms-content-select{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--cms-muted,#999);flex:none}
 .cms-content-select input{accent-color:currentColor}
+
+
+.cms-gallery-replace{display:inline-flex;align-items:center;border:1px solid var(--cms-line,#444);border-radius:7px;padding:6px 8px;font-size:11px;cursor:pointer}
+.cms-gallery-replace input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.cms-video-actions button:not(.delete){border:1px solid var(--cms-line,#444);border-radius:7px;background:transparent;color:inherit;padding:7px 9px;font-size:12px;cursor:pointer}
