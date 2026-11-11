@@ -1941,6 +1941,41 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual(accepted.status_code, 201)
 
 
+    def test_work_order_response_preserves_thumbnail_urls(self):
+        from django.contrib.auth.models import Permission
+        self.work.image_url = "https://example.com/cover.jpg"
+        self.work.save(update_fields=["image_url"])
+        self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="change_work"))
+        self.client.force_login(self.editor)
+        response = self.client.post(
+            reverse("cms-category-work-order", args=[self.category.pk]),
+            data=json.dumps({"workIds": [self.work.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["results"][0]["image"], "https://example.com/cover.jpg")
+
+    def test_category_order_preview_is_shareable_and_uses_unsaved_order(self):
+        from django.contrib.auth.models import Permission
+        second = Work.objects.create(category=self.category, title="Segunda obra", position=1, is_active=True)
+        self.work.is_active = True
+        self.work.save(update_fields=["is_active"])
+        self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="view_work"))
+        self.client.force_login(self.editor)
+        created = self.client.post(
+            reverse("cms-category-work-order-preview", args=[self.category.pk]),
+            data=json.dumps({"workIds": [second.pk, self.work.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(created.status_code, 200)
+        token = created.json()["url"].split("category_preview_token=", 1)[1]
+        public_response = Client().get(reverse("portfolio-data") + "?category_preview_token=" + token)
+        self.assertEqual(public_response.status_code, 200)
+        payload = public_response.json()
+        self.assertTrue(payload["preview"]["category"])
+        self.assertEqual([work["titulo"] for work in payload["categorias"][0]["obras"]], ["Segunda obra", "Obra vinculada"])
+
+
 class CmsArtistProfileApiTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission
