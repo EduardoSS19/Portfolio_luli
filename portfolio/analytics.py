@@ -11,11 +11,11 @@ DEFAULT_PROPERTY_ID = "563474943"
 
 
 def _report(client, property_id, dimensions, metrics, *, limit=10, dimension_filter=None):
-    from google.analytics.data_v1beta.types import Dimension, Metric, RunReportRequest
+    from google.analytics.data_v1beta.types import DateRange, Dimension, Metric, RunReportRequest
 
     request = RunReportRequest(
         property=f"properties/{property_id}",
-        date_ranges=[{"start_date": "28daysAgo", "end_date": "today"}],
+        date_ranges=[DateRange(start_date="28daysAgo", end_date="today")],
         dimensions=[Dimension(name=name) for name in dimensions],
         metrics=[Metric(name=name) for name in metrics],
         limit=limit,
@@ -83,10 +83,10 @@ def get_ga4_dashboard_data():
 
     countries, sources, top_artworks = [], [], []
     try:
-        response = _report(client, property_id, ["country"], ["activeUsers", "sessions"])
+        response = _report(client, property_id, ["city", "country"], ["activeUsers", "sessions"])
         countries = [
-            {"name": dims[0], "users": int(metrics[0]), "sessions": int(metrics[1])}
-            for dims, metrics in _rows(response, 1, 2) if dims[0] not in ("", "(not set)")
+            {"name": ", ".join(part for part in dims if part and part != "(not set)"), "users": int(metrics[0]), "sessions": int(metrics[1])}
+            for dims, metrics in _rows(response, 2, 2) if any(part and part != "(not set)" for part in dims)
         ]
     except Exception:
         logger.exception("Não foi possível consultar a localização dos acessos no GA4.")
