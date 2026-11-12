@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 function readCsrf() {
   const cookie = document.cookie.split('; ').find(item => item.startsWith('csrftoken='))
@@ -36,6 +37,7 @@ export function CmsCategoryManager({
   canEditCategory = false,
   canDeleteCategory = false,
 }) {
+  const { confirm, dialogNode } = useCmsConfirm()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -275,7 +277,7 @@ export function CmsCategoryManager({
     const warning = item.workCount
       ? 'Excluir esta categoria também excluirá permanentemente ' + item.workCount + ' obra(s) vinculada(s). Continuar?'
       : 'Excluir esta categoria permanentemente?'
-    if (!window.confirm(warning)) return
+    if (!(await confirm({ title: 'Excluir categoria?', message: warning + ' Esta ação não pode ser desfeita.', confirmLabel: 'Excluir categoria', variant: 'danger' }))) return
     setSaving(true); setError(''); setNotice('')
     try {
       await categoryRequest('/api/cms/categories/' + item.id + '/', { method: 'DELETE' })
@@ -444,6 +446,7 @@ export function CmsCategoryManager({
           <p>{canEditCategory ? 'Sua conta pode editar categorias existentes, mas não criar novas categorias.' : 'Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.'}</p>
         </aside>}
       </div>
+      {dialogNode}
     </>
   )
 }
