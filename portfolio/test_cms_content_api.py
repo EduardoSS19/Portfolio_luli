@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
-from django.test.client import MULTIPART_CONTENT
 from django.urls import reverse
 
 from .models import BackgroundFrame, Reference, SocialLink
@@ -156,10 +155,9 @@ class CmsContentApiTests(TestCase):
             self.assertTrue(image_url)
             self.assertIn(old_name, image_url)
 
-            response = self.client.patch(
+            response = self.client.post(
                 reverse("cms-content-detail", args=["backgrounds", background.pk]),
                 data={"image": image_upload("replacement.png", "blue")},
-                content_type=MULTIPART_CONTENT,
             )
             self.assertEqual(response.status_code, 200, response.content)
             background.refresh_from_db()
