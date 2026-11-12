@@ -477,3 +477,15 @@
 .cms-save-state-dot{width:7px;height:7px;flex:none;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px currentColor;opacity:.75}
 .cms-editor-save-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 @media(max-width:700px){.cms-editor-save-actions{display:grid;grid-template-columns:1fr}.cms-profile-form .cms-editor-save-actions{width:100%}}
+
+
+/* Estados de publicação com significado explícito */
+.cms-publication-state{display:flex;align-items:flex-start;gap:11px;min-width:190px;padding:9px 12px;border:1px solid var(--cms-line);border-radius:8px;background:var(--cms-panel-2)}
+.cms-publication-state-dot{width:8px;height:8px;flex:none;margin-top:4px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px currentColor;opacity:.72}
+.cms-publication-state.published{color:#c6d9bc;border-color:#526b4b;background:#526b4b12}
+.cms-publication-state.draft{color:#e6d19a;border-color:#b99a55;background:#b99a5512}
+.cms-publication-state>span:last-child{display:grid;gap:3px}
+.cms-publication-state strong{font:600 11px 'DM Sans'}
+.cms-publication-state small{max-width:280px;color:var(--cms-muted);font:10px/1.45 'DM Sans'}
+.cms-content-publication-status{font-size:9px;letter-spacing:.1px}
+@media(max-width:700px){.cms-publication-state{min-width:0;width:100%;margin-top:8px}.cms-editor-heading-actions{align-items:stretch}}
