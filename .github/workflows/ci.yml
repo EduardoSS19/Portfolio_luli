@@ -112,7 +112,7 @@ jobs:
         run: npx --yes --package=@playwright/test@1.56.1 playwright --version
 
       - name: Install browser engines
-        run: npx --yes --package=@playwright/test@1.56.1 playwright install chromium
+        run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium firefox webkit
 
       - name: Link isolated Playwright package for config resolution
         shell: bash
@@ -122,10 +122,10 @@ jobs:
           mkdir -p node_modules/@playwright
           ln -s "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")" node_modules/@playwright/test
 
-      - name: Run responsive gallery tests
-        timeout-minutes: 4
+      - name: Run desktop, mobile and CMS browser tests
+        timeout-minutes: 12
         shell: bash
         run: |
           PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
           test -n "$PLAYWRIGHT_CLI"
-          node "$PLAYWRIGHT_CLI" test --project=chromium-desktop --workers=1 --retries=0 --max-failures=1 --reporter=list
+          node "$PLAYWRIGHT_CLI" test --workers=1 --retries=0 --max-failures=1 --reporter=list
