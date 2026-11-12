@@ -111,7 +111,7 @@ export function CmsContentManager() {
     try {
       const body = new FormData()
       body.append('image', file)
-      await api('/api/cms/content/backgrounds/' + item.id + '/', { method: 'PATCH', body })
+      await api('/api/cms/content/backgrounds/' + item.id + '/', { method: 'POST', body })
       setImageErrors(current => ({ ...current, [item.id]: false }))
       setNotice('Imagem de fundo substituída. A posição e a publicação foram preservadas.')
       await load('backgrounds')
