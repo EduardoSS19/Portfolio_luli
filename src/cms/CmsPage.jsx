@@ -633,7 +633,7 @@ export function CmsPage() {
                         <label className="cms-work-select"><input type="checkbox" checked={selectedWorkIds.includes(work.id)} onChange={event => setSelectedWorkIds(current => event.target.checked ? [...current, work.id] : current.filter(id => id !== work.id))} aria-label={'Selecionar ' + work.title} /> Selecionar</label>
                         <div className="cms-work-image">
                           {work.image ? <img src={work.image} alt="" loading="lazy" /> : <div className="cms-no-image"><span>✳</span><small>SEM IMAGEM</small></div>}
-                          <span className={`cms-work-status ${work.published ? 'published' : 'draft'}`}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+                          <span className={`cms-work-status ${work.published ? 'published' : 'draft'}`} title={work.published ? 'Visível para visitantes no portfólio público' : 'Rascunho: não aparece no portfólio público'} aria-label={work.published ? 'Publicada no portfólio' : 'Rascunho, não aparece no portfólio'}>{work.published ? 'No ar' : 'Rascunho'}</span>
                         </div>
                         <div className="cms-work-info"><div><h3>{work.title}</h3><p>{work.category?.title || 'Sem categoria'}</p></div><span className="cms-work-arrow">↗</span></div>
                         <div className="cms-work-meta"><span>{work.media?.images + work.media?.gallery || 0} imagens</span><span>{work.media?.videos || 0} vídeos</span></div>

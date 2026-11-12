@@ -463,7 +463,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           {!isNew && work.id && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving || !canDelete} title={!canDelete ? 'Sua conta não tem permissão para excluir obras. Solicite a permissão Excluir obra no Django Admin.' : 'Excluir definitivamente esta obra e seus arquivos vinculados.'}>Excluir obra</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork} disabled={dirty} title={dirty ? 'Salve as alterações antes de abrir a prévia.' : 'Abrir uma prévia privada desta obra.'}>{dirty ? 'Salve para prévia' : 'Visualizar prévia ↗'}</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
-          <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
+          <div className={'cms-publication-state ' + (work.published ? 'published' : 'draft')} role="status" aria-live="polite"><span className="cms-publication-state-dot" /><span><strong>{work.published ? 'No ar' : 'Rascunho'}</strong><small>{work.published ? 'Esta obra está visível para visitantes no portfólio público.' : 'Esta obra não aparece no portfólio público até ser publicada.'}</small></span></div>
         </div>
       </header>
       {dirty && <div className="cms-save-state pending" role="status" aria-live="polite"><span className="cms-save-state-dot" />Alterações não salvas. Salve a ficha para atualizar a prévia e manter tudo no portfólio.</div>}
