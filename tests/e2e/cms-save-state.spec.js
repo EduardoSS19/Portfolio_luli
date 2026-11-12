@@ -51,7 +51,7 @@ test('perfil sinaliza alterações pendentes e permite descartá-las ou salvá-l
 
   await name.fill('Luli Becker Atualizada')
   await page.getByRole('button', { name: 'Salvar perfil' }).click()
-  await expect(page.getByRole('status')).toContainText('Perfil atualizado')
+  await expect(page.locator('.cms-editor-message[role="status"]')).toContainText('Perfil atualizado')
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
   expect(patchCount).toBe(1)
 })
@@ -81,6 +81,6 @@ test('conteúdo complementar só habilita salvar quando há mudanças', async ({
   await expect(page.locator('.cms-save-state.compact')).toContainText('Alterações ainda não salvas')
   await expect(saveButton).toBeEnabled()
   await saveButton.click()
-  await expect(page.getByRole('status')).toContainText('Item adicionado')
+  await expect(page.locator('.cms-editor-message[role="status"]')).toContainText('Item adicionado')
   await expect(page.getByLabel('Nome da rede social')).toHaveValue('')
 })
