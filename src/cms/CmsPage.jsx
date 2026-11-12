@@ -6,6 +6,7 @@ import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 import { CmsProfileManager } from './CmsProfileManager.jsx'
 import { CmsContentManager } from './CmsContentManager.jsx'
 import { CmsMediaManager } from './CmsMediaManager.jsx'
+import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const PAGE_SIZE = 24
 
@@ -62,6 +63,7 @@ function LoginRequired({ forbidden = false }) {
 }
 
 export function CmsPage() {
+  const { confirm, dialogNode } = useCmsConfirm()
   const [overview, setOverview] = useState(null)
   const [analytics, setAnalytics] = useState(null)
   const [works, setWorks] = useState([])
@@ -393,7 +395,7 @@ export function CmsPage() {
   const bulkSetPublication = async published => {
     if (!selectedWorkIds.length) return
     const action = published ? 'publicar' : 'despublicar'
-    if (!window.confirm(action[0].toUpperCase() + action.slice(1) + ' ' + selectedWorkIds.length + ' obra(s) selecionada(s)?')) return
+    if (!(await confirm({ title: (published ? 'Publicar ' : 'Despublicar ') + selectedWorkIds.length + ' obras?', message: published ? 'As obras selecionadas ficarão visíveis no portfólio público.' : 'As obras selecionadas deixarão de aparecer no portfólio público.', confirmLabel: published ? 'Publicar selecionadas' : 'Despublicar selecionadas', variant: 'default' }))) return
     const response = await fetch('/api/cms/works/bulk-publish/', {
       method: 'POST',
       credentials: 'same-origin',
@@ -652,6 +654,7 @@ export function CmsPage() {
           {error && !isOverview && null}
         </div>
       </main>
+      {dialogNode}
     </div>
   )
 }
