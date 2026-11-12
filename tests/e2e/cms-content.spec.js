@@ -28,6 +28,10 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
         status: 'not_configured', historical: null, realtime: null,
       }) })
     }
+    if (url.pathname === '/api/cms/content/social-links/1/' && route.request().method() === 'DELETE') {
+      socialLinks = socialLinks.filter(item => item.id !== 1)
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ deleted: true }) })
+    }
     if (url.pathname.endsWith('/api/cms/content/')) {
       if (route.request().method() === 'PATCH') {
         const payload = route.request().postDataJSON()
@@ -59,6 +63,17 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
   await expect(contentRows).toHaveCount(2)
   await contentRows.nth(0).dragTo(contentRows.nth(1))
   await expect.poll(() => savedOrder).toEqual([4, 1])
+
+  const behanceRow = page.locator('.cms-content-item').filter({ hasText: 'Behance' })
+  await behanceRow.getByRole('button', { name: 'Excluir' }).click()
+  const deleteDialog = page.getByRole('alertdialog')
+  await expect(deleteDialog.getByRole('heading', { name: 'Excluir item?' })).toBeVisible()
+  await deleteDialog.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(page.getByText('Behance', { exact: true })).toBeVisible()
+  await behanceRow.getByRole('button', { name: 'Excluir' }).click()
+  await deleteDialog.getByRole('button', { name: 'Excluir item' }).click()
+  await expect(page.getByText('Behance', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Instagram', { exact: true })).toBeVisible()
 
   await page.locator('.cms-content-tabs button').nth(1).click()
   await expect(page.locator('.cms-content-tabs button').nth(1)).toHaveClass(/active/)
@@ -118,7 +133,9 @@ test('biblioteca central lista e transfere mídias entre obras', async ({ page }
   await expect(page.getByText('Foto 01', { exact: true })).toBeVisible()
 
   await page.getByLabel('Obra de destino para Foto 01').selectOption('2')
-  page.once('dialog', dialog => dialog.accept())
   await page.getByRole('button', { name: 'Transferir' }).click()
+  const transferDialog = page.getByRole('alertdialog')
+  await expect(transferDialog.getByRole('heading', { name: 'Transferir mídia?' })).toBeVisible()
+  await transferDialog.getByRole('button', { name: 'Transferir mídia' }).click()
   await expect(page.getByRole('status')).toContainText('Mídia transferida para "Obra destino"')
 })
