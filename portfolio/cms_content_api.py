@@ -220,6 +220,17 @@ def cms_content_detail(request, content_type, item_id):
 
     if request.method == "DELETE":
 
+        if not permissions["canDelete"]:
+            return JsonResponse({"error": "content_delete_permission_required"}, status=403)
+        image_name = item.image.name if content_type == "backgrounds" and item.image else ""
+        item.delete()
+        if image_name:
+            try:
+                default_storage.delete(image_name)
+            except Exception:
+                logger.exception("Could not delete removed CMS background %s", image_name)
+        return JsonResponse({"deleted": True, "id": item_id})
+
     if content_type == "backgrounds" and request.content_type.startswith("multipart/form-data"):
         if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
             return JsonResponse({"error": "exactly_one_image_required"}, status=400)
@@ -255,17 +266,6 @@ def cms_content_detail(request, content_type, item_id):
             except Exception:
                 logger.exception("Could not delete replaced CMS background %s", old_name)
         return JsonResponse({"result": _serialize_content(content_type, item)})
-
-        if not permissions["canDelete"]:
-            return JsonResponse({"error": "content_delete_permission_required"}, status=403)
-        image_name = item.image.name if content_type == "backgrounds" and item.image else ""
-        item.delete()
-        if image_name:
-            try:
-                default_storage.delete(image_name)
-            except Exception:
-                logger.exception("Could not delete removed CMS background %s", image_name)
-        return JsonResponse({"deleted": True, "id": item_id})
 
     if not permissions["canChange"]:
         return JsonResponse({"error": "content_change_permission_required"}, status=403)
