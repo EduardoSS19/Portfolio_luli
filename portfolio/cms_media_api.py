@@ -152,6 +152,7 @@ def cms_media_move(request):
         item.save(update_fields=["work", "position"])
         _normalize_positions(model.objects.filter(work=source))
         _normalize_positions(model.objects.filter(work=destination))
+        item.refresh_from_db(fields=["position"])
 
     return JsonResponse({
         "moved": True,
