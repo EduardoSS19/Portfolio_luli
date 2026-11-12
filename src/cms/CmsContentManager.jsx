@@ -150,9 +150,9 @@ export function CmsContentManager() {
     finally { setSaving(false) }
   }
 
-  const addLink = () => update('links', [...form.links, { text: '', url: '' }])
-  const editLink = (index, key, value) => update('links', form.links.map((link, i) => i === index ? { ...link, [key]: value } : link))
-  const removeLink = index => update('links', form.links.filter((_, i) => i !== index))
+  const addLink = () => update('links', [...(form.links || []), { text: '', url: '' }])
+  const editLink = (index, key, value) => update('links', (form.links || []).map((link, i) => i === index ? { ...link, [key]: value } : link))
+  const removeLink = index => update('links', (form.links || []).filter((_, i) => i !== index))
 
   const current = TYPES.find(item => item.id === type)
   const canEdit = permissions.canAdd || permissions.canChange
@@ -204,7 +204,7 @@ export function CmsContentManager() {
             {type === 'social-links' ? <label>URL<input type="url" required maxLength={500} value={form.url} onChange={event => update('url', event.target.value)} placeholder="https://" /></label> : <>
               <label>Período<input maxLength={100} value={form.period} onChange={event => update('period', event.target.value)} placeholder="Ex.: 2024–2025" /></label>
               <div className="cms-content-links"><div><strong>Links da referência</strong><button type="button" onClick={addLink}>+ Adicionar link</button></div>
-                {form.links.map((link, index) => <div className="cms-content-link-fields" key={index}><input aria-label="Texto do link" required maxLength={255} placeholder="Texto do link" value={link.text} onChange={event => editLink(index, 'text', event.target.value)} /><input aria-label="URL do link" type="url" required maxLength={500} placeholder="https://" value={link.url} onChange={event => editLink(index, 'url', event.target.value)} /><button type="button" onClick={() => removeLink(index)} aria-label="Remover link">×</button></div>)}
+                {(form.links || []).map((link, index) => <div className="cms-content-link-fields" key={index}><input aria-label="Texto do link" required maxLength={255} placeholder="Texto do link" value={link.text} onChange={event => editLink(index, 'text', event.target.value)} /><input aria-label="URL do link" type="url" required maxLength={500} placeholder="https://" value={link.url} onChange={event => editLink(index, 'url', event.target.value)} /><button type="button" onClick={() => removeLink(index)} aria-label="Remover link">×</button></div>)}
               </div>
             </>}
             <label className="cms-content-checkbox"><input type="checkbox" checked={!!form.is_active} onChange={event => update('is_active', event.target.checked)} /> Publicado no site</label>
