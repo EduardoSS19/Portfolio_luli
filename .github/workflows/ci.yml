@@ -123,9 +123,12 @@ jobs:
           ln -s "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")" node_modules/@playwright/test
 
       - name: Run desktop, mobile and CMS browser tests
-        timeout-minutes: 12
+        timeout-minutes: 15
         shell: bash
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/junit.xml
         run: |
+          mkdir -p test-results
           PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
           test -n "$PLAYWRIGHT_CLI"
-          node "$PLAYWRIGHT_CLI" test --workers=1 --retries=0 --max-failures=1 --reporter=list
+          node "$PLAYWRIGHT_CLI" test --workers=1 --retries=0 --reporter=list,junit
