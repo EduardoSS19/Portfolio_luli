@@ -244,14 +244,21 @@ export function ObraCard({
     })
 
     const miniatura = imagemRef.current
-    if (!imagemFoco || !miniatura || typeof imagemFoco.animate !== 'function' || reduzirMovimento()) return
-    const quadro = calcularQuadroDaMiniatura(imagemFoco, miniatura)
-    if (!quadro) return
+    if (!imagemFoco || typeof imagemFoco.animate !== 'function' || reduzirMovimento()) return
+
+    // A geometria da miniatura pode ficar indisponível em alguns ciclos de layout
+    // (especialmente após centralização/scroll no WebKit). Isso não deve cancelar
+    // o zoom inteiro: nesse caso usamos um pequeno zoom de entrada como fallback.
+    const quadro = miniatura ? calcularQuadroDaMiniatura(imagemFoco, miniatura) : null
+    const quadroInicial = quadro || {
+      transform: 'translate(0px, 14px) scale(0.96)',
+      clipPath: SEM_RECORTE,
+    }
 
     focoAbrindoRef.current = true
     const animacao = imagemFoco.animate(
       [
-        { transform: quadro.transform, clipPath: quadro.clipPath },
+        { transform: quadroInicial.transform, clipPath: quadroInicial.clipPath },
         { transform: SEM_TRANSFORMACAO, clipPath: SEM_RECORTE },
       ],
       { duration: 640, easing: EASE_ABRIR, fill: 'both' },
