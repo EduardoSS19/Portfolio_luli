@@ -302,7 +302,13 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
     setSaved(false)
+    setError('')
     setDirty(true)
+  }
+
+  const cancelEditing = async () => {
+    if (dirty && !(await confirm({ title: 'Descartar alterações?', message: 'As mudanças feitas nesta ficha ainda não foram salvas. Se sair agora, elas serão perdidas.', confirmLabel: 'Descartar alterações', variant: 'danger' }))) return
+    onCancel()
   }
 
   const uploadCover = async event => {
@@ -460,6 +466,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
         </div>
       </header>
+      {dirty && <div className="cms-save-state pending" role="status" aria-live="polite"><span className="cms-save-state-dot" />Alterações não salvas. Salve a ficha para atualizar a prévia e manter tudo no portfólio.</div>}
 
       <details className="cms-editor-section cms-cover-section cms-editor-collapsible">
         <summary className="cms-editor-section-heading"><span><h2>Imagem de capa</h2><p>Esta é a imagem principal que representa a obra na grade do portfólio.</p></span><span className="cms-editor-collapse-indicator" aria-hidden="true">⌄</span></summary>
@@ -574,10 +581,10 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {saved && <div className="cms-editor-message success" role="status">{created ? 'Rascunho criado. A obra ainda não está publicada.' : work.published ? 'Alterações salvas. A obra continua publicada no portfólio.' : 'Alterações salvas. A obra continua como rascunho e não aparece no portfólio público.'}</div>}
         <div className="cms-editor-actions">
-          <button className="cms-editor-cancel" type="button" onClick={onCancel}>← Voltar para obras</button>
+          <button className="cms-editor-cancel" type="button" onClick={cancelEditing} disabled={saving}>← Voltar para obras</button>
           <div className="cms-editor-save-actions">
-            {isNew && <button className="cms-editor-cancel" type="submit" value="add-another" disabled={saving}>{saving ? 'Salvando…' : 'Salvar e adicionar outra'}</button>}
-            <button className="cms-primary-button" type="submit" value="save" disabled={saving}>{saving ? 'Salvando…' : isNew ? 'Salvar obra' : 'Salvar e continuar editando'} <span>↗</span></button>
+            {isNew && <button className="cms-editor-cancel" type="submit" value="add-another" disabled={saving || !dirty}>{saving ? 'Salvando…' : 'Salvar e adicionar outra'}</button>}
+            <button className="cms-primary-button" type="submit" value="save" disabled={saving || !dirty}>{saving ? 'Salvando…' : isNew ? 'Salvar obra' : 'Salvar e continuar editando'} <span>↗</span></button>
           </div>
         </div>
       </form>
