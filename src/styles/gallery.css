@@ -1335,8 +1335,10 @@
 
 /* Safari/WebKit: a faixa de miniaturas fica sobreposta e alinhada ao rodapé da mídia.
    Mantém as mesmas dimensões já usadas no layout responsivo da galeria. */
+/* A galeria é o containing block das miniaturas; não criar um contexto
+   deslocado na caixa da imagem (Safari/WebKit arredonda essa caixa de forma distinta). */
 .secao:not(.sobre-secao) .obra.tem-carrossel .obra-imagem {
-  position: relative;
+  position: static;
 }
 .secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
   box-sizing: border-box;
