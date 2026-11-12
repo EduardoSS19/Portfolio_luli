@@ -1307,3 +1307,27 @@
     opacity: 1 !important;
   }
 }
+
+
+/* Correções de regressão identificadas no CI cross-browser.
+   O card tem altura explícita; a galeria deve ocupar a caixa inteira,
+   sem recalcular uma proporção menor em navegadores touch. */
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obra.modo-grade .obra-galeria {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+  }
+  /* A regra editorial de hover é exclusiva de ponteiros precisos.
+     Em touch, o título precisa permanecer legível sem depender de hover. */
+  .galeria-grade-global .obra.modo-grade .obra-texto,
+  .galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto,
+  .galeria-grade-global .obra.modo-grade.tem-video .obra-texto {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
