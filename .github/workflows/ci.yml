@@ -26,29 +26,56 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
+      backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      cms: ${{ steps.filter.outputs.cms }}
+      public: ${{ steps.filter.outputs.public }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Filter frontend changes
+      - name: Filter changed areas
         id: filter
         uses: dorny/paths-filter@v3
         with:
           filters: |
+            backend:
+              - 'portfolio/**/*.py'
+              - 'config/**/*.py'
+              - 'manage.py'
+              - 'requirements*.txt'
+              - 'pyproject.toml'
+              - 'pytest.ini'
+              - 'Procfile'
+              - 'runtime.txt'
             frontend:
               - 'src/**'
-              - 'tests/e2e/**'
-              - 'playwright.config.js'
+              - 'public/**'
+              - 'index.html'
               - 'package.json'
               - 'package-lock.json'
               - 'vite.config.*'
-              - 'index.html'
+            cms:
+              - 'src/cms/**'
+              - 'tests/e2e/cms-content.spec.js'
+              - 'portfolio/cms_api.py'
+              - 'portfolio/cms_content_api.py'
+              - 'portfolio/cms_analytics.py'
+              - 'portfolio/test_cms*.py'
+            public:
+              - 'src/components/**'
+              - 'src/styles/**'
+              - 'src/App.jsx'
+              - 'tests/e2e/editorial-navigation.spec.js'
+              - 'tests/e2e/gallery-*.spec.js'
+              - 'playwright.config.js'
 
   backend:
     name: Django checks and tests
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -87,11 +114,11 @@ jobs:
         run: python manage.py check --deploy --fail-level ERROR
 
   frontend:
-    name: Build React frontend
+    name: React build and targeted browser tests
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.cms == 'true' || needs.changes.outputs.public == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,15 +133,23 @@ jobs:
         run: npm ci
 
       - name: Build frontend
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: npm run build
 
-      - name: Install cross-browser test runner
+      - name: Install Playwright test runner
+        if: needs.changes.outputs.cms == 'true' || needs.changes.outputs.public == 'true' || github.event_name == 'workflow_dispatch'
         run: npx --yes --package=@playwright/test@1.56.1 playwright --version
 
-      - name: Install browser engines
+      - name: Install browser engines for public regression
+        if: needs.changes.outputs.public == 'true' || github.event_name == 'workflow_dispatch'
         run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium firefox webkit
 
+      - name: Install browser engines for CMS-only validation
+        if: needs.changes.outputs.cms == 'true' && needs.changes.outputs.public != 'true' && github.event_name != 'workflow_dispatch'
+        run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium webkit
+
       - name: Link isolated Playwright package for config resolution
+        if: needs.changes.outputs.cms == 'true' || needs.changes.outputs.public == 'true' || github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           PLAYWRIGHT_TEST_PACKAGE="$(find "$HOME/.npm/_npx" -path '*/node_modules/@playwright/test/package.json' -print -quit)"
@@ -122,16 +157,29 @@ jobs:
           mkdir -p node_modules/@playwright
           ln -s "$(dirname "$PLAYWRIGHT_TEST_PACKAGE")" node_modules/@playwright/test
 
-      - name: Run desktop, mobile and CMS browser tests
-        timeout-minutes: 15
+      - name: Run CMS browser tests
+        if: needs.changes.outputs.cms == 'true' || github.event_name == 'workflow_dispatch'
+        timeout-minutes: 8
         shell: bash
         env:
-          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/junit.xml
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/cms-junit.xml
         run: |
           mkdir -p test-results
           PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
           test -n "$PLAYWRIGHT_CLI"
-          node "$PLAYWRIGHT_CLI" test --workers=1 --retries=0 --reporter=list,junit
+          node "$PLAYWRIGHT_CLI" test tests/e2e/cms-content.spec.js --project=chromium-desktop --project=webkit-iphone --workers=1 --retries=0 --reporter=list,junit
+
+      - name: Run public desktop, mobile and gallery regression tests
+        if: needs.changes.outputs.public == 'true' || github.event_name == 'workflow_dispatch'
+        timeout-minutes: 15
+        shell: bash
+        env:
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/public-junit.xml
+        run: |
+          mkdir -p test-results
+          PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
+          test -n "$PLAYWRIGHT_CLI"
+          node "$PLAYWRIGHT_CLI" test tests/e2e/editorial-navigation.spec.js tests/e2e/gallery-focus-desktop.spec.js tests/e2e/gallery-responsive.spec.js --workers=1 --retries=0 --reporter=list,junit
 
       - name: Upload browser diagnostics
         if: always()
