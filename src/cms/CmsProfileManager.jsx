@@ -18,6 +18,7 @@ const FIELDS = [
 
 export function CmsProfileManager() {
   const [profile, setProfile] = useState(null)
+  const [savedValues, setSavedValues] = useState(null)
   const [permissions, setPermissions] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -38,10 +39,12 @@ export function CmsProfileManager() {
       return data
     }).then(data => {
       if (!active) return
-      setProfile(data.profile || {
+      const nextProfile = data.profile || {
         name: '', tagline: '', photo_url: '', bio: '',
         instagram_url: '', contact_email: '', contact_form_url: '',
-      })
+      }
+      setProfile(nextProfile)
+      setSavedValues(Object.fromEntries(FIELDS.map(field => [field.name, nextProfile[field.name] ?? ''])))
       setPermissions(data.permissions || {})
     }).catch(err => { if (active) setError(err.message) })
       .finally(() => { if (active) setLoading(false) })
@@ -51,6 +54,7 @@ export function CmsProfileManager() {
   const change = (name, value) => {
     setProfile(current => ({ ...current, [name]: value }))
     setNotice('')
+    setError('')
   }
 
 
@@ -113,6 +117,7 @@ export function CmsProfileManager() {
         throw new Error(messages.join(' · ') || (data.error === 'profile_edit_permission_required' ? 'Sua conta não tem permissão para editar o perfil.' : 'Não foi possível salvar o perfil.'))
       }
       setProfile(data.profile)
+      setSavedValues(Object.fromEntries(FIELDS.map(field => [field.name, data.profile[field.name] ?? ''])))
       if (data.permissions) setPermissions(data.permissions)
       setNotice('Perfil atualizado. As informações foram salvas.')
     } catch (err) {
@@ -128,6 +133,13 @@ export function CmsProfileManager() {
 
   const canSave = profile.id ? permissions.canChange : permissions.canAdd
   const photo = profile.photo || profile.photo_url
+  const currentValues = Object.fromEntries(FIELDS.map(field => [field.name, profile[field.name] ?? '']))
+  const hasChanges = savedValues !== null && JSON.stringify(currentValues) !== JSON.stringify(savedValues)
+  const discardChanges = () => {
+    setProfile(current => ({ ...current, ...savedValues }))
+    setError('')
+    setNotice('Alterações descartadas. O perfil voltou à última versão salva.')
+  }
 
   return (
     <section className="cms-profile-page">
@@ -135,6 +147,7 @@ export function CmsProfileManager() {
         <div><p className="cms-eyebrow">IDENTIDADE DO PORTFÓLIO</p><h1>Perfil<span>.</span></h1><p>Apresentação, biografia e canais de contato exibidos no site.</p></div>
       </header>
       <form className="cms-profile-form" onSubmit={save}>
+        <div className={'cms-save-state' + (hasChanges ? ' pending' : ' clean')} role="status" aria-live="polite"><span className="cms-save-state-dot" />{hasChanges ? 'Você tem alterações não salvas.' : 'Tudo salvo. O perfil está atualizado.'}</div>
         <div className="cms-profile-preview">
           {photo ? <img src={photo} alt="Prévia da foto do perfil" /> : <div className="cms-no-image"><span>LB</span><small>SEM FOTO</small></div>}
           <div className="cms-profile-photo-controls"><strong>Foto do perfil</strong><p>Envie uma imagem JPG, PNG ou WebP de até 15 MB. A foto anterior só é substituída quando o novo arquivo é validado e salvo.</p><div><input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher foto do perfil" onChange={event => setPhotoFile(event.target.files?.[0] || null)} /><button className="cms-cover-upload" type="button" disabled={!photoFile || uploadingPhoto || !permissions.canChange} onClick={uploadPhoto}>{uploadingPhoto ? 'Enviando…' : 'Atualizar foto'}</button></div></div>
@@ -153,8 +166,8 @@ export function CmsProfileManager() {
         {error && <div className="cms-editor-message error" role="alert">{error}</div>}
         {notice && <div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions">
-          <span>{canSave ? 'As alterações serão refletidas no portfólio.' : 'Você tem acesso de leitura a este perfil.'}</span>
-          <button className="cms-primary-button" type="submit" disabled={!canSave || saving}>{saving ? 'Salvando…' : 'Salvar perfil'} <span>↗</span></button>
+          <span>{canSave ? (hasChanges ? 'Revise suas alterações antes de salvar.' : 'As alterações serão refletidas no portfólio.') : 'Você tem acesso de leitura a este perfil.'}</span>
+          <div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discardChanges} disabled={!hasChanges || saving}>Descartar alterações</button><button className="cms-primary-button" type="submit" disabled={!canSave || saving || !hasChanges}>{saving ? 'Salvando…' : 'Salvar perfil'} <span>↗</span></button></div>
         </div>
       </form>
     </section>
