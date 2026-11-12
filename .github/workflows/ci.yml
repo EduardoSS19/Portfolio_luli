@@ -64,6 +64,7 @@ jobs:
               - 'src/cms/**'
               - 'tests/e2e/cms-content.spec.js'
               - 'portfolio/cms_api.py'
+              - 'portfolio/cms_media_api.py'
               - 'portfolio/cms_content_api.py'
               - 'portfolio/cms_analytics.py'
               - 'portfolio/test_cms*.py'

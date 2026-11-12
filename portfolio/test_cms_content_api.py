@@ -312,3 +312,88 @@ class CmsContentApiTests(TestCase):
         response = self.client.delete(reverse("cms-work-delete", args=[work.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Work.objects.filter(pk=work.pk).exists())
+
+
+    def test_media_library_lists_gallery_images_and_videos_with_work_assignment(self):
+        from .models import Category, Work, WorkImage, WorkVideo
+
+        category = Category.objects.create(title="Acervo", key="cms-media-list")
+        work = Work.objects.create(category=category, title="Obra com mídia")
+        image = WorkImage.objects.create(work=work, image="obras/foto.png", position=2)
+        video = WorkVideo.objects.create(
+            work=work, youtube_url="https://youtu.be/Video1234567",
+            video_id="Video1234567", video_title="Processo criativo",
+            thumbnail_url="https://example.com/video.jpg", position=1,
+        )
+
+        response = self.client.get(reverse("cms-media-library"))
+        self.assertEqual(response.status_code, 200)
+        results = response.json()["results"]
+        self.assertEqual({item["type"] for item in results}, {"image", "video"})
+        self.assertEqual({item["workId"] for item in results}, {work.pk})
+        self.assertEqual({item["id"] for item in results}, {image.pk, video.pk})
+
+    def test_media_move_reassigns_gallery_image_and_appends_to_destination(self):
+        from .models import Category, Work, WorkImage
+
+        self.grant("change_work")
+        category = Category.objects.create(title="Acervo", key="cms-media-image-move")
+        source = Work.objects.create(category=category, title="Origem")
+        destination = Work.objects.create(category=category, title="Destino")
+        moving = WorkImage.objects.create(work=source, image="obras/foto.png", position=4)
+        WorkImage.objects.create(work=destination, image="obras/outra.png", position=2)
+
+        response = self.client.post(
+            reverse("cms-media-move"),
+            data=json.dumps({"type": "image", "itemId": moving.pk, "workId": destination.pk}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        moving.refresh_from_db()
+        self.assertEqual(moving.work_id, destination.pk)
+        self.assertEqual(moving.position, 1)
+        self.assertEqual(moving.image.name, "obras/foto.png")
+
+    def test_media_move_reassigns_video_and_rejects_duplicate_in_destination(self):
+        from .models import Category, Work, WorkVideo
+
+        self.grant("change_work")
+        category = Category.objects.create(title="Acervo", key="cms-media-video-move")
+        source = Work.objects.create(category=category, title="Origem")
+        destination = Work.objects.create(category=category, title="Destino")
+        moving = WorkVideo.objects.create(
+            work=source, youtube_url="https://youtu.be/Video1234567",
+            video_id="Video1234567", video_title="Vídeo",
+            thumbnail_url="https://example.com/video.jpg",
+        )
+        duplicate = WorkVideo.objects.create(
+            work=destination, youtube_url="https://youtu.be/Video1234567",
+            video_id="Video1234567", video_title="Vídeo duplicado",
+            thumbnail_url="https://example.com/video.jpg",
+        )
+
+        response = self.client.post(
+            reverse("cms-media-move"),
+            data=json.dumps({"type": "video", "itemId": moving.pk, "workId": destination.pk}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+        moving.refresh_from_db()
+        self.assertEqual(moving.work_id, source.pk)
+        self.assertTrue(duplicate.pk)
+
+    def test_media_move_requires_change_work_permission(self):
+        from .models import Category, Work, WorkImage
+
+        category = Category.objects.create(title="Acervo", key="cms-media-permission")
+        source = Work.objects.create(category=category, title="Origem")
+        destination = Work.objects.create(category=category, title="Destino")
+        image = WorkImage.objects.create(work=source, image="obras/foto.png")
+        response = self.client.post(
+            reverse("cms-media-move"),
+            data=json.dumps({"type": "image", "itemId": image.pk, "workId": destination.pk}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+        image.refresh_from_db()
+        self.assertEqual(image.work_id, source.pk)
