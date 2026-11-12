@@ -232,7 +232,7 @@ export function CmsContentManager() {
               <div className="cms-content-item-main">
                 <strong>{type === 'backgrounds' ? 'Imagem de fundo ' + (index + 1) : item.title}</strong>
                 <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, (item.links || []).length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
-                <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativo' : 'Inativo'}</span>
+                <span className={'cms-category-status cms-content-publication-status' + (item.active ? '' : ' inactive')} aria-label={item.active ? 'Publicado no site' : 'Oculto no site'}>{item.active ? 'Publicado no site' : 'Oculto no site'}</span>
               </div>
               <div className="cms-content-item-actions">
                 <button type="button" aria-label="Mover para cima" disabled={saving || index === 0 || !permissions.canChange} onClick={() => move(index, -1)}>↑</button>
