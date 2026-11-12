@@ -217,15 +217,16 @@ export function CmsContentManager() {
           <form className="cms-content-form" onSubmit={uploadBackgrounds}>
             <h3>Adicionar imagens</h3><p>Selecione várias imagens de uma vez. Elas serão adicionadas ao final da sequência, na ordem dos arquivos.</p>
             <label>Arquivos de imagem<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={event => setFiles(Array.from(event.target.files || []))} /></label>
+            <small className="cms-field-help">Escolha JPG, PNG ou WebP. As imagens entram depois das atuais; use “Substituir” para trocar um arquivo sem mudar sua posição.</small>
             <small>{files.length} arquivo(s) selecionado(s) · até 15 MB por imagem</small>
             <button className="cms-primary-button" type="submit" disabled={saving || !files.length || !permissions.canAdd}>{saving ? 'Enviando…' : 'Adicionar imagens'}</button>
           </form>
         ) : (
           <form className="cms-content-form" onSubmit={save}>
             <h3>{editing ? 'Editar item' : type === 'references' ? 'Nova referência' : 'Novo link social'}</h3>
-            <label>{type === 'references' ? 'Título' : 'Nome da rede social'}<input required maxLength={type === 'references' ? 255 : 40} value={form.title} onChange={event => update('title', event.target.value)} placeholder={type === 'references' ? 'Ex.: Exposição coletiva' : 'Ex.: Instagram'} /></label>
-            {type === 'social-links' ? <label>URL<input type="url" required maxLength={500} value={form.url} onChange={event => update('url', event.target.value)} placeholder="https://" /></label> : <>
-              <label>Período<input maxLength={100} value={form.period} onChange={event => update('period', event.target.value)} placeholder="Ex.: 2024–2025" /></label>
+            <label>{type === 'references' ? 'Título' : 'Nome da rede social'}<input required maxLength={type === 'references' ? 255 : 40} value={form.title} onChange={event => update('title', event.target.value)} placeholder={type === 'references' ? 'Ex.: Exposição coletiva' : 'Ex.: Instagram'} /><small className="cms-field-help">{type === 'references' ? 'Nome da exposição, publicação, cliente ou projeto que deseja destacar.' : 'Nome que será exibido junto ao endereço, como Instagram ou Behance.'}</small></label>
+            {type === 'social-links' ? <label>URL<input type="url" required maxLength={500} value={form.url} onChange={event => update('url', event.target.value)} placeholder="https://" /><small className="cms-field-help">Cole o endereço completo do perfil, incluindo https://.</small></label> : <>
+              <label>Período<input maxLength={100} value={form.period} onChange={event => update('period', event.target.value)} placeholder="Ex.: 2024–2025" /><small className="cms-field-help">Ano ou intervalo em que a exposição, projeto ou publicação aconteceu.</small></label>
               <div className="cms-content-links"><div><strong>Links da referência</strong><button type="button" onClick={addLink}>+ Adicionar link</button></div>
                 {(form.links || []).map((link, index) => <div className="cms-content-link-fields" key={index}><input aria-label="Texto do link" required maxLength={255} placeholder="Texto do link" value={link.text} onChange={event => editLink(index, 'text', event.target.value)} /><input aria-label="URL do link" type="url" required maxLength={500} placeholder="https://" value={link.url} onChange={event => editLink(index, 'url', event.target.value)} /><button type="button" onClick={() => removeLink(index)} aria-label="Remover link">×</button></div>)}
               </div>
@@ -238,7 +239,7 @@ export function CmsContentManager() {
       {previewBackground && <div className="cms-background-preview-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setPreviewBackground(null) }}>
         <section className="cms-background-preview-dialog" role="dialog" aria-modal="true" aria-label="Visualização da imagem de fundo">
           <header><div><strong>Imagem de fundo</strong><small>Prévia do arquivo cadastrado no portfólio</small></div><button type="button" onClick={() => setPreviewBackground(null)} aria-label="Fechar visualização">×</button></header>
-          <img src={previewBackground.image} alt="Visualização ampliada da imagem de fundo" onError={() => setImageErrors(current => ({ ...current, [previewBackground.id]: true }))} />
+          {imageErrors[previewBackground.id] ? <p className="cms-background-preview-error">Não foi possível carregar esta imagem. O endereço do arquivo foi recebido, mas o armazenamento não respondeu com uma imagem válida.</p> : <img src={previewBackground.image} alt="Visualização ampliada da imagem de fundo" onError={() => setImageErrors(current => ({ ...current, [previewBackground.id]: true }))} />}
           <footer><span>{imageErrors[previewBackground.id] ? 'Não foi possível carregar este arquivo. Verifique o armazenamento da imagem.' : 'A imagem original foi carregada para conferência.'}</span><button type="button" onClick={() => setPreviewBackground(null)}>Fechar</button></footer>
         </section>
       </div>}
