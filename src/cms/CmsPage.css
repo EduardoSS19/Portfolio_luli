@@ -458,3 +458,12 @@
 @keyframes cms-confirm-rise{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.cms-confirm-dialog{padding:23px 20px}.cms-confirm-dialog h2{font-size:21px}.cms-confirm-dialog footer{display:grid;grid-template-columns:1fr 1fr}.cms-confirm-dialog footer button{padding:0 10px}}
 @media(prefers-reduced-motion:reduce){.cms-confirm-overlay,.cms-confirm-dialog{animation:none}}
+
+
+.cms-video-inline-edit{display:grid;gap:8px;margin-top:9px;padding:10px;border:1px solid var(--cms-line);border-radius:7px;background:#171814}
+.cms-video-inline-edit label{display:grid;gap:5px;color:var(--cms-muted);font-size:10px}
+.cms-video-inline-edit input{width:100%;min-width:0;padding:9px 10px;border:1px solid rgba(239,235,221,.16);border-radius:5px;background:#111210;color:var(--cms-text);font:11px 'DM Sans',sans-serif}
+.cms-video-inline-edit>div{display:flex;gap:7px}
+.cms-video-inline-edit button{padding:7px 10px;border:1px solid var(--cms-line);border-radius:5px;background:#292b24;color:var(--cms-text);font:600 10px 'DM Sans',sans-serif;cursor:pointer}
+.cms-video-inline-edit button:first-child{border-color:#c9d39a;background:#c9d39a;color:#171812}
+.cms-video-inline-edit button:disabled{opacity:.45;cursor:wait}
