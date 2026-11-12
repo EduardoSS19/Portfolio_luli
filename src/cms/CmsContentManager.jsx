@@ -48,6 +48,8 @@ export function CmsContentManager() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [previewBackground, setPreviewBackground] = useState(null)
+  const [imageErrors, setImageErrors] = useState({})
 
   const load = useCallback(async (kind = type) => {
     setLoading(true)
@@ -98,6 +100,20 @@ export function CmsContentManager() {
       await api('/api/cms/content/?type=backgrounds', { method: 'POST', body })
       setFiles([])
       setNotice('Imagens adicionadas na ordem selecionada.')
+      await load('backgrounds')
+    } catch (err) { setError(err.message) }
+    finally { setSaving(false) }
+  }
+
+  const replaceBackground = async (item, file) => {
+    if (!file) return
+    setSaving(true); setError(''); setNotice('')
+    try {
+      const body = new FormData()
+      body.append('image', file)
+      await api('/api/cms/content/backgrounds/' + item.id + '/', { method: 'PATCH', body })
+      setImageErrors(current => ({ ...current, [item.id]: false }))
+      setNotice('Imagem de fundo substituída. A posição e a publicação foram preservadas.')
       await load('backgrounds')
     } catch (err) { setError(err.message) }
     finally { setSaving(false) }
@@ -174,7 +190,11 @@ export function CmsContentManager() {
           {loading ? <div className="cms-loading">Carregando conteúdo…</div> : items.length ? items.map((item, index) => (
             <article className="cms-content-item" key={item.id}>
               <label className="cms-content-select"><input type="checkbox" checked={selectedIds.includes(item.id)} onChange={event => setSelectedIds(current => event.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))} aria-label={'Selecionar ' + (item.title || 'imagem de fundo')} /> Selecionar</label>
-              {type === 'backgrounds' && <img className="cms-content-thumb" src={item.image} alt="" loading="lazy" />}
+              {type === 'backgrounds' && (item.image && !imageErrors[item.id]
+                ? <button type="button" className="cms-background-preview" onClick={() => setPreviewBackground(item)} aria-label={'Visualizar imagem de fundo ' + (index + 1)}>
+                    <img className="cms-content-thumb" src={item.image} alt={'Prévia da imagem de fundo ' + (index + 1)} loading="eager" decoding="async" onError={() => setImageErrors(current => ({ ...current, [item.id]: true }))} />
+                  </button>
+                : <span className="cms-background-image-fallback">Prévia indisponível</span> )}
               <div className="cms-content-item-main">
                 <strong>{type === 'backgrounds' ? 'Imagem de fundo ' + (index + 1) : item.title}</strong>
                 <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, (item.links || []).length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
@@ -183,6 +203,9 @@ export function CmsContentManager() {
               <div className="cms-content-item-actions">
                 <button type="button" aria-label="Mover para cima" disabled={saving || index === 0 || !permissions.canChange} onClick={() => move(index, -1)}>↑</button>
                 <button type="button" aria-label="Mover para baixo" disabled={saving || index === items.length - 1 || !permissions.canChange} onClick={() => move(index, 1)}>↓</button>
+                {type === 'backgrounds' && <label className="cms-background-replace" title="Substituir o arquivo sem alterar a posição">
+                  Substituir<input type="file" accept="image/jpeg,image/png,image/webp" disabled={saving || !permissions.canChange} onChange={event => { replaceBackground(item, event.target.files?.[0]); event.target.value = '' }} />
+                </label>}
                 {type !== 'backgrounds' && <button type="button" onClick={() => startEdit(item)} disabled={saving || !permissions.canChange}>Editar</button>}
                 <button type="button" onClick={() => toggle(item)} disabled={saving || !permissions.canChange}>{item.active ? 'Ocultar' : 'Publicar'}</button>
                 <button type="button" onClick={() => remove(item)} disabled={saving || !permissions.canDelete}>Excluir</button>
@@ -212,6 +235,13 @@ export function CmsContentManager() {
           </form>
         )}
       </div>
+      {previewBackground && <div className="cms-background-preview-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setPreviewBackground(null) }}>
+        <section className="cms-background-preview-dialog" role="dialog" aria-modal="true" aria-label="Visualização da imagem de fundo">
+          <header><div><strong>Imagem de fundo</strong><small>Prévia do arquivo cadastrado no portfólio</small></div><button type="button" onClick={() => setPreviewBackground(null)} aria-label="Fechar visualização">×</button></header>
+          <img src={previewBackground.image} alt="Visualização ampliada da imagem de fundo" onError={() => setImageErrors(current => ({ ...current, [previewBackground.id]: true }))} />
+          <footer><span>{imageErrors[previewBackground.id] ? 'Não foi possível carregar este arquivo. Verifique o armazenamento da imagem.' : 'A imagem original foi carregada para conferência.'}</span><button type="button" onClick={() => setPreviewBackground(null)}>Fechar</button></footer>
+        </section>
+      </div>}
     </section>
   )
 }
