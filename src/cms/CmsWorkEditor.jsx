@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const SECTIONS = [
   {
@@ -112,6 +113,7 @@ function Field({ field, value, categories, onChange }) {
 }
 
 export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSave, onUploadCover, onLoadGallery, onUploadGalleryImage, onReplaceGalleryImage, onDeleteGalleryImage, onReorderGalleryImages, onLoadVideos, onAddVideo, onUpdateVideo, onDeleteVideo, onReorderVideos, onPreview, onPublish, onDelete, canDelete = false }) {
+  const { confirm, dialogNode } = useCmsConfirm()
   const [form, setForm] = useState(() => ({ ...work, category: String(work.category ?? '') }))
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
@@ -171,7 +173,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     const message = nextPublished
       ? 'Publicar esta obra? Ela ficará visível para todas as pessoas no portfólio.'
       : 'Despublicar esta obra? Ela deixará de aparecer no portfólio público.'
-    if (!window.confirm(message)) return
+    if (!(await confirm({ title: nextPublished ? 'Publicar obra?' : 'Despublicar obra?', message, confirmLabel: nextPublished ? 'Publicar obra' : 'Despublicar', variant: 'default' }))) return
     setPublishing(true)
     setError('')
     setSaved(false)
@@ -184,7 +186,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
   const deleteWork = async () => {
-    if (!window.confirm('Excluir esta obra e todas as imagens e vídeos vinculados? Esta ação não pode ser desfeita.')) return
+    if (!(await confirm({ title: 'Excluir obra?', message: 'A obra e todas as imagens e vídeos vinculados serão removidos permanentemente. Esta ação não pode ser desfeita.', confirmLabel: 'Excluir obra', variant: 'danger' }))) return
     setSaving(true)
     setError('')
     try {
@@ -244,7 +246,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   }
 
   const deleteVideo = async item => {
-    if (!window.confirm('Remover este vídeo da obra? Esta ação não pode ser desfeita.')) return
+    if (!(await confirm({ title: 'Remover vídeo?', message: 'Este vídeo deixará de aparecer junto à obra. Esta ação não pode ser desfeita.', confirmLabel: 'Remover vídeo', variant: 'danger' }))) return
     setVideoBusyId(item.id)
     setVideoError('')
     setVideoNotice('')
@@ -354,7 +356,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   }
 
   const deleteGalleryItem = async item => {
-    if (!window.confirm('Remover esta imagem da galeria? Esta ação não pode ser desfeita.')) return
+    if (!(await confirm({ title: 'Remover imagem?', message: 'Esta imagem será removida da galeria da obra. Esta ação não pode ser desfeita.', confirmLabel: 'Remover imagem', variant: 'danger' }))) return
     setGalleryBusyId(item.id)
     setGalleryError('')
     setGalleryNotice('')
@@ -556,6 +558,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           </div>
         </div>
       </form>
+      {dialogNode}
     </section>
   )
 }
