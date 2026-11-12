@@ -135,6 +135,17 @@ class CmsContentApiTests(TestCase):
                     [0, 1],
                 )
 
+    def test_reference_listing_returns_existing_records_and_nested_links(self):
+        self.grant("view_reference")
+        reference = Reference.objects.create(title="Exposição coletiva", period="2026")
+        reference.links.create(text="Catálogo", url="https://example.com/catalogo")
+
+        response = self.client.get(self.url + "?type=references")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["results"][0]["title"], "Exposição coletiva")
+        self.assertEqual(response.json()["results"][0]["links"][0]["text"], "Catálogo")
+
     def test_content_listing_requires_django_view_or_change_permission(self):
         response = self.client.get(self.url + "?type=social-links")
         self.assertEqual(response.status_code, 403)

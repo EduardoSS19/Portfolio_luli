@@ -14,9 +14,13 @@ function Metric({ label, value, detail }) {
   )
 }
 
-export function CmsAnalytics({ data }) {
+export function CmsAnalytics({ data, compact = false }) {
+  const historical = data?.historical
+  const topArtworks = historical?.top_artworks || []
+  const countries = historical?.countries || []
+  const sources = historical?.sources || []
   return (
-    <section className="cms-analytics" aria-labelledby="cms-analytics-title">
+    <section className={'cms-analytics' + (compact ? ' compact' : '')} aria-labelledby="cms-analytics-title">
       <div className="cms-analytics-heading">
         <div>
           <p className="cms-eyebrow">DESEMPENHO DO PORTFÓLIO</p>
@@ -38,12 +42,26 @@ export function CmsAnalytics({ data }) {
             <Metric label="Público" value={data.historical?.metrics?.active_users} detail="Usuários · últimos 28 dias" />
             <Metric label="Visitas" value={data.historical?.metrics?.sessions} detail="Sessões · últimos 28 dias" />
             <Metric label="Visualizações" value={data.historical?.metrics?.page_views} detail="Páginas · últimos 28 dias" />
+            <Metric label="Obras abertas" value={data.historical?.metrics?.artwork_clicks} detail="Cliques em obras · últimos 28 dias" />
           </div>
           {data.historical?.status === 'ok' && (
             <p className="cms-analytics-footnote">O site registrou {formatNumber(data.historical.metrics.events)} eventos no período. Os relatórios são atualizados automaticamente.</p>
           )}
           {data.historical?.status === 'no_data' && (
             <p className="cms-analytics-footnote">O GA4 ainda está processando os primeiros relatórios históricos.</p>
+          )}
+          {!compact && historical?.status === 'ok' && (
+            <div className="cms-analytics-breakdown">
+              <section><h3>Obras mais abertas</h3>
+                {topArtworks.length ? topArtworks.map(item => <div className="cms-analytics-row" key={item.name}><span>{item.name}</span><strong>{formatNumber(item.clicks)}</strong></div>) : <p className="cms-analytics-footnote">{historical.artwork_dimension_status === 'not_registered' ? 'Registre artwork_name como dimensão personalizada de evento no GA4 para ver o ranking por obra.' : 'Ainda não há cliques de obras no período.'}</p>}
+              </section>
+              <section><h3>Origem dos acessos</h3>
+                {sources.length ? sources.map(item => <div className="cms-analytics-row" key={item.name}><span>{item.name}</span><strong>{formatNumber(item.sessions)} visitas</strong></div>) : <p className="cms-analytics-footnote">Sem dados de origem neste período.</p>}
+              </section>
+              <section><h3>Localização do público</h3>
+                {countries.length ? countries.map(item => <div className="cms-analytics-row" key={item.name}><span>{item.name}</span><strong>{formatNumber(item.users)} pessoas</strong></div>) : <p className="cms-analytics-footnote">Sem dados geográficos neste período.</p>}
+              </section>
+            </div>
           )}
         </>
       )}

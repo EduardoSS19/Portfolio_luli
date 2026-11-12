@@ -5,7 +5,7 @@
 .cms-analytics-heading>div>p:last-child{margin:0;color:var(--cms-muted);font-size:11px;line-height:1.6}
 .cms-analytics-live{display:flex;align-items:center;gap:8px;color:var(--cms-accent);font-size:9px;font-weight:700;letter-spacing:1px;white-space:nowrap}
 .cms-analytics-live i{width:7px;height:7px;border-radius:50%;background:#a9c58d;box-shadow:0 0 0 4px #a9c58d20}
-.cms-analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cms-analytics-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .cms-analytics-metric{min-width:0;padding:16px;border:1px solid var(--cms-line);border-radius:8px;background:#11130f80}
 .cms-analytics-metric>span{display:block;color:var(--cms-muted);font-size:10px}
 .cms-analytics-metric strong{display:block;margin:12px 0 4px;font:600 clamp(24px,3vw,31px) 'Manrope';letter-spacing:-1px}
@@ -13,3 +13,16 @@
 .cms-analytics-state{margin:0;padding:17px;border:1px solid var(--cms-line);border-radius:8px;color:var(--cms-muted);font-size:11px;line-height:1.6}
 .cms-analytics-footnote{margin:14px 0 0;color:var(--cms-muted);font-size:10px;line-height:1.6}
 @media(max-width:700px){.cms-analytics{margin-top:22px;padding:17px}.cms-analytics-heading{margin-bottom:16px}.cms-analytics-heading h2{font-size:19px}.cms-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.cms-analytics-metric{padding:13px}.cms-analytics-metric strong{font-size:26px}}
+
+.cms-analytics-breakdown{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+.cms-analytics-breakdown>section{min-width:0;padding:16px;border:1px solid var(--cms-line);border-radius:8px;background:#11130f55}
+.cms-analytics-breakdown h3{margin:0 0 12px;font:600 13px 'Manrope';color:var(--cms-text)}
+.cms-analytics-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--cms-line);font-size:10px}
+.cms-analytics-row:last-child{border-bottom:0}
+.cms-analytics-row span{min-width:0;overflow-wrap:anywhere;color:var(--cms-muted)}
+.cms-analytics-row strong{flex-shrink:0;color:var(--cms-text);font-size:10px}
+.cms-analytics.compact{margin:18px 0 24px;padding:20px}
+.cms-analytics.compact .cms-analytics-heading{margin-bottom:14px}
+.cms-analytics.compact .cms-analytics-heading h2{font-size:18px}
+.cms-analytics.compact .cms-analytics-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:850px){.cms-analytics-breakdown{grid-template-columns:1fr}.cms-analytics.compact .cms-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

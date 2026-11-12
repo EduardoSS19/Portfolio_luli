@@ -647,7 +647,7 @@ class AdminDashboardTests(TestCase):
 
 
 class EditorGroupCommandTests(TestCase):
-    def test_editor_group_has_edit_permissions_without_delete(self):
+    def test_editor_group_can_delete_works_without_gaining_other_delete_permissions(self):
         call_command("setup_editor_group")
 
         group = Group.objects.get(name="Editores do portfólio")
@@ -655,7 +655,9 @@ class EditorGroupCommandTests(TestCase):
         self.assertIn("add_work", permissions)
         self.assertIn("change_work", permissions)
         self.assertIn("view_work", permissions)
-        self.assertNotIn("delete_work", permissions)
+        self.assertIn("delete_work", permissions)
+        self.assertNotIn("delete_category", permissions)
+        self.assertNotIn("delete_sociallink", permissions)
 
     def test_editor_group_command_is_idempotent(self):
         call_command("setup_editor_group")
@@ -1958,6 +1960,8 @@ class CmsCategoryManagementApiTests(TestCase):
     def test_category_order_preview_is_shareable_and_uses_unsaved_order(self):
         from django.contrib.auth.models import Permission
         second = Work.objects.create(category=self.category, title="Segunda obra", position=1, is_active=True)
+        other_category = Category.objects.create(title="Escultura", key="preview-escultura-isolada")
+        Work.objects.create(category=other_category, title="Outra obra fora da prévia", is_active=True)
         self.work.is_active = True
         self.work.save(update_fields=["is_active"])
         self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="view_work"))
@@ -1973,6 +1977,7 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual(public_response.status_code, 200)
         payload = public_response.json()
         self.assertTrue(payload["preview"]["category"])
+        self.assertEqual(len(payload["categorias"]), 1)
         self.assertEqual([work["titulo"] for work in payload["categorias"][0]["obras"]], ["Segunda obra", "Obra vinculada"])
 
 

@@ -17,6 +17,7 @@ async function api(url, options = {}) {
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
     const messages = {
+      content_view_permission_required: 'Sua conta não tem permissão para visualizar este conteúdo.',
       content_add_permission_required: 'Sua conta não tem permissão para adicionar este conteúdo.',
       content_change_permission_required: 'Sua conta não tem permissão para editar este conteúdo.',
       content_delete_permission_required: 'Sua conta não tem permissão para excluir este conteúdo.',
@@ -149,9 +150,9 @@ export function CmsContentManager() {
     finally { setSaving(false) }
   }
 
-  const addLink = () => update('links', [...form.links, { text: '', url: '' }])
-  const editLink = (index, key, value) => update('links', form.links.map((link, i) => i === index ? { ...link, [key]: value } : link))
-  const removeLink = index => update('links', form.links.filter((_, i) => i !== index))
+  const addLink = () => update('links', [...(form.links || []), { text: '', url: '' }])
+  const editLink = (index, key, value) => update('links', (form.links || []).map((link, i) => i === index ? { ...link, [key]: value } : link))
+  const removeLink = index => update('links', (form.links || []).filter((_, i) => i !== index))
 
   const current = TYPES.find(item => item.id === type)
   const canEdit = permissions.canAdd || permissions.canChange
@@ -162,7 +163,7 @@ export function CmsContentManager() {
         <div><p className="cms-eyebrow">ELEMENTOS COMPLEMENTARES DO SITE</p><h1>Conteúdo complementar<span>.</span></h1><p>Esta área não cadastra obras: ela controla os links do rodapé, a seção Referências e as imagens de fundo do portfólio.</p></div>
       </header>
       <nav className="cms-content-tabs" aria-label="Tipos de conteúdo">
-        {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => setType(item.id)}>{item.label}</button>)}
+        {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => { setItems([]); setType(item.id) }}>{item.label}</button>)}
       </nav>
       <div className="cms-content-intro"><div><h2>{current.title}</h2><p>{current.description}</p></div><span>{items.length} {items.length === 1 ? 'item' : 'itens'}</span></div>
       {error && <div className="cms-error" role="alert">{error}<button type="button" onClick={() => load(type)}>Tentar novamente</button></div>}
@@ -176,7 +177,7 @@ export function CmsContentManager() {
               {type === 'backgrounds' && <img className="cms-content-thumb" src={item.image} alt="" loading="lazy" />}
               <div className="cms-content-item-main">
                 <strong>{type === 'backgrounds' ? 'Imagem de fundo ' + (index + 1) : item.title}</strong>
-                <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, item.links.length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
+                <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, (item.links || []).length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativo' : 'Inativo'}</span>
               </div>
               <div className="cms-content-item-actions">
@@ -203,7 +204,7 @@ export function CmsContentManager() {
             {type === 'social-links' ? <label>URL<input type="url" required maxLength={500} value={form.url} onChange={event => update('url', event.target.value)} placeholder="https://" /></label> : <>
               <label>Período<input maxLength={100} value={form.period} onChange={event => update('period', event.target.value)} placeholder="Ex.: 2024–2025" /></label>
               <div className="cms-content-links"><div><strong>Links da referência</strong><button type="button" onClick={addLink}>+ Adicionar link</button></div>
-                {form.links.map((link, index) => <div className="cms-content-link-fields" key={index}><input aria-label="Texto do link" required maxLength={255} placeholder="Texto do link" value={link.text} onChange={event => editLink(index, 'text', event.target.value)} /><input aria-label="URL do link" type="url" required maxLength={500} placeholder="https://" value={link.url} onChange={event => editLink(index, 'url', event.target.value)} /><button type="button" onClick={() => removeLink(index)} aria-label="Remover link">×</button></div>)}
+                {(form.links || []).map((link, index) => <div className="cms-content-link-fields" key={index}><input aria-label="Texto do link" required maxLength={255} placeholder="Texto do link" value={link.text} onChange={event => editLink(index, 'text', event.target.value)} /><input aria-label="URL do link" type="url" required maxLength={500} placeholder="https://" value={link.url} onChange={event => editLink(index, 'url', event.target.value)} /><button type="button" onClick={() => removeLink(index)} aria-label="Remover link">×</button></div>)}
               </div>
             </>}
             <label className="cms-content-checkbox"><input type="checkbox" checked={!!form.is_active} onChange={event => update('is_active', event.target.checked)} /> Publicado no site</label>

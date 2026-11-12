@@ -1307,3 +1307,56 @@
     opacity: 1 !important;
   }
 }
+
+
+/* Correções de regressão identificadas no CI cross-browser.
+   O card tem altura explícita; a galeria deve ocupar a caixa inteira,
+   sem recalcular uma proporção menor em navegadores touch. */
+@media (hover: none), (pointer: coarse) {
+  .galeria-grade-global .obra.modo-grade .obra-galeria {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+  }
+  /* A regra editorial de hover é exclusiva de ponteiros precisos.
+     Em touch, o título precisa permanecer legível sem depender de hover. */
+  .galeria-grade-global .obra.modo-grade .obra-texto,
+  .galeria-grade-global .obra.modo-grade.arte-videoarte .obra-texto,
+  .galeria-grade-global .obra.modo-grade.tem-video .obra-texto {
+    display: flex !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+
+/* Safari/WebKit: a faixa de miniaturas fica sobreposta e alinhada ao rodapé da mídia.
+   Mantém as mesmas dimensões já usadas no layout responsivo da galeria. */
+/* A galeria é o containing block das miniaturas; não criar um contexto
+   deslocado na caixa da imagem (Safari/WebKit arredonda essa caixa de forma distinta). */
+.secao:not(.sobre-secao) .obra.tem-carrossel .obra-imagem {
+  position: static;
+}
+.secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
+  box-sizing: border-box;
+  position: absolute;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+  }
+}
