@@ -232,6 +232,8 @@ def cms_content_detail(request, content_type, item_id):
         return JsonResponse({"deleted": True, "id": item_id})
 
     if content_type == "backgrounds" and request.content_type.startswith("multipart/form-data"):
+        if not permissions["canChange"]:
+            return JsonResponse({"error": "content_change_permission_required"}, status=403)
         if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
             return JsonResponse({"error": "exactly_one_image_required"}, status=400)
         uploaded = request.FILES["image"]
