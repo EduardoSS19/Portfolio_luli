@@ -5,7 +5,7 @@
 .cms-analytics-heading>div>p:last-child{margin:0;color:var(--cms-muted);font-size:11px;line-height:1.6}
 .cms-analytics-live{display:flex;align-items:center;gap:8px;color:var(--cms-accent);font-size:9px;font-weight:700;letter-spacing:1px;white-space:nowrap}
 .cms-analytics-live i{width:7px;height:7px;border-radius:50%;background:#a9c58d;box-shadow:0 0 0 4px #a9c58d20}
-.cms-analytics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.cms-analytics-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .cms-analytics-metric{min-width:0;padding:16px;border:1px solid var(--cms-line);border-radius:8px;background:#11130f80}
 .cms-analytics-metric>span{display:block;color:var(--cms-muted);font-size:10px}
 .cms-analytics-metric strong{display:block;margin:12px 0 4px;font:600 clamp(24px,3vw,31px) 'Manrope';letter-spacing:-1px}
@@ -24,5 +24,5 @@
 .cms-analytics.compact{margin:18px 0 24px;padding:20px}
 .cms-analytics.compact .cms-analytics-heading{margin-bottom:14px}
 .cms-analytics.compact .cms-analytics-heading h2{font-size:18px}
-.cms-analytics.compact .cms-analytics-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cms-analytics.compact .cms-analytics-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
 @media(max-width:850px){.cms-analytics-breakdown{grid-template-columns:1fr}.cms-analytics.compact .cms-analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
