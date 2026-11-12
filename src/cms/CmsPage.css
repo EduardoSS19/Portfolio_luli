@@ -467,3 +467,13 @@
 .cms-video-inline-edit button{padding:7px 10px;border:1px solid var(--cms-line);border-radius:5px;background:#292b24;color:var(--cms-text);font:600 10px 'DM Sans',sans-serif;cursor:pointer}
 .cms-video-inline-edit button:first-child{border-color:#c9d39a;background:#c9d39a;color:#171812}
 .cms-video-inline-edit button:disabled{opacity:.45;cursor:wait}
+
+
+/* Estado de salvamento compartilhado entre os formulários do CMS */
+.cms-save-state{display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid var(--cms-line);border-radius:8px;background:var(--cms-panel-2);color:var(--cms-muted);font:500 11px/1.5 'DM Sans',sans-serif}
+.cms-save-state.compact{padding:9px 11px;font-size:10px}
+.cms-save-state.pending{border-color:#b99a55;background:#b99a5512;color:#e6d19a}
+.cms-save-state.clean{border-color:#526b4b;background:#526b4b12;color:#c6d9bc}
+.cms-save-state-dot{width:7px;height:7px;flex:none;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px currentColor;opacity:.75}
+.cms-editor-save-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){.cms-editor-save-actions{display:grid;grid-template-columns:1fr}.cms-profile-form .cms-editor-save-actions{width:100%}}
