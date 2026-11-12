@@ -203,7 +203,7 @@ def cms_content(request):
     return JsonResponse({"result": _serialize_content(content_type, item)}, status=201)
 
 
-@require_http_methods(["PATCH", "DELETE"])
+@require_http_methods(["POST", "PATCH", "DELETE"])
 @never_cache
 @ensure_csrf_cookie
 @csrf_protect
@@ -231,7 +231,7 @@ def cms_content_detail(request, content_type, item_id):
                 logger.exception("Could not delete removed CMS background %s", image_name)
         return JsonResponse({"deleted": True, "id": item_id})
 
-    if content_type == "backgrounds" and request.content_type.startswith("multipart/form-data"):
+    if request.method == "POST" and content_type == "backgrounds" and request.content_type.startswith("multipart/form-data"):
         if not permissions["canChange"]:
             return JsonResponse({"error": "content_change_permission_required"}, status=403)
         if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
