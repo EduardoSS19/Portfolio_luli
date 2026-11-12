@@ -14,7 +14,11 @@ function Metric({ label, value, detail }) {
   )
 }
 
-export function CmsAnalytics({ data, compact = false }) {\n  const historical = data?.historical\n  const topArtworks = historical?.top_artworks || []\n  const countries = historical?.countries || []\n  const sources = historical?.sources || []
+export function CmsAnalytics({ data, compact = false }) {
+  const historical = data?.historical
+  const topArtworks = historical?.top_artworks || []
+  const countries = historical?.countries || []
+  const sources = historical?.sources || []
   return (
     <section className={'cms-analytics' + (compact ? ' compact' : '')} aria-labelledby="cms-analytics-title">
       <div className="cms-analytics-heading">
@@ -37,7 +41,7 @@ export function CmsAnalytics({ data, compact = false }) {\n  const historical = 
             <Metric label="Pessoas agora" value={data.realtime?.status === 'ok' ? data.realtime.active_users : null} detail="Ativas nos últimos 30 minutos" />
             <Metric label="Público" value={data.historical?.metrics?.active_users} detail="Usuários · últimos 28 dias" />
             <Metric label="Visitas" value={data.historical?.metrics?.sessions} detail="Sessões · últimos 28 dias" />
-            <Metric label="Visualizações" value={data.historical?.metrics?.page_views} detail="Páginas · últimos 28 dias" />
+            <Metric label="Obras abertas" value={data.historical?.metrics?.artwork_clicks} detail="Cliques em obras · últimos 28 dias" />
           </div>
           {data.historical?.status === 'ok' && (
             <p className="cms-analytics-footnote">O site registrou {formatNumber(data.historical.metrics.events)} eventos no período. Os relatórios são atualizados automaticamente.</p>
