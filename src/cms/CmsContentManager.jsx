@@ -17,6 +17,7 @@ async function api(url, options = {}) {
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
     const messages = {
+      content_view_permission_required: 'Sua conta não tem permissão para visualizar este conteúdo.',
       content_add_permission_required: 'Sua conta não tem permissão para adicionar este conteúdo.',
       content_change_permission_required: 'Sua conta não tem permissão para editar este conteúdo.',
       content_delete_permission_required: 'Sua conta não tem permissão para excluir este conteúdo.',
