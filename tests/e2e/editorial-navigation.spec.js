@@ -88,7 +88,8 @@ test('menu editorial mantém alvos de toque e conteúdo dentro da tela em celula
   }
 })
 
-test('navegação por toque fecha o menu e rola até a seção no mobile', async ({ browser }) => {
+test('navegação por toque fecha o menu e rola até a seção no mobile', async ({ browser, browserName }) => {
+  test.skip(browserName === 'firefox', 'Firefox não oferece contexto mobile com isMobile; a cobertura mobile roda em Chromium e WebKit.')
   // Este teste roda no projeto chromium-desktop do CI, então cria explicitamente
   // um contexto mobile com suporte a toque em vez de depender do device do projeto.
   const context = await browser.newContext({
