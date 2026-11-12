@@ -5,55 +5,55 @@ const SECTIONS = [
     title: 'Identificação',
     description: 'As informações principais que apresentam a obra.',
     fields: [
-      { name: 'title', label: 'Nome da obra', required: true },
-      { name: 'category', label: 'Categoria', type: 'category', required: true },
-      { name: 'year', label: 'Ano de criação', type: 'number', placeholder: 'Ex.: 2024' },
-      { name: 'description', label: 'Descrição', type: 'textarea', wide: true, placeholder: 'Conte um pouco sobre esta obra…' },
-      { name: 'detail', label: 'Observações adicionais', type: 'textarea', wide: true },
+      { name: 'title', label: 'Nome da obra', required: true, placeholder: 'Ex.: Entrelaços', help: 'Use o título pelo qual você identifica ou apresenta esta obra.' },
+      { name: 'category', label: 'Categoria', type: 'category', required: true, help: 'Escolha em qual seção do portfólio esta obra deve aparecer.' },
+      { name: 'year', label: 'Ano de criação', type: 'number', placeholder: 'Ex.: 2024', help: 'Informe o ano em que a obra foi concluída ou iniciada.' },
+      { name: 'description', label: 'Descrição', type: 'textarea', wide: true, placeholder: 'Conte um pouco sobre esta obra…', help: 'Texto de apresentação que ajuda o visitante a compreender a obra.' },
+      { name: 'detail', label: 'Observações adicionais', type: 'textarea', wide: true, placeholder: 'Informações complementares, referências ou curiosidades…', help: 'Use para detalhes que não se encaixam nos demais campos.' },
     ],
   },
   {
     title: 'Técnica e materiais',
     description: 'Como a obra foi criada e a qual série pertence.',
     fields: [
-      { name: 'technique', label: 'Técnica' },
-      { name: 'material', label: 'Materiais' },
-      { name: 'support', label: 'Suporte' },
-      { name: 'series', label: 'Série ou coleção' },
+      { name: 'technique', label: 'Técnica', placeholder: 'Ex.: aquarela, óleo sobre tela, fotografia digital', help: 'Descreva o processo ou a técnica artística utilizada.' },
+      { name: 'material', label: 'Materiais', placeholder: 'Ex.: tinta acrílica, grafite, madeira', help: 'Liste os materiais utilizados na produção.' },
+      { name: 'support', label: 'Suporte', placeholder: 'Ex.: tela, papel, madeira, tecido', help: 'Informe a superfície ou estrutura que recebe a obra.' },
+      { name: 'series', label: 'Série ou coleção', placeholder: 'Ex.: Cartografias afetivas', help: 'Preencha se a obra fizer parte de um conjunto ou projeto.' },
     ],
   },
   {
     title: 'Dimensões',
     description: 'Preencha somente as medidas que fizerem sentido para a obra.',
     fields: [
-      { name: 'height', label: 'Altura', type: 'number', step: '0.01' },
-      { name: 'width', label: 'Largura', type: 'number', step: '0.01' },
-      { name: 'depth', label: 'Profundidade', type: 'number', step: '0.01' },
-      { name: 'dimension_unit', label: 'Unidade', placeholder: 'cm' },
+      { name: 'height', label: 'Altura', type: 'number', step: '0.01', placeholder: 'Ex.: 40', help: 'Medida vertical. Use a unidade escolhida abaixo.' },
+      { name: 'width', label: 'Largura', type: 'number', step: '0.01', placeholder: 'Ex.: 30', help: 'Medida horizontal. Use a unidade escolhida abaixo.' },
+      { name: 'depth', label: 'Profundidade', type: 'number', step: '0.01', placeholder: 'Ex.: 5', help: 'Preencha quando a espessura ou profundidade for relevante.' },
+      { name: 'dimension_unit', label: 'Unidade', placeholder: 'cm', help: 'Unidade usada nas medidas: cm, mm, m etc.' },
     ],
   },
   {
     title: 'Informações comerciais',
     description: 'Dados opcionais para organizar disponibilidade e edição.',
     fields: [
-      { name: 'availability', label: 'Disponibilidade', type: 'availability' },
-      { name: 'price', label: 'Preço', type: 'number', step: '0.01' },
-      { name: 'currency', label: 'Moeda', placeholder: 'BRL' },
-      { name: 'edition', label: 'Edição' },
-      { name: 'print_run', label: 'Tiragem' },
-      { name: 'signed', label: 'Assinada?', type: 'signed' },
+      { name: 'availability', label: 'Disponibilidade', type: 'availability', help: 'Indique se a obra pode ser adquirida, já foi vendida ou está reservada.' },
+      { name: 'price', label: 'Preço', type: 'number', step: '0.01', placeholder: 'Ex.: 850,00', help: 'Valor numérico sem símbolo da moeda. Deixe vazio se não quiser informar.' },
+      { name: 'currency', label: 'Moeda', placeholder: 'BRL', help: 'Código da moeda, como BRL para real ou USD para dólar.' },
+      { name: 'edition', label: 'Edição', placeholder: 'Ex.: edição limitada ou peça única', help: 'Identifique se é peça única, edição aberta ou limitada.' },
+      { name: 'print_run', label: 'Tiragem', placeholder: 'Ex.: 3/10', help: 'Número desta cópia e total da edição, quando aplicável.' },
+      { name: 'signed', label: 'Assinada?', type: 'signed', help: 'Informe se a obra possui assinatura da artista.' },
     ],
   },
   {
     title: 'Contexto e organização',
     description: 'Detalhes de procedência, conservação e ordem no portfólio.',
     fields: [
-      { name: 'creation_location', label: 'Local de criação' },
-      { name: 'condition', label: 'Estado de conservação' },
-      { name: 'position', label: 'Ordem dentro da categoria', type: 'number', required: true },
-      { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true },
-      { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true },
-      { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true },
+      { name: 'creation_location', label: 'Local de criação', placeholder: 'Ex.: Porto Alegre, RS', help: 'Cidade, estado ou país onde a obra foi criada.' },
+      { name: 'condition', label: 'Estado de conservação', placeholder: 'Ex.: excelente, bom estado, restaurada', help: 'Descreva a condição atual da obra, se essa informação for relevante.' },
+      { name: 'position', label: 'Ordem dentro da categoria', type: 'number', required: true, help: 'Número menor aparece primeiro na categoria. Você também pode reorganizar na área Categorias.' },
+      { name: 'exhibitions', label: 'Exposições e contexto', type: 'textarea', wide: true, placeholder: 'Ex.: exposta na Mostra X, em 2025…', help: 'Registre exposições, prêmios, publicações ou contexto de apresentação.' },
+      { name: 'is_share_image', label: 'Usar como imagem de compartilhamento', type: 'checkbox', wide: true, help: 'Quando ativada, esta obra será a imagem padrão ao compartilhar o portfólio. Apenas uma obra pode ocupar esse papel.' },
+      { name: 'image_url', label: 'URL alternativa da imagem (avançado)', type: 'url', wide: true, placeholder: 'https://…', help: 'Use somente se a imagem estiver hospedada fora do envio de arquivos. Normalmente, deixe em branco.' },
     ],
   },
 ]
@@ -64,6 +64,8 @@ function Field({ field, value, categories, onChange }) {
     id,
     value: value ?? '',
     required: field.required,
+    placeholder: field.placeholder || '',
+    'aria-describedby': field.help ? id + '-help' : undefined,
     onChange: event => onChange(field.name, event.target.value),
   }
   let control
@@ -105,6 +107,7 @@ function Field({ field, value, categories, onChange }) {
     <div className={'cms-editor-field' + (field.wide ? ' wide' : '')}>
       <label htmlFor={id}>{field.label}{field.required ? ' *' : ''}</label>
       {control}
+      {field.help && <small className="cms-field-help" id={id + '-help'}>{field.help}</small>}
     </div>
   )
 }
