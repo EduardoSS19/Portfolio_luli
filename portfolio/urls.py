@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .cms_analytics import cms_analytics
+from .cms_media_api import cms_media_library, cms_media_move
 from .cms_content_api import cms_content, cms_content_detail, cms_content_toggle
 
 from .cms_api import cms_overview, cms_work_cover_upload, cms_work_create, cms_work_gallery, cms_work_gallery_delete, cms_work_gallery_item, cms_work_video_delete, cms_work_video_update, cms_work_videos, cms_work_update, cms_work_preview, cms_work_publish, cms_work_bulk_publish, cms_work_delete, cms_works, cms_categories, cms_category_update, cms_category_work_order, cms_category_work_order_preview, cms_profile, cms_profile_photo_upload
@@ -11,6 +12,8 @@ urlpatterns = [
     path("portfolio/", portfolio_data, name="portfolio-data"),
     path("contact/", contact, name="contact"),
     path("cms/overview/", cms_overview, name="cms-overview"),
+    path("cms/media/", cms_media_library, name="cms-media-library"),
+    path("cms/media/move/", cms_media_move, name="cms-media-move"),
     path("cms/content/", cms_content, name="cms-content"),
     path("cms/content/<str:content_type>/<int:item_id>/", cms_content_detail, name="cms-content-detail"),
     path("cms/content/<str:content_type>/<int:item_id>/toggle/", cms_content_toggle, name="cms-content-toggle"),
