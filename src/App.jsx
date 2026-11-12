@@ -279,9 +279,22 @@ export default function App() {
     )
   }
 
+  if (previsualizacao?.category) {
+    const categoria = categorias[0]
+    return (
+      <main className="site-shell preview-only-shell">
+        <FundoFantasma frames={conteudo.frames} />
+        <header className="preview-only-header">
+          <div><span>PRÉVIA DE ORGANIZAÇÃO · LINK TEMPORÁRIO</span><h1>{categoria?.titulo || previsualizacao.titulo}</h1><p>Somente esta categoria e sua nova ordem são exibidas. Nada foi publicado.</p></div>
+          <a href="/" aria-label="Sair da prévia e voltar ao portfólio">Sair da prévia ↗</a>
+        </header>
+        {categoria ? <SecaoCategoria titulo={categoria.titulo} chave={categoria.chave} obras={categoria.obras} indice={0} /> : <p className="preview-only-empty">Não foi possível carregar esta categoria. Gere outra prévia pelo painel.</p>}
+      </main>
+    )
+  }
+
   return (
     <div className="site-shell">
-      {previsualizacao?.category && <div className="preview-mode-banner" role="status">PRÉVIA PARA COMPARTILHAMENTO · {previsualizacao.titulo} · não altera o portfólio publicado</div>}
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
