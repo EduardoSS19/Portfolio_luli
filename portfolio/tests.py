@@ -1958,6 +1958,8 @@ class CmsCategoryManagementApiTests(TestCase):
     def test_category_order_preview_is_shareable_and_uses_unsaved_order(self):
         from django.contrib.auth.models import Permission
         second = Work.objects.create(category=self.category, title="Segunda obra", position=1, is_active=True)
+        other_category = Category.objects.create(title="Escultura", key="preview-escultura-isolada")
+        Work.objects.create(category=other_category, title="Outra obra fora da prévia", is_active=True)
         self.work.is_active = True
         self.work.save(update_fields=["is_active"])
         self.editor.user_permissions.add(*Permission.objects.filter(content_type__app_label="portfolio", codename="view_work"))
@@ -1973,7 +1975,28 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual(public_response.status_code, 200)
         payload = public_response.json()
         self.assertTrue(payload["preview"]["category"])
+        self.assertEqual(len(payload["categorias"]), 1)
         self.assertEqual([work["titulo"] for work in payload["categorias"][0]["obras"]], ["Segunda obra", "Obra vinculada"])
+
+
+class CmsContentReadApiTests(TestCase):
+    def test_staff_can_read_social_links_and_references_without_admin_view_permissions(self):
+        staff = get_user_model().objects.create_user(
+            username="cms-content-reader", password="test-password-123", is_staff=True
+        )
+        social = SocialLink.objects.create(title="Behance", url="https://behance.net/artista")
+        reference = Reference.objects.create(title="Exposição", period="2026")
+        reference.links.create(text="Catálogo", url="https://example.com/catalogo")
+        self.client.force_login(staff)
+
+        social_response = self.client.get(reverse("cms-content"), {"type": "social-links"})
+        reference_response = self.client.get(reverse("cms-content"), {"type": "references"})
+
+        self.assertEqual(social_response.status_code, 200)
+        self.assertEqual(social_response.json()["results"][0]["id"], social.pk)
+        self.assertEqual(reference_response.status_code, 200)
+        self.assertEqual(reference_response.json()["results"][0]["id"], reference.pk)
+        self.assertEqual(reference_response.json()["results"][0]["links"][0]["text"], "Catálogo")
 
 
 class CmsArtistProfileApiTests(TestCase):
