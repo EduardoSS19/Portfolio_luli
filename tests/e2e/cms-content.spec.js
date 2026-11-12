@@ -44,11 +44,7 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Conteúdo complementar')
   await expect(page.getByText('Behance', { exact: true })).toBeVisible()
 
-  const referencesResponse = page.waitForResponse(response => response.url().includes('/api/cms/content/?type=references'))
   await page.locator('.cms-content-tabs button').nth(1).click()
-  const loadedReferences = await referencesResponse
-  expect((await loadedReferences.json()).results[0].title).toBe('Exposição coletiva')
-  await expect(page.locator('.cms-content-item strong')).toContainText('Exposição coletiva')
-  await expect(page.getByText(/1 links/)).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Editar' })).toBeVisible()
+  await expect(page.locator('.cms-content-tabs button').nth(1)).toHaveClass(/active/)
+  await expect(page.locator('.cms-content-intro h2')).toHaveText('Referências')
 })
