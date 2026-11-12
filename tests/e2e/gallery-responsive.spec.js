@@ -329,6 +329,17 @@ test('na lista desktop, o texto do carrossel fica centralizado verticalmente', a
 test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual e limpa a animação', async ({ page }) => {
   // Este teste verifica a animação, portanto não deve herdar a preferência de movimento reduzido do runner.
   await page.emulateMedia({ reducedMotion: 'no-preference' })
+  // Mantém a animação de abertura ativa tempo suficiente para interrompê-la
+  // de forma determinística em Chromium, Firefox e WebKit.
+  await page.addInitScript(() => {
+    const animate = Element.prototype.animate
+    Element.prototype.animate = function (keyframes, options) {
+      if (this.classList?.contains('obra-focus-imagem')) {
+        return animate.call(this, keyframes, { ...options, duration: 5000 })
+      }
+      return animate.call(this, keyframes, options)
+    }
+  })
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 390, height: 844 })
 
