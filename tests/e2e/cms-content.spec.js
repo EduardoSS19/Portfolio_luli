@@ -58,6 +58,7 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Conteúdo complementar')
   await expect(page.getByText('Behance', { exact: true })).toBeVisible()
   await expect(page.getByText('Instagram', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('Publicado no site')).toHaveCount(2)
 
   const contentRows = page.locator('.cms-content-item')
   await expect(contentRows).toHaveCount(2)
