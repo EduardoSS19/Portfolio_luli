@@ -327,26 +327,9 @@ test('na lista desktop, o texto do carrossel fica centralizado verticalmente', a
 })
 
 test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual e limpa a animação', async ({ page }) => {
-  // Este teste verifica a animação, portanto não deve herdar a preferência de movimento reduzido do runner.
+  // O zoom real dura 640 ms: observar a transformação renderizada evita
+  // depender de monkeypatch de WAAPI, que varia entre engines e dispositivos.
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  // Mantém a animação de abertura ativa tempo suficiente para interrompê-la
-  // de forma determinística em Chromium, Firefox e WebKit.
-  await page.addInitScript(() => {
-    const animate = Element.prototype.animate
-    Element.prototype.animate = function (keyframes, options) {
-      const animacao = animate.call(
-        this,
-        keyframes,
-        this.classList?.contains('obra-focus-imagem') ? { ...options, duration: 5000 } : options,
-      )
-      if (this.classList?.contains('obra-focus-imagem')) {
-        // Referência direta: WebKit pode não expor a animação recém-criada
-        // em Element.getAnimations() no mesmo ciclo de abertura do dialog.
-        window.__obraFocusAnimation = animacao
-      }
-      return animacao
-    }
-  })
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 390, height: 844 })
 
@@ -356,15 +339,18 @@ test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual 
   await expect(dialog).toHaveAttribute('open', '')
   const imagem = dialog.locator('.obra-focus-imagem')
 
-  // Garante que o fechamento aconteça enquanto o zoom de entrada ainda está ativo.
-  await expect.poll(() => page.evaluate(() => window.__obraFocusAnimation?.playState)).toBe('running')
-  // Interrompe no meio do zoom, quando getBoundingClientRect já está alterado
-  // pela transformação WAAPI. Esse é o cenário que deslocava o quadro de retorno.
-  await page.waitForTimeout(280)
+  const transformacaoInicial = await imagem.evaluate(element => getComputedStyle(element).transform)
+  await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform))
+    .not.toBe(transformacaoInicial)
+
+  // Confirma que o quadro continua evoluindo antes de interromper a abertura.
+  const transformacaoIntermediaria = await imagem.evaluate(element => getComputedStyle(element).transform)
+  await page.waitForTimeout(120)
+  await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform))
+    .not.toBe(transformacaoIntermediaria)
 
   await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
   await expect(dialog).not.toHaveAttribute('open', '')
-  await expect.poll(() => page.evaluate(() => window.__obraFocusAnimation?.playState)).toBe('idle')
   await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform)).toBe('none')
   await expect(card.locator('.obra-zoom-trigger')).toBeVisible()
 })
@@ -488,6 +474,9 @@ test('na lista, as miniaturas ficam sobre a mídia sem reservar altura extra', a
   const galeria = card.locator('.obra-galeria')
   const imagem = card.locator('.obra-imagem')
   const miniaturas = card.locator('.carrossel-miniaturas')
+  // A lista anima a entrada do card; aguarda a geometria assentar antes de
+  // comparar a sobreposição, sem ampliar a tolerância do alinhamento.
+  await aguardarQuadroEstavel(galeria)
   const [caixaGaleria, caixaImagem, caixaMiniaturas] = await Promise.all([
     galeria.boundingBox(), imagem.boundingBox(), miniaturas.boundingBox(),
   ])
