@@ -452,7 +452,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
 
   return (
     <section className="cms-editor">
-      <button className="cms-editor-back" type="button" onClick={onCancel}>← Voltar para a biblioteca</button>
+      <button className="cms-editor-back" type="button" onClick={cancelEditing} disabled={saving}>← Voltar para a biblioteca</button>
       <header className="cms-editor-heading">
         <div>
           <p className="cms-eyebrow">{isNew ? 'NOVA OBRA' : 'EDIÇÃO DE OBRA · #' + work.id}</p>
