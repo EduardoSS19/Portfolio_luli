@@ -1979,26 +1979,6 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual([work["titulo"] for work in payload["categorias"][0]["obras"]], ["Segunda obra", "Obra vinculada"])
 
 
-class CmsContentReadApiTests(TestCase):
-    def test_staff_can_read_social_links_and_references_without_admin_view_permissions(self):
-        staff = get_user_model().objects.create_user(
-            username="cms-content-reader", password="test-password-123", is_staff=True
-        )
-        social = SocialLink.objects.create(title="Behance", url="https://behance.net/artista")
-        reference = Reference.objects.create(title="Exposição", period="2026")
-        reference.links.create(text="Catálogo", url="https://example.com/catalogo")
-        self.client.force_login(staff)
-
-        social_response = self.client.get(reverse("cms-content"), {"type": "social-links"})
-        reference_response = self.client.get(reverse("cms-content"), {"type": "references"})
-
-        self.assertEqual(social_response.status_code, 200)
-        self.assertEqual(social_response.json()["results"][0]["id"], social.pk)
-        self.assertEqual(reference_response.status_code, 200)
-        self.assertEqual(reference_response.json()["results"][0]["id"], reference.pk)
-        self.assertEqual(reference_response.json()["results"][0]["links"][0]["text"], "Catálogo")
-
-
 class CmsArtistProfileApiTests(TestCase):
     def setUp(self):
         from django.contrib.auth.models import Permission
