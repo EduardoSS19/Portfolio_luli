@@ -43,6 +43,7 @@ export function CmsContentManager() {
   const [items, setItems] = useState([])
   const [permissions, setPermissions] = useState({})
   const [form, setForm] = useState(emptyForm('social-links'))
+  const [initialForm, setInitialForm] = useState(emptyForm('social-links'))
   const [editing, setEditing] = useState(null)
   const [files, setFiles] = useState([])
   const [selectedIds, setSelectedIds] = useState([])
@@ -66,15 +67,28 @@ export function CmsContentManager() {
     finally { setLoading(false) }
   }, [type])
 
-  useEffect(() => { setEditing(null); setForm(emptyForm(type)); setFiles([]); setSelectedIds([]); load(type) }, [type, load])
+  useEffect(() => {
+    const cleanForm = emptyForm(type)
+    setEditing(null); setForm(cleanForm); setInitialForm(cleanForm); setFiles([]); setSelectedIds([]); load(type)
+  }, [type, load])
 
-  const reset = () => { setEditing(null); setForm(emptyForm(type)); setNotice('') }
-  const update = (key, value) => setForm(current => ({ ...current, [key]: value }))
+  const reset = (preserveNotice = false) => {
+    const cleanForm = emptyForm(type)
+    setEditing(null); setForm(cleanForm); setInitialForm(cleanForm)
+    if (!preserveNotice) setNotice('')
+  }
+  const update = (key, value) => {
+    setForm(current => ({ ...current, [key]: value }))
+    setError('')
+    setNotice('')
+  }
   const startEdit = item => {
-    setEditing(item.id)
-    setForm(type === 'references'
+    const nextForm = type === 'references'
       ? { title: item.title, period: item.period || '', position: item.position, is_active: item.active, links: item.links.map(link => ({ text: link.text, url: link.url })) }
-      : { title: item.title, url: item.url, position: item.position, is_active: item.active })
+      : { title: item.title, url: item.url, position: item.position, is_active: item.active }
+    setEditing(item.id)
+    setForm(nextForm)
+    setInitialForm(nextForm)
     setError('')
     setNotice('')
   }
@@ -87,8 +101,8 @@ export function CmsContentManager() {
       await api(editing ? '/api/cms/content/' + type + '/' + editing + '/' : '/api/cms/content/?type=' + type, {
         method: editing ? 'PATCH' : 'POST', body: JSON.stringify(payload),
       })
+      reset(true)
       setNotice(editing ? 'Alterações salvas.' : 'Item adicionado.')
-      reset()
       await load(type)
     } catch (err) { setError(err.message) }
     finally { setSaving(false) }
@@ -182,6 +196,7 @@ export function CmsContentManager() {
 
   const current = TYPES.find(item => item.id === type)
   const canEdit = permissions.canAdd || permissions.canChange
+  const formHasChanges = JSON.stringify(form) !== JSON.stringify(initialForm)
 
   return (
     <section className="cms-content-manager">
@@ -243,6 +258,7 @@ export function CmsContentManager() {
         ) : (
           <form className="cms-content-form" onSubmit={save}>
             <h3>{editing ? 'Editar item' : type === 'references' ? 'Nova referência' : 'Novo link social'}</h3>
+            <div className={'cms-save-state compact' + (formHasChanges ? ' pending' : ' clean')} role="status" aria-live="polite"><span className="cms-save-state-dot" />{formHasChanges ? 'Alterações ainda não salvas.' : editing ? 'Nenhuma alteração pendente.' : 'Preencha os campos para adicionar um item.'}</div>
             <label>{type === 'references' ? 'Título' : 'Nome da rede social'}<input required maxLength={type === 'references' ? 255 : 40} value={form.title} onChange={event => update('title', event.target.value)} placeholder={type === 'references' ? 'Ex.: Exposição coletiva' : 'Ex.: Instagram'} /><small className="cms-field-help">{type === 'references' ? 'Nome da exposição, publicação, cliente ou projeto que deseja destacar.' : 'Nome que será exibido junto ao endereço, como Instagram ou Behance.'}</small></label>
             {type === 'social-links' ? <label>URL<input type="url" required maxLength={500} value={form.url} onChange={event => update('url', event.target.value)} placeholder="https://" /><small className="cms-field-help">Cole o endereço completo do perfil, incluindo https://.</small></label> : <>
               <label>Período<input maxLength={100} value={form.period} onChange={event => update('period', event.target.value)} placeholder="Ex.: 2024–2025" /><small className="cms-field-help">Ano ou intervalo em que a exposição, projeto ou publicação aconteceu.</small></label>
@@ -251,7 +267,7 @@ export function CmsContentManager() {
               </div>
             </>}
             <label className="cms-content-checkbox"><input type="checkbox" checked={!!form.is_active} onChange={event => update('is_active', event.target.checked)} /> Publicado no site</label>
-            <div className="cms-content-form-actions"><button className="cms-primary-button" type="submit" disabled={saving || !(editing ? permissions.canChange : permissions.canAdd)}>{saving ? 'Salvando…' : editing ? 'Salvar alterações' : 'Adicionar item'}</button>{editing && <button type="button" className="cms-editor-cancel" onClick={reset} disabled={saving}>Cancelar</button>}</div>
+            <div className="cms-content-form-actions"><button className="cms-primary-button" type="submit" disabled={saving || !formHasChanges || !(editing ? permissions.canChange : permissions.canAdd)}>{saving ? 'Salvando…' : editing ? 'Salvar alterações' : 'Adicionar item'}</button>{editing && <button type="button" className="cms-editor-cancel" onClick={reset} disabled={saving}>Cancelar</button>}</div>
           </form>
         )}
       </div>
