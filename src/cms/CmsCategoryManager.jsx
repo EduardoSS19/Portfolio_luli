@@ -47,6 +47,8 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
   const [workPage, setWorkPage] = useState(0)
   const [draggingWorkId, setDraggingWorkId] = useState(null)
   const [dragOverWorkId, setDragOverWorkId] = useState(null)
+  const [draggingCategoryId, setDraggingCategoryId] = useState(null)
+  const [dragOverCategoryId, setDragOverCategoryId] = useState(null)
   const [supportsDrag, setSupportsDrag] = useState(false)
   const WORKS_PER_PAGE = 10
 
@@ -216,6 +218,32 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
     }
   }
 
+  const dropCategory = async targetId => {
+    if (!draggingCategoryId || draggingCategoryId === targetId) return
+    const sourceIndex = items.findIndex(item => String(item.id) === String(draggingCategoryId))
+    const targetIndex = items.findIndex(item => String(item.id) === String(targetId))
+    if (sourceIndex < 0 || targetIndex < 0) return
+    const next = [...items]
+    const [dragged] = next.splice(sourceIndex, 1)
+    next.splice(targetIndex, 0, dragged)
+    setDraggingCategoryId(null)
+    setDragOverCategoryId(null)
+    setSaving(true); setError('')
+    try {
+      const result = await categoryRequest('/api/cms/categories/', {
+        method: 'PATCH',
+        body: JSON.stringify({ ids: next.map(item => item.id) }),
+      })
+      setItems(result.results || next)
+      setNotice('Ordem das categorias atualizada.')
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const move = async (index, direction) => {
     const next = [...items]
     const target = index + direction
@@ -287,9 +315,27 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
           <h2>Suas categorias</h2>
           <p>Desativar uma categoria não apaga as obras vinculadas a ela.</p>
           {loading ? <div className="cms-loading">Carregando categorias…</div> : items.length ? items.map(item => (
-            <article className="cms-category-item" key={item.id}>
+            <article
+              className={'cms-category-item' + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
+              key={item.id}
+              draggable={supportsDrag && !saving}
+              onDragStart={event => {
+                if (!supportsDrag || saving) { event.preventDefault(); return }
+                setDraggingCategoryId(item.id)
+                event.dataTransfer.effectAllowed = 'move'
+                event.dataTransfer.setData('text/plain', String(item.id))
+              }}
+              onDragOver={event => {
+                if (!draggingCategoryId || saving) return
+                event.preventDefault()
+                event.dataTransfer.dropEffect = 'move'
+                if (dragOverCategoryId !== item.id) setDragOverCategoryId(item.id)
+              }}
+              onDrop={event => { event.preventDefault(); dropCategory(item.id) }}
+              onDragEnd={() => { setDraggingCategoryId(null); setDragOverCategoryId(null) }}
+            >
               <div>
-                <strong>{item.title}</strong>
+                <strong>{supportsDrag && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
                 <small>{item.workCount} {item.workCount === 1 ? 'obra vinculada' : 'obras vinculadas'} · /{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
