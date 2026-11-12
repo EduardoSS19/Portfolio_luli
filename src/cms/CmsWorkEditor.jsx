@@ -135,6 +135,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const [videos, setVideos] = useState([])
   const [videosLoading, setVideosLoading] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
+  const [editingVideoId, setEditingVideoId] = useState(null)
+  const [editingVideoUrl, setEditingVideoUrl] = useState('')
   const [videoAdding, setVideoAdding] = useState(false)
   const [videoBusyId, setVideoBusyId] = useState(null)
   const [videoError, setVideoError] = useState('')
@@ -233,14 +235,30 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
 
+  const startEditVideo = item => {
+    setEditingVideoId(item.id)
+    setEditingVideoUrl(item.youtubeUrl || '')
+    setVideoError('')
+    setVideoNotice('')
+  }
+
+  const cancelEditVideo = () => {
+    setEditingVideoId(null)
+    setEditingVideoUrl('')
+  }
+
   const editVideo = async item => {
-    const nextUrl = window.prompt('Cole o novo link do YouTube:', item.youtubeUrl)
-    if (nextUrl == null || !nextUrl.trim() || nextUrl.trim() === item.youtubeUrl) return
+    const nextUrl = editingVideoUrl.trim()
+    if (!nextUrl || nextUrl === item.youtubeUrl) {
+      cancelEditVideo()
+      return
+    }
     setVideoBusyId(item.id); setVideoError(''); setVideoNotice('')
     try {
-      const updated = await onUpdateVideo(work.id, item.id, nextUrl.trim())
+      const updated = await onUpdateVideo(work.id, item.id, nextUrl)
       setVideos(current => current.map(video => video.id === item.id ? updated : video))
       setVideoNotice('Link e miniatura do vídeo atualizados.')
+      cancelEditVideo()
     } catch (err) { setVideoError(err.message || 'Não foi possível atualizar o vídeo.') }
     finally { setVideoBusyId(null) }
   }
@@ -518,12 +536,17 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
                   <div className="cms-video-info">
                     <strong>{item.title || 'Vídeo do YouTube'}</strong>
                     <a href={item.youtubeUrl} target="_blank" rel="noreferrer">Abrir no YouTube ↗</a>
-                    <small>Vídeo {String(index + 1).padStart(2, '0')}</small>
+                    {editingVideoId === item.id ? (
+                      <div className="cms-video-inline-edit">
+                        <label>Link do YouTube<input type="url" value={editingVideoUrl} onChange={event => setEditingVideoUrl(event.target.value)} required aria-label="Novo link do YouTube" /></label>
+                        <div><button type="button" onClick={() => editVideo(item)} disabled={videoBusyId === item.id || !editingVideoUrl.trim()}>{videoBusyId === item.id ? 'Salvando…' : 'Salvar link'}</button><button type="button" onClick={cancelEditVideo} disabled={videoBusyId === item.id}>Cancelar</button></div>
+                      </div>
+                    ) : <small>Vídeo {String(index + 1).padStart(2, '0')}</small>}
                   </div>
                   <div className="cms-video-actions">
                     <button type="button" aria-label="Mover vídeo para cima" title="Mover para cima" disabled={index === 0 || videoBusyId === item.id} onClick={() => moveVideo(index, -1)}>↑</button>
                     <button type="button" aria-label="Mover vídeo para baixo" title="Mover para baixo" disabled={index === videos.length - 1 || videoBusyId === item.id} onClick={() => moveVideo(index, 1)}>↓</button>
-                    <button type="button" disabled={videoBusyId === item.id} onClick={() => editVideo(item)}>Editar link</button>
+                    {editingVideoId !== item.id && <button type="button" disabled={videoBusyId === item.id || editingVideoId !== null} onClick={() => startEditVideo(item)}>Editar link</button>}
                     <button type="button" className="delete" disabled={videoBusyId === item.id} onClick={() => deleteVideo(item)}>{videoBusyId === item.id ? '…' : 'Remover'}</button>
                   </div>
                 </article>)}
