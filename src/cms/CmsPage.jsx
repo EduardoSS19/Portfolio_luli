@@ -443,7 +443,7 @@ export function CmsPage() {
   }, [load])
 
   useEffect(() => {
-    if (section !== 'analytics') {
+    if (section !== 'analytics' && section !== 'overview') {
       setAnalytics(null)
       return
     }
@@ -544,6 +544,7 @@ export function CmsPage() {
                 </section>
               )}
               <section className="cms-section-heading cms-analytics-shortcut"><div><p className="cms-eyebrow">GOOGLE ANALYTICS 4</p><h2>Entenda o alcance do seu trabalho</h2></div><button className="cms-text-button" onClick={() => setSection('analytics')}>Abrir estatísticas ↗</button></section>
+              <CmsAnalytics data={analytics} compact />
               <section className="cms-dashboard-shortcuts" aria-label="Atalhos de gestão"><button type="button" onClick={() => setSection('categories')}><strong>Categorias</strong><span>Organize as seções e a ordem do acervo →</span></button><button type="button" onClick={() => setSection('profile')}><strong>Perfil</strong><span>Edite apresentação e contato →</span></button><button type="button" onClick={() => setSection('content')}><strong>Conteúdo complementar</strong><span>Redes sociais, referências e fundos →</span></button></section>
               <section className="cms-lower-grid">
                 <article className="cms-feature-card">
