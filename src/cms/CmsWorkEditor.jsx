@@ -64,14 +64,13 @@ function Field({ field, value, categories, onChange }) {
     id,
     value: value ?? '',
     required: field.required,
-    placeholder: field.placeholder || '',
     'aria-describedby': field.help ? id + '-help' : undefined,
     onChange: event => onChange(field.name, event.target.value),
   }
   let control
 
   if (field.type === 'textarea') {
-    control = <textarea {...common} rows={4} />
+    control = <textarea {...common} rows={4} placeholder={field.placeholder || ''} />
   } else if (field.type === 'category') {
     control = (
       <select {...common}>
