@@ -521,7 +521,13 @@ export function CmsPage() {
           ) : isProfile ? (
             <CmsProfileManager />
           ) : isCategories ? (
-            <CmsCategoryManager canEditWorks={overview?.permissions?.canEditWork} onChanged={() => setLibraryRefresh(value => value + 1)} />
+            <CmsCategoryManager
+              canEditWorks={overview?.permissions?.canEditWork}
+              canCreateCategory={overview?.permissions?.canCreateCategory}
+              canEditCategory={overview?.permissions?.canEditCategory}
+              canDeleteCategory={overview?.permissions?.canDeleteCategory}
+              onChanged={() => setLibraryRefresh(value => value + 1)}
+            />
           ) : isContent ? (
             <CmsContentManager />
           ) : isMedia ? (

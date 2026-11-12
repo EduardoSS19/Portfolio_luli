@@ -29,7 +29,13 @@ async function categoryRequest(url, options = {}) {
   return data
 }
 
-export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
+export function CmsCategoryManager({
+  onChanged,
+  canEditWorks = false,
+  canCreateCategory = false,
+  canEditCategory = false,
+  canDeleteCategory = false,
+}) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -318,15 +324,15 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
             <article
               className={'cms-category-item' + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
               key={item.id}
-              draggable={supportsDrag && !saving}
+              draggable={supportsDrag && canEditCategory && !saving}
               onDragStart={event => {
-                if (!supportsDrag || saving) { event.preventDefault(); return }
+                if (!supportsDrag || !canEditCategory || saving) { event.preventDefault(); return }
                 setDraggingCategoryId(item.id)
                 event.dataTransfer.effectAllowed = 'move'
                 event.dataTransfer.setData('text/plain', String(item.id))
               }}
               onDragOver={event => {
-                if (!draggingCategoryId || saving) return
+                if (!draggingCategoryId || !canEditCategory || saving) return
                 event.preventDefault()
                 event.dataTransfer.dropEffect = 'move'
                 if (dragOverCategoryId !== item.id) setDragOverCategoryId(item.id)
@@ -335,17 +341,19 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
               onDragEnd={() => { setDraggingCategoryId(null); setDragOverCategoryId(null) }}
             >
               <div>
-                <strong>{supportsDrag && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
+                <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
                 <small>{item.workCount} {item.workCount === 1 ? 'obra vinculada' : 'obras vinculadas'} · /{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
                 <button type="button" onClick={() => setSelectedCategoryId(String(item.id))} disabled={saving || !canEditWorks} title={!canEditWorks ? 'Sua conta não tem permissão para reorganizar obras.' : 'Organizar a ordem das obras nesta categoria'}>Organizar obras</button>
-                <button type="button" onClick={() => move(items.indexOf(item), -1)} disabled={saving || items.indexOf(item) === 0}>↑</button>
-                <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1}>↓</button>
-                <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
-                <button type="button" onClick={() => toggleActive(item)} disabled={saving}>{item.active ? 'Desativar' : 'Ativar'}</button>
-                <button type="button" onClick={() => remove(item)} disabled={saving}>Excluir</button>
+                {canEditCategory && <>
+                  <button type="button" onClick={() => move(items.indexOf(item), -1)} disabled={saving || items.indexOf(item) === 0} aria-label={'Mover categoria ' + item.title + ' para cima'}>↑</button>
+                  <button type="button" onClick={() => move(items.indexOf(item), 1)} disabled={saving || items.indexOf(item) === items.length - 1} aria-label={'Mover categoria ' + item.title + ' para baixo'}>↓</button>
+                  <button type="button" onClick={() => startEdit(item)} disabled={saving}>Editar</button>
+                  <button type="button" onClick={() => toggleActive(item)} disabled={saving}>{item.active ? 'Desativar' : 'Ativar'}</button>
+                </>}
+                {canDeleteCategory && <button type="button" onClick={() => remove(item)} disabled={saving}>Excluir</button>}
               </div>
             </article>
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
@@ -413,7 +421,7 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
             </>
           ) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use a busca para localizar uma obra ou as setas para reorganizar a sequência.</small></div>}
         </section>
-        <form className="cms-category-form" onSubmit={save}>
+        {(canCreateCategory || (editing && canEditCategory)) ? <form className="cms-category-form" onSubmit={save}>
           <div>
             <h2>{editing ? 'Editar categoria' : 'Nova categoria'}</h2>
             <p>O nome aparece no portfólio. A chave identifica a categoria nos endereços e filtros.</p>
@@ -427,11 +435,14 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
             <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
           </label>
           <div className="cms-category-form-actions">
-            <button className="cms-primary-button" type="submit" disabled={saving || !title.trim()}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
+            <button className="cms-primary-button" type="submit" disabled={saving || !title.trim() || (editing ? !canEditCategory : !canCreateCategory)}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
             {editing && <button className="cms-editor-cancel" type="button" onClick={reset} disabled={saving}>Cancelar</button>}
           </div>
           {notice && <div className="cms-category-notice" role="status">{notice}</div>}
-        </form>
+        </form> : <aside className="cms-category-form cms-permission-note" role="note">
+          <h2>Permissões de categoria</h2>
+          <p>{canEditCategory ? 'Sua conta pode editar categorias existentes, mas não criar novas categorias.' : 'Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.'}</p>
+        </aside>}
       </div>
     </>
   )

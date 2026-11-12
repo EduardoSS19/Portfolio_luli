@@ -232,6 +232,22 @@ class CmsContentApiTests(TestCase):
         self.assertEqual(response.json()["updated"], 2)
         self.assertEqual(Work.objects.filter(pk__in=[first.pk, second.pk], is_active=True).count(), 2)
 
+    def test_cms_overview_exposes_category_permissions(self):
+        response = self.client.get(reverse("cms-overview"))
+        self.assertEqual(response.status_code, 200)
+        permissions = response.json()["permissions"]
+        self.assertFalse(permissions["canCreateCategory"])
+        self.assertFalse(permissions["canEditCategory"])
+        self.assertFalse(permissions["canDeleteCategory"])
+
+        self.grant("add_category", "change_category", "delete_category")
+        response = self.client.get(reverse("cms-overview"))
+        self.assertEqual(response.status_code, 200)
+        permissions = response.json()["permissions"]
+        self.assertTrue(permissions["canCreateCategory"])
+        self.assertTrue(permissions["canEditCategory"])
+        self.assertTrue(permissions["canDeleteCategory"])
+
     def test_category_order_and_cascade_delete_are_available(self):
         from .models import Category, Work
 

@@ -857,7 +857,7 @@ class CmsReadApiTests(TestCase):
             "categoryOptions": [{"id": self.category.pk, "key": "cms-ceramica", "title": "Cerâmica"}],
             "references": 0,
             "videos": 1,
-            "permissions": {"canCreateWork": False, "canEditWork": False, "canDeleteWork": False},
+            "permissions": {"canCreateWork": False, "canEditWork": False, "canDeleteWork": False, "canCreateCategory": False, "canEditCategory": False, "canDeleteCategory": False},
         })
         self.assertEqual(response["Cache-Control"], "max-age=0, no-cache, no-store, must-revalidate, private")
 
