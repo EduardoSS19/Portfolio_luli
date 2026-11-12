@@ -441,7 +441,7 @@ export function CmsCategoryManager({
           {notice && <div className="cms-category-notice" role="status">{notice}</div>}
         </form> : <aside className="cms-category-form cms-permission-note" role="note">
           <h2>Permissões de categoria</h2>
-          <p>Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.</p>
+          <p>{canEditCategory ? 'Sua conta pode editar categorias existentes, mas não criar novas categorias.' : 'Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.'}</p>
         </aside>}
       </div>
     </>
