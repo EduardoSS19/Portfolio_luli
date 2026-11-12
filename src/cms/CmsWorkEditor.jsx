@@ -424,7 +424,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
           <p>Edite os dados da obra. Salvar não altera sua publicação; a prévia mostra a última versão salva.</p>
         </div>
         <div className="cms-editor-heading-actions">
-          {!isNew && work.id && canDelete && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving}>Excluir obra</button>}
+          {!isNew && work.id && <button className="cms-editor-cancel" type="button" onClick={deleteWork} disabled={saving || !canDelete} title={!canDelete ? 'Sua conta não tem permissão para excluir obras. Solicite a permissão Excluir obra no Django Admin.' : 'Excluir definitivamente esta obra e seus arquivos vinculados.'}>Excluir obra</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={previewWork} disabled={dirty} title={dirty ? 'Salve as alterações antes de abrir a prévia.' : 'Abrir uma prévia privada desta obra.'}>{dirty ? 'Salve para prévia' : 'Visualizar prévia ↗'}</button>}
           {!isNew && work.id && <button className="cms-cover-upload" type="button" onClick={togglePublication} disabled={publishing || dirty}>{publishing ? 'Atualizando…' : work.published ? 'Despublicar obra' : 'Publicar obra'}</button>}
           <span className={'cms-work-status ' + (work.published ? 'published' : 'draft')}>{work.published ? 'Publicada' : 'Rascunho'}</span>
