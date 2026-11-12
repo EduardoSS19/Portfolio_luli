@@ -1331,3 +1331,13 @@
     transform: none !important;
   }
 }
+
+
+/* Safari/WebKit: normaliza o box model da faixa de miniaturas sobreposta.
+   A altura inclui o padding, evitando que a faixa ultrapasse a caixa da mídia. */
+.secao:not(.sobre-secao) .obra.tem-carrossel .carrossel-miniaturas {
+  box-sizing: border-box;
+  height: 4.7rem;
+  min-height: 4.7rem;
+  margin: 0;
+}
