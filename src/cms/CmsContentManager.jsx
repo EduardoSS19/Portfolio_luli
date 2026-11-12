@@ -163,7 +163,7 @@ export function CmsContentManager() {
         <div><p className="cms-eyebrow">ELEMENTOS COMPLEMENTARES DO SITE</p><h1>Conteúdo complementar<span>.</span></h1><p>Esta área não cadastra obras: ela controla os links do rodapé, a seção Referências e as imagens de fundo do portfólio.</p></div>
       </header>
       <nav className="cms-content-tabs" aria-label="Tipos de conteúdo">
-        {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => setType(item.id)}>{item.label}</button>)}
+        {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => { setItems([]); setType(item.id) }}>{item.label}</button>)}
       </nav>
       <div className="cms-content-intro"><div><h2>{current.title}</h2><p>{current.description}</p></div><span>{items.length} {items.length === 1 ? 'item' : 'itens'}</span></div>
       {error && <div className="cms-error" role="alert">{error}<button type="button" onClick={() => load(type)}>Tentar novamente</button></div>}
@@ -177,7 +177,7 @@ export function CmsContentManager() {
               {type === 'backgrounds' && <img className="cms-content-thumb" src={item.image} alt="" loading="lazy" />}
               <div className="cms-content-item-main">
                 <strong>{type === 'backgrounds' ? 'Imagem de fundo ' + (index + 1) : item.title}</strong>
-                <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, item.links.length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
+                <small>{type === 'social-links' ? item.url : type === 'references' ? [item.period, (item.links || []).length + ' links'].filter(Boolean).join(' · ') : 'Posição ' + (item.position + 1)}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativo' : 'Inativo'}</span>
               </div>
               <div className="cms-content-item-actions">
