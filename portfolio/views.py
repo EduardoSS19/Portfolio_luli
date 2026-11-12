@@ -160,6 +160,10 @@ def portfolio_data(request):
         # com outras obras da categoria nem com o restante do portfólio.
         works_queryset = Work.objects.filter(pk=preview_work.pk)
         categories_queryset = Category.objects.filter(pk=preview_work.category_id)
+    elif preview_category:
+        # A prévia de ordenação deve mostrar somente a categoria reorganizada,
+        # e não a página inteira do portfólio.
+        categories_queryset = Category.objects.filter(pk=preview_category.pk)
 
     categories = categories_queryset.prefetch_related(
         Prefetch(
