@@ -7,13 +7,13 @@ function readCookie(name) {
 }
 
 const FIELDS = [
-  { name: 'name', label: 'Nome', required: true },
-  { name: 'tagline', label: 'Frase de apresentação' },
-  { name: 'instagram_url', label: 'Instagram', type: 'url' },
-  { name: 'contact_email', label: 'E-mail de contato', type: 'email' },
-  { name: 'contact_form_url', label: 'Link do formulário externo', type: 'url' },
-  { name: 'photo_url', label: 'URL alternativa da foto', type: 'url', wide: true },
-  { name: 'bio', label: 'Biografia', type: 'textarea', wide: true, required: true },
+  { name: 'name', label: 'Nome', required: true, placeholder: 'Ex.: Luli Becker', help: 'Nome que identifica a artista no portfólio.' },
+  { name: 'tagline', label: 'Frase de apresentação', placeholder: 'Ex.: Arte, memória e experimentação', help: 'Uma frase curta que resume sua apresentação artística.' },
+  { name: 'instagram_url', label: 'Instagram', type: 'url', placeholder: 'https://instagram.com/seuperfil', help: 'Cole o endereço completo do seu perfil, começando por https://.' },
+  { name: 'contact_email', label: 'E-mail de contato', type: 'email', placeholder: 'contato@exemplo.com', help: 'E-mail que visitantes poderão usar para entrar em contato.' },
+  { name: 'contact_form_url', label: 'Link do formulário externo', type: 'url', placeholder: 'https://…', help: 'Opcional. Use se você utiliza um formulário de contato em outro serviço.' },
+  { name: 'photo_url', label: 'URL alternativa da foto', type: 'url', wide: true, placeholder: 'https://…', help: 'Alternativa avançada. Se enviar uma foto pelo botão acima, não precisa preencher este campo.' },
+  { name: 'bio', label: 'Biografia', type: 'textarea', wide: true, required: true, placeholder: 'Conte sua trajetória, interesses, formação e processos artísticos…', help: 'Apresentação mais completa. Separe os parágrafos com uma linha em branco.' },
 ]
 
 export function CmsProfileManager() {
@@ -144,8 +144,9 @@ export function CmsProfileManager() {
             <label className={'cms-editor-field' + (field.wide ? ' wide' : '')} key={field.name}>
               <span>{field.label}{field.required ? ' *' : ''}</span>
               {field.type === 'textarea'
-                ? <textarea rows={7} required={field.required} value={profile[field.name] ?? ''} onChange={event => change(field.name, event.target.value)} />
-                : <input type={field.type || 'text'} required={field.required} value={profile[field.name] ?? ''} onChange={event => change(field.name, event.target.value)} />}
+                ? <textarea rows={7} required={field.required} value={profile[field.name] ?? ''} placeholder={field.placeholder || ''} onChange={event => change(field.name, event.target.value)} />
+                : <input type={field.type || 'text'} required={field.required} value={profile[field.name] ?? ''} placeholder={field.placeholder || ''} onChange={event => change(field.name, event.target.value)} />}
+              {field.help && <small className="cms-field-help">{field.help}</small>}
             </label>
           ))}
         </div>

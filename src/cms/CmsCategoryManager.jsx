@@ -351,7 +351,7 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
         </section>
         <section className="cms-category-work-order">
-          <div className="cms-category-work-order-heading"><div><h2>Ordem das obras</h2><p>Esta sequência define como as obras aparecem dentro da categoria no portfólio.</p></div>
+          <div className="cms-category-work-order-heading"><div><h2>Ordem das obras</h2><p>Esta sequência define como as obras aparecem dentro da categoria no portfólio. Use as setas para mover uma obra; em computadores, também é possível arrastar.</p></div>
             <select aria-label="Categoria para organizar obras" value={selectedCategoryId} onChange={event => setSelectedCategoryId(event.target.value)}>
               <option value="">Selecione uma categoria</option>
               {items.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
@@ -420,9 +420,11 @@ export function CmsCategoryManager({ onChanged, canEditWorks = false }) {
           </div>
           <label>Nome da categoria
             <input value={title} onChange={event => setTitle(event.target.value)} maxLength={100} required placeholder="Ex.: Pinturas" />
+            <small className="cms-field-help">Nome que os visitantes verão para encontrar este grupo de obras.</small>
           </label>
           <label>Chave / endereço
             <input value={key} onChange={event => setKey(event.target.value)} maxLength={50} placeholder="Gerada automaticamente pelo nome" />
+            <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
           </label>
           <div className="cms-category-form-actions">
             <button className="cms-primary-button" type="submit" disabled={saving || !title.trim()}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>

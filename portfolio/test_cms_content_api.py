@@ -135,6 +135,53 @@ class CmsContentApiTests(TestCase):
                     [0, 1],
                 )
 
+    def test_background_listing_exposes_image_url_and_replacement_preserves_item(self):
+        from django.core.files.storage import default_storage
+
+        self.grant("view_backgroundframe", "change_backgroundframe")
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            def image_upload(name, color):
+                output = BytesIO()
+                Image.new("RGB", (12, 8), color).save(output, format="PNG")
+                return SimpleUploadedFile(name, output.getvalue(), content_type="image/png")
+
+            background = BackgroundFrame.objects.create(
+                image=image_upload("original.png", "red"), position=2, is_active=True,
+            )
+            old_name = background.image.name
+            listing = self.client.get(self.url + "?type=backgrounds")
+            self.assertEqual(listing.status_code, 200)
+            image_url = listing.json()["results"][0]["image"]
+            self.assertTrue(image_url)
+            self.assertIn(old_name, image_url)
+
+            response = self.client.post(
+                reverse("cms-content-detail", args=["backgrounds", background.pk]),
+                data={"image": image_upload("replacement.png", "blue")},
+            )
+            self.assertEqual(response.status_code, 200, response.content)
+            background.refresh_from_db()
+            self.assertEqual(background.position, 2)
+            self.assertTrue(background.is_active)
+            self.assertNotEqual(background.image.name, old_name)
+            self.assertTrue(default_storage.exists(background.image.name))
+            self.assertFalse(default_storage.exists(old_name))
+            self.assertEqual(response.json()["result"]["id"], background.pk)
+            self.assertIn(background.image.name, response.json()["result"]["image"])
+
+    def test_background_replacement_requires_change_permission(self):
+        background = BackgroundFrame.objects.create(image="fundos/existing.png")
+        output = BytesIO()
+        Image.new("RGB", (8, 8), "blue").save(output, format="PNG")
+        upload = SimpleUploadedFile("replacement.png", output.getvalue(), content_type="image/png")
+        response = self.client.patch(
+            reverse("cms-content-detail", args=["backgrounds", background.pk]),
+            data={"image": upload},
+        )
+        self.assertEqual(response.status_code, 403)
+        background.refresh_from_db()
+        self.assertEqual(background.image.name, "fundos/existing.png")
+
     def test_reference_listing_returns_existing_records_and_nested_links(self):
         self.grant("view_reference")
         reference = Reference.objects.create(title="Exposição coletiva", period="2026")

@@ -203,7 +203,7 @@ def cms_content(request):
     return JsonResponse({"result": _serialize_content(content_type, item)}, status=201)
 
 
-@require_http_methods(["PATCH", "DELETE"])
+@require_http_methods(["POST", "PATCH", "DELETE"])
 @never_cache
 @ensure_csrf_cookie
 @csrf_protect
@@ -219,6 +219,7 @@ def cms_content_detail(request, content_type, item_id):
     permissions = _content_permissions(request.user, model_name)
 
     if request.method == "DELETE":
+
         if not permissions["canDelete"]:
             return JsonResponse({"error": "content_delete_permission_required"}, status=403)
         image_name = item.image.name if content_type == "backgrounds" and item.image else ""
@@ -230,8 +231,47 @@ def cms_content_detail(request, content_type, item_id):
                 logger.exception("Could not delete removed CMS background %s", image_name)
         return JsonResponse({"deleted": True, "id": item_id})
 
+    if request.method == "POST" and content_type == "backgrounds" and request.content_type.startswith("multipart/form-data"):
+        if not permissions["canChange"]:
+            return JsonResponse({"error": "content_change_permission_required"}, status=403)
+        if set(request.FILES.keys()) != {"image"} or len(request.FILES.getlist("image")) != 1:
+            return JsonResponse({"error": "exactly_one_image_required"}, status=400)
+        uploaded = request.FILES["image"]
+        error = _validate_cms_gallery_image(uploaded)
+        if error:
+            return JsonResponse({"error": error, "maxBytes": MAX_COVER_UPLOAD_SIZE}, status=413 if error == "image_too_large" else 400)
+
+        old_name = item.image.name if item.image else ""
+        try:
+            from PIL import Image
+            uploaded.seek(0)
+            with Image.open(uploaded) as image:
+                extension = ALLOWED_COVER_FORMATS[image.format]
+            uploaded.seek(0)
+            target_name = item.image.field.generate_filename(item, f"background-{item.pk}.{extension}")
+            stored_name = default_storage.save(target_name, uploaded)
+            item.image.name = stored_name
+            item.full_clean()
+            item.save(update_fields=["image"])
+        except Exception:
+            if "stored_name" in locals():
+                try:
+                    default_storage.delete(stored_name)
+                except Exception:
+                    logger.exception("Could not clean up failed background replacement %s", stored_name)
+            logger.exception("CMS background replacement failed for item %s", item_id)
+            return JsonResponse({"error": "image_storage_failed"}, status=503)
+
+        if old_name and old_name != stored_name:
+            try:
+                default_storage.delete(old_name)
+            except Exception:
+                logger.exception("Could not delete replaced CMS background %s", old_name)
+        return JsonResponse({"result": _serialize_content(content_type, item)})
+
     if not permissions["canChange"]:
         return JsonResponse({"error": "content_change_permission_required"}, status=403)
+
     try:
         payload = json.loads(request.body.decode("utf-8")) if request.content_type == "application/json" else None
     except (UnicodeDecodeError, json.JSONDecodeError):
