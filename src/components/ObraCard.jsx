@@ -594,7 +594,6 @@ export function ObraCard({
                 )}
               </>
             )}
-          </div>
           {midias.length > 1 && !modoGrade && (
             <div className="carrossel-miniaturas" role="group" aria-label={`Escolher imagem ou vídeo de ${titulo}`}>
               {midias.map((midia, index) => (
@@ -620,6 +619,7 @@ export function ObraCard({
               <span className="carrossel-arraste" aria-hidden="true">↔</span>
             </div>
           )}
+          </div>
         </div>
         <div
           className="obra-texto"
