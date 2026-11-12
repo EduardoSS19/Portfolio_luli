@@ -47,4 +47,5 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
   await page.locator('.cms-content-tabs button').nth(1).click()
   await expect(page.locator('.cms-content-tabs button').nth(1)).toHaveClass(/active/)
   await expect(page.locator('.cms-content-intro h2')).toHaveText('Referências')
+  await expect(page.getByText('Exposição coletiva', { exact: true })).toBeVisible()
 })
