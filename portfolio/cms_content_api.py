@@ -105,8 +105,9 @@ def cms_content(request):
     permissions = _content_permissions(request.user, model_name)
 
     if request.method == "GET":
-        if not permissions["canView"]:
-            return JsonResponse({"error": "content_view_permission_required"}, status=403)
+        # The CMS is the staff editorial workspace: staff may inspect existing
+        # content even when their Django Admin role is read-only. Mutations below
+        # continue to enforce the model-specific add/change/delete permissions.
         items = [_serialize_content(content_type, item) for item in _content_queryset(content_type)]
         return JsonResponse({"results": items, "permissions": permissions})
 
