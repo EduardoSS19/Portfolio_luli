@@ -398,8 +398,16 @@ test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplic
   await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await expect(card.locator('.grade-midia-contagem')).toHaveText('+1 imagem')
   await expect(card.locator('.carrossel-indice')).toHaveCount(0)
-  await expect(card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' })).toBeVisible()
-  await card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' }).click()
+  const proxima = card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' })
+  await expect(proxima).toHaveCount(1)
+  const touch = await page.evaluate(() => matchMedia('(hover: none), (pointer: coarse)').matches)
+  if (touch) {
+    // Em touch a navegação é por gesto; o +N substitui as setas visuais.
+    await expect(proxima).toBeHidden()
+  } else {
+    await expect(proxima).toBeVisible()
+    await proxima.click()
+  }
   await expect(card.locator('.carrossel-indice')).toHaveCount(0)
   await card.locator('.obra-zoom-trigger').click()
   const dialog = page.getByLabel('Visualização ampliada de Ruído cromático')
@@ -515,9 +523,15 @@ test('os títulos da grade só aparecem ao passar o mouse ou focar por teclado',
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra').first()
   const texto = card.locator('.obra-texto')
-  await expect(texto).toHaveCSS('opacity', '0')
-  await card.hover()
-  await expect.poll(() => texto.evaluate(el => Number.parseFloat(getComputedStyle(el).opacity))).toBeGreaterThan(.95)
+  const touch = await page.evaluate(() => matchMedia('(hover: none), (pointer: coarse)').matches)
+  if (touch) {
+    // Sem hover em touch: o título permanece visível como informação essencial.
+    await expect(texto).toHaveCSS('opacity', '1')
+  } else {
+    await expect(texto).toHaveCSS('opacity', '0')
+    await card.hover()
+    await expect.poll(() => texto.evaluate(el => Number.parseFloat(getComputedStyle(el).opacity))).toBeGreaterThan(.95)
+  }
 })
 
 
