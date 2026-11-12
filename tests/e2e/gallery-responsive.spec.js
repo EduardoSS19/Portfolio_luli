@@ -327,6 +327,8 @@ test('na lista desktop, o texto do carrossel fica centralizado verticalmente', a
 })
 
 test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual e limpa a animação', async ({ page }) => {
+  // Este teste verifica a animação, portanto não deve herdar a preferência de movimento reduzido do runner.
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
   await abrirPortfolio(page)
   await page.setViewportSize({ width: 390, height: 844 })
 
@@ -398,7 +400,8 @@ test('a grade indica carrossel com +N e setas, sem miniaturas ou contador duplic
   await expect(card.locator('.carrossel-miniaturas')).toHaveCount(0)
   await expect(card.locator('.grade-midia-contagem')).toHaveText('+1 imagem')
   await expect(card.locator('.carrossel-indice')).toHaveCount(0)
-  const proxima = card.getByRole('button', { name: 'Próxima imagem de Ruído cromático' })
+  // O botão continua no DOM para acessibilidade, mesmo quando CSS o oculta em touch.
+  const proxima = card.locator('.carrossel-seta.carrossel-proxima')
   await expect(proxima).toHaveCount(1)
   const touch = await page.evaluate(() => matchMedia('(hover: none), (pointer: coarse)').matches)
   if (touch) {
