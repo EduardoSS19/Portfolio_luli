@@ -334,10 +334,17 @@ test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual 
   await page.addInitScript(() => {
     const animate = Element.prototype.animate
     Element.prototype.animate = function (keyframes, options) {
+      const animacao = animate.call(
+        this,
+        keyframes,
+        this.classList?.contains('obra-focus-imagem') ? { ...options, duration: 5000 } : options,
+      )
       if (this.classList?.contains('obra-focus-imagem')) {
-        return animate.call(this, keyframes, { ...options, duration: 5000 })
+        // Referência direta: WebKit pode não expor a animação recém-criada
+        // em Element.getAnimations() no mesmo ciclo de abertura do dialog.
+        window.__obraFocusAnimation = animacao
       }
-      return animate.call(this, keyframes, options)
+      return animacao
     }
   })
   await abrirPortfolio(page)
@@ -350,16 +357,14 @@ test('fechar o foco durante o zoom de abertura reverte a partir do quadro atual 
   const imagem = dialog.locator('.obra-focus-imagem')
 
   // Garante que o fechamento aconteça enquanto o zoom de entrada ainda está ativo.
-  await expect.poll(() => imagem.evaluate(element =>
-    element.getAnimations().some(animation => animation.playState === 'running')
-  )).toBe(true)
+  await expect.poll(() => page.evaluate(() => window.__obraFocusAnimation?.playState)).toBe('running')
   // Interrompe no meio do zoom, quando getBoundingClientRect já está alterado
   // pela transformação WAAPI. Esse é o cenário que deslocava o quadro de retorno.
   await page.waitForTimeout(280)
 
   await dialog.getByRole('button', { name: 'Fechar visualização' }).click()
   await expect(dialog).not.toHaveAttribute('open', '')
-  await expect.poll(() => imagem.evaluate(element => element.getAnimations().length)).toBe(0)
+  await expect.poll(() => page.evaluate(() => window.__obraFocusAnimation?.playState)).toBe('idle')
   await expect.poll(() => imagem.evaluate(element => getComputedStyle(element).transform)).toBe('none')
   await expect(card.locator('.obra-zoom-trigger')).toBeVisible()
 })
