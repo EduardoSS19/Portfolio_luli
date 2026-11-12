@@ -101,16 +101,26 @@ def get_ga4_dashboard_data():
         logger.exception("Não foi possível consultar as origens dos acessos no GA4.")
 
     artwork_dimension_status = "not_available"
-    try:
-        event_filter = FilterExpression(
-            filter=Filter(
-                field_name="eventName",
-                string_filter=Filter.StringFilter(
-                    value="view_artwork",
-                    match_type=Filter.StringFilter.MatchType.EXACT,
-                ),
-            )
+    artwork_clicks = None
+    event_filter = FilterExpression(
+        filter=Filter(
+            field_name="eventName",
+            string_filter=Filter.StringFilter(
+                value="view_artwork",
+                match_type=Filter.StringFilter.MatchType.EXACT,
+            ),
         )
+    )
+    try:
+        clicks_response = _report(
+            client, property_id, [], ["eventCount"],
+            limit=1, dimension_filter=event_filter,
+        )
+        artwork_clicks = int(clicks_response.rows[0].metric_values[0].value) if clicks_response.rows else 0
+    except Exception:
+        logger.exception("Não foi possível consultar os cliques em obras no GA4.")
+
+    try:
         response = _report(
             client, property_id, ["customEvent:artwork_name"], ["eventCount"],
             limit=10, dimension_filter=event_filter,
@@ -126,6 +136,8 @@ def get_ga4_dashboard_data():
         artwork_dimension_status = "not_registered"
         logger.info("Dimensão personalizada artwork_name ainda não está disponível no GA4.")
 
+    if historical.get("metrics") is not None:
+        historical["metrics"]["artwork_clicks"] = artwork_clicks
     historical["countries"] = countries
     historical["sources"] = sources
     historical["top_artworks"] = top_artworks
