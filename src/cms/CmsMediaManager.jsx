@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 function readCookie(name) {
   const prefix = name + '='
@@ -7,6 +8,7 @@ function readCookie(name) {
 }
 
 export function CmsMediaManager({ canEdit = false }) {
+  const { confirm, dialogNode } = useCmsConfirm()
   const [items, setItems] = useState([])
   const [works, setWorks] = useState([])
   const [type, setType] = useState('all')
@@ -48,7 +50,7 @@ export function CmsMediaManager({ canEdit = false }) {
     const workId = Number(targets[key])
     if (!workId || workId === item.workId) return
     const destination = works.find(work => work.id === workId)
-    if (!window.confirm('Transferir "' + item.title + '" de "' + item.workTitle + '" para "' + (destination?.title || 'a obra selecionada') + '"?')) return
+    if (!(await confirm({ title: 'Transferir mídia?', message: '“' + item.title + '” será movida de “' + item.workTitle + '” para “' + (destination?.title || 'a obra selecionada') + '”. O arquivo original será preservado.', confirmLabel: 'Transferir mídia', variant: 'default' }))) return
     setBusy(key); setError(''); setNotice('')
     try {
       const response = await fetch('/api/cms/media/move/', {
@@ -111,6 +113,7 @@ export function CmsMediaManager({ canEdit = false }) {
         </div>
       ) : <div className="cms-media-empty">Nenhuma mídia encontrada. Fotos extras e vídeos cadastrados nas obras aparecerão aqui.</div>}
       {!canEdit && <small className="cms-field-help">Sua conta pode consultar a biblioteca, mas não tem permissão para transferir mídias.</small>}
+      {dialogNode}
     </section>
   )
 }
