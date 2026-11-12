@@ -41,6 +41,7 @@ export function CmsAnalytics({ data, compact = false }) {
             <Metric label="Pessoas agora" value={data.realtime?.status === 'ok' ? data.realtime.active_users : null} detail="Ativas nos últimos 30 minutos" />
             <Metric label="Público" value={data.historical?.metrics?.active_users} detail="Usuários · últimos 28 dias" />
             <Metric label="Visitas" value={data.historical?.metrics?.sessions} detail="Sessões · últimos 28 dias" />
+            <Metric label="Visualizações" value={data.historical?.metrics?.page_views} detail="Páginas · últimos 28 dias" />
             <Metric label="Obras abertas" value={data.historical?.metrics?.artwork_clicks} detail="Cliques em obras · últimos 28 dias" />
           </div>
           {data.historical?.status === 'ok' && (
