@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const TYPES = [
   { id: 'social-links', label: 'Redes sociais', title: 'Redes sociais', description: 'Links como Instagram e Behance exibidos junto aos contatos no rodapé do site.' },
@@ -37,6 +38,7 @@ const emptyForm = type => type === 'social-links'
   : { title: '', period: '', position: 0, is_active: true, links: [] }
 
 export function CmsContentManager() {
+  const { confirm, dialogNode } = useCmsConfirm()
   const [type, setType] = useState('social-links')
   const [items, setItems] = useState([])
   const [permissions, setPermissions] = useState({})
@@ -132,7 +134,7 @@ export function CmsContentManager() {
   }
 
   const remove = async item => {
-    if (!window.confirm('Excluir este item permanentemente?')) return
+    if (!(await confirm({ title: 'Excluir item?', message: 'Este conteúdo será removido permanentemente do portfólio. Esta ação não pode ser desfeita.', confirmLabel: 'Excluir item', variant: 'danger' }))) return
     setSaving(true); setError(''); setNotice('')
     try {
       await api('/api/cms/content/' + type + '/' + item.id + '/', { method: 'DELETE' })
@@ -253,6 +255,7 @@ export function CmsContentManager() {
           </form>
         )}
       </div>
+      {dialogNode}
       {previewBackground && <div className="cms-background-preview-overlay" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setPreviewBackground(null) }}>
         <section className="cms-background-preview-dialog" role="dialog" aria-modal="true" aria-label="Visualização da imagem de fundo">
           <header><div><strong>Imagem de fundo</strong><small>Prévia do arquivo cadastrado no portfólio</small></div><button type="button" onClick={() => setPreviewBackground(null)} aria-label="Fechar visualização">×</button></header>
