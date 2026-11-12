@@ -647,7 +647,7 @@ class AdminDashboardTests(TestCase):
 
 
 class EditorGroupCommandTests(TestCase):
-    def test_editor_group_has_edit_permissions_without_delete(self):
+    def test_editor_group_can_delete_works_without_gaining_other_delete_permissions(self):
         call_command("setup_editor_group")
 
         group = Group.objects.get(name="Editores do portfólio")
@@ -655,7 +655,9 @@ class EditorGroupCommandTests(TestCase):
         self.assertIn("add_work", permissions)
         self.assertIn("change_work", permissions)
         self.assertIn("view_work", permissions)
-        self.assertNotIn("delete_work", permissions)
+        self.assertIn("delete_work", permissions)
+        self.assertNotIn("delete_category", permissions)
+        self.assertNotIn("delete_sociallink", permissions)
 
     def test_editor_group_command_is_idempotent(self):
         call_command("setup_editor_group")
