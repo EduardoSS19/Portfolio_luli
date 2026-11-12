@@ -50,6 +50,8 @@ export function CmsContentManager() {
   const [notice, setNotice] = useState('')
   const [previewBackground, setPreviewBackground] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
+  const [draggingId, setDraggingId] = useState(null)
+  const [dragOverId, setDragOverId] = useState(null)
 
   const load = useCallback(async (kind = type) => {
     setLoading(true)
@@ -153,18 +155,24 @@ export function CmsContentManager() {
     finally { setSaving(false) }
   }
 
-  const move = async (index, delta) => {
+  const reorderItems = async (sourceIndex, targetIndex) => {
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex >= items.length || targetIndex >= items.length || sourceIndex === targetIndex) return
     const next = [...items]
-    const target = index + delta
-    if (target < 0 || target >= next.length) return
-    ;[next[index], next[target]] = [next[target], next[index]]
-    setSaving(true); setError('')
+    const [dragged] = next.splice(sourceIndex, 1)
+    next.splice(targetIndex, 0, dragged)
+    setItems(next)
+    setSaving(true); setError(''); setNotice('')
     try {
       await api('/api/cms/content/', { method: 'PATCH', body: JSON.stringify({ type, ids: next.map(item => item.id) }) })
+      setNotice('Ordem atualizada no site.')
       await load(type)
-    } catch (err) { setError(err.message) }
-    finally { setSaving(false) }
+    } catch (err) {
+      setError(err.message)
+      await load(type)
+    } finally { setSaving(false) }
   }
+
+  const move = (index, delta) => reorderItems(index, index + delta)
 
   const addLink = () => update('links', [...(form.links || []), { text: '', url: '' }])
   const editLink = (index, key, value) => update('links', (form.links || []).map((link, i) => i === index ? { ...link, [key]: value } : link))
@@ -182,13 +190,22 @@ export function CmsContentManager() {
         {TYPES.map(item => <button type="button" key={item.id} className={type === item.id ? 'active' : ''} onClick={() => { setItems([]); setType(item.id) }}>{item.label}</button>)}
       </nav>
       <div className="cms-content-intro"><div><h2>{current.title}</h2><p>{current.description}</p></div><span>{items.length} {items.length === 1 ? 'item' : 'itens'}</span></div>
+      {permissions.canChange && <p className="cms-sortable-hint">⠿ Arraste os itens para alterar a ordem em que aparecem no site. As setas também continuam disponíveis.</p>}
       {error && <div className="cms-error" role="alert">{error}<button type="button" onClick={() => load(type)}>Tentar novamente</button></div>}
       {notice && <div className="cms-editor-message success" role="status">{notice}</div>}
       {selectedIds.length > 0 && <div className="cms-bulk-actions"><strong>{selectedIds.length} item(ns) selecionado(s)</strong><button type="button" onClick={() => bulkToggle(true)} disabled={saving}>Publicar selecionados</button><button type="button" onClick={() => bulkToggle(false)} disabled={saving}>Ocultar selecionados</button><button type="button" onClick={() => setSelectedIds([])}>Limpar seleção</button></div>}
       <div className="cms-content-layout">
         <section className="cms-content-list">
           {loading ? <div className="cms-loading">Carregando conteúdo…</div> : items.length ? items.map((item, index) => (
-            <article className="cms-content-item" key={item.id}>
+            <article
+              className={'cms-content-item cms-sortable-item' + (draggingId === item.id ? ' is-dragging' : '') + (dragOverId === item.id ? ' is-drop-target' : '')}
+              key={item.id}
+              draggable={permissions.canChange && !saving}
+              onDragStart={event => { if (!permissions.canChange || saving) { event.preventDefault(); return } setDraggingId(item.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(item.id)) }}
+              onDragOver={event => { if (draggingId === null || !permissions.canChange || saving) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverId(item.id) }}
+              onDrop={event => { event.preventDefault(); const source = items.findIndex(entry => entry.id === draggingId); const target = items.findIndex(entry => entry.id === item.id); reorderItems(source, target); setDraggingId(null); setDragOverId(null) }}
+              onDragEnd={() => { setDraggingId(null); setDragOverId(null) }}
+            >
               <label className="cms-content-select"><input type="checkbox" checked={selectedIds.includes(item.id)} onChange={event => setSelectedIds(current => event.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))} aria-label={'Selecionar ' + (item.title || 'imagem de fundo')} /> Selecionar</label>
               {type === 'backgrounds' && (item.image && !imageErrors[item.id]
                 ? <button type="button" className="cms-background-preview" onClick={() => setPreviewBackground(item)} aria-label={'Visualizar imagem de fundo ' + (index + 1)}>
