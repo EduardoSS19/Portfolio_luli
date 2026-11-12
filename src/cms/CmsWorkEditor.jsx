@@ -128,6 +128,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const [galleryError, setGalleryError] = useState('')
   const [galleryNotice, setGalleryNotice] = useState('')
   const [galleryBusyId, setGalleryBusyId] = useState(null)
+  const [draggingGalleryId, setDraggingGalleryId] = useState(null)
+  const [dragOverGalleryId, setDragOverGalleryId] = useState(null)
   const [videos, setVideos] = useState([])
   const [videosLoading, setVideosLoading] = useState(false)
   const [videoUrl, setVideoUrl] = useState('')
@@ -135,6 +137,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
   const [videoBusyId, setVideoBusyId] = useState(null)
   const [videoError, setVideoError] = useState('')
   const [videoNotice, setVideoNotice] = useState('')
+  const [draggingVideoId, setDraggingVideoId] = useState(null)
+  const [dragOverVideoId, setDragOverVideoId] = useState(null)
 
   useEffect(() => {
     if (!work.id) return
@@ -255,11 +259,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
 
-  const moveVideo = async (index, direction) => {
+  const reorderVideoItems = async (sourceIndex, targetIndex) => {
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex >= videos.length || targetIndex >= videos.length || sourceIndex === targetIndex) return
     const next = [...videos]
-    const target = index + direction
-    if (target < 0 || target >= next.length) return
-    ;[next[index], next[target]] = [next[target], next[index]]
+    const [dragged] = next.splice(sourceIndex, 1)
+    next.splice(targetIndex, 0, dragged)
     setVideos(next)
     setVideoError('')
     setVideoNotice('')
@@ -272,6 +276,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       try { setVideos(await onLoadVideos(work.id)) } catch { /* preserve reorder error */ }
     }
   }
+
+  const moveVideo = (index, direction) => reorderVideoItems(index, index + direction)
 
   const changeField = (name, value) => {
     setForm(current => ({ ...current, [name]: value }))
@@ -363,11 +369,11 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     }
   }
 
-  const moveGalleryItem = async (index, direction) => {
+  const reorderGalleryItems = async (sourceIndex, targetIndex) => {
+    if (sourceIndex < 0 || targetIndex < 0 || sourceIndex >= gallery.length || targetIndex >= gallery.length || sourceIndex === targetIndex) return
     const next = [...gallery]
-    const target = index + direction
-    if (target < 0 || target >= next.length) return
-    ;[next[index], next[target]] = [next[target], next[index]]
+    const [dragged] = next.splice(sourceIndex, 1)
+    next.splice(targetIndex, 0, dragged)
     setGallery(next)
     setGalleryError('')
     setGalleryNotice('')
@@ -380,6 +386,8 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
       try { setGallery(await onLoadGallery(work.id)) } catch { /* preserve the reorder error */ }
     }
   }
+
+  const moveGalleryItem = (index, direction) => reorderGalleryItems(index, index + direction)
 
   const submit = async event => {
     event.preventDefault()
@@ -458,7 +466,15 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
         {work.id && <label className={'cms-cover-upload cms-gallery-add-control' + (galleryUploading ? ' disabled' : '')}>{galleryUploading ? 'Enviando…' : '＋ Adicionar imagens'}<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={uploadGallery} disabled={galleryUploading} /></label>}
         {!work.id ? <div className="cms-gallery-empty">Salve a obra primeiro para começar a montar a galeria.</div> : galleryLoading ? <div className="cms-gallery-empty">Carregando imagens…</div> : gallery.length ? (
           <div className="cms-gallery-grid">
-            {gallery.map((item, index) => <article className="cms-gallery-item" key={item.id}>
+            {gallery.map((item, index) => <article
+              className={'cms-gallery-item cms-sortable-item' + (draggingGalleryId === item.id ? ' is-dragging' : '') + (dragOverGalleryId === item.id ? ' is-drop-target' : '')}
+              key={item.id}
+              draggable={!galleryUploading && galleryBusyId === null}
+              onDragStart={event => { if (galleryUploading || galleryBusyId !== null) { event.preventDefault(); return } setDraggingGalleryId(item.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(item.id)) }}
+              onDragOver={event => { if (draggingGalleryId === null || galleryUploading || galleryBusyId !== null) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverGalleryId(item.id) }}
+              onDrop={event => { event.preventDefault(); const source = gallery.findIndex(image => image.id === draggingGalleryId); const target = gallery.findIndex(image => image.id === item.id); reorderGalleryItems(source, target); setDraggingGalleryId(null); setDragOverGalleryId(null) }}
+              onDragEnd={() => { setDraggingGalleryId(null); setDragOverGalleryId(null) }}
+            >
               <div className="cms-gallery-thumb">{item.url ? <img src={item.url} alt={'Imagem adicional ' + (index + 1) + ' de ' + (work.title || 'obra')} loading="lazy" /> : <span>Imagem indisponível</span>}<small>{String(index + 1).padStart(2, '0')}</small></div>
               <div className="cms-gallery-item-actions">
                 <button type="button" aria-label="Mover imagem para a esquerda" title="Mover para a esquerda" disabled={index === 0 || galleryBusyId === item.id} onClick={() => moveGalleryItem(index, -1)}>←</button>
@@ -487,7 +503,15 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
             </form>
             {videosLoading ? <div className="cms-gallery-empty">Carregando vídeos…</div> : videos.length ? (
               <div className="cms-video-list">
-                {videos.map((item, index) => <article className="cms-video-item" key={item.id}>
+                {videos.map((item, index) => <article
+                  className={'cms-video-item cms-sortable-item' + (draggingVideoId === item.id ? ' is-dragging' : '') + (dragOverVideoId === item.id ? ' is-drop-target' : '')}
+                  key={item.id}
+                  draggable={videoBusyId === null && !videoAdding}
+                  onDragStart={event => { if (videoBusyId !== null || videoAdding) { event.preventDefault(); return } setDraggingVideoId(item.id); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(item.id)) }}
+                  onDragOver={event => { if (draggingVideoId === null || videoBusyId !== null || videoAdding) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverVideoId(item.id) }}
+                  onDrop={event => { event.preventDefault(); const source = videos.findIndex(video => video.id === draggingVideoId); const target = videos.findIndex(video => video.id === item.id); reorderVideoItems(source, target); setDraggingVideoId(null); setDragOverVideoId(null) }}
+                  onDragEnd={() => { setDraggingVideoId(null); setDragOverVideoId(null) }}
+                >
                   <div className="cms-video-thumb">{item.thumbnail ? <img src={item.thumbnail} alt="" loading="lazy" /> : <span>▶</span>}</div>
                   <div className="cms-video-info">
                     <strong>{item.title || 'Vídeo do YouTube'}</strong>

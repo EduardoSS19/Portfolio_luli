@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 test('conteúdo complementar carrega redes sociais e referências no painel', async ({ page }) => {
+  let socialLinks = [
+    { id: 1, title: 'Behance', url: 'https://behance.net/artista', position: 0, active: true },
+    { id: 4, title: 'Instagram', url: 'https://instagram.com/artista', position: 1, active: true },
+  ]
+  let savedOrder = null
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
     if (url.pathname.endsWith('/api/cms/overview/')) {
@@ -24,9 +29,14 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
       }) })
     }
     if (url.pathname.endsWith('/api/cms/content/')) {
-      const type = url.searchParams.get('type')
+      if (route.request().method() === 'PATCH') {
+        const payload = route.request().postDataJSON()
+        savedOrder = payload.ids
+        socialLinks = payload.ids.map((id, index) => ({ ...socialLinks.find(item => item.id === id), position: index }))
+      }
+      const type = url.searchParams.get('type') || route.request().postDataJSON()?.type
       const results = type === 'social-links'
-        ? [{ id: 1, title: 'Behance', url: 'https://behance.net/artista', position: 0, active: true }]
+        ? socialLinks
         : type === 'references'
           ? [{ id: 2, title: 'Exposição coletiva', period: '2026', position: 0, active: true, links: [{ id: 3, text: 'Catálogo', url: 'https://example.com/catalogo', position: 0 }] }]
           : []
@@ -43,6 +53,12 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Conteúdo complementar')
   await expect(page.getByText('Behance', { exact: true })).toBeVisible()
+  await expect(page.getByText('Instagram', { exact: true })).toBeVisible()
+
+  const contentRows = page.locator('.cms-content-item')
+  await expect(contentRows).toHaveCount(2)
+  await contentRows.nth(0).dragTo(contentRows.nth(1))
+  await expect.poll(() => savedOrder).toEqual([4, 1])
 
   await page.locator('.cms-content-tabs button').nth(1).click()
   await expect(page.locator('.cms-content-tabs button').nth(1)).toHaveClass(/active/)
