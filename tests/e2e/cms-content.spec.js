@@ -39,12 +39,12 @@ test('conteúdo complementar carrega redes sociais e referências no painel', as
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Olá')
-  await page.getByRole('button', { name: 'Conteúdo' }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Conteúdo/ }).click()
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Conteúdo complementar')
   await expect(page.getByText('Behance')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Referências' }).click()
+  await page.locator('.cms-content-tabs').getByRole('button', { name: 'Referências' }).click()
   await expect(page.getByText('Exposição coletiva')).toBeVisible()
   await expect(page.getByText(/1 links/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Editar' })).toBeVisible()
