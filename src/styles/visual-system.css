@@ -1359,3 +1359,6 @@ html {
   background-color: #f8fbfd;
 }
 
+
+.sobre-secao .sobre-entrada.sem-imagem{grid-template-columns:minmax(0,1fr)}
+.sobre-secao .sobre-entrada.sem-imagem .obra-texto{grid-column:1/-1;min-width:0}
