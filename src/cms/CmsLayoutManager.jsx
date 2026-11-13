@@ -22,10 +22,10 @@ const COLOR_FIELDS = [
   ['color_accent','Destaque','Links e elementos ativos'],
 ]
 const PALETTES = [
-  {name:'Azul profundo',colors:['#061522','#0b2943','#eff7ff','#a9bdcc','#93c8f2']},
-  {name:'Oliva e papel',colors:['#171912','#292d20','#f1efdf','#b9b99f','#c5cf91']},
-  {name:'Terracota',colors:['#211815','#382720','#fff0e5','#cdb8aa','#d98d68']},
-  {name:'Galeria clara',colors:['#f5f2eb','#ffffff','#24231f','#77746c','#657c62']},
+  {name:'Azul profundo',darkColors:['#061522','#0b2943','#eff7ff','#a9bdcc','#93c8f2'],lightColors:['#edf4f8','#ffffff','#1b2b36','#617482','#3c7196']},
+  {name:'Oliva e papel',darkColors:['#171912','#292d20','#f1efdf','#b9b99f','#c5cf91'],lightColors:['#f4f3e9','#ffffff','#292d20','#777866','#657c62']},
+  {name:'Terracota',darkColors:['#211815','#382720','#fff0e5','#cdb8aa','#d98d68'],lightColors:['#fbf1eb','#fffaf7','#382720','#806f67','#ad6246']},
+  {name:'Galeria clara',darkColors:['#1e2420','#303b34','#f4f2e9','#b7c0b5','#9db58a'],lightColors:['#f5f2eb','#ffffff','#24231f','#77746c','#657c62']},
 ]
 const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, tablet: { label:'Tablet', width:768, height:1024 }, mobile: { label:'Celular', width:390, height:844 } }
 
@@ -118,7 +118,12 @@ export function CmsLayoutManager(){
   const colorKey=name=>`${editingTheme}_${name}`
   const contrast=useMemo(()=>contrastRatio(settings[colorKey('color_text')],settings[colorKey('color_background')]),[settings,editingTheme])
   const change=(name,value)=>{setSettings(current=>({...current,[colorKey(name)]:value}));setError('');setNotice('')}
-  const applyPalette=colors=>{const [color_background,color_surface,color_text,color_muted,color_accent]=colors;setSettings(current=>({...current,[colorKey('color_background')]:color_background,[colorKey('color_surface')]:color_surface,[colorKey('color_text')]:color_text,[colorKey('color_muted')]:color_muted,[colorKey('color_accent')]:color_accent}));setError('');setNotice('')}
+  const applyPalette=palette=>{
+    const [darkBackground,darkSurface,darkText,darkMuted,darkAccent]=palette.darkColors
+    const [lightBackground,lightSurface,lightText,lightMuted,lightAccent]=palette.lightColors
+    setSettings(current=>({...current,dark_color_background:darkBackground,dark_color_surface:darkSurface,dark_color_text:darkText,dark_color_muted:darkMuted,dark_color_accent:darkAccent,light_color_background:lightBackground,light_color_surface:lightSurface,light_color_text:lightText,light_color_muted:lightMuted,light_color_accent:lightAccent}))
+    setError('');setNotice('')
+  }
   const save=async event=>{
     event.preventDefault();setSaving(true);setError('');setNotice('')
     try{
@@ -144,7 +149,7 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className="cms-layout-palette" key={palette.name} onClick={()=>applyPalette(palette.colors)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{palette.colors.map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className="cms-layout-palette" key={palette.name} onClick={()=>applyPalette(palette.colors)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Bom contraste de texto':'Contraste abaixo do recomendado'}</strong><small>{'Relação de contraste: '+contrast.toFixed(2)+':1. Para texto comum, procure pelo menos 4,5:1.'}</small></div></div>
         </section>
