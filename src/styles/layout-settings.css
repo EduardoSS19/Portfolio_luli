@@ -134,3 +134,10 @@
 .site-shell[data-layout-width] nav.site-nav button.ativo {
   color:var(--layout-text-on-accent,var(--texto))!important;
 }
+
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] nav.site-nav button:not(.ativo) {
+  color:var(--layout-nav-muted,var(--layout-muted))!important;
+}
