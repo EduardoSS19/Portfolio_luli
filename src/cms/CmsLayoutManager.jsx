@@ -37,15 +37,15 @@ export function CmsLayoutManager(){
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
   const [previewMode,setPreviewMode]=useState(false)
   const [previewDevice,setPreviewDevice]=useState('desktop')
-  const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
+  const [previewContainerWidth,setPreviewContainerWidth]=useState(0)\n  const [previewContainerHeight,setPreviewContainerHeight]=useState(600)
   const previewFrameRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
-  const previewHeight=760
+  const previewHeight=previewContainerHeight
   const previewScale=previewContainerWidth>0?Math.min(1,previewContainerWidth/previewWidth):1
   useEffect(()=>{
     const element=previewFrameRef.current
     if(!element)return
-    const update=()=>setPreviewContainerWidth(element.clientWidth)
+    const update=()=>{setPreviewContainerWidth(element.clientWidth);setPreviewContainerHeight(element.clientHeight)}
     update()
     if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
     const observer=new ResizeObserver(update)
