@@ -42,7 +42,7 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
-  await expect(page.locator('.secao .obra')).toHaveCount(1)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(1)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
   expect(await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)).toBe(initialNavigation)
 })
