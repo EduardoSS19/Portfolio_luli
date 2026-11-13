@@ -158,6 +158,8 @@ test('prévia respeita opções independentes da apresentação e referências',
   await sendSettings(page, { show_bio_image: true, show_bio: false, show_references: true }, 'page')
   await expect(page.locator('.sobre-secao .obra-imagem')).toBeVisible()
   await expect(page.locator('.sobre-secao .biografia')).toHaveCount(0)
+  await expect(page.locator('.sobre-secao .categoria-legenda')).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText: 'Início' })).toHaveCount(0)
   await expect(page.locator('#Referências')).toBeVisible()
 })
 
