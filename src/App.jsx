@@ -280,6 +280,7 @@ export default function App() {
     '--azul-claro': layout.color_accent,
     '--texto': layout.color_text,
     '--linha': layout.color_muted + '44',
+    '--layout-muted': layout.color_muted,
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: layout.color_background, color: layout.color_text },
