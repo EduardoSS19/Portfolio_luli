@@ -146,4 +146,25 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toHaveClass(/is-empty/)
+
+  const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
+  await inlineFrame.scrollIntoViewIfNeeded()
+  await expect.poll(() => inlineFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(500)
+  const inlineGeometry = await inlineFrame.evaluate(frame => ({
+    frame: frame.getBoundingClientRect().width,
+    stage: frame.parentElement.getBoundingClientRect().width,
+  }))
+  expect(Math.abs(inlineGeometry.frame - inlineGeometry.stage)).toBeLessThan(2)
+
+  await page.getByRole('button', { name: 'Abrir janela flutuante' }).click()
+  const floatingFrame = page.locator('iframe[title="Prévia flutuante em Desktop"]')
+  await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
+  const beforeResize = await floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)
+  const resizeHandle = page.getByRole('button', { name: 'Redimensionar janela de prévia' })
+  const handleBox = await resizeHandle.boundingBox()
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(handleBox.x + handleBox.width / 2 + 90, handleBox.y + handleBox.height / 2 + 60)
+  await page.mouse.up()
+  await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(beforeResize + 50)
 })
