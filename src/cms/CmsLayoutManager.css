@@ -83,7 +83,7 @@
   max-height:calc(100vh - 16px);
   padding:.8rem;
   overflow:hidden;
-  resize:both;
+  resize:none;
   border-color:rgba(201,211,154,.42);
   background:#171914;
   box-shadow:0 24px 90px rgba(0,0,0,.62),0 0 0 1px rgba(255,255,255,.04);
@@ -135,4 +135,96 @@
   }
   .cms-layout-preview-panel.floating .cms-layout-preview-heading{padding:.25rem .2rem .55rem}
   .cms-layout-preview-window-actions>span{display:none}
+}
+
+/* A prévia fixa permanece no fim do editor; a flutuante é uma segunda janela independente. */
+.cms-layout-inline-preview{
+  display:grid;
+  gap:.65rem;
+  width:100%;
+  min-width:0;
+  margin:2rem 0 1rem;
+  padding:1rem;
+  border:1px solid var(--cms-border,rgba(255,255,255,.12));
+  border-radius:18px;
+  background:var(--cms-panel,rgba(255,255,255,.025));
+}
+.cms-layout-inline-preview .cms-layout-preview-heading{padding:.25rem .2rem .65rem}
+.cms-layout-preview-frame-inline{
+  height:min(78vh,900px);
+  min-height:520px;
+  max-height:none;
+  background:#061522;
+}
+.cms-layout-preview-panel.floating{
+  padding:.8rem .8rem 1.15rem;
+}
+.cms-layout-preview-window-actions{gap:.45rem}
+.cms-layout-preview-window-actions .cms-preview-window-button{
+  display:grid;
+  place-items:center;
+  width:2.15rem;
+  height:2.15rem;
+  flex:0 0 2.15rem;
+  padding:0;
+  border:1px solid rgba(224,226,210,.17);
+  border-radius:10px;
+  color:#e9eadf;
+  background:rgba(255,255,255,.055);
+  box-shadow:0 1px 2px rgba(0,0,0,.18);
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+.cms-layout-preview-window-actions .cms-preview-window-button:hover{
+  border-color:rgba(201,211,154,.58);
+  background:rgba(201,211,154,.13);
+  transform:translateY(-1px);
+}
+.cms-layout-preview-window-actions .cms-preview-window-button.close:hover{
+  border-color:rgba(226,133,126,.55);
+  color:#ffd7d2;
+  background:rgba(180,67,61,.18);
+}
+.cms-layout-preview-window-actions .cms-preview-window-button:focus-visible,
+.cms-preview-resize-handle:focus-visible{
+  outline:2px solid #c9d39a;
+  outline-offset:2px;
+}
+.cms-layout-preview-window-actions .cms-preview-window-button svg{
+  width:15px;
+  height:15px;
+  fill:currentColor;
+}
+.cms-layout-preview-window-actions .cms-preview-window-button.close svg{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+}
+.cms-preview-resize-handle{
+  position:absolute;
+  right:3px;
+  bottom:3px;
+  z-index:4;
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  padding:0;
+  border:1px solid rgba(224,226,210,.14);
+  border-radius:8px;
+  color:#d9dfc2;
+  background:rgba(255,255,255,.075);
+  cursor:nwse-resize;
+  touch-action:none;
+}
+.cms-preview-resize-handle:hover{background:rgba(201,211,154,.17);border-color:rgba(201,211,154,.45)}
+.cms-preview-resize-handle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.cms-layout-preview-panel.floating.maximized .cms-preview-resize-handle{display:none}
+@media(max-width:560px){
+  .cms-layout-inline-preview{padding:.65rem;margin-top:1.25rem}
+  .cms-layout-preview-frame-inline{height:72vh;min-height:440px}
+  .cms-layout-preview-panel.floating{padding:.55rem .55rem 1rem}
+  .cms-layout-preview-window-actions{gap:.3rem}
+  .cms-layout-preview-window-actions .cms-preview-window-button{width:2rem;height:2rem;flex-basis:2rem}
 }
