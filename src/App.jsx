@@ -30,6 +30,7 @@ export default function App() {
     frames: [],
     redes: [],
     sobre: null,
+    marca: '',
   })
   const [carregando, setCarregando] = useState(true)
   const [previsualizacao, setPrevisualizacao] = useState(null)
@@ -125,6 +126,7 @@ export default function App() {
           frames: Array.isArray(data.frames) ? data.frames : [],
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
+          marca: data.marca || '',
         }))
         setPrevisualizacao(data.preview ?? null)
       })
@@ -310,6 +312,7 @@ export default function App() {
         modoGaleria={modoGaleria}
         aoTrocarModo={trocarModoGaleria}
         tema={tema}
+        imagemMarca={conteudo.marca}
         aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
       />
       <Sobre perfil={sobre} />
