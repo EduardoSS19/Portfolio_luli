@@ -668,7 +668,7 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
       })(),
     }
   })
-  expect(estilosRodape.fundo).toBe('rgb(2, 7, 13)')
+  expect(estilosRodape.fundo).toBe('rgb(6, 21, 34)')
   expect(estilosRodape.imagem).toBe('none')
   expect(estilosRodape.opacidade).toBe('1')
   expect(estilosRodape.posicao).toBe('relative')
@@ -826,10 +826,10 @@ test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ pag
   await page.getByRole('button', { name: 'Ativar tema claro' }).click()
   const rodape = page.locator('.rodape')
   await expect(rodape).toBeVisible()
-  await expect(rodape).toHaveCSS('background-color', 'rgb(241, 246, 250)')
-  await expect(rodape).toHaveCSS('color', 'rgb(23, 43, 59)')
-  await expect(rodape.locator('small')).toHaveCSS('color', 'rgba(23, 43, 59, 0.66)')
-  await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(23, 43, 59)')
+  await expect(rodape).toHaveCSS('background-color', 'rgb(245, 242, 235)')
+  await expect(rodape).toHaveCSS('color', 'rgb(36, 35, 31)')
+  await expect(rodape.locator('small')).toHaveCSS('color', 'rgb(119, 116, 108)')
+  await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(36, 35, 31)')
 })
 
 
