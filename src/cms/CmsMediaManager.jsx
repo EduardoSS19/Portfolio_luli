@@ -50,7 +50,7 @@ export function CmsMediaManager({ canEdit = false }) {
     const workId = Number(targets[key])
     if (!workId || workId === item.workId) return
     const destination = works.find(work => work.id === workId)
-    if (!(await confirm({ title: 'Transferir mídia?', message: '“' + item.title + '” será movida de “' + item.workTitle + '” para “' + (destination?.title || 'a obra selecionada') + '”. O arquivo original será preservado.', confirmLabel: 'Transferir mídia', variant: 'default' }))) return
+    if (!(await confirm({ title: 'Transferir mídia?', message: '“' + item.title + '” será movida de “' + item.workTitle + '” para “' + (destination?.title || 'a obra selecionada') + '”. O arquivo original será preservado.', target: item.title + ' · destino: ' + (destination?.title || 'obra selecionada'), confirmLabel: 'Transferir mídia', variant: 'default' }))) return
     setBusy(key); setError(''); setNotice('')
     try {
       const response = await fetch('/api/cms/media/move/', {

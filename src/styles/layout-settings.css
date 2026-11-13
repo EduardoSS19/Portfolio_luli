@@ -55,3 +55,122 @@
   font:700 .68rem/1.4 "Segoe UI",system-ui,sans-serif;
   letter-spacing:.12em;
 }
+
+
+/* Functional layout controls: every editor setting maps to a visible site rule. */
+.site-shell[data-layout-width="compact"] .secao{width:min(100%,900px)}
+.site-shell[data-layout-width="compact"] .galeria-grade-global{width:min(calc(100% - 3rem),1180px)}
+.site-shell[data-layout-width="wide"] .secao{width:min(100%,1480px)}
+.site-shell[data-layout-width="wide"] .galeria-grade-global{width:min(calc(100% - 3rem),1680px)}
+.site-shell[data-layout-hero-align="left"] .hero{width:min(100%,1480px);margin-inline:auto;text-align:left}
+.site-shell[data-layout-hero-align="left"] .hero-linha{margin-left:0;margin-right:auto}
+.site-shell[data-layout-hero-size="compact"] .hero{padding:clamp(2.5rem,6vw,5rem) 1.5rem 1.5rem}
+.site-shell[data-layout-hero-size="compact"] .hero-linha{height:1.75rem;margin-top:1.1rem}
+.site-shell[data-layout-spacing="compact"] .secao{padding-block:1.1rem}
+.site-shell[data-layout-spacing="compact"] .obras-lista{gap:.85rem}
+.site-shell[data-layout-spacing="comfortable"] .secao{padding-block:clamp(2rem,3.2vw,3rem)}
+.site-shell[data-layout-spacing="comfortable"] .obras-lista{gap:1.5rem}
+.site-shell[data-layout-spacing="spacious"] .secao{padding-block:clamp(3.5rem,6vw,5.5rem)}
+.site-shell[data-layout-spacing="spacious"] .obras-lista{gap:clamp(2rem,4vw,3.25rem)}
+@media(min-width:901px){
+  .site-shell[data-layout-gallery-columns="2"] .galeria-grade-global .obras-lista.modo-grade,
+  .site-shell[data-layout-gallery-columns="2"] .secao .obras-lista.modo-grade{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .site-shell[data-layout-gallery-columns="3"] .galeria-grade-global .obras-lista.modo-grade,
+  .site-shell[data-layout-gallery-columns="3"] .secao .obras-lista.modo-grade{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .site-shell[data-layout-gallery-columns="4"] .galeria-grade-global .obras-lista.modo-grade,
+  .site-shell[data-layout-gallery-columns="4"] .secao .obras-lista.modo-grade{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+
+/* One active palette owns every large surface, including the page behind the shell. */
+.site-shell[data-layout-width]{background:var(--azul-escuro)!important;color:var(--texto)}
+.site-shell[data-layout-width] .obra:not(.modo-grade),
+.site-shell[data-layout-width] .referencia-item{background:var(--azul-medio)!important;color:var(--texto)}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto{background:var(--azul-medio)!important;color:var(--texto)}
+.site-shell[data-layout-width] .obra-galeria,
+.site-shell[data-layout-width] .obra-imagem{background:var(--azul-medio)}
+.site-shell[data-layout-width] .fundo-fantasma::after{background:linear-gradient(180deg,color-mix(in srgb,var(--azul-escuro) 12%,transparent),color-mix(in srgb,var(--azul-escuro) 42%,transparent) 52%,var(--azul-escuro))}
+.site-shell[data-layout-width] nav.site-nav{background:color-mix(in srgb,var(--azul-medio) 94%,transparent)!important}
+.site-shell[data-layout-width] .hero p,
+.site-shell[data-layout-width] .obra-texto p,
+.site-shell[data-layout-width] .editorial-menu-heading p{color:var(--layout-muted)!important}
+.site-shell[data-layout-width] .secao h2,
+.site-shell[data-layout-width] .hero-kicker,
+.site-shell[data-layout-width] .categoria-legenda{color:var(--azul-claro)}
+.site-shell[data-layout-width] .rodape{background:var(--rodape-fundo)!important;color:var(--rodape-texto)!important}
+.site-shell[data-layout-width] .rodape small,
+.site-shell[data-layout-width] .rodape-creditos{color:var(--rodape-muted)}
+
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade{background:var(--azul-medio)}
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto{background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--azul-escuro) 76%,transparent) 38%,var(--azul-escuro) 100%)}
+.site-shell[data-layout-width] nav.site-nav button{color:var(--layout-muted)}
+.site-shell[data-layout-width] nav.site-nav button:hover{color:var(--texto)}
+.site-shell[data-layout-width] nav.site-nav button.ativo{color:var(--azul-escuro);background:var(--azul-claro);border-color:var(--azul-claro)}
+.site-shell[data-layout-width] .secao-contagem{color:var(--layout-muted)}
+
+
+/* Accessible text pairing: every text-bearing surface uses a foreground computed against its own background. */
+.site-shell[data-layout-width] .obra:not(.modo-grade),
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto,
+.site-shell[data-layout-width] .referencia-item {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto h3,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto p,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .categoria-legenda,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dt,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dd {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .detalhe,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .obra-ficha-item {
+  color:var(--layout-surface-muted,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto,
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto h3,
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto p {
+  color:var(--layout-grid-title,#fff)!important;
+}
+.site-shell[data-layout-width] nav.site-nav button.ativo {
+  color:var(--layout-text-on-accent,var(--texto))!important;
+}
+
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] nav.site-nav button:not(.ativo) {
+  color:var(--layout-nav-muted,var(--layout-muted))!important;
+}
+
+.site-shell[data-layout-width] .obra-focus-caption > span,
+.site-shell[data-layout-width] .obra-focus-metadados > span,
+.site-shell[data-layout-width] .obra-focus-detalhe {
+  color:var(--layout-accent-on-overlay,#fff)!important;
+}
+.site-shell[data-layout-width] .obra-focus-caption button,
+.site-shell[data-layout-width] .form-contato button,
+.site-shell[data-layout-width] .nav-gallery-switch button.ativo {
+  color:var(--layout-text-on-accent,var(--texto))!important;
+}
+.site-shell[data-layout-width] .editorial-menu-heading>span,
+.site-shell[data-layout-width] .editorial-menu-number,
+.site-shell[data-layout-width] .editorial-menu-arrow {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
+
+/* Lista: cada texto é contrastado com o painel de detalhes, não com a imagem. */
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto h3,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto > p,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .categoria-legenda,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dt,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dd {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .detalhe,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .obra-ficha-item {
+  color:var(--layout-surface-muted,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao span {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
