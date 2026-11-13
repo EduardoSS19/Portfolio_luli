@@ -52,3 +52,12 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(is_valid_layout_setting("light_color_accent", "#657c62"))
         self.assertFalse(is_valid_layout_setting("dark_color_background", "rgb(0,0,0)"))
         self.assertFalse(is_valid_layout_setting("color_background", "#061522"))
+
+
+    def test_visibility_options_default_to_true_and_reject_non_booleans(self):
+        settings = normalize_layout_settings({})
+        self.assertTrue(settings["show_bio_image"])
+        self.assertTrue(settings["show_bio"])
+        self.assertTrue(settings["show_references"])
+        self.assertFalse(is_valid_layout_setting("show_bio", "false"))
+        self.assertTrue(is_valid_layout_setting("show_bio", False))
