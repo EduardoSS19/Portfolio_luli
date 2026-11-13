@@ -117,7 +117,12 @@ export function CmsLayoutManager(){
   const previewUrl=useMemo(()=> '/?layout_preview='+encodeURIComponent(JSON.stringify(settings)),[settings])
   const colorKey=name=>`${editingTheme}_${name}`
   const contrast=useMemo(()=>contrastRatio(settings[colorKey('color_text')],settings[colorKey('color_background')]),[settings,editingTheme])
-  const change=(name,value)=>{setSettings(current=>({...current,[colorKey(name)]:value}));setError('');setNotice('')}
+  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setError('');setNotice('')}
+  const paletteIsActive=palette=>{
+    const keys=['color_background','color_surface','color_text','color_muted','color_accent']
+    return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
+      && palette.lightColors.every((value,index)=>settings[`light_${keys[index]}`]===value)
+  }
   const applyPalette=palette=>{
     const [darkBackground,darkSurface,darkText,darkMuted,darkAccent]=palette.darkColors
     const [lightBackground,lightSurface,lightText,lightMuted,lightAccent]=palette.lightColors
@@ -149,7 +154,7 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className="cms-layout-palette" key={palette.name} onClick={()=>applyPalette(palette.colors)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Bom contraste de texto':'Contraste abaixo do recomendado'}</strong><small>{'Relação de contraste: '+contrast.toFixed(2)+':1. Para texto comum, procure pelo menos 4,5:1.'}</small></div></div>
         </section>
