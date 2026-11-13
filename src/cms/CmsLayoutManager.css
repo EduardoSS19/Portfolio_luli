@@ -258,7 +258,7 @@
 .cms-layout-fields{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:1.2rem;min-width:0}
 .cms-layout-field-group{grid-column:1;min-width:0}
 /* A prévia contextual acompanha a opção ativa, sem ocupar uma coluna fixa. */
-.cms-layout-hover-preview-floating{position:fixed;transform:translate(-50%,-50%);z-index:1000;box-sizing:border-box;width:min(380px,calc(100vw - 32px));min-width:0;max-height:calc(100vh - 32px);padding:12px;border:1px solid rgba(201,211,154,.52);border-radius:16px;color:#f0eee6;background:#171914;box-shadow:0 18px 54px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.035);overflow:auto;overscroll-behavior:contain}
+.cms-layout-hover-preview-floating{position:fixed;transform:none;opacity:1;z-index:1000;box-sizing:border-box;width:min(380px,calc(100vw - 32px));min-width:0;max-height:calc(100vh - 32px);padding:12px;border:1px solid rgba(201,211,154,.52);border-radius:16px;color:#f0eee6;background-color:#171914;opacity:1;backdrop-filter:none;box-shadow:0 18px 54px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.035);overflow:auto;overscroll-behavior:contain}
 .cms-layout-hover-preview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:2px 2px 10px}
 .cms-layout-hover-preview-heading>div{display:grid;gap:3px;min-width:0}
 .cms-layout-hover-preview-heading .cms-eyebrow{margin:0;font-size:8px}
