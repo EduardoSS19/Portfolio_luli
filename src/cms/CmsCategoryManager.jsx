@@ -277,7 +277,7 @@ export function CmsCategoryManager({
     const warning = item.workCount
       ? 'Excluir esta categoria também excluirá permanentemente ' + item.workCount + ' obra(s) vinculada(s). Continuar?'
       : 'Excluir esta categoria permanentemente?'
-    if (!(await confirm({ title: 'Excluir categoria?', message: warning + ' Esta ação não pode ser desfeita.', confirmLabel: 'Excluir categoria', variant: 'danger' }))) return
+    if (!(await confirm({ title: 'Excluir categoria?', message: warning + ' Esta ação não pode ser desfeita.', target: item.title, confirmLabel: 'Excluir categoria', variant: 'danger' }))) return
     setSaving(true); setError(''); setNotice('')
     try {
       await categoryRequest('/api/cms/categories/' + item.id + '/', { method: 'DELETE' })
