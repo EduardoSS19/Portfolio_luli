@@ -151,7 +151,7 @@
 }
 .cms-layout-inline-preview .cms-layout-preview-heading{padding:.25rem .2rem .65rem}
 .cms-layout-theme-tabs{display:flex;gap:.45rem;margin:.85rem 0 .45rem;padding:.25rem;border:1px solid var(--cms-border,rgba(255,255,255,.12));border-radius:12px;background:rgba(0,0,0,.12)}
-.cms-layout-theme-tabs button{flex:1;min-height:2.55rem;padding:.55rem .8rem;border:1px solid transparent;border-radius:9px;color:var(--cms-muted,#aaa99f);background:transparent;font:600 .78rem/1.2 inherit;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.cms-layout-theme-tabs button{flex:1;min-height:2.55rem;padding:.55rem .8rem;border:1px solid transparent;border-radius:9px;color:var(--cms-muted,#aaa99f);background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;line-height:1.2;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
 .cms-layout-theme-tabs button.active{border-color:rgba(177,194,137,.42);color:var(--cms-text,#f2f0e8);background:rgba(177,194,137,.14)}
 .cms-layout-theme-tabs button:focus-visible{outline:2px solid #c9d39a;outline-offset:2px}
 .cms-layout-active-theme{margin:.35rem 0 .75rem;color:var(--cms-muted,#aaa99f);font-size:.72rem}
