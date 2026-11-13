@@ -42,8 +42,10 @@ export function CmsLayoutManager(){
   const previewDragRef=useRef(null)
   const previewResizeRef=useRef(null)
   const inlinePreviewIframeRef=useRef(null)
+  const inlinePreviewViewportRef=useRef(null)
   const [previewDevice,setPreviewDevice]=useState('desktop')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
+  const [inlinePreviewWidth,setInlinePreviewWidth]=useState(0)
   const [previewDocumentHeight,setPreviewDocumentHeight]=useState(2400)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
@@ -51,6 +53,8 @@ export function CmsLayoutManager(){
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
   const previewScale=previewContainerWidth>0?Math.min(1,previewContainerWidth/previewWidth):1
   const previewStageHeight=Math.ceil(previewDocumentHeight*previewScale)
+  const inlinePreviewScale=inlinePreviewWidth>0?Math.min(1,inlinePreviewWidth/previewWidth):1
+  const inlinePreviewStageHeight=Math.ceil(previewDocumentHeight*inlinePreviewScale)
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -90,6 +94,16 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[previewOpen])
+  useEffect(()=>{
+    const element=inlinePreviewViewportRef.current
+    if(!element)return
+    const update=()=>setInlinePreviewWidth(element.clientWidth)
+    update()
+    if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
+    const observer=new ResizeObserver(update)
+    observer.observe(element)
+    return()=>observer.disconnect()
+  },[])
   useEffect(()=>()=>previewContentObserverRef.current?.disconnect(),[])
   const measurePreviewDocument=(frame=previewIframeRef.current)=>{
     const doc=frame?.contentDocument
@@ -169,7 +183,7 @@ export function CmsLayoutManager(){
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:previewStageHeight}}><iframe ref={inlinePreviewIframeRef} key={`inline:${previewUrl}:${previewDevice}`} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="no" onLoad={()=>measurePreviewDocument(inlinePreviewIframeRef.current)} style={{width:previewWidth,height:previewDocumentHeight,transform:`translateX(-50%) scale(${Math.min(1,Math.max(320,1100)/previewWidth)})`}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" ref={inlinePreviewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} key={`inline:${previewUrl}:${previewDevice}`} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="no" onLoad={()=>measurePreviewDocument(inlinePreviewIframeRef.current)} style={{width:previewWidth,height:previewDocumentHeight,transform:`translateX(-50%) scale(${inlinePreviewScale})`}}/></div></div>
       <p className="cms-layout-preview-caption">Percorra a página inteira aqui embaixo. A janela flutuante pode ficar aberta ao mesmo tempo para conferir outra posição do editor.</p>
     </section>
   </section>
