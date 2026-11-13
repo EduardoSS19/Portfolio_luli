@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .cms_analytics import cms_analytics
+from .cms_layout_api import cms_layout
 from .cms_media_api import cms_media_library, cms_media_move
 from .cms_content_api import cms_content, cms_content_detail, cms_content_toggle
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path("cms/content/<str:content_type>/<int:item_id>/", cms_content_detail, name="cms-content-detail"),
     path("cms/content/<str:content_type>/<int:item_id>/toggle/", cms_content_toggle, name="cms-content-toggle"),
     path("cms/profile/", cms_profile, name="cms-profile"),
+    path("cms/layout/", cms_layout, name="cms-layout"),
     path("cms/profile/photo/", cms_profile_photo_upload, name="cms-profile-photo-upload"),
     path("cms/profile/brand-image/", cms_profile_brand_image_upload, name="cms-profile-brand-image-upload"),
     path("cms/analytics/", cms_analytics, name="cms-analytics"),

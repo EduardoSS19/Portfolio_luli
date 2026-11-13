@@ -6,6 +6,7 @@ import { CmsCategoryManager } from './CmsCategoryManager.jsx'
 import { CmsProfileManager } from './CmsProfileManager.jsx'
 import { CmsContentManager } from './CmsContentManager.jsx'
 import { CmsMediaManager } from './CmsMediaManager.jsx'
+import { CmsLayoutManager } from './CmsLayoutManager.jsx'
 import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const PAGE_SIZE = 24
@@ -488,6 +489,7 @@ export function CmsPage() {
   const isOverview = section === 'overview'
   const isCategories = section === 'categories'
   const isProfile = section === 'profile'
+  const isLayout = section === 'layout'
   const isContent = section === 'content'
   const isMedia = section === 'media'
   const isLibrary = section === 'library'
@@ -506,6 +508,7 @@ export function CmsPage() {
           <button className={isLibrary ? 'active' : ''} onClick={() => { setSelectedWork(null); setCreatingWork(false); setSection('library') }}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
           <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
           <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
+          <button className={isLayout ? 'active' : ''} onClick={() => setSection('layout')}><span>▧</span> Layout</button>
           <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Conteúdo</button>
           <button className={isMedia ? 'active' : ''} onClick={() => setSection('media')}><span>▧</span> Mídias</button>
           <button className={isAnalytics ? 'active' : ''} onClick={() => setSection('analytics')}><span>◷</span> Estatísticas</button>
@@ -519,7 +522,7 @@ export function CmsPage() {
 
       <main className="cms-main">
         <header className="cms-topbar">
-          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isContent ? 'CONTEÚDO' : isMedia ? 'MÍDIAS' : isAnalytics ? 'ESTATÍSTICAS' : 'BIBLIOTECA'}</div>
+          <div className="cms-breadcrumb">LULI BECKER <span>/</span> {isOverview ? 'VISÃO GERAL' : isCategories ? 'CATEGORIAS' : isProfile ? 'PERFIL' : isLayout ? 'LAYOUT' : isContent ? 'CONTEÚDO' : isMedia ? 'MÍDIAS' : isAnalytics ? 'ESTATÍSTICAS' : 'BIBLIOTECA'}</div>
           <div className="cms-top-actions">
             <span className="cms-live-label"><i /> Site publicado</span>
             <button className="cms-home-shortcut" type="button" onClick={() => { setSelectedWork(null); setCreatingWork(false); setEditError(null); setSection('overview') }}>← Início do painel</button>
@@ -532,6 +535,8 @@ export function CmsPage() {
             <><section className="cms-library-heading"><div><p className="cms-eyebrow">DESEMPENHO DO PORTFÓLIO</p><h1>Estatísticas<span>.</span></h1><p>Acompanhe como as pessoas encontram e navegam pelo site.</p></div></section><CmsAnalytics data={analytics} /></>
           ) : isProfile ? (
             <CmsProfileManager />
+          ) : isLayout ? (
+            <CmsLayoutManager />
           ) : isCategories ? (
             <CmsCategoryManager
               canEditWorks={overview?.permissions?.canEditWork}

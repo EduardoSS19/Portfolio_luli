@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
+from .layout_settings import DEFAULT_LAYOUT_SETTINGS
 from .models import (
     ArtistProfile,
     BackgroundFrame,
@@ -74,6 +75,7 @@ class PortfolioApiTests(TestCase):
             },
             "frames": ["/media/fundos/2026/09/frame.webp"],
             "marca": "",
+            "layout": DEFAULT_LAYOUT_SETTINGS,
             "redes": [{"titulo": "Behance", "url": "https://behance.net/artista"}],
             "categorias": [{
                 "titulo": "Desenho",
@@ -138,7 +140,7 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(
             response.json(),
-            {"sobre": None, "frames": [], "marca": "", "redes": [], "categorias": [], "referencias": []},
+            {"sobre": None, "frames": [], "marca": "", "layout": DEFAULT_LAYOUT_SETTINGS, "redes": [], "categorias": [], "referencias": []},
         )
 
     @override_settings(

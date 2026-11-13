@@ -15,6 +15,7 @@ class ArtistProfile(models.Model):
     photo_url = models.CharField("URL alternativa da foto", max_length=500, blank=True)
     brand_image = models.ImageField("imagem da marca", upload_to="identidade/%Y/%m/", blank=True, validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])])
     brand_background_color = models.CharField("cor de fundo da marca", max_length=7, default="#151612", validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Informe uma cor hexadecimal no formato #RRGGBB.")])
+    layout_settings = models.JSONField("configurações de layout", default=dict, blank=True)
     bio = models.TextField("biografia (separe os parágrafos com linha em branco)")
     instagram_url = models.URLField("Instagram", max_length=500, blank=True)
     contact_email = models.EmailField("e-mail de contato", blank=True)
