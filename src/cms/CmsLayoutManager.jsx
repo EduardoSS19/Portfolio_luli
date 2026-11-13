@@ -79,16 +79,16 @@ export function CmsLayoutManager(){
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
   const previewHeight=PREVIEW_DEVICES[previewDevice].height
-  const previewScale=previewContainerSize.width>0?Math.min(1,previewContainerSize.width/previewWidth):1
+  const previewScale=previewContainerSize.width>0&&previewContainerSize.height>0?Math.min(1,previewContainerSize.width/previewWidth,previewContainerSize.height/previewDocumentHeight):1
   const previewStageWidth=previewWidth
   const previewStageHeight=previewDocumentHeight
-  const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
+  const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewDocumentHeight):1
   const inlinePreviewStageWidth=previewWidth
   const inlinePreviewStageHeight=previewDocumentHeight
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
   const hoverPreviewScale=Math.min(1,(hoverPreviewSize.width||360)/previewWidth)
   const hoverPreviewStageWidth=previewWidth
-  const hoverPreviewStageHeight=previewDocumentHeight
+  const hoverPreviewStageHeight=previewHeight
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -322,7 +322,7 @@ export function CmsLayoutManager(){
             </header>
             {hoverPreviewMounted&&<div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice} style={{display:hoveredOption?'flex':'none'}}>
               <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,zoom:hoverPreviewScale}}>
-                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight}}/>
+                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight}}/>
               </div>
             </div>}
             {!hoverPreviewMounted&&<div className="cms-layout-hover-preview-placeholder"><span>◉</span><p>A prévia da opção aparece aqui antes de você aplicá-la.</p></div>}
