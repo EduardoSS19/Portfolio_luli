@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import './CmsLayoutManager.css'
 
 const DEFAULTS = {
@@ -116,7 +116,7 @@ export function CmsLayoutManager(){
     })
   }
   const stopPreviewResize=event=>{if(previewResizeRef.current?.pointerId===event.pointerId)previewResizeRef.current=null}
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     const element=previewViewportRef.current
     if(!element)return
     const update=()=>setPreviewContainerSize({width:element.clientWidth,height:element.clientHeight})
@@ -126,7 +126,7 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[previewOpen])
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     if(!hoverPreviewMounted)return
     const element=hoverPreviewViewportRef.current
     if(!element)return
@@ -138,7 +138,7 @@ export function CmsLayoutManager(){
     return()=>observer.disconnect()
   },[hoverPreviewMounted])
   useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)},[])
-  useEffect(()=>{
+  useLayoutEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
     const update=()=>setInlinePreviewSize({width:element.clientWidth,height:element.clientHeight})
@@ -266,7 +266,7 @@ export function CmsLayoutManager(){
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={scheduleHideOptionPreview} onFocus={event=>showOptionPreview(field.name,value,label,detail,event)} onBlur={scheduleHideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={()=>showOptionPreview(field.name,value,label,detail)} onMouseLeave={scheduleHideOptionPreview} onFocus={()=>showOptionPreview(field.name,value,label,detail)} onBlur={scheduleHideOptionPreview} onClick={()=>setHoveredOption(null)}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
           <aside className={'cms-layout-hover-preview'+(!hoveredOption?' is-empty':'')} aria-label="Prévia temporária da opção" onMouseEnter={keepOptionPreview} onMouseLeave={scheduleHideOptionPreview}>
             <header className="cms-layout-hover-preview-heading">
               <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption?.label||'Prévia instantânea'}</strong><small>{hoveredOption?.detail||'Passe o cursor ou navegue por uma opção para simular a alteração aqui.'}</small></div>
