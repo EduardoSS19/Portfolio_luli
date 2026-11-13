@@ -86,6 +86,16 @@ export function CmsPage() {
   const [creatingWork, setCreatingWork] = useState(false)
   const [libraryRefresh, setLibraryRefresh] = useState(0)
   const [selectedWorkIds, setSelectedWorkIds] = useState([])
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    const updateVisibility = () => setShowBackToTop(window.scrollY > 420)
+    updateVisibility()
+    window.addEventListener('scroll', updateVisibility, { passive: true })
+    return () => window.removeEventListener('scroll', updateVisibility)
+  }, [])
+
+  const scrollDashboardToTop = () => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
 
   useEffect(() => {
     let active = true
@@ -669,6 +679,7 @@ export function CmsPage() {
           {error && !isOverview && null}
         </div>
       </main>
+      {showBackToTop && <button className="cms-back-to-top" type="button" onClick={scrollDashboardToTop} aria-label="Voltar ao topo do painel" title="Voltar ao topo">↑<span>Topo</span></button>}
       {dialogNode}
     </div>
   )

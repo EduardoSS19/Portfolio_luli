@@ -668,7 +668,7 @@ test('miniaturas não exibem uma linha divisória acima e o rodapé tem fundo s�
       })(),
     }
   })
-  expect(estilosRodape.fundo).toBe('rgb(2, 7, 13)')
+  expect(estilosRodape.fundo).toBe('rgb(6, 21, 34)')
   expect(estilosRodape.imagem).toBe('none')
   expect(estilosRodape.opacidade).toBe('1')
   expect(estilosRodape.posicao).toBe('relative')
@@ -826,10 +826,16 @@ test('rodapé acompanha o tema claro com fundo e textos legíveis', async ({ pag
   await page.getByRole('button', { name: 'Ativar tema claro' }).click()
   const rodape = page.locator('.rodape')
   await expect(rodape).toBeVisible()
-  await expect(rodape).toHaveCSS('background-color', 'rgb(241, 246, 250)')
-  await expect(rodape).toHaveCSS('color', 'rgb(23, 43, 59)')
-  await expect(rodape.locator('small')).toHaveCSS('color', 'rgba(23, 43, 59, 0.66)')
-  await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(23, 43, 59)')
+  await expect(rodape).toHaveCSS('background-color', 'rgb(245, 242, 235)')
+  await expect(rodape).toHaveCSS('color', 'rgb(36, 35, 31)')
+  const contrasteTextoSecundario = await rodape.locator('small').evaluate(element => {
+    const rgb = value => value.match(/[0-9.]+/g).slice(0, 3).map(Number).map(channel => channel / 255).map(channel => channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4)
+    const luminance = value => { const channels = rgb(value); return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722 }
+    const values = [luminance(getComputedStyle(element).color), luminance(getComputedStyle(element.closest('.rodape')).backgroundColor)].sort((a, b) => b - a)
+    return (values[0] + .05) / (values[1] + .05)
+  })
+  expect(contrasteTextoSecundario).toBeGreaterThanOrEqual(4.5)
+  await expect(rodape.locator('.rodape-creditos strong')).toHaveCSS('color', 'rgb(36, 35, 31)')
 })
 
 
