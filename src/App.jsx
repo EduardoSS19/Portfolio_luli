@@ -13,6 +13,16 @@ import { Contato } from './components/Contato.jsx'
 import { trackAnalyticsEvent } from './utils/analytics.js'
 import { CmsPage } from './cms/CmsPage.jsx'
 
+const DEFAULT_LAYOUT_SETTINGS = {
+  content_width: 'standard',
+  hero_alignment: 'center',
+  hero_size: 'large',
+  section_spacing: 'comfortable',
+  gallery_columns: '3',
+  default_gallery_view: 'lista',
+  default_theme: 'escuro',
+}
+
 const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
@@ -31,15 +41,16 @@ export default function App() {
     redes: [],
     sobre: null,
     marca: '',
+    layout: DEFAULT_LAYOUT_SETTINGS,
   })
   const [carregando, setCarregando] = useState(true)
   const [previsualizacao, setPrevisualizacao] = useState(null)
   const categorias = conteudo.categorias
   const referencias = conteudo.referencias
   const sobre = conteudo.sobre ?? perfilInicial
-  const [modoGaleria, setModoGaleria] = useState('lista')
+  const [modoGaleria, setModoGaleria] = useState(DEFAULT_LAYOUT_SETTINGS.default_gallery_view)
   // O portfólio sempre inicia no tema escuro; a escolha clara vale apenas para a sessão atual.
-  const [tema, setTema] = useState('escuro')
+  const [tema, setTema] = useState(DEFAULT_LAYOUT_SETTINGS.default_theme)
 
   useEffect(() => {
     document.documentElement.dataset.theme = tema
@@ -127,7 +138,11 @@ export default function App() {
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
           marca: data.marca || '',
+          layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) },
         }))
+        const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) }
+        setModoGaleria(layout.default_gallery_view)
+        setTema(layout.default_theme)
         setPrevisualizacao(data.preview ?? null)
       })
       .catch(error => {
@@ -248,6 +263,14 @@ export default function App() {
   }
 
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
+  const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
+  const layoutAttributes = {
+    'data-layout-width': layout.content_width,
+    'data-layout-hero-align': layout.hero_alignment,
+    'data-layout-hero-size': layout.hero_size,
+    'data-layout-spacing': layout.section_spacing,
+    'data-layout-gallery-columns': layout.gallery_columns,
+  }
 
   if (modoDiagnosticoGrade) {
     return <GaleriaGradeDiagnostico categorias={categorias} />
@@ -257,7 +280,7 @@ export default function App() {
     const categoriaPreview = categorias[0]
     const obraPreview = categoriaPreview?.obras?.[0]
     return (
-      <main className="site-shell preview-only-shell">
+      <main className="site-shell preview-only-shell" {...layoutAttributes}>
         <FundoFantasma frames={conteudo.frames} />
         <header className="preview-only-header">
           <div>
@@ -284,7 +307,7 @@ export default function App() {
   if (previsualizacao?.category) {
     const categoria = categorias[0]
     return (
-      <main className="site-shell preview-only-shell">
+      <main className="site-shell preview-only-shell" {...layoutAttributes}>
         <FundoFantasma frames={conteudo.frames} />
         <header className="preview-only-header">
           <div><span>PRÉVIA DE ORGANIZAÇÃO · LINK TEMPORÁRIO</span><h1>{categoria?.titulo || previsualizacao.titulo}</h1><p>Somente esta categoria e sua nova ordem são exibidas. Nada foi publicado.</p></div>
@@ -296,7 +319,7 @@ export default function App() {
   }
 
   return (
-    <div className="site-shell">
+    <div className="site-shell" {...layoutAttributes}>
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
