@@ -15,7 +15,7 @@ async function openLiveLayoutPreview(page) {
       categorias: [{ titulo: 'Pintura', chave: 'pintura', obras: [
         { titulo: 'Obra de teste', imagem: image, descricao: 'Estudo de contraste.' },
       ] }],
-      referencias: [], frames: [], redes: [],
+      referencias: [{ titulo: 'Exposição coletiva', periodo: '2025', links: [{ texto: 'Instituição', url: 'https://example.com' }] }], frames: [], redes: [],
       sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
       layout: { default_gallery_view: 'lista', default_theme: 'escuro' },
     }),
@@ -141,4 +141,28 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
     ]
   })
   for (const ratio of lightRatios) expect(ratio).toBeGreaterThanOrEqual(4.5)
+})
+
+
+test('prévia respeita opções independentes da apresentação e referências', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.sobre-secao .obra-imagem')).toBeVisible()
+  await expect(page.locator('.sobre-secao .biografia')).toBeVisible()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await sendSettings(page, { show_bio_image: false, show_bio: true, show_references: false }, 'page')
+  await expect(page.locator('.sobre-secao .obra-imagem')).toHaveCount(0)
+  await expect(page.locator('.sobre-secao .biografia')).toBeVisible()
+  await expect(page.locator('#Referências')).toHaveCount(0)
+  await sendSettings(page, { show_bio_image: true, show_bio: false, show_references: true }, 'page')
+  await expect(page.locator('.sobre-secao .obra-imagem')).toBeVisible()
+  await expect(page.locator('.sobre-secao .biografia')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toBeVisible()
+})
+
+test('configurações de visibilidade são preservadas ao alternar entre temas', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { show_bio_image: false, show_bio: false, show_references: false, default_theme: 'claro' }, 'page')
+  await expect(page.locator('.sobre-secao')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toHaveCount(0)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'claro')
 })
