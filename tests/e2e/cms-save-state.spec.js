@@ -127,10 +127,23 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const hoverPreview = page.locator('.cms-layout-hover-preview')
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview.getByText('À esquerda', { exact: true })).toBeVisible()
-  await expect(hoverPreview.locator('iframe[title="Prévia temporária do portfólio"]')).toHaveAttribute('src', '/?layout_preview=1')
+  const temporaryFrame = hoverPreview.locator('iframe[title="Prévia temporária do portfólio"]')
+  await expect(temporaryFrame).toHaveAttribute('src', '/?layout_preview=1')
   await expect(leftOption.locator('input')).not.toBeChecked()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
+
+  const overlapsControls = await page.evaluate(() => {
+    const preview = document.querySelector('.cms-layout-hover-preview').getBoundingClientRect()
+    return [...document.querySelectorAll('.cms-layout-option, .cms-editor-actions button')].some(element => {
+      const rect = element.getBoundingClientRect()
+      return rect.width > 0 && rect.height > 0 &&
+        rect.left < preview.right && rect.right > preview.left &&
+        rect.top < preview.bottom && rect.bottom > preview.top
+    })
+  })
+  expect(overlapsControls).toBe(false)
 
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
-  await expect(hoverPreview).toBeHidden()
+  await expect(hoverPreview).toHaveClass(/is-empty/)
 })
