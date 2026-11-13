@@ -173,6 +173,8 @@ export default function App() {
   const trocaModoPendenteRef = useRef(null)
   const selecaoCategoriaTimerRef = useRef(null)
   const scrollEndHandlerRef = useRef(null)
+  // Evita que atualizações visuais repetidas da prévia repitam a navegação até a mesma seção.
+  const lastLayoutPreviewScrollTargetRef = useRef(null)
 
   function trocarModoGaleria(novoModo) {
     if (novoModo === modoGaleria) return
@@ -220,21 +222,31 @@ export default function App() {
         contact: '#Contato',
       }
       const selector = focusSelectors[focus]
-      if (selector) {
-        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          const target = document.querySelector(selector)
-          if (!target) return
-          target.scrollIntoView({ block: 'start', behavior: 'auto' })
-        }))
+      const scrollTarget = selector ? `${focus}:${selector}` : null
+      // O editor envia mensagens também para atualizar cores e conteúdo. Só navegamos
+      // quando o alvo muda; uma atualização do mesmo alvo nunca deve puxar a página de volta.
+      if (!scrollTarget) {
+        lastLayoutPreviewScrollTargetRef.current = null
+        return
       }
+      if (lastLayoutPreviewScrollTargetRef.current === scrollTarget) return
+      lastLayoutPreviewScrollTargetRef.current = scrollTarget
+      window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+        if (lastLayoutPreviewScrollTargetRef.current !== scrollTarget) return
+        const target = document.querySelector(selector)
+        if (!target) return
+        target.scrollIntoView({ block: 'start', behavior: 'auto' })
+      }))
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
     return () => window.removeEventListener('message', handleLayoutPreviewUpdate)
   }, [carregando])
 
+  const initialLayoutPreviewFocusHandledRef = useRef(false)
   useEffect(() => {
-    if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
+    if (!carregando && !initialLayoutPreviewFocusHandledRef.current && new URLSearchParams(window.location.search).has('layout_preview')) {
+      initialLayoutPreviewFocusHandledRef.current = true
       const focus = new URLSearchParams(window.location.search).get('layout_preview_focus')
       const selector = focus === 'hero' ? '.hero' : focus === 'gallery'
         ? (modoGaleria === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)')
