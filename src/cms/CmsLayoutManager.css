@@ -242,3 +242,17 @@
 .cms-layout-preview-frame-inline{display:flex;align-items:center;justify-content:center}
 .cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{flex:0 0 auto;min-height:0;overflow:hidden}
 .cms-layout-preview-frame-inline .cms-layout-preview-stage-inline iframe{position:absolute;top:0;left:0;transform-origin:top left}
+
+
+/* Agrupamento editorial dos controles do construtor de layout. */
+.cms-layout-fields{display:grid;gap:1.4rem}
+.cms-layout-field-group{display:grid;gap:.75rem;min-width:0}
+.cms-layout-group-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;padding:.15rem .15rem .25rem;border-bottom:1px solid var(--cms-border,rgba(255,255,255,.12))}
+.cms-layout-group-heading h2{margin:.1rem 0 0;color:var(--cms-text,#f2f0e8);font:400 1.3rem Georgia,serif}
+.cms-layout-group-heading>div>p:last-child{margin:.3rem 0 .65rem;color:var(--cms-muted,#aaa99f);font-size:.76rem;line-height:1.45}
+.cms-layout-group-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+/* A prévia incorporada replica o comportamento da janela flutuante: iframe em tamanho lógico,
+   escala visual no próprio elemento e centralização pelo flexbox da moldura. */
+.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline iframe{position:relative;top:auto;left:auto;flex:0 0 auto;transform-origin:center center;max-width:none;max-height:none}
+@media(max-width:900px){.cms-layout-group-fields{grid-template-columns:1fr}}
