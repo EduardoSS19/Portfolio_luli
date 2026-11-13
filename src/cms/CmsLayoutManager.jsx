@@ -37,7 +37,8 @@ export function CmsLayoutManager(){
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
   const [previewMode,setPreviewMode]=useState(false)
   const [previewDevice,setPreviewDevice]=useState('desktop')
-  const [previewContainerWidth,setPreviewContainerWidth]=useState(0)\n  const [previewContainerHeight,setPreviewContainerHeight]=useState(600)
+  const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
+  const [previewContainerHeight,setPreviewContainerHeight]=useState(600)
   const previewFrameRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
   const previewHeight=previewContainerHeight
