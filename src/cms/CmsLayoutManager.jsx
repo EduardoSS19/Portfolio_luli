@@ -38,21 +38,53 @@ export function CmsLayoutManager(){
   const [previewMode,setPreviewMode]=useState(false)
   const [previewDevice,setPreviewDevice]=useState('desktop')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
-  const [previewContainerHeight,setPreviewContainerHeight]=useState(600)
-  const previewFrameRef=useRef(null)
+  const [previewDocumentHeight,setPreviewDocumentHeight]=useState(2400)
+  const previewViewportRef=useRef(null)
+  const previewIframeRef=useRef(null)
+  const previewContentObserverRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
-  const previewHeight=previewContainerHeight
   const previewScale=previewContainerWidth>0?Math.min(1,previewContainerWidth/previewWidth):1
+  const previewStageHeight=Math.ceil(previewDocumentHeight*previewScale)
   useEffect(()=>{
-    const element=previewFrameRef.current
+    const element=previewViewportRef.current
     if(!element)return
-    const update=()=>{setPreviewContainerWidth(element.clientWidth);setPreviewContainerHeight(element.clientHeight)}
+    const update=()=>setPreviewContainerWidth(element.clientWidth)
     update()
     if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
     const observer=new ResizeObserver(update)
     observer.observe(element)
     return()=>observer.disconnect()
   },[])
+  useEffect(()=>()=>previewContentObserverRef.current?.disconnect(),[])
+  const measurePreviewDocument=()=>{
+    const doc=previewIframeRef.current?.contentDocument
+    if(!doc)return
+    const measure=()=>{
+      const height=Math.max(
+        doc.documentElement?.scrollHeight||0,
+        doc.documentElement?.offsetHeight||0,
+        doc.body?.scrollHeight||0,
+        doc.body?.offsetHeight||0,
+        doc.documentElement?.clientHeight||0,
+        600
+      )
+      setPreviewDocumentHeight(height)
+    }
+    previewContentObserverRef.current?.disconnect()
+    measure()
+    if(typeof ResizeObserver!=='undefined'){
+      const observer=new ResizeObserver(measure)
+      if(doc.documentElement)observer.observe(doc.documentElement)
+      if(doc.body)observer.observe(doc.body)
+      previewContentObserverRef.current=observer
+    }else{
+      const view=doc.defaultView
+      view?.addEventListener('resize',measure)
+      previewContentObserverRef.current={disconnect:()=>view?.removeEventListener('resize',measure)}
+    }
+    doc.fonts?.ready?.then(measure)
+    doc.querySelectorAll('img').forEach(image=>image.addEventListener('load',measure,{once:true}))
+  }
   useEffect(()=>{
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
@@ -97,7 +129,7 @@ export function CmsLayoutManager(){
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
-      <aside className="cms-layout-preview-panel" aria-label="Prévia ao vivo do portfólio"><div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO AO VIVO</p><strong>Seu portfólio</strong></div><span>Não publicado</span></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame" ref={previewFrameRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:previewHeight}}><iframe key={previewUrl} title={`Prévia do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" style={{width:previewWidth,height:previewHeight/previewScale,transform:`translateX(-50%) scale(${previewScale})`}}/></div></div><p className="cms-layout-preview-caption">Prévia do site real com as configurações atuais. Navegue e confira as obras; nada será publicado até salvar.</p></aside>
+      <aside className="cms-layout-preview-panel" aria-label="Prévia ao vivo do portfólio"><div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO AO VIVO</p><strong>Seu portfólio</strong></div><span>Não publicado</span></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame" ref={previewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:previewStageHeight}}><iframe ref={previewIframeRef} key={previewUrl} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="eager" scrolling="no" onLoad={measurePreviewDocument} style={{width:previewWidth,height:previewDocumentHeight,transform:`translateX(-50%) scale(${previewScale})`}}/></div></div><p className="cms-layout-preview-caption">Página inteira em escala proporcional. Role o painel para percorrer o portfólio; a largura interna continua simulando o dispositivo escolhido. Nada será publicado até salvar.</p></aside>
     </div>
   </section>
 }
