@@ -252,8 +252,8 @@ export function CmsLayoutManager(){
     const panelWidth=Math.min(380,window.innerWidth-32)
     const panelHeight=Math.min(440,window.innerHeight-32)
     setHoverPreviewPosition({
-      left:Math.max(16,(window.innerWidth-panelWidth)/2),
-      top:Math.max(16,(window.innerHeight-panelHeight)/2),
+      left:window.innerWidth/2,
+      top:window.innerHeight/2,
     })
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
     setHoverPreviewMounted(true)
