@@ -1297,3 +1297,12 @@
 @media (prefers-reduced-motion: reduce) {
   .cms-shell .cms-main .cms-content button:not(.cms-nav button) { transition: none; }
 }
+
+
+/* Atalho persistente para retornar ao início de qualquer seção do painel. */
+.cms-back-to-top{position:fixed;right:clamp(16px,2.5vw,32px);bottom:clamp(16px,2.5vw,30px);z-index:30;display:flex;align-items:center;justify-content:center;gap:7px;min-width:48px;min-height:48px;padding:0 15px;border:1px solid rgba(201,211,154,.42);border-radius:999px;color:#202218;background:#c9d39a;box-shadow:0 8px 28px rgba(0,0,0,.32);font:700 18px/1 'DM Sans',sans-serif;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.cms-back-to-top span{font-size:10px;letter-spacing:.04em}
+.cms-back-to-top:hover{transform:translateY(-3px);background:#d7e0aa;box-shadow:0 12px 34px rgba(0,0,0,.4)}
+.cms-back-to-top:focus-visible{outline:2px solid #f0eee6;outline-offset:3px}
+@media(max-width:700px){.cms-back-to-top{right:14px;bottom:14px;min-width:46px;min-height:46px;padding:0 13px}}
+@media(prefers-reduced-motion:reduce){.cms-back-to-top{transition:none}}
