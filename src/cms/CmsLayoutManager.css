@@ -235,3 +235,10 @@
   .cms-layout-preview-window-actions{gap:.3rem}
   .cms-layout-preview-window-actions .cms-preview-window-button{width:2rem;height:2rem;flex-basis:2rem}
 }
+
+
+/* A prévia incorporada usa uma moldura com as dimensões visuais já escaladas.
+   Assim o layout reserva exatamente o espaço ocupado pelo viewport transformado. */
+.cms-layout-preview-frame-inline{display:flex;align-items:center;justify-content:center}
+.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{flex:0 0 auto;min-height:0;overflow:hidden}
+.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline iframe{position:absolute;top:0;left:0;transform-origin:top left}
