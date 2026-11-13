@@ -138,7 +138,7 @@ export default function App() {
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
-  ], [categorias, referencias.length])
+  ], [categorias, referencias.length, conteudo.layout?.show_references])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
