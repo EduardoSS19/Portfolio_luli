@@ -212,10 +212,19 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const focus = event.data.focus
-      if (focus === 'gallery' || focus === 'hero') {
+      const focusSelectors = {
+        hero: '.hero',
+        bio: '#Início',
+        gallery: (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)',
+        references: '#Referências',
+        contact: '#Contato',
+      }
+      const selector = focusSelectors[focus]
+      if (selector) {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          const selector = focus === 'hero' ? '.hero' : (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)'
-          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'auto' })
+          const target = document.querySelector(selector)
+          if (!target) return
+          target.scrollIntoView({ block: 'start', behavior: 'auto' })
         }))
       }
     }
