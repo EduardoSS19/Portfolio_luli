@@ -42,8 +42,8 @@
   color:var(--azul-claro);
 }
 .site-shell[data-layout-width] .rodape{
-  color:var(--texto);
-  background:var(--azul-escuro);
+  color:var(--rodape-texto,var(--texto));
+  background:var(--rodape-fundo,var(--azul-escuro));
 }
 .layout-preview-banner{
   position:relative;
