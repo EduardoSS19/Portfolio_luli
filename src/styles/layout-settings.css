@@ -106,3 +106,31 @@
 .site-shell[data-layout-width] nav.site-nav button:hover{color:var(--texto)}
 .site-shell[data-layout-width] nav.site-nav button.ativo{color:var(--azul-escuro);background:var(--azul-claro);border-color:var(--azul-claro)}
 .site-shell[data-layout-width] .secao-contagem{color:var(--layout-muted)}
+
+
+/* Accessible text pairing: every text-bearing surface uses a foreground computed against its own background. */
+.site-shell[data-layout-width] .obra:not(.modo-grade),
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto,
+.site-shell[data-layout-width] .referencia-item {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto h3,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto p,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .categoria-legenda,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dt,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dd {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .detalhe,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .obra-ficha-item {
+  color:var(--layout-surface-muted,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto,
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto h3,
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto p {
+  color:var(--layout-grid-title,#fff)!important;
+}
+.site-shell[data-layout-width] nav.site-nav button.ativo {
+  color:var(--layout-text-on-accent,var(--texto))!important;
+}
