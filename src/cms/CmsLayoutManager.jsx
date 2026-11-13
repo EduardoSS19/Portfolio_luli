@@ -181,7 +181,7 @@ export function CmsLayoutManager(){
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
-    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':'page'
+    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
     return {settings:nextSettings,focus,previewMode:nextMode}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -244,7 +244,7 @@ export function CmsLayoutManager(){
     ]
   },[settings,editingTheme])
   const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
+  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
