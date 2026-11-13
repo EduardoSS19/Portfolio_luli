@@ -73,6 +73,7 @@ class PortfolioApiTests(TestCase):
                 "bio": "Primeiro parágrafo.\n\nSegundo parágrafo.",
             },
             "frames": ["/media/fundos/2026/09/frame.webp"],
+            "marca": "",
             "redes": [{"titulo": "Behance", "url": "https://behance.net/artista"}],
             "categorias": [{
                 "titulo": "Desenho",
@@ -137,7 +138,7 @@ class PortfolioApiTests(TestCase):
 
         self.assertEqual(
             response.json(),
-            {"sobre": None, "frames": [], "redes": [], "categorias": [], "referencias": []},
+            {"sobre": None, "frames": [], "marca": "", "redes": [], "categorias": [], "referencias": []},
         )
 
     @override_settings(
