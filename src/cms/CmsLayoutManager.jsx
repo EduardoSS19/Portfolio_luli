@@ -116,6 +116,25 @@ export function CmsLayoutManager(){
     })
   }
   const stopPreviewResize=event=>{if(previewResizeRef.current?.pointerId===event.pointerId)previewResizeRef.current=null}
+  // Mantém a janela e seu puxador dentro do viewport, inclusive na abertura e após resize.
+  useLayoutEffect(()=>{
+    if(!previewOpen||previewMaximized)return
+    const clampPreviewPosition=()=>{
+      const maxWidth=Math.min(previewSize.width,window.innerWidth-16)
+      const maxHeight=Math.min(previewSize.height,window.innerHeight-16)
+      setPreviewPosition(current=>{
+        const next={
+          x:Math.max(8,Math.min(current.x,window.innerWidth-maxWidth-8)),
+          y:Math.max(8,Math.min(current.y,window.innerHeight-maxHeight-8)),
+        }
+        return next.x===current.x&&next.y===current.y?current:next
+      })
+    }
+    clampPreviewPosition()
+    window.addEventListener('resize',clampPreviewPosition)
+    return()=>window.removeEventListener('resize',clampPreviewPosition)
+  },[previewOpen,previewMaximized,previewPosition.x,previewPosition.y,previewSize.width,previewSize.height])
+
   useLayoutEffect(()=>{
     const element=previewViewportRef.current
     if(!element)return
