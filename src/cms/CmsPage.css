@@ -1306,3 +1306,38 @@
 .cms-back-to-top:focus-visible{outline:2px solid #f0eee6;outline-offset:3px}
 @media(max-width:700px){.cms-back-to-top{right:14px;bottom:14px;min-width:46px;min-height:46px;padding:0 13px}}
 @media(prefers-reduced-motion:reduce){.cms-back-to-top{transition:none}}
+
+
+/* Hover é apenas feedback visual: não desloca controles nem a página. */
+.cms-shell .cms-main .cms-content button:not(.cms-nav button):hover:not(:disabled),
+.cms-shell .cms-main .cms-content button:not(.cms-nav button):active:not(:disabled),
+.cms-shell .cms-back-to-top:hover {
+  transform: none !important;
+}
+.cms-shell .cms-main .cms-content button:not(.cms-nav button) {
+  transition-property: background-color, background, border-color, color, box-shadow, opacity !important;
+}
+.cms-shell .cms-back-to-top {
+  transition-property: background-color, background, border-color, color, box-shadow, opacity !important;
+}
+
+
+.cms-confirm-dialog .cms-confirm-target {
+  margin: 1rem 0 0;
+  padding: .75rem .9rem;
+  border: 1px solid rgba(201,211,154,.2);
+  border-radius: 9px;
+  background: rgba(201,211,154,.07);
+  color: #e5e8d7;
+  font-size: .82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.cms-confirm-dialog .cms-confirm-target strong {
+  display: block;
+  margin-bottom: .2rem;
+  color: #c9d39a;
+  font-size: .68rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
