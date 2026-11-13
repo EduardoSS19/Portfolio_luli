@@ -19,6 +19,9 @@ DEFAULT_LAYOUT_SETTINGS = {
     "light_color_text": "#24231f",
     "light_color_muted": "#77746c",
     "light_color_accent": "#657c62",
+    "show_bio_image": True,
+    "show_bio": True,
+    "show_references": True,
 }
 LAYOUT_SETTING_CHOICES = {
     "content_width": {"compact", "standard", "wide"},
@@ -30,6 +33,7 @@ LAYOUT_SETTING_CHOICES = {
     "default_theme": {"escuro", "claro"},
 }
 COLOR_SETTING_KEYS = {f"{theme}_{key}" for theme in ("dark", "light") for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent")}
+BOOLEAN_SETTING_KEYS = {"show_bio_image", "show_bio", "show_references"}
 LEGACY_COLOR_KEYS = {"color_background", "color_surface", "color_text", "color_muted", "color_accent"}
 HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
@@ -40,6 +44,8 @@ def normalize_layout_settings(value):
         key: source.get(key) if isinstance(source.get(key), str) and source.get(key) in choices else DEFAULT_LAYOUT_SETTINGS[key]
         for key, choices in LAYOUT_SETTING_CHOICES.items()
     }
+    for key in BOOLEAN_SETTING_KEYS:
+        normalized[key] = source.get(key) if isinstance(source.get(key), bool) else DEFAULT_LAYOUT_SETTINGS[key]
     for theme in ("dark", "light"):
         for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent"):
             setting_key = f"{theme}_{key}"
@@ -57,4 +63,6 @@ def is_valid_layout_setting(key, value):
         return isinstance(value, str) and value in LAYOUT_SETTING_CHOICES[key]
     if key in COLOR_SETTING_KEYS:
         return isinstance(value, str) and bool(HEX_COLOR_RE.fullmatch(value))
+    if key in BOOLEAN_SETTING_KEYS:
+        return isinstance(value, bool)
     return False
