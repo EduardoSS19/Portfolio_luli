@@ -11,7 +11,11 @@ from .models import ArtistProfile
 
 class CmsLayoutApiTests(TestCase):
     def setUp(self):
-        self.profile = ArtistProfile.objects.create(name="Artista", bio="Biografia")
+        self.profile, _ = ArtistProfile.objects.get_or_create(
+            pk=1, defaults={"name": "Artista", "bio": "Biografia"}
+        )
+        self.profile.layout_settings = {}
+        self.profile.save(update_fields=["layout_settings"])
         self.staff = get_user_model().objects.create_user(
             username="layout-editor", password="test-password-123", is_staff=True
         )
