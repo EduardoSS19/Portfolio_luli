@@ -32,6 +32,14 @@ const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, 
 function readCookie(name){const prefix=name+'=';const item=document.cookie.split('; ').find(cookie=>cookie.startsWith(prefix));return item?decodeURIComponent(item.slice(prefix.length)):''}
 function luminance(hex){const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722}
 function contrastRatio(a,b){const values=[luminance(a),luminance(b)].sort((x,y)=>y-x);return(values[0]+.05)/(values[1]+.05)}
+function blendColor(from,to,amount){const a=from.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));const b=to.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));return '#'+a.map((value,index)=>Math.round(value+(b[index]-value)*amount).toString(16).padStart(2,'0')).join('')}
+function accessibleColor(foreground,background,minimum=4.5){
+  if(contrastRatio(foreground,background)>=minimum)return foreground
+  const target=contrastRatio('#000000',background)>=contrastRatio('#ffffff',background)?'#000000':'#ffffff'
+  let low=0,high=1
+  for(let step=0;step<22;step++){const middle=(low+high)/2;if(contrastRatio(blendColor(foreground,target,middle),background)>=minimum)high=middle;else low=middle}
+  return blendColor(foreground,target,high)
+}
 
 export function CmsLayoutManager(){
   const [settings,setSettings]=useState(DEFAULTS),[saved,setSaved]=useState(DEFAULTS),[canChange,setCanChange]=useState(false)
@@ -131,7 +139,22 @@ export function CmsLayoutManager(){
     return()=>window.removeEventListener('message',handlePreviewReady)
   },[settings,previewFocus,previewOpen])
   const colorKey=name=>`${editingTheme}_${name}`
-  const contrast=useMemo(()=>contrastRatio(settings[colorKey('color_text')],settings[colorKey('color_background')]),[settings,editingTheme])
+  const contrastMetrics=useMemo(()=>{
+    const background=settings[colorKey('color_background')],surface=settings[colorKey('color_surface')]
+    const text=accessibleColor(settings[colorKey('color_text')],background)
+    const surfaceText=accessibleColor(settings[colorKey('color_text')],surface)
+    const muted=accessibleColor(settings[colorKey('color_muted')],background)
+    const surfaceMuted=accessibleColor(settings[colorKey('color_muted')],surface)
+    const accent=accessibleColor(settings[colorKey('color_accent')],background)
+    return [
+      ['Texto principal / fundo',contrastRatio(text,background)],
+      ['Texto principal / cartões',contrastRatio(surfaceText,surface)],
+      ['Texto secundário / fundo',contrastRatio(muted,background)],
+      ['Texto secundário / cartões',contrastRatio(surfaceMuted,surface)],
+      ['Destaques / fundo',contrastRatio(accent,background)],
+    ]
+  },[settings,editingTheme])
+  const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
   const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
@@ -171,7 +194,7 @@ export function CmsLayoutManager(){
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
           <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
-          <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Bom contraste de texto':'Contraste abaixo do recomendado'}</strong><small>{'Relação de contraste: '+contrast.toFixed(2)+':1. Para texto comum, procure pelo menos 4,5:1.'}</small></div></div>
+          <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
         <div className="cms-layout-fields">{FIELDS.map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
