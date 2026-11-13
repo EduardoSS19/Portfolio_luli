@@ -59,7 +59,10 @@ export function useCmsConfirm() {
     }
     const first = controls[0]
     const last = controls[controls.length - 1]
-    if (event.shiftKey && document.activeElement === first) {
+    if (document.activeElement === dialogRef.current) {
+      event.preventDefault()
+      ;(event.shiftKey ? last : first).focus({ preventScroll: true })
+    } else if (event.shiftKey && document.activeElement === first) {
       event.preventDefault()
       last.focus({ preventScroll: true })
     } else if (!event.shiftKey && document.activeElement === last) {
