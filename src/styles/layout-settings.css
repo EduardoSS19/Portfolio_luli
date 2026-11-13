@@ -157,3 +157,20 @@
 .site-shell[data-layout-width] .editorial-menu-arrow {
   color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
 }
+
+/* Lista: cada texto é contrastado com o painel de detalhes, não com a imagem. */
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto h3,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto > p,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .categoria-legenda,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dt,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-ficha-tecnica dd {
+  color:var(--layout-surface-text,var(--texto))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .detalhe,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-texto .obra-ficha-item {
+  color:var(--layout-surface-muted,var(--layout-surface-text))!important;
+}
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao,
+.site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao span {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
