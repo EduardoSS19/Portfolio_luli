@@ -181,7 +181,7 @@ export default function App() {
       const focus = event.data.focus
       if (focus === 'gallery' || focus === 'hero') {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          const selector = focus === 'hero' ? '.hero' : (safeSettings.default_gallery_view || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao'
+          const selector = focus === 'hero' ? '.hero' : (safeSettings.default_gallery_view || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)'
           document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'auto' })
         }))
       }
@@ -195,7 +195,7 @@ export default function App() {
     if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
       const focus = new URLSearchParams(window.location.search).get('layout_preview_focus')
       const selector = focus === 'hero' ? '.hero' : focus === 'gallery'
-        ? (modoGaleria === 'grade' ? '.galeria-grade-global' : '.secao')
+        ? (modoGaleria === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)')
         : null
       if (selector) {
         window.requestAnimationFrame(() => {
