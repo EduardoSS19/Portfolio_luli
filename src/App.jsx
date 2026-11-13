@@ -388,6 +388,7 @@ export default function App() {
   const readableSurfaceMuted = accessibleColor(effectiveColors.color_muted, effectiveColors.color_surface)
   const readableAccent = accessibleColor(effectiveColors.color_accent, effectiveColors.color_background)
   const readableAccentOnSurface = accessibleColor(effectiveColors.color_accent, effectiveColors.color_surface)
+  const readableAccentOnOverlay = accessibleColor(effectiveColors.color_accent, '#051421')
   const readableNavMuted = accessibleColor(effectiveColors.color_muted, effectiveColors.color_surface)
   const readableTextOnAccent = accessibleColor(readableText, readableAccent)
   const layoutColors = {
@@ -401,6 +402,7 @@ export default function App() {
     '--layout-surface-muted': readableSurfaceMuted,
     '--layout-text-on-accent': readableTextOnAccent,
     '--layout-accent-on-surface': readableAccentOnSurface,
+    '--layout-accent-on-overlay': readableAccentOnOverlay,
     '--layout-nav-muted': readableNavMuted,
     '--layout-grid-title': '#ffffff',
     '--layout-grid-description': '#ffffff',
