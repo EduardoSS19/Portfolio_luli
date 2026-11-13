@@ -244,32 +244,19 @@
 .cms-layout-group-heading h2{margin:.1rem 0 0;color:var(--cms-text,#f2f0e8);font:400 1.3rem Georgia,serif}
 .cms-layout-group-heading>div>p:last-child{margin:.3rem 0 .65rem;color:var(--cms-muted,#aaa99f);font-size:.76rem;line-height:1.45}
 .cms-layout-group-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;min-width:0}
-/* Shell com dimensões já escaladas: o iframe mantém o viewport lógico e o shell
-   reserva exatamente sua área visual, sem depender da caixa transformada do iframe. */
+/* Viewport lógico: zoom redimensiona a caixa de layout do iframe, não só sua pintura. */
 .cms-layout-preview-frame-scaled{display:flex;align-items:center;justify-content:center}
 .cms-layout-preview-stage-scaled{position:relative;flex:0 0 auto;min-width:0;min-height:0;overflow:hidden}
-.cms-layout-preview-stage-scaled iframe{position:absolute;top:0;left:0;display:block;flex:none;transform-origin:top left;max-width:none;max-height:none}
+.cms-layout-preview-stage-scaled iframe{position:absolute;top:0;left:0;display:block;flex:none;max-width:none;max-height:none;border:0;transform:none}
 .cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{width:auto;min-height:0}
 @media(max-width:900px){.cms-layout-group-fields{grid-template-columns:1fr}}
 
 
-/* Janela compacta acionada ao passar o cursor ou focar uma opção. */
-.cms-layout-hover-preview{
-  position:fixed;
-  z-index:1200;
-  width:min(520px,calc(100vw - 24px));
-  padding:12px;
-  border:1px solid rgba(201,211,154,.42);
-  border-radius:16px;
-  color:#f0eee6;
-  background:#171914;
-  box-shadow:0 22px 70px rgba(0,0,0,.58),0 0 0 1px rgba(255,255,255,.035);
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-  transition:opacity .16s ease,visibility .16s ease;
-}
-.cms-layout-hover-preview[aria-hidden="true"]{opacity:0;visibility:hidden;pointer-events:none}
+
+/* A prévia contextual tem uma coluna própria e não cobre opções ou botões. */
+.cms-layout-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,380px);align-items:start;gap:1.2rem;min-width:0}
+.cms-layout-field-group{grid-column:1;min-width:0}
+.cms-layout-hover-preview{position:sticky;top:16px;grid-column:2;grid-row:1 / span 3;align-self:start;width:auto;min-width:0;max-height:calc(100vh - 32px);padding:12px;border:1px solid rgba(201,211,154,.42);border-radius:16px;color:#f0eee6;background:#171914;box-shadow:0 18px 54px rgba(0,0,0,.32),0 0 0 1px rgba(255,255,255,.035);overflow:hidden}
 .cms-layout-hover-preview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:2px 2px 10px}
 .cms-layout-hover-preview-heading>div{display:grid;gap:3px;min-width:0}
 .cms-layout-hover-preview-heading .cms-eyebrow{margin:0;font-size:8px}
@@ -278,8 +265,8 @@
 .cms-layout-hover-preview-heading button{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:8px;color:#e9eadf;background:rgba(255,255,255,.05);font-size:20px;cursor:pointer}
 .cms-layout-hover-preview-frame{height:260px;min-height:0;max-height:260px;border-radius:9px}
 .cms-layout-hover-preview .cms-layout-preview-caption{margin:8px 2px 1px;font-size:9px}
-@media(max-width:600px){
-  .cms-layout-hover-preview{left:12px!important;right:12px;width:auto;top:auto!important;bottom:12px;padding:9px}
-  .cms-layout-hover-preview-frame{height:220px;max-height:220px}
-}
-@media(prefers-reduced-motion:reduce){.cms-layout-hover-preview{transition:none}}
+.cms-layout-hover-preview-placeholder{display:grid;place-items:center;gap:8px;min-height:260px;padding:20px;border:1px dashed rgba(201,211,154,.22);border-radius:9px;background:rgba(255,255,255,.02);text-align:center}
+.cms-layout-hover-preview-placeholder span{color:#c9d39a;font-size:26px}
+.cms-layout-hover-preview-placeholder p{max-width:220px;margin:0;color:#aaa99f;font-size:11px;line-height:1.5}
+@media(max-width:1100px){.cms-layout-fields{grid-template-columns:minmax(0,1fr)}.cms-layout-hover-preview{position:relative;top:auto;grid-column:1;grid-row:auto;max-height:none}}
+@media(max-width:600px){.cms-layout-hover-preview{padding:9px}.cms-layout-hover-preview-frame,.cms-layout-hover-preview-placeholder{height:220px;min-height:220px;max-height:220px}}
