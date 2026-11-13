@@ -1,8 +1,59 @@
 /* CMS color tokens: HEX values are validated by Django before persistence. */
-.site-shell[data-layout-width]{background:var(--azul-escuro);color:var(--texto)}
-.site-shell[data-layout-width] .obra,.site-shell[data-layout-width] .referencia-item{background:var(--azul-medio);color:var(--texto)}
-.site-shell[data-layout-width] .editorial-menu-backdrop{background:linear-gradient(145deg,var(--azul-escuro),var(--azul-medio))}
-.site-shell[data-layout-width] .editorial-menu-trigger,.site-shell[data-layout-width] .alternar-modo-flutuante,.site-shell[data-layout-width] .editorial-menu-control{color:var(--texto);border-color:color-mix(in srgb,var(--azul-claro) 35%,transparent);background:color-mix(in srgb,var(--azul-medio) 88%,transparent)}
-.site-shell[data-layout-width] .hero p,.site-shell[data-layout-width] .obra-texto p,.site-shell[data-layout-width] .editorial-menu-heading p{color:var(--layout-muted,var(--texto))}
-.site-shell[data-layout-width] .secao h2,.site-shell[data-layout-width] .hero-kicker,.site-shell[data-layout-width] .categoria-legenda,.site-shell[data-layout-width] .editorial-menu-number,.site-shell[data-layout-width] .editorial-menu-arrow{color:var(--azul-claro)}
-.layout-preview-banner{position:relative;z-index:80;padding:.7rem 1rem;color:#171912;background:#d7dda9;text-align:center;font:700 .68rem/1.4 "Segoe UI",system-ui,sans-serif;letter-spacing:.12em}
+.site-shell[data-layout-width]{
+  min-height:100vh;
+  background:var(--azul-escuro);
+  color:var(--texto);
+}
+.site-shell[data-layout-width] .obra,
+.site-shell[data-layout-width] .referencia-item{
+  background:var(--azul-medio);
+  color:var(--texto);
+}
+.site-shell[data-layout-width] .obra-texto{
+  background:var(--azul-medio);
+  color:var(--texto);
+}
+.site-shell[data-layout-width] .obra-galeria{
+  background:color-mix(in srgb,var(--azul-medio) 82%,var(--azul-escuro));
+}
+.site-shell[data-layout-width] .obra-imagem{
+  background:
+    radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--azul-claro) 16%,transparent),transparent 55%),
+    var(--azul-medio);
+}
+.site-shell[data-layout-width] .editorial-menu-backdrop{
+  background:linear-gradient(145deg,var(--azul-escuro),var(--azul-medio));
+}
+.site-shell[data-layout-width] .editorial-menu-trigger,
+.site-shell[data-layout-width] .alternar-modo-flutuante,
+.site-shell[data-layout-width] .editorial-menu-control{
+  color:var(--texto);
+  border-color:color-mix(in srgb,var(--azul-claro) 35%,transparent);
+  background:color-mix(in srgb,var(--azul-medio) 88%,transparent);
+}
+.site-shell[data-layout-width] .hero p,
+.site-shell[data-layout-width] .obra-texto p,
+.site-shell[data-layout-width] .editorial-menu-heading p{
+  color:var(--layout-muted,var(--texto));
+}
+.site-shell[data-layout-width] .secao h2,
+.site-shell[data-layout-width] .hero-kicker,
+.site-shell[data-layout-width] .categoria-legenda,
+.site-shell[data-layout-width] .editorial-menu-number,
+.site-shell[data-layout-width] .editorial-menu-arrow{
+  color:var(--azul-claro);
+}
+.site-shell[data-layout-width] .rodape{
+  color:var(--texto);
+  background:var(--azul-escuro);
+}
+.layout-preview-banner{
+  position:relative;
+  z-index:80;
+  padding:.7rem 1rem;
+  color:#171912;
+  background:#d7dda9;
+  text-align:center;
+  font:700 .68rem/1.4 "Segoe UI",system-ui,sans-serif;
+  letter-spacing:.12em;
+}
