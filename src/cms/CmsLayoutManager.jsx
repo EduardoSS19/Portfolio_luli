@@ -67,6 +67,13 @@ export function CmsLayoutManager(){
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
+  const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
+  const [hoveredOption,setHoveredOption]=useState(null)
+  const [hoverPreviewPosition,setHoverPreviewPosition]=useState({left:24,top:120})
+  const [hoverPreviewSize,setHoverPreviewSize]=useState({width:0,height:0})
+  const hoverPreviewIframeRef=useRef(null)
+  const hoverPreviewViewportRef=useRef(null)
+  const hoverPreviewHideTimerRef=useRef(null)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
@@ -77,6 +84,9 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewHeight):1
   const inlinePreviewStageWidth=Math.ceil(previewWidth*inlinePreviewScale)
   const inlinePreviewStageHeight=Math.ceil(previewHeight*inlinePreviewScale)
+  const hoverPreviewScale=hoverPreviewSize.width>0&&hoverPreviewSize.height>0?Math.min(1,hoverPreviewSize.width/previewWidth,hoverPreviewSize.height/previewHeight):1
+  const hoverPreviewStageWidth=Math.ceil(previewWidth*hoverPreviewScale)
+  const hoverPreviewStageHeight=Math.ceil(previewHeight*hoverPreviewScale)
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -117,6 +127,18 @@ export function CmsLayoutManager(){
     return()=>observer.disconnect()
   },[previewOpen])
   useEffect(()=>{
+    if(!hoverPreviewMounted)return
+    const element=hoverPreviewViewportRef.current
+    if(!element)return
+    const update=()=>setHoverPreviewSize({width:element.clientWidth,height:element.clientHeight})
+    update()
+    if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
+    const observer=new ResizeObserver(update)
+    observer.observe(element)
+    return()=>observer.disconnect()
+  },[hoverPreviewMounted])
+  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)},[])
+  useEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
     const update=()=>setInlinePreviewSize({width:element.clientWidth,height:element.clientHeight})
@@ -136,20 +158,50 @@ export function CmsLayoutManager(){
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
   const previewUrl='/?layout_preview=1'
-  const sendPreviewUpdate=target=>{
-    target?.postMessage({type:'cms-layout-preview:update',settings,focus:previewFocus,previewMode},window.location.origin)
+  const hoverPreviewState=()=>{
+    if(!hoveredOption)return {settings,focus:previewFocus,previewMode}
+    const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
+    const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
+    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':'page'
+    return {settings:nextSettings,focus,previewMode:nextMode}
+  }
+  const sendPreviewUpdate=(target,override)=>{
+    const payload=override||{settings,focus:previewFocus,previewMode}
+    target?.postMessage({type:'cms-layout-preview:update',...payload},window.location.origin)
   }
   useEffect(()=>{
-    const allowedSources=[previewIframeRef.current?.contentWindow,inlinePreviewIframeRef.current?.contentWindow].filter(Boolean)
+    const hoverState=hoverPreviewState()
+    const hoverWindow=hoverPreviewIframeRef.current?.contentWindow
+    const allowedSources=[previewIframeRef.current?.contentWindow,inlinePreviewIframeRef.current?.contentWindow,hoverWindow].filter(Boolean)
     const handlePreviewReady=event=>{
       if(event.origin!==window.location.origin||event.data?.type!=='cms-layout-preview:ready'||!allowedSources.includes(event.source))return
-      sendPreviewUpdate(event.source)
+      sendPreviewUpdate(event.source,event.source===hoverWindow?hoverState:undefined)
     }
     window.addEventListener('message',handlePreviewReady)
     sendPreviewUpdate(previewIframeRef.current?.contentWindow)
     sendPreviewUpdate(inlinePreviewIframeRef.current?.contentWindow)
+    if(hoverWindow)sendPreviewUpdate(hoverWindow,hoverState)
     return()=>window.removeEventListener('message',handlePreviewReady)
-  },[settings,previewFocus,previewMode,previewOpen])
+  },[settings,previewFocus,previewMode,previewOpen,hoveredOption,hoverPreviewMounted])
+  const showOptionPreview=(name,value,label,detail,event)=>{
+    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
+    const rect=event.currentTarget.getBoundingClientRect()
+    const width=Math.min(520,window.innerWidth-24)
+    const height=360
+    let left=rect.right+14
+    if(left+width>window.innerWidth-12)left=Math.max(12,rect.left-width-14)
+    const top=Math.max(12,Math.min(rect.top,window.innerHeight-height-12))
+    setHoverPreviewPosition({left,top})
+    setHoveredOption({name,value,label,detail})
+    setHoverPreviewMounted(true)
+  }
+  const scheduleHideOptionPreview=()=>{
+    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
+    hoverPreviewHideTimerRef.current=window.setTimeout(()=>setHoveredOption(null),220)
+  }
+  const keepOptionPreview=()=>{
+    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
+  }
   const colorKey=name=>`${editingTheme}_${name}`
   const contrastMetrics=useMemo(()=>{
     const background=settings[colorKey('color_background')],surface=settings[colorKey('color_surface')]
@@ -208,7 +260,7 @@ export function CmsLayoutManager(){
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}</div>
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={scheduleHideOptionPreview} onFocus={event=>showOptionPreview(field.name,value,label,detail,event)} onBlur={scheduleHideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}</div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
@@ -220,5 +272,10 @@ export function CmsLayoutManager(){
       <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${inlinePreviewScale})`}}/></div></div>
       <p className="cms-layout-preview-caption">Escala automática: {Math.round(inlinePreviewScale*100)}% · viewport de {previewWidth} × {previewHeight}px. Role dentro da prévia para percorrer a página; a janela flutuante pode ficar aberta ao mesmo tempo.</p>
     </section>
+    {hoverPreviewMounted&&<aside className="cms-layout-hover-preview" aria-label="Prévia temporária da opção" aria-hidden={!hoveredOption} style={{left:hoverPreviewPosition.left,top:hoverPreviewPosition.top}} onMouseEnter={keepOptionPreview} onMouseLeave={scheduleHideOptionPreview}>
+      <header className="cms-layout-hover-preview-heading"><div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption?.label||'Prévia da alteração'}</strong><small>{hoveredOption?.detail||'Passe o cursor sobre uma opção para comparar.'}</small></div><button type="button" aria-label="Fechar prévia temporária" onClick={()=>setHoveredOption(null)}>×</button></header>
+      <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}><iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`}}/></div></div>
+      <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
+    </aside>}
   </section>
 }
