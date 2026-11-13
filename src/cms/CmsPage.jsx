@@ -416,7 +416,7 @@ export function CmsPage() {
   const bulkSetPublication = async published => {
     if (!selectedWorkIds.length) return
     const action = published ? 'publicar' : 'despublicar'
-    if (!(await confirm({ title: (published ? 'Publicar ' : 'Despublicar ') + selectedWorkIds.length + ' obras?', message: published ? 'As obras selecionadas ficarão visíveis no portfólio público.' : 'As obras selecionadas deixarão de aparecer no portfólio público.', confirmLabel: published ? 'Publicar selecionadas' : 'Despublicar selecionadas', variant: 'default' }))) return
+    if (!(await confirm({ title: (published ? 'Publicar ' : 'Despublicar ') + selectedWorkIds.length + ' obras?', message: published ? 'As obras selecionadas ficarão visíveis no portfólio público.' : 'As obras selecionadas deixarão de aparecer no portfólio público.', target: selectedWorkIds.length + ' obras selecionadas', confirmLabel: published ? 'Publicar selecionadas' : 'Despublicar selecionadas', variant: 'default' }))) return
     const response = await fetch('/api/cms/works/bulk-publish/', {
       method: 'POST',
       credentials: 'same-origin',
