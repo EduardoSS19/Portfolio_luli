@@ -54,6 +54,7 @@ export function CmsLayoutManager(){
   const inlinePreviewViewportRef=useRef(null)
   const [previewDevice,setPreviewDevice]=useState('desktop')
   const [previewFocus,setPreviewFocus]=useState('page')
+  const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
   const [inlinePreviewWidth,setInlinePreviewWidth]=useState(0)
@@ -118,14 +119,14 @@ export function CmsLayoutManager(){
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
       .then(async response=>{const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(response.status===403?'Sua conta não tem permissão para acessar o layout.':'Não foi possível carregar as opções de layout.');return data})
-      .then(data=>{if(!active)return;const next={...DEFAULTS,...(data.settings||{})};setSettings(next);setSaved(next);setCanChange(Boolean(data.permissions?.canChange))})
+      .then(data=>{if(!active)return;const next={...DEFAULTS,...(data.settings||{})};setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
       .catch(err=>{if(active)setError(err.message)}).finally(()=>{if(active)setLoading(false)})
     return()=>{active=false}
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
   const previewUrl='/?layout_preview=1'
   const sendPreviewUpdate=target=>{
-    target?.postMessage({type:'cms-layout-preview:update',settings,focus:previewFocus},window.location.origin)
+    target?.postMessage({type:'cms-layout-preview:update',settings,focus:previewFocus,previewMode},window.location.origin)
   }
   useEffect(()=>{
     const allowedSources=[previewIframeRef.current?.contentWindow,inlinePreviewIframeRef.current?.contentWindow].filter(Boolean)
@@ -137,7 +138,7 @@ export function CmsLayoutManager(){
     sendPreviewUpdate(previewIframeRef.current?.contentWindow)
     sendPreviewUpdate(inlinePreviewIframeRef.current?.contentWindow)
     return()=>window.removeEventListener('message',handlePreviewReady)
-  },[settings,previewFocus,previewOpen])
+  },[settings,previewFocus,previewMode,previewOpen])
   const colorKey=name=>`${editingTheme}_${name}`
   const contrastMetrics=useMemo(()=>{
     const background=settings[colorKey('color_background')],surface=settings[colorKey('color_surface')]
@@ -155,7 +156,7 @@ export function CmsLayoutManager(){
     ]
   },[settings,editingTheme])
   const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
+  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
@@ -176,8 +177,8 @@ export function CmsLayoutManager(){
       const next={...DEFAULTS,...data.settings};setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
     }catch(err){setError(err.message||'Não foi possível salvar.')}finally{setSaving(false)}
   }
-  const discard=()=>{setSettings(saved);setError('');setNotice('Alterações descartadas.')}
-  const reset=()=>{setSettings(DEFAULTS);setError('');setNotice('')}
+  const discard=()=>{setSettings(saved);setPreviewMode(saved.default_gallery_view);setError('');setNotice('Alterações descartadas.')}
+  const reset=()=>{setSettings(DEFAULTS);setPreviewMode(DEFAULTS.default_gallery_view);setError('');setNotice('')}
   if(loading)return <div className="cms-loading">Carregando opções de layout…</div>
   return <section className="cms-layout-page">
     <header className="cms-library-heading"><div><p className="cms-eyebrow">APARÊNCIA DO PORTFÓLIO</p><h1>Layout<span>.</span></h1><p>Personalize a composição e as cores vendo o resultado antes de salvar.</p></div>
