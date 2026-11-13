@@ -65,6 +65,7 @@ function LoginRequired({ forbidden = false }) {
 export function CmsPage() {
   const { confirm, dialogNode } = useCmsConfirm()
   const [overview, setOverview] = useState(null)
+  const [brandImage, setBrandImage] = useState('')
   const [analytics, setAnalytics] = useState(null)
   const [works, setWorks] = useState([])
   const [pagination, setPagination] = useState({ total: 0, hasMore: false })
@@ -83,6 +84,14 @@ export function CmsPage() {
   const [creatingWork, setCreatingWork] = useState(false)
   const [libraryRefresh, setLibraryRefresh] = useState(0)
   const [selectedWorkIds, setSelectedWorkIds] = useState([])
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/cms/profile/', { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(data => { if (active && data?.profile?.brand_image) setBrandImage(data.profile.brand_image) }).catch(() => {})
+    const updateBrand = event => setBrandImage(event.detail || '')
+    window.addEventListener('portfolio-brand-image-updated', updateBrand)
+    return () => { active = false; window.removeEventListener('portfolio-brand-image-updated', updateBrand) }
+  }, [])
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedQuery(query), 250)
@@ -487,7 +496,7 @@ export function CmsPage() {
     <div className="cms-shell">
       <aside className="cms-sidebar">
         <a className="cms-brand" href="/" aria-label="Voltar ao portfólio">
-          <span className="cms-brand-mark">LB<span>.</span></span>
+          {brandImage ? <img className="cms-brand-image" src={brandImage} alt="" /> : <span className="cms-brand-mark">LB<span>.</span></span>}
           <span className="cms-brand-caption">ESPAÇO DE EDIÇÃO</span>
         </a>
         <div className="cms-sidebar-label">ESPAÇO DE TRABALHO</div>

@@ -193,6 +193,7 @@ def portfolio_data(request):
                 else None
             ),
             "frames": [_otimizada(frame.image.url, 900, "e_saturation:-35") for frame in frames],
+            "marca": _image_url(profile.brand_image, "", 300) if profile and profile.brand_image else "",
             "redes": [
                 {"titulo": social.title, "url": social.url}
                 for social in social_links
@@ -349,6 +350,14 @@ def frontend(request):
         f'<meta name="twitter:title" content="{escape(titulo, quote=True)}" />',
         f'<meta name="twitter:description" content="{escape(descricao, quote=True)}" />',
     ]
+    if profile and profile.brand_image:
+        try:
+            favicon_url = request.build_absolute_uri(profile.brand_image.url)
+        except (ValueError, OSError):
+            favicon_url = ""
+        if favicon_url:
+            tags.append('<link rel="icon" href="' + escape(favicon_url, quote=True) + '" />')
+
     if imagem:
         tags.extend([
             f'<meta property="og:image" content="{escape(imagem, quote=True)}" />',
