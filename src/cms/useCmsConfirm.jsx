@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 export function useCmsConfirm() {
   const [options, setOptions] = useState(null)
@@ -105,5 +106,7 @@ export function useCmsConfirm() {
     </div>
   ) : null
 
-  return { confirm, dialogNode }
+  // O portal remove o diálogo de ancestrais do painel que possam criar
+  // um containing block (transform/filter) ou recortar position: fixed.
+  return { confirm, dialogNode: dialogNode ? createPortal(dialogNode, document.body) : null }
 }
