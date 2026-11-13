@@ -56,17 +56,18 @@ class CmsLayoutApiTests(TestCase):
         self.client.force_login(self.staff)
         response = self.client.patch(
             reverse("cms-layout"),
-            data=json.dumps({"color_background": "#F4F1E8", "color_accent": "#9a735e"}),
+            data=json.dumps({"dark_color_background": "#F4F1E8", "light_color_accent": "#9a735e"}),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
         self.profile.refresh_from_db()
-        self.assertEqual(self.profile.layout_settings["color_background"], "#f4f1e8")
-        self.assertEqual(response.json()["settings"]["color_accent"], "#9a735e")
+        self.assertEqual(self.profile.layout_settings["dark_color_background"], "#f4f1e8")
+        self.assertEqual(self.profile.layout_settings["light_color_accent"], "#9a735e")
+        self.assertNotEqual(response.json()["settings"]["dark_color_accent"], response.json()["settings"]["light_color_accent"])
 
     def test_invalid_colors_and_unknown_keys_are_rejected_without_saving(self):
         self.client.force_login(self.staff)
-        for payload in ({"color_background": "red"}, {"color_accent": "#fff"}, {"color_text": "url(javascript:alert(1))"}, {"unknown": "#ffffff"}):
+        for payload in ({"dark_color_background": "red"}, {"light_color_accent": "#fff"}, {"dark_color_text": "url(javascript:alert(1))"}, {"color_background": "#ffffff"}, {"unknown": "#ffffff"}):
             response = self.client.patch(
                 reverse("cms-layout"), data=json.dumps(payload), content_type="application/json"
             )
