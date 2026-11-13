@@ -498,7 +498,7 @@
 
 
 /* Sistema unificado de botões do CMS — hierarquia, acessibilidade e toque */
-.cms-shell button:not(.cms-nav button){
+.cms-shell :where(button:not(.cms-nav button)){
   box-sizing:border-box;
   min-height:38px;
   padding:9px 13px;
@@ -511,19 +511,19 @@
   cursor:pointer;
   transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease,opacity .16s ease;
 }
-.cms-shell button:not(.cms-nav button):hover:not(:disabled){
+.cms-shell :where(button:not(.cms-nav button)):hover:not(:disabled){
   border-color:rgba(201,211,154,.58);
   background:#c9d39a12;
   color:var(--cms-accent);
 }
-.cms-shell button:not(.cms-nav button):active:not(:disabled){transform:translateY(1px)}
-.cms-shell button:not(.cms-nav button):focus-visible,
+.cms-shell :where(button:not(.cms-nav button)):active:not(:disabled){transform:translateY(1px)}
+.cms-shell :where(button:not(.cms-nav button)):focus-visible,
 .cms-shell a.cms-primary-button:focus-visible,
 .cms-shell .cms-cover-upload:focus-within{
   outline:2px solid var(--cms-accent);
   outline-offset:3px;
 }
-.cms-shell button:not(.cms-nav button):disabled{
+.cms-shell :where(button:not(.cms-nav button)):disabled{
   opacity:.42;
   cursor:not-allowed;
   transform:none;
@@ -650,13 +650,13 @@
   color:#fff7f2;
 }
 @media(max-width:700px){
-  .cms-shell button:not(.cms-nav button){min-height:42px;padding:10px 12px}
+  .cms-shell :where(button:not(.cms-nav button)){min-height:42px;padding:10px 12px}
   .cms-shell .cms-primary-button,.cms-shell button.cms-primary-button{min-height:44px}
   .cms-shell .cms-editor-actions .cms-primary-button{width:100%}
   .cms-shell .cms-category-item-actions{gap:7px}
   .cms-shell .cms-category-item-actions button{min-height:42px}
 }
 @media(prefers-reduced-motion:reduce){
-  .cms-shell button:not(.cms-nav button){transition:none}
-  .cms-shell button:not(.cms-nav button):active:not(:disabled){transform:none}
+  .cms-shell :where(button:not(.cms-nav button)){transition:none}
+  .cms-shell :where(button:not(.cms-nav button)):active:not(:disabled){transform:none}
 }
