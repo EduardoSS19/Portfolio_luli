@@ -249,12 +249,30 @@ export function CmsLayoutManager(){
 
   const showOptionPreview=(name,value,label,detail,event)=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
-    const panelWidth=Math.min(380,window.innerWidth-32)
-    const panelHeight=Math.min(440,window.innerHeight-32)
-    setHoverPreviewPosition({
-      left:window.innerWidth/2,
-      top:window.innerHeight/2,
-    })
+    const anchor=event?.currentTarget?.getBoundingClientRect?.()
+    const viewportWidth=window.innerWidth
+    const viewportHeight=window.innerHeight
+    const panelWidth=Math.min(380,viewportWidth-32)
+    const panelHeight=Math.min(440,viewportHeight-32)
+    const gap=16
+    const minEdge=16
+    if(anchor){
+      const rightSpace=viewportWidth-anchor.right-gap-minEdge
+      const leftSpace=anchor.left-gap-minEdge
+      // Prioriza o lado que comporta o painel inteiro; se nenhum comportar,
+      // usa o lado com mais espaço e mantém o painel dentro do viewport.
+      const placeRight=rightSpace>=panelWidth || (leftSpace<panelWidth && rightSpace>=leftSpace)
+      let left=placeRight?anchor.right+gap:anchor.left-panelWidth-gap
+      left=Math.max(minEdge,Math.min(left,viewportWidth-panelWidth-minEdge))
+      const centeredTop=anchor.top+(anchor.height-panelHeight)/2
+      const top=Math.max(minEdge,Math.min(centeredTop,viewportHeight-panelHeight-minEdge))
+      setHoverPreviewPosition({left,top})
+    }else{
+      setHoverPreviewPosition({
+        left:Math.max(minEdge,(viewportWidth-panelWidth)/2),
+        top:Math.max(minEdge,(viewportHeight-panelHeight)/2),
+      })
+    }
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
     setHoverPreviewMounted(true)
   }
