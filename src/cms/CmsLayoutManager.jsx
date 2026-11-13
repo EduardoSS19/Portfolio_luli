@@ -74,6 +74,7 @@ export function CmsLayoutManager(){
   const previewScale=previewContainerSize.width>0&&previewContainerSize.height>0?Math.min(1,previewContainerSize.width/previewWidth,previewContainerSize.height/previewHeight):1
   const previewStageHeight=Math.ceil(previewHeight*previewScale)
   const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewHeight):1
+  const inlinePreviewStageHeight=Math.ceil(previewHeight*inlinePreviewScale)
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -214,7 +215,7 @@ export function CmsLayoutManager(){
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline"><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${inlinePreviewScale})`}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline" style={{height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${inlinePreviewScale})`}}/></div></div>
       <p className="cms-layout-preview-caption">Escala automática: {Math.round(inlinePreviewScale*100)}% · viewport de {previewWidth} × {previewHeight}px. Role dentro da prévia para percorrer a página; a janela flutuante pode ficar aberta ao mesmo tempo.</p>
     </section>
   </section>
