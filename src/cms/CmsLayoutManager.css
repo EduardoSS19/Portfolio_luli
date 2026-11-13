@@ -102,7 +102,7 @@
   display:grid;place-items:center;width:2rem;height:2rem;padding:0;
   border:1px solid var(--cms-border,rgba(255,255,255,.14));border-radius:7px;
   color:var(--cms-text,#f2f0e8);background:rgba(255,255,255,.05);
-  font:500 1.1rem/1 inherit;cursor:pointer
+  font-family:inherit;font-size:1.1rem;font-weight:500;line-height:1;cursor:pointer
 }
 .cms-layout-preview-panel.floating .cms-layout-preview-devices{flex:0 0 auto}
 .cms-layout-preview-panel.floating .cms-layout-preview-frame{
