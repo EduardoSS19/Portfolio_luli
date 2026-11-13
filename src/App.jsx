@@ -31,6 +31,9 @@ const DEFAULT_LAYOUT_SETTINGS = {
   light_color_text: '#24231f',
   light_color_muted: '#77746c',
   light_color_accent: '#657c62',
+  show_bio_image: true,
+  show_bio: true,
+  show_references: true,
 }
 
 const LAYOUT_PREVIEW_CHOICES = {
@@ -54,6 +57,9 @@ function parseLayoutPreview(raw) {
     })
     LAYOUT_PREVIEW_COLORS.forEach(key => {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
+    })
+    ;['show_bio_image','show_bio','show_references'].forEach(key => {
+      if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
     return safe
   } catch {
@@ -130,7 +136,7 @@ export default function App() {
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
-    ...(referencias.length ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
+    ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
   ], [categorias, referencias.length])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
@@ -417,6 +423,9 @@ export default function App() {
     'data-layout-hero-size': layout.hero_size,
     'data-layout-spacing': layout.section_spacing,
     'data-layout-gallery-columns': layout.gallery_columns,
+    'data-layout-show-bio-image': String(layout.show_bio_image !== false),
+    'data-layout-show-bio': String(layout.show_bio !== false),
+    'data-layout-show-references': String(layout.show_references !== false),
   }
 
   if (modoDiagnosticoGrade) {
@@ -485,7 +494,7 @@ export default function App() {
         tema={tema}
         aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
       />
-      <Sobre perfil={sobre} />
+      {(layout.show_bio_image !== false || layout.show_bio !== false) && <Sobre perfil={sobre} mostrarImagem={layout.show_bio_image !== false} mostrarBio={layout.show_bio !== false} />}
       {modoGaleria === 'grade' ? (
         <GaleriaGrade categorias={categorias} />
       ) : (
@@ -500,7 +509,7 @@ export default function App() {
           />
         ))
       )}
-      {referencias.length > 0 && <Referencias referencias={referencias} />}
+      {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
       <Contato endpoint={sobre.formulario} email={sobre.email} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
