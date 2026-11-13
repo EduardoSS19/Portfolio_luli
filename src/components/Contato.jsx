@@ -9,13 +9,14 @@ function lerCookie(nome) {
   return cookie ? decodeURIComponent(cookie.slice(nome.length + 1)) : ''
 }
 
-export function Contato({ endpoint, email }) {
+export function Contato({ endpoint, email, demoMode = false }) {
   const [enviando, setEnviando] = useState(false)
   const [status, setStatus] = useState(null)
   const [ref, visivel] = useScrollReveal()
 
   async function lidarEnvio(e) {
     e.preventDefault()
+    if (demoMode) { setStatus('demo'); return }
     setEnviando(true)
     setStatus(null)
 
@@ -82,11 +83,12 @@ export function Contato({ endpoint, email }) {
             <input type="text" name="website" tabIndex="-1" autoComplete="off" />
           </label>
         </div>
-        <button type="submit" disabled={enviando}>
+        <button type="submit" disabled={enviando || demoMode}>
           {enviando ? 'Enviando...' : 'Enviar mensagem'}
         </button>
         {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Obrigada pelo contato.</p>}
         {status === 'erro' && <p className="form-status erro" role="alert">Não foi possível enviar agora. Tente novamente mais tarde.</p>}
+        {demoMode && <p className="form-status" role="status">Modo de demonstração: o formulário está desativado e nenhuma mensagem será enviada.</p>}
       </form>
     </section>
   )
