@@ -25,6 +25,6 @@ def normalize_layout_settings(value):
     """Return only known settings and safe values; never accept arbitrary CSS."""
     source = value if isinstance(value, dict) else {}
     return {
-        key: source.get(key) if source.get(key) in choices else DEFAULT_LAYOUT_SETTINGS[key]
+        key: source.get(key) if isinstance(source.get(key), str) and source.get(key) in choices else DEFAULT_LAYOUT_SETTINGS[key]
         for key, choices in LAYOUT_SETTING_CHOICES.items()
     }
