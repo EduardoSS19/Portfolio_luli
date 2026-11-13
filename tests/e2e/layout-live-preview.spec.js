@@ -86,6 +86,29 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
   await expect(page.locator('.galeria-grade-global .obra-texto h3')).toHaveCSS('color', 'rgb(255, 255, 255)')
 
   await sendSettings(page, {
+    default_gallery_view: 'lista',
+    dark_color_background: '#777777',
+    dark_color_surface: '#888888',
+    dark_color_text: '#888888',
+    dark_color_muted: '#888888',
+    dark_color_accent: '#888888',
+  }, 'gallery', 'lista')
+  const listTextContrast = await page.locator('.secao:not(.sobre-secao) .obra:not(.modo-grade)').first().evaluate(card => {
+    const parse = value => value.match(/[0-9.]+/g).slice(0,3).map(Number)
+    const luminance = rgb => rgb.map(value => value / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4).reduce((sum,value,index) => sum + value * [.2126,.7152,.0722][index],0)
+    const ratio = (foreground,background) => {
+      const values = [luminance(parse(foreground)),luminance(parse(background))].sort((a,b)=>b-a)
+      return (values[0]+.05)/(values[1]+.05)
+    }
+    const panel = getComputedStyle(card.querySelector('.obra-texto')).backgroundColor
+    return ['h3','.obra-texto > p','.categoria-legenda'].map(selector => {
+      const element = card.querySelector(selector)
+      return { selector, ratio:ratio(getComputedStyle(element).color,panel) }
+    })
+  })
+  for (const item of listTextContrast) expect(item.ratio, item.selector).toBeGreaterThanOrEqual(4.5)
+
+  await sendSettings(page, {
     default_theme: 'claro',
     light_color_background: '#eeeeee',
     light_color_surface: '#ffffff',
