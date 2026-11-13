@@ -170,7 +170,7 @@ export default function App() {
   }, [modoGaleria])
 
   useEffect(() => {
-    if (!new URLSearchParams(window.location.search).has('layout_preview')) return undefined
+    if (carregando || !new URLSearchParams(window.location.search).has('layout_preview')) return undefined
     const handleLayoutPreviewUpdate = event => {
       if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'cms-layout-preview:update') return
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
@@ -182,14 +182,14 @@ export default function App() {
       if (focus === 'gallery' || focus === 'hero') {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
           const selector = focus === 'hero' ? '.hero' : (safeSettings.default_gallery_view || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao'
-          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'auto' })
         }))
       }
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
     return () => window.removeEventListener('message', handleLayoutPreviewUpdate)
-  }, [])
+  }, [carregando])
 
   useEffect(() => {
     if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
