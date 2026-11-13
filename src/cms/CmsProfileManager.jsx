@@ -9,6 +9,7 @@ function readCookie(name) {
 const FIELDS = [
   { name: 'name', label: 'Nome', required: true, placeholder: 'Ex.: Luli Becker', help: 'Nome que identifica a artista no portfólio.' },
   { name: 'tagline', label: 'Frase de apresentação', placeholder: 'Ex.: Arte, memória e experimentação', help: 'Uma frase curta que resume sua apresentação artística.' },
+  { name: 'brand_background_color', label: 'Cor de fundo da marca', type: 'color', help: 'Cor exibida atrás da imagem no painel. Também aparece na área de identidade do CMS.' },
   { name: 'instagram_url', label: 'Instagram', type: 'url', placeholder: 'https://instagram.com/seuperfil', help: 'Cole o endereço completo do seu perfil, começando por https://.' },
   { name: 'contact_email', label: 'E-mail de contato', type: 'email', placeholder: 'contato@exemplo.com', help: 'E-mail que visitantes poderão usar para entrar em contato.' },
   { name: 'contact_form_url', label: 'Link do formulário externo', type: 'url', placeholder: 'https://…', help: 'Opcional. Use se você utiliza um formulário de contato em outro serviço.' },
@@ -42,7 +43,7 @@ export function CmsProfileManager() {
     }).then(data => {
       if (!active) return
       const nextProfile = data.profile || {
-        name: '', tagline: '', photo_url: '', brand_image: '', bio: '',
+        name: '', tagline: '', photo_url: '', brand_image: '', brand_background_color: '#151612', bio: '',
         instagram_url: '', contact_email: '', contact_form_url: '',
       }
       setProfile(nextProfile)
@@ -111,7 +112,7 @@ export function CmsProfileManager() {
         throw new Error(messages[data.error] || 'Não foi possível enviar a imagem da marca.')
       }
       setProfile(current => ({ ...current, brand_image: data.brand_image }))
-      window.dispatchEvent(new CustomEvent('portfolio-brand-image-updated', { detail: data.brand_image }))
+      window.dispatchEvent(new CustomEvent('portfolio-brand-image-updated', { detail: { image: data.brand_image, backgroundColor: profile.brand_background_color || '#151612' } }))
       setBrandFile(null)
       setNotice('Imagem da marca atualizada no painel e no site.')
     } catch (err) { setError(err.message || 'Não foi possível enviar a imagem da marca.') }
@@ -142,6 +143,7 @@ export function CmsProfileManager() {
       }
       setProfile(data.profile)
       setSavedValues(Object.fromEntries(FIELDS.map(field => [field.name, data.profile[field.name] ?? ''])))
+      window.dispatchEvent(new CustomEvent('portfolio-brand-image-updated', { detail: { image: data.profile.brand_image || '', backgroundColor: data.profile.brand_background_color || '#151612' } }))
       if (data.permissions) setPermissions(data.permissions)
       setNotice('Perfil atualizado. As informações foram salvas.')
     } catch (err) {
@@ -173,8 +175,8 @@ export function CmsProfileManager() {
       <form className="cms-profile-form" onSubmit={save}>
         <div className={'cms-save-state' + (hasChanges ? ' pending' : ' clean')} role="status" aria-live="polite"><span className="cms-save-state-dot" />{hasChanges ? 'Você tem alterações não salvas.' : 'Tudo salvo. O perfil está atualizado.'}</div>
         <div className="cms-brand-image-editor">
-          <div className="cms-brand-image-preview">{profile.brand_image ? <img src={profile.brand_image} alt="Prévia da imagem da marca" /> : <span>MARCA</span>}</div>
-          <div className="cms-profile-photo-controls"><strong>Imagem da marca</strong><p>Uma única imagem será usada no ícone da aba do navegador, no botão de retorno ao site e na identificação do painel. Prefira uma imagem quadrada; JPG, PNG ou WebP, até 15 MB.</p><div><input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher imagem da marca" onChange={event => setBrandFile(event.target.files?.[0] || null)} /><button className="cms-cover-upload" type="button" disabled={!brandFile || uploadingBrand || !permissions.canChange} onClick={uploadBrandImage}>{uploadingBrand ? 'Enviando…' : 'Atualizar imagem da marca'}</button></div></div>
+          <div className="cms-brand-image-preview" style={{ backgroundColor: profile.brand_background_color || "#151612" }}>{profile.brand_image ? <img src={profile.brand_image} alt="Prévia da imagem da marca" /> : <span>MARCA</span>}</div>
+          <div className="cms-profile-photo-controls"><strong>Imagem da marca</strong><p>Uma única imagem será usada no ícone da aba do navegador e na identidade visual do painel. Prefira uma imagem quadrada; JPG, PNG ou WebP, até 15 MB.</p><div><input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Escolher imagem da marca" onChange={event => setBrandFile(event.target.files?.[0] || null)} /><button className="cms-cover-upload" type="button" disabled={!brandFile || uploadingBrand || !permissions.canChange} onClick={uploadBrandImage}>{uploadingBrand ? 'Enviando…' : 'Atualizar imagem da marca'}</button></div></div>
         </div>
         <div className="cms-profile-preview">
           {photo ? <img src={photo} alt="Prévia da foto do perfil" /> : <div className="cms-no-image"><span>LB</span><small>SEM FOTO</small></div>}
