@@ -165,9 +165,13 @@ jobs:
         if: needs.changes.outputs.gallery == 'true' || github.event_name == 'workflow_dispatch'
         run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium webkit
 
-      - name: Install browser engines for CMS-only validation
-        if: (needs.changes.outputs.cms == 'true' || needs.changes.outputs.navigation == 'true') && needs.changes.outputs.gallery != 'true' && github.event_name != 'workflow_dispatch'
+      - name: Install browser engines for navigation validation
+        if: needs.changes.outputs.navigation == 'true' && needs.changes.outputs.gallery != 'true' && github.event_name != 'workflow_dispatch'
         run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium webkit
+
+      - name: Install Chromium for CMS-only validation
+        if: needs.changes.outputs.cms == 'true' && needs.changes.outputs.navigation != 'true' && needs.changes.outputs.gallery != 'true' && github.event_name != 'workflow_dispatch'
+        run: npx --yes --package=@playwright/test@1.56.1 playwright install --with-deps chromium
 
       - name: Link isolated Playwright package for config resolution
         if: needs.changes.outputs.cms == 'true' || needs.changes.outputs.navigation == 'true' || needs.changes.outputs.gallery == 'true' || github.event_name == 'workflow_dispatch'
@@ -190,7 +194,7 @@ jobs:
           test -n "$PLAYWRIGHT_CLI"
           node "$PLAYWRIGHT_CLI" test tests/e2e/cms-content.spec.js tests/e2e/cms-save-state.spec.js --project=chromium-desktop --workers=1 --retries=0 --reporter=list,junit
 
-      - name: Run public desktop, mobile and gallery regression tests
+      - name: Run navigation desktop and mobile tests
         if: needs.changes.outputs.navigation == 'true' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 15
         shell: bash
