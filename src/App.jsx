@@ -176,12 +176,13 @@ export default function App() {
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
       if (!safeSettings) return
       setConteudo(current => ({ ...current, layout: { ...current.layout, ...safeSettings } }))
-      if (safeSettings.default_gallery_view) setModoGaleria(safeSettings.default_gallery_view)
+      const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
+      if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const focus = event.data.focus
       if (focus === 'gallery' || focus === 'hero') {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          const selector = focus === 'hero' ? '.hero' : (safeSettings.default_gallery_view || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)'
+          const selector = focus === 'hero' ? '.hero' : (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)'
           document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'auto' })
         }))
       }
