@@ -28,6 +28,34 @@ const DEFAULT_LAYOUT_SETTINGS = {
   color_accent: '#93c8f2',
 }
 
+const LAYOUT_PREVIEW_CHOICES = {
+  content_width: ['compact', 'standard', 'wide'],
+  hero_alignment: ['center', 'left'],
+  hero_size: ['compact', 'large'],
+  section_spacing: ['compact', 'comfortable', 'spacious'],
+  gallery_columns: ['2', '3', '4'],
+  default_gallery_view: ['lista', 'grade'],
+  default_theme: ['escuro', 'claro'],
+}
+const LAYOUT_PREVIEW_COLORS = ['color_background', 'color_surface', 'color_text', 'color_muted', 'color_accent']
+
+function parseLayoutPreview(raw) {
+  try {
+    const candidate = JSON.parse(raw)
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null
+    const safe = {}
+    Object.entries(LAYOUT_PREVIEW_CHOICES).forEach(([key, choices]) => {
+      if (choices.includes(candidate[key])) safe[key] = candidate[key]
+    })
+    LAYOUT_PREVIEW_COLORS.forEach(key => {
+      if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
+    })
+    return safe
+  } catch {
+    return null
+  }
+}
+
 const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
@@ -122,10 +150,7 @@ export default function App() {
     const controller = new AbortController()
 
     const params = new URLSearchParams(window.location.search)
-    let layoutPreview = null
-    if (params.has('layout_preview')) {
-      try { layoutPreview = JSON.parse(params.get('layout_preview')) } catch { layoutPreview = null }
-    }
+    const layoutPreview = params.has('layout_preview') ? parseLayoutPreview(params.get('layout_preview')) : null
     const previewToken = params.get('preview_token')
     const categoryPreviewToken = params.get('category_preview_token')
     const apiUrl = previewToken
