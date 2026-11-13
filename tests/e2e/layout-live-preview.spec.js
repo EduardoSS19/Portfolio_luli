@@ -79,6 +79,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
       contrast(color('--azul-claro'), color('--azul-escuro')),
       contrast(color('--layout-accent-on-surface'), color('--azul-medio')),
       contrast(color('--layout-nav-muted'), color('--azul-medio')),
+      contrast(color('--layout-accent-on-overlay'), '#051421'),
     ]
   })
   for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
