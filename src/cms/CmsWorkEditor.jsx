@@ -175,7 +175,7 @@ export function CmsWorkEditor({ work, categories, isNew = false, onCancel, onSav
     const message = nextPublished
       ? 'Publicar esta obra? Ela ficará visível para todas as pessoas no portfólio.'
       : 'Despublicar esta obra? Ela deixará de aparecer no portfólio público.'
-    if (!(await confirm({ title: nextPublished ? 'Publicar obra?' : 'Despublicar obra?', message, confirmLabel: nextPublished ? 'Publicar obra' : 'Despublicar', variant: 'default' }))) return
+    if (!(await confirm({ title: nextPublished ? 'Publicar obra?' : 'Despublicar obra?', message, target: form.title || work.title || 'Obra sem título', confirmLabel: nextPublished ? 'Publicar obra' : 'Despublicar', variant: 'default' }))) return
     setPublishing(true)
     setError('')
     setSaved(false)
