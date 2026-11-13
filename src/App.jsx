@@ -312,7 +312,6 @@ export default function App() {
         modoGaleria={modoGaleria}
         aoTrocarModo={trocarModoGaleria}
         tema={tema}
-        imagemMarca={conteudo.marca}
         aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
       />
       <Sobre perfil={sobre} />

@@ -66,6 +66,7 @@ export function CmsPage() {
   const { confirm, dialogNode } = useCmsConfirm()
   const [overview, setOverview] = useState(null)
   const [brandImage, setBrandImage] = useState('')
+  const [brandBackgroundColor, setBrandBackgroundColor] = useState('#151612')
   const [analytics, setAnalytics] = useState(null)
   const [works, setWorks] = useState([])
   const [pagination, setPagination] = useState({ total: 0, hasMore: false })
@@ -87,8 +88,8 @@ export function CmsPage() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/cms/profile/', { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(data => { if (active && data?.profile?.brand_image) setBrandImage(data.profile.brand_image) }).catch(() => {})
-    const updateBrand = event => setBrandImage(event.detail || '')
+    fetch('/api/cms/profile/', { credentials: 'same-origin', headers: { Accept: 'application/json' }, cache: 'no-store' }).then(response => response.ok ? response.json() : null).then(data => { if (active && data?.profile) { setBrandImage(data.profile.brand_image || ''); setBrandBackgroundColor(data.profile.brand_background_color || '#151612') } }).catch(() => {})
+    const updateBrand = event => { const detail = event.detail || {}; setBrandImage(detail.image || ''); setBrandBackgroundColor(detail.backgroundColor || '#151612') }
     window.addEventListener('portfolio-brand-image-updated', updateBrand)
     return () => { active = false; window.removeEventListener('portfolio-brand-image-updated', updateBrand) }
   }, [])
@@ -496,7 +497,7 @@ export function CmsPage() {
     <div className="cms-shell">
       <aside className="cms-sidebar">
         <a className="cms-brand" href="/" aria-label="Voltar ao portfólio">
-          {brandImage ? <img className="cms-brand-image" src={brandImage} alt="" /> : <span className="cms-brand-mark">LB<span>.</span></span>}
+          {brandImage ? <img className="cms-brand-image" src={brandImage} alt="" style={{ backgroundColor: brandBackgroundColor }} /> : <span className="cms-brand-mark">LB<span>.</span></span>}
           <span className="cms-brand-caption">ESPAÇO DE EDIÇÃO</span>
         </a>
         <div className="cms-sidebar-label">ESPAÇO DE TRABALHO</div>
@@ -551,7 +552,7 @@ export function CmsPage() {
                   <h1>Olá, Luli<span>.</span></h1>
                   <p>Seu trabalho, organizado em um só lugar.</p>
                 </div>
-                <div className="cms-welcome-art" aria-hidden="true"><span>✳</span><i>LB</i></div>
+                <div className="cms-welcome-art" aria-hidden="true" style={{ backgroundColor: brandBackgroundColor }}>{brandImage ? <img src={brandImage} alt="" /> : <><span>✳</span><i>LB</i></>}</div>
               </section>
               <section className="cms-section-heading">
                 <div><p className="cms-eyebrow">ACERVO</p><h2>Seu portfólio em números</h2></div>

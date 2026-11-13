@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, imagemMarca }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -83,10 +83,6 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
 
   return (
     <nav className={`site-nav editorial-nav ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
-      <button type="button" className="site-home-brand" aria-label="Ir para o início do portfólio" onClick={() => selecionar('Início')}>
-        {imagemMarca ? <img src={imagemMarca} alt="" /> : <span>Início</span>}
-      </button>
-
       <button
         ref={botaoMenuRef}
         type="button"

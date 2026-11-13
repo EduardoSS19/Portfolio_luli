@@ -2023,6 +2023,7 @@ class CmsArtistProfileApiTests(TestCase):
                 "instagram_url": "https://instagram.com/nova",
                 "contact_email": "novo@example.com",
                 "contact_form_url": "",
+                "brand_background_color": "#aabbcc",
             }),
             content_type="application/json",
         )
@@ -2031,6 +2032,7 @@ class CmsArtistProfileApiTests(TestCase):
         self.assertEqual(self.profile.name, "Artista Atualizada")
         self.assertEqual(self.profile.bio, "Linha um\nLinha dois\n\nNovo parágrafo")
         self.assertEqual(self.profile.contact_email, "novo@example.com")
+        self.assertEqual(self.profile.brand_background_color, "#aabbcc")
 
     def test_invalid_profile_fields_are_rejected(self):
         self.client.force_login(self.editor)
@@ -2047,6 +2049,18 @@ class CmsArtistProfileApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.profile.refresh_from_db()
         self.assertEqual(self.profile.name, "Artista")
+
+    def test_invalid_brand_background_color_is_rejected(self):
+        self.client.force_login(self.editor)
+        response = self.client.patch(
+            reverse("cms-profile"),
+            data=json.dumps({"name": "Artista", "bio": "Bio", "brand_background_color": "not-a-color"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("brand_background_color", response.json()["fields"])
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.brand_background_color, "#151612")
 
     def test_staff_without_profile_permission_cannot_update(self):
         staff = get_user_model().objects.create_user(username="cms-profile-readonly", is_staff=True)
