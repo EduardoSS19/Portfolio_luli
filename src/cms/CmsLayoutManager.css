@@ -244,8 +244,10 @@
 .cms-layout-group-heading h2{margin:.1rem 0 0;color:var(--cms-text,#f2f0e8);font:400 1.3rem Georgia,serif}
 .cms-layout-group-heading>div>p:last-child{margin:.3rem 0 .65rem;color:var(--cms-muted,#aaa99f);font-size:.76rem;line-height:1.45}
 .cms-layout-group-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;min-width:0}
-/* Mesmo modelo da janela flutuante: estágio com a altura visual escalada e iframe
-   em dimensões lógicas, centralizado sem regras posicionais concorrentes. */
-.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{width:100%;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline iframe{position:relative;top:auto;left:auto;flex:0 0 auto;transform-origin:center center;max-width:none;max-height:none}
+/* Shell com dimensões já escaladas: o iframe mantém o viewport lógico e o shell
+   reserva exatamente sua área visual, sem depender da caixa transformada do iframe. */
+.cms-layout-preview-frame-scaled{display:flex;align-items:center;justify-content:center}
+.cms-layout-preview-stage-scaled{position:relative;flex:0 0 auto;min-width:0;min-height:0;overflow:hidden}
+.cms-layout-preview-stage-scaled iframe{position:absolute;top:0;left:0;display:block;flex:none;transform-origin:top left;max-width:none;max-height:none}
+.cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{width:auto;min-height:0}
 @media(max-width:900px){.cms-layout-group-fields{grid-template-columns:1fr}}
