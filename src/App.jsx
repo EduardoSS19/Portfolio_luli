@@ -314,6 +314,9 @@ export default function App() {
     '--texto': effectiveColors.color_text,
     '--linha': effectiveColors.color_muted + '44',
     '--layout-muted': effectiveColors.color_muted,
+    '--rodape-fundo': usesDefaultDarkPalette ? (tema === 'claro' ? '#f1f6fa' : '#02070d') : effectiveColors.color_background,
+    '--rodape-texto': usesDefaultDarkPalette ? (tema === 'claro' ? '#172b3b' : '#eff7ff') : effectiveColors.color_text,
+    '--rodape-muted': usesDefaultDarkPalette ? (tema === 'claro' ? 'rgba(23,43,59,.66)' : 'rgba(239,247,255,.58)') : effectiveColors.color_muted,
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: effectiveColors.color_background, color: effectiveColors.color_text },
