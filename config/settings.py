@@ -152,7 +152,9 @@ SECURE_HSTS_SECONDS = int(
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-X_FRAME_OPTIONS = "DENY"
+# Permite que o próprio site seja exibido no iframe de prévia do CMS.
+# SAMEORIGIN continua bloqueando incorporação por sites externos (clickjacking).
+X_FRAME_OPTIONS = "SAMEORIGIN"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
