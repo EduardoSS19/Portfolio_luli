@@ -38,7 +38,7 @@ export function CmsLayoutManager(){
   const [previewMode,setPreviewMode]=useState(false)
   const [previewOpen,setPreviewOpen]=useState(false)
   const [previewMaximized,setPreviewMaximized]=useState(false)
-  const [previewPosition,setPreviewPosition]=useState({x:32,y:104})
+  const [previewPosition,setPreviewPosition]=useState({x:24,y:72})
   const previewDragRef=useRef(null)
   const [previewDevice,setPreviewDevice]=useState('desktop')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
@@ -72,7 +72,7 @@ export function CmsLayoutManager(){
     const observer=new ResizeObserver(update)
     observer.observe(element)
     return()=>observer.disconnect()
-  },[])
+  },[previewOpen])
   useEffect(()=>()=>previewContentObserverRef.current?.disconnect(),[])
   const measurePreviewDocument=()=>{
     const doc=previewIframeRef.current?.contentDocument
