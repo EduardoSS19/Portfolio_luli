@@ -56,8 +56,8 @@
 .cms-layout-preview-devices button.active{border-color:rgba(177,194,137,.45);color:var(--cms-text,#f2f0e8);background:rgba(177,194,137,.13)}
 .cms-layout-preview-devices button:focus-visible{outline:2px solid var(--cms-text,#f2f0e8);outline-offset:2px}
 .cms-layout-preview-frame{width:100%;height:min(72vh,760px);min-height:420px;overflow:hidden;overscroll-behavior:contain;border:1px solid var(--cms-border,rgba(255,255,255,.12));border-radius:10px;background:#061522}
-.cms-layout-preview-stage{position:relative;width:100%;overflow:hidden;min-height:100%}
-.cms-layout-preview-frame iframe{position:absolute;top:0;left:50%;display:block;border:0;background:transparent;transform-origin:top center}
+.cms-layout-preview-stage{position:relative;display:flex;align-items:center;justify-content:center;width:100%;overflow:hidden;min-height:100%}
+.cms-layout-preview-frame iframe{position:relative;top:auto;left:auto;display:block;flex:0 0 auto;border:0;background:transparent;transform-origin:center center}
 .cms-layout-preview-caption{margin:.65rem .25rem .15rem;color:var(--cms-muted,#aaa99f);font-size:.68rem;line-height:1.5}
 .cms-layout-page .cms-editor-actions{flex-wrap:wrap}
 .cms-layout-page .cms-editor-save-actions{display:flex;flex-wrap:wrap;gap:.5rem}
