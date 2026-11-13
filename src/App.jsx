@@ -274,16 +274,24 @@ export default function App() {
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
+  const usesDefaultDarkPalette = layout.color_background === '#061522'
+    && layout.color_surface === '#0b2943'
+    && layout.color_text === '#eff7ff'
+    && layout.color_muted === '#a9bdcc'
+    && layout.color_accent === '#93c8f2'
+  const effectiveColors = tema === 'claro' && usesDefaultDarkPalette
+    ? { color_background: '#f5f2eb', color_surface: '#ffffff', color_text: '#24231f', color_muted: '#77746c', color_accent: '#657c62' }
+    : layout
   const layoutColors = {
-    '--azul-escuro': layout.color_background,
-    '--azul-medio': layout.color_surface,
-    '--azul-claro': layout.color_accent,
-    '--texto': layout.color_text,
-    '--linha': layout.color_muted + '44',
-    '--layout-muted': layout.color_muted,
+    '--azul-escuro': effectiveColors.color_background,
+    '--azul-medio': effectiveColors.color_surface,
+    '--azul-claro': effectiveColors.color_accent,
+    '--texto': effectiveColors.color_text,
+    '--linha': effectiveColors.color_muted + '44',
+    '--layout-muted': effectiveColors.color_muted,
   }
   const layoutAttributes = {
-    style: { ...layoutColors, background: layout.color_background, color: layout.color_text },
+    style: { ...layoutColors, background: effectiveColors.color_background, color: effectiveColors.color_text },
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
