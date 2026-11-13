@@ -4,7 +4,8 @@ import './CmsLayoutManager.css'
 const DEFAULTS = {
   content_width:'standard', hero_alignment:'center', hero_size:'large',
   section_spacing:'comfortable', gallery_columns:'3', default_gallery_view:'lista', default_theme:'escuro',
-  color_background:'#061522', color_surface:'#0b2943', color_text:'#eff7ff', color_muted:'#a9bdcc', color_accent:'#93c8f2',
+  dark_color_background:'#061522', dark_color_surface:'#0b2943', dark_color_text:'#eff7ff', dark_color_muted:'#a9bdcc', dark_color_accent:'#93c8f2',
+  light_color_background:'#f5f2eb', light_color_surface:'#ffffff', light_color_text:'#24231f', light_color_muted:'#77746c', light_color_accent:'#657c62',
 }
 const FIELDS = [
   {name:'content_width',title:'Largura do conteúdo',description:'Define quanto espaço o conteúdo ocupa em telas maiores.',options:[['compact','Enxuto','Mais foco e respiro lateral'],['standard','Equilibrado','Proporção atual'],['wide','Amplo','Mais espaço para imagens']]},
@@ -26,7 +27,7 @@ const PALETTES = [
   {name:'Terracota',colors:['#211815','#382720','#fff0e5','#cdb8aa','#d98d68']},
   {name:'Galeria clara',colors:['#f5f2eb','#ffffff','#24231f','#77746c','#657c62']},
 ]
-const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440 }, tablet: { label:'Tablet', width:768 }, mobile: { label:'Celular', width:390 } }
+const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, tablet: { label:'Tablet', width:768, height:1024 }, mobile: { label:'Celular', width:390, height:844 } }
 
 function readCookie(name){const prefix=name+'=';const item=document.cookie.split('; ').find(cookie=>cookie.startsWith(prefix));return item?decodeURIComponent(item.slice(prefix.length)):''}
 function luminance(hex){const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722}
@@ -44,17 +45,17 @@ export function CmsLayoutManager(){
   const inlinePreviewIframeRef=useRef(null)
   const inlinePreviewViewportRef=useRef(null)
   const [previewDevice,setPreviewDevice]=useState('desktop')
+  const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
   const [inlinePreviewWidth,setInlinePreviewWidth]=useState(0)
-  const [previewDocumentHeight,setPreviewDocumentHeight]=useState(2400)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
-  const previewContentObserverRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
+  const previewHeight=PREVIEW_DEVICES[previewDevice].height
   const previewScale=previewContainerWidth>0?Math.min(1,previewContainerWidth/previewWidth):1
-  const previewStageHeight=Math.ceil(previewDocumentHeight*previewScale)
+  const previewStageHeight=Math.ceil(previewHeight*previewScale)
   const inlinePreviewScale=inlinePreviewWidth>0?Math.min(1,inlinePreviewWidth/previewWidth):1
-  const inlinePreviewStageHeight=Math.ceil(previewDocumentHeight*inlinePreviewScale)
+  const inlinePreviewStageHeight=Math.ceil(previewHeight*inlinePreviewScale)
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -104,36 +105,6 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[])
-  useEffect(()=>()=>previewContentObserverRef.current?.disconnect(),[])
-  const measurePreviewDocument=(frame=previewIframeRef.current)=>{
-    const doc=frame?.contentDocument
-    if(!doc)return
-    const measure=()=>{
-      const height=Math.max(
-        doc.documentElement?.scrollHeight||0,
-        doc.documentElement?.offsetHeight||0,
-        doc.body?.scrollHeight||0,
-        doc.body?.offsetHeight||0,
-        doc.documentElement?.clientHeight||0,
-        600
-      )
-      setPreviewDocumentHeight(height)
-    }
-    previewContentObserverRef.current?.disconnect()
-    measure()
-    if(typeof ResizeObserver!=='undefined'){
-      const observer=new ResizeObserver(measure)
-      if(doc.documentElement)observer.observe(doc.documentElement)
-      if(doc.body)observer.observe(doc.body)
-      previewContentObserverRef.current=observer
-    }else{
-      const view=doc.defaultView
-      view?.addEventListener('resize',measure)
-      previewContentObserverRef.current={disconnect:()=>view?.removeEventListener('resize',measure)}
-    }
-    doc.fonts?.ready?.then(measure)
-    doc.querySelectorAll('img').forEach(image=>image.addEventListener('load',measure,{once:true}))
-  }
   useEffect(()=>{
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
@@ -144,9 +115,10 @@ export function CmsLayoutManager(){
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
   const previewUrl=useMemo(()=> '/?layout_preview='+encodeURIComponent(JSON.stringify(settings)),[settings])
-  const contrast=useMemo(()=>contrastRatio(settings.color_text,settings.color_background),[settings.color_text,settings.color_background])
-  const change=(name,value)=>{setSettings(current=>({...current,[name]:value}));setError('');setNotice('')}
-  const applyPalette=colors=>{const [color_background,color_surface,color_text,color_muted,color_accent]=colors;setSettings(current=>({...current,color_background,color_surface,color_text,color_muted,color_accent}));setError('');setNotice('')}
+  const colorKey=name=>`${editingTheme}_${name}`
+  const contrast=useMemo(()=>contrastRatio(settings[colorKey('color_text')],settings[colorKey('color_background')]),[settings,editingTheme])
+  const change=(name,value)=>{setSettings(current=>({...current,[colorKey(name)]:value}));setError('');setNotice('')}
+  const applyPalette=colors=>{const [color_background,color_surface,color_text,color_muted,color_accent]=colors;setSettings(current=>({...current,[colorKey('color_background')]:color_background,[colorKey('color_surface')]:color_surface,[colorKey('color_text')]:color_text,[colorKey('color_muted')]:color_muted,[colorKey('color_accent')]:color_accent}));setError('');setNotice('')}
   const save=async event=>{
     event.preventDefault();setSaving(true);setError('');setNotice('')
     try{
@@ -168,22 +140,24 @@ export function CmsLayoutManager(){
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
-          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings.color_accent}}/></div>
-          <p className="cms-layout-help">Escolha uma paleta ou ajuste cada cor individualmente.</p>
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
+          <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
+          <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
+          <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
           <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className="cms-layout-palette" key={palette.name} onClick={()=>applyPalette(palette.colors)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{palette.colors.map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
-          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[name]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label}/><code>{settings[name].toUpperCase()}</code></span></label>)}</div>
+          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Bom contraste de texto':'Contraste abaixo do recomendado'}</strong><small>{'Relação de contraste: '+contrast.toFixed(2)+':1. Para texto comum, procure pelo menos 4,5:1.'}</small></div></div>
         </section>
         <div className="cms-layout-fields">{FIELDS.map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
-      {previewOpen&&<aside className={'cms-layout-preview-panel floating'+(previewMaximized?' maximized':'')} aria-label="Janela flutuante de prévia" style={previewMaximized?undefined:{left:previewPosition.x,top:previewPosition.y,width:previewSize.width,height:previewSize.height}}><div className="cms-layout-preview-heading" onPointerDown={startPreviewDrag} onPointerMove={movePreviewDrag} onPointerUp={stopPreviewDrag} onPointerCancel={stopPreviewDrag}><div><p className="cms-eyebrow">PRÉVIA AO VIVO</p><strong>Seu portfólio</strong><small className="cms-layout-preview-drag-hint">Arraste para mover</small></div><div className="cms-layout-preview-window-actions"><span>Não publicado</span><button className="cms-preview-window-button" type="button" aria-label={previewMaximized?'Restaurar janela':'Maximizar janela'} title={previewMaximized?'Restaurar':'Maximizar'} onClick={()=>setPreviewMaximized(value=>!value)}><svg viewBox="0 0 20 20" aria-hidden="true">{previewMaximized?<path d="M7 3v2H5v10h10v-2h2v4H3V3h4zm3 0h7v7h-2V6.4l-6.3 6.3-1.4-1.4L13.6 5H10V3z"/>:<path d="M3 3h14v14H3V3zm2 2v10h10V5H5z"/>}</svg></button><button className="cms-preview-window-button close" type="button" aria-label="Fechar janela flutuante" title="Fechar" onClick={()=>setPreviewOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame" ref={previewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:previewStageHeight}}><iframe ref={previewIframeRef} key={`${previewUrl}:${previewDevice}`} title={`Prévia flutuante em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="eager" scrolling="no" onLoad={()=>measurePreviewDocument(previewIframeRef.current)} style={{width:previewWidth,height:previewDocumentHeight,transform:`translateX(-50%) scale(${previewScale})`}}/></div></div><p className="cms-layout-preview-caption">Largura real do dispositivo. Role dentro da janela. Nada será publicado até salvar.</p>{!previewMaximized&&<button className="cms-preview-resize-handle" type="button" aria-label="Redimensionar janela de prévia" title="Arraste para redimensionar" onPointerDown={startPreviewResize} onPointerMove={movePreviewResize} onPointerUp={stopPreviewResize} onPointerCancel={stopPreviewResize}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M10 15l5-5"/></svg></button>}</aside>}
+      {previewOpen&&<aside className={'cms-layout-preview-panel floating'+(previewMaximized?' maximized':'')} aria-label="Janela flutuante de prévia" style={previewMaximized?undefined:{left:previewPosition.x,top:previewPosition.y,width:previewSize.width,height:previewSize.height}}><div className="cms-layout-preview-heading" onPointerDown={startPreviewDrag} onPointerMove={movePreviewDrag} onPointerUp={stopPreviewDrag} onPointerCancel={stopPreviewDrag}><div><p className="cms-eyebrow">PRÉVIA AO VIVO</p><strong>Seu portfólio</strong><small className="cms-layout-preview-drag-hint">Arraste para mover</small></div><div className="cms-layout-preview-window-actions"><span>Não publicado</span><button className="cms-preview-window-button" type="button" aria-label={previewMaximized?'Restaurar janela':'Maximizar janela'} title={previewMaximized?'Restaurar':'Maximizar'} onClick={()=>setPreviewMaximized(value=>!value)}><svg viewBox="0 0 20 20" aria-hidden="true">{previewMaximized?<path d="M7 3v2H5v10h10v-2h2v4H3V3h4zm3 0h7v7h-2V6.4l-6.3 6.3-1.4-1.4L13.6 5H10V3z"/>:<path d="M3 3h14v14H3V3zm2 2v10h10V5H5z"/>}</svg></button><button className="cms-preview-window-button close" type="button" aria-label="Fechar janela flutuante" title="Fechar" onClick={()=>setPreviewOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame" ref={previewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:previewStageHeight}}><iframe ref={previewIframeRef} key={`${previewUrl}:${previewDevice}`} title={`Prévia flutuante em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`translateX(-50%) scale(${previewScale})`}}/></div></div><p className="cms-layout-preview-caption">Largura real do dispositivo. Role dentro da janela. Nada será publicado até salvar.</p>{!previewMaximized&&<button className="cms-preview-resize-handle" type="button" aria-label="Redimensionar janela de prévia" title="Arraste para redimensionar" onPointerDown={startPreviewResize} onPointerMove={movePreviewResize} onPointerUp={stopPreviewResize} onPointerCancel={stopPreviewResize}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M10 15l5-5"/></svg></button>}</aside>}
     </div>
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" ref={inlinePreviewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} key={`inline:${previewUrl}:${previewDevice}`} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="no" onLoad={()=>measurePreviewDocument(inlinePreviewIframeRef.current)} style={{width:previewWidth,height:previewDocumentHeight,transform:`translateX(-50%) scale(${inlinePreviewScale})`}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline" ref={inlinePreviewViewportRef} data-device={previewDevice}><div className="cms-layout-preview-stage" style={{height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} key={`inline:${previewUrl}:${previewDevice}`} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`translateX(-50%) scale(${inlinePreviewScale})`}}/></div></div>
       <p className="cms-layout-preview-caption">Percorra a página inteira aqui embaixo. A janela flutuante pode ficar aberta ao mesmo tempo para conferir outra posição do editor.</p>
     </section>
   </section>
