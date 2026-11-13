@@ -21,6 +21,39 @@ const DEFAULT_LAYOUT_SETTINGS = {
   gallery_columns: '3',
   default_gallery_view: 'lista',
   default_theme: 'escuro',
+  color_background: '#061522',
+  color_surface: '#0b2943',
+  color_text: '#eff7ff',
+  color_muted: '#a9bdcc',
+  color_accent: '#93c8f2',
+}
+
+const LAYOUT_PREVIEW_CHOICES = {
+  content_width: ['compact', 'standard', 'wide'],
+  hero_alignment: ['center', 'left'],
+  hero_size: ['compact', 'large'],
+  section_spacing: ['compact', 'comfortable', 'spacious'],
+  gallery_columns: ['2', '3', '4'],
+  default_gallery_view: ['lista', 'grade'],
+  default_theme: ['escuro', 'claro'],
+}
+const LAYOUT_PREVIEW_COLORS = ['color_background', 'color_surface', 'color_text', 'color_muted', 'color_accent']
+
+function parseLayoutPreview(raw) {
+  try {
+    const candidate = JSON.parse(raw)
+    if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null
+    const safe = {}
+    Object.entries(LAYOUT_PREVIEW_CHOICES).forEach(([key, choices]) => {
+      if (choices.includes(candidate[key])) safe[key] = candidate[key]
+    })
+    LAYOUT_PREVIEW_COLORS.forEach(key => {
+      if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
+    })
+    return safe
+  } catch {
+    return null
+  }
 }
 
 const perfilInicial = {
@@ -117,6 +150,7 @@ export default function App() {
     const controller = new AbortController()
 
     const params = new URLSearchParams(window.location.search)
+    const layoutPreview = params.has('layout_preview') ? parseLayoutPreview(params.get('layout_preview')) : null
     const previewToken = params.get('preview_token')
     const categoryPreviewToken = params.get('category_preview_token')
     const apiUrl = previewToken
@@ -138,9 +172,9 @@ export default function App() {
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
           marca: data.marca || '',
-          layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) },
+          layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) },
         }))
-        const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) }
+        const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) }
         setModoGaleria(layout.default_gallery_view)
         setTema(layout.default_theme)
         setPrevisualizacao(data.preview ?? null)
@@ -264,7 +298,25 @@ export default function App() {
 
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
+  const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
+  const usesDefaultDarkPalette = layout.color_background === '#061522'
+    && layout.color_surface === '#0b2943'
+    && layout.color_text === '#eff7ff'
+    && layout.color_muted === '#a9bdcc'
+    && layout.color_accent === '#93c8f2'
+  const effectiveColors = tema === 'claro' && usesDefaultDarkPalette
+    ? { color_background: '#f5f2eb', color_surface: '#ffffff', color_text: '#24231f', color_muted: '#77746c', color_accent: '#657c62' }
+    : layout
+  const layoutColors = {
+    '--azul-escuro': effectiveColors.color_background,
+    '--azul-medio': effectiveColors.color_surface,
+    '--azul-claro': effectiveColors.color_accent,
+    '--texto': effectiveColors.color_text,
+    '--linha': effectiveColors.color_muted + '44',
+    '--layout-muted': effectiveColors.color_muted,
+  }
   const layoutAttributes = {
+    style: { ...layoutColors, background: effectiveColors.color_background, color: effectiveColors.color_text },
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
@@ -320,6 +372,7 @@ export default function App() {
 
   return (
     <div className="site-shell" {...layoutAttributes}>
+      {isLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho

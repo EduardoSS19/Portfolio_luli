@@ -1,33 +1,8 @@
-/* CMS-controlled layout settings. Values are allow-listed by the Django API. */
-.site-shell[data-layout-width="compact"] .secao { max-width:900px; }
-.site-shell[data-layout-width="wide"] .secao { max-width:1380px; }
-.site-shell[data-layout-width="compact"] .galeria-grade-global { width:min(100% - 3rem,1120px); }
-.site-shell[data-layout-width="wide"] .galeria-grade-global { width:min(100% - 3rem,1780px); }
-
-.site-shell[data-layout-hero-align="left"] .hero { width:min(100% - 3rem,1380px); margin-inline:auto; text-align:left; }
-.site-shell[data-layout-hero-align="left"] .hero-linha { margin-left:0; margin-right:auto; }
-.site-shell[data-layout-hero-size="compact"] .hero { padding-top:1.1rem; padding-bottom:.45rem; }
-.site-shell[data-layout-hero-size="compact"] .hero h1 { font-size:clamp(1.8rem,4.8vw,2.8rem); }
-.site-shell[data-layout-hero-size="large"] .hero { padding-top:clamp(3rem,7vw,6rem); padding-bottom:clamp(1.2rem,3vw,2.4rem); }
-
-.site-shell[data-layout-spacing="compact"] .secao { padding-top:1.65rem; padding-bottom:1.65rem; }
-.site-shell[data-layout-spacing="spacious"] .secao { padding-top:4.8rem; padding-bottom:4.8rem; }
-.site-shell[data-layout-spacing="compact"] .obras-lista:not(.modo-grade) { gap:2.4rem; }
-.site-shell[data-layout-spacing="spacious"] .obras-lista:not(.modo-grade) { gap:5.6rem; }
-.site-shell[data-layout-spacing="compact"] .galeria-grade-global { padding-bottom:2.5rem; }
-.site-shell[data-layout-spacing="spacious"] .galeria-grade-global { padding-bottom:6rem; }
-
-@media (min-width:901px) {
-  .site-shell[data-layout-gallery-columns="2"] .galeria-grade-global .obras-lista.modo-grade { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .site-shell[data-layout-gallery-columns="3"] .galeria-grade-global .obras-lista.modo-grade { grid-template-columns:repeat(3,minmax(0,1fr)); }
-  .site-shell[data-layout-gallery-columns="4"] .galeria-grade-global .obras-lista.modo-grade { grid-template-columns:repeat(4,minmax(0,1fr)); }
-}
-@media (max-width:900px) {
-  .site-shell[data-layout-hero-align="left"] .hero { width:calc(100% - 2rem); }
-}
-@media (max-width:600px) {
-  .site-shell[data-layout-width="compact"] .secao,
-  .site-shell[data-layout-width="wide"] .secao { width:100%; }
-  .site-shell[data-layout-spacing="spacious"] .secao { padding-top:3rem; padding-bottom:3rem; }
-  .site-shell[data-layout-spacing="compact"] .secao { padding-top:1.4rem; padding-bottom:1.4rem; }
-}
+/* CMS color tokens: HEX values are validated by Django before persistence. */
+.site-shell[data-layout-width]{background:var(--azul-escuro);color:var(--texto)}
+.site-shell[data-layout-width] .obra,.site-shell[data-layout-width] .referencia-item{background:var(--azul-medio);color:var(--texto)}
+.site-shell[data-layout-width] .editorial-menu-backdrop{background:linear-gradient(145deg,var(--azul-escuro),var(--azul-medio))}
+.site-shell[data-layout-width] .editorial-menu-trigger,.site-shell[data-layout-width] .alternar-modo-flutuante,.site-shell[data-layout-width] .editorial-menu-control{color:var(--texto);border-color:color-mix(in srgb,var(--azul-claro) 35%,transparent);background:color-mix(in srgb,var(--azul-medio) 88%,transparent)}
+.site-shell[data-layout-width] .hero p,.site-shell[data-layout-width] .obra-texto p,.site-shell[data-layout-width] .editorial-menu-heading p{color:var(--layout-muted,var(--texto))}
+.site-shell[data-layout-width] .secao h2,.site-shell[data-layout-width] .hero-kicker,.site-shell[data-layout-width] .categoria-legenda,.site-shell[data-layout-width] .editorial-menu-number,.site-shell[data-layout-width] .editorial-menu-arrow{color:var(--azul-claro)}
+.layout-preview-banner{position:relative;z-index:80;padding:.7rem 1rem;color:#171912;background:#d7dda9;text-align:center;font:700 .68rem/1.4 "Segoe UI",system-ui,sans-serif;letter-spacing:.12em}
