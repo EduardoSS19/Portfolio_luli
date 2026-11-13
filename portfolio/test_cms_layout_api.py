@@ -109,3 +109,27 @@ class CmsLayoutApiTests(TestCase):
         )
         self.assertEqual(rejected.status_code, 403)
         self.assertEqual(accepted.status_code, 200)
+
+
+    def test_editor_can_save_independent_bio_and_references_visibility(self):
+        self.client.force_login(self.staff)
+        response = self.client.patch(
+            reverse("cms-layout"),
+            data=json.dumps({"show_bio_image": False, "show_bio": True, "show_references": False}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertFalse(response.json()["settings"]["show_bio_image"])
+        self.assertTrue(response.json()["settings"]["show_bio"])
+        self.assertFalse(response.json()["settings"]["show_references"])
+        self.assertFalse(self.profile.layout_settings["show_references"])
+
+    def test_visibility_options_reject_non_boolean_values(self):
+        self.client.force_login(self.staff)
+        response = self.client.patch(
+            reverse("cms-layout"),
+            data=json.dumps({"show_bio": "false"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
