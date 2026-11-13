@@ -14,12 +14,10 @@
   color:var(--texto);
 }
 .site-shell[data-layout-width] .obra-galeria{
-  background:color-mix(in srgb,var(--azul-medio) 82%,var(--azul-escuro));
+  background:var(--azul-medio);
 }
 .site-shell[data-layout-width] .obra-imagem{
-  background:
-    radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--azul-claro) 16%,transparent),transparent 55%),
-    var(--azul-medio);
+  background:var(--azul-medio);
 }
 .site-shell[data-layout-width] .editorial-menu-backdrop{
   background:linear-gradient(145deg,var(--azul-escuro),var(--azul-medio));
@@ -28,8 +26,8 @@
 .site-shell[data-layout-width] .alternar-modo-flutuante,
 .site-shell[data-layout-width] .editorial-menu-control{
   color:var(--texto);
-  border-color:color-mix(in srgb,var(--azul-claro) 35%,transparent);
-  background:color-mix(in srgb,var(--azul-medio) 88%,transparent);
+  border-color:var(--azul-claro);
+  background:var(--azul-medio);
 }
 .site-shell[data-layout-width] .hero p,
 .site-shell[data-layout-width] .obra-texto p,
