@@ -10,7 +10,7 @@ export function Sobre({ perfil, mostrarImagem = true, mostrarBio = true }) {
           {perfil.foto ? <img src={perfil.foto} alt={perfil.nome} /> : <span>Foto da artista</span>}
         </div>}
         <div className="obra-texto">
-          <span className="categoria-legenda">Início</span>
+          {mostrarBio && <span className="categoria-legenda">Início</span>}
           <h2>{perfil.nome}</h2>
           {mostrarBio && <p className="biografia" style={{ whiteSpace: 'pre-line' }}>{perfil.bio}</p>}
         </div>
