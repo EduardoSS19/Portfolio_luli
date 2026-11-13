@@ -297,7 +297,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:'100%',height:'100%'}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:'100%',height:'100%',transform:'none'}}/>>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:'100%',height:'100%',transform:'none'}}/>
             </div>
           </div>
           <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
