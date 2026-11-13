@@ -318,7 +318,7 @@ export default function App() {
     color_surface: layout[`${palettePrefix}_color_surface`],
     color_text: layout[`${palettePrefix}_color_text`],
     color_muted: layout[`${palettePrefix}_color_muted`],
-    color_accent: layout[`${palettePrefix}_color_accent'],
+    color_accent: layout[`${palettePrefix}_color_accent`],
   }
   const layoutColors = {
     '--azul-escuro': effectiveColors.color_background,
