@@ -193,6 +193,7 @@ def portfolio_data(request):
                 else None
             ),
             "frames": [_otimizada(frame.image.url, 900, "e_saturation:-35") for frame in frames],
+            "marca": _image_url(profile.brand_image, "", 300) if profile and profile.brand_image else "",
             "redes": [
                 {"titulo": social.title, "url": social.url}
                 for social in social_links
