@@ -21,11 +21,16 @@ const DEFAULT_LAYOUT_SETTINGS = {
   gallery_columns: '3',
   default_gallery_view: 'lista',
   default_theme: 'escuro',
-  color_background: '#061522',
-  color_surface: '#0b2943',
-  color_text: '#eff7ff',
-  color_muted: '#a9bdcc',
-  color_accent: '#93c8f2',
+  dark_color_background: '#061522',
+  dark_color_surface: '#0b2943',
+  dark_color_text: '#eff7ff',
+  dark_color_muted: '#a9bdcc',
+  dark_color_accent: '#93c8f2',
+  light_color_background: '#f5f2eb',
+  light_color_surface: '#ffffff',
+  light_color_text: '#24231f',
+  light_color_muted: '#77746c',
+  light_color_accent: '#657c62',
 }
 
 const LAYOUT_PREVIEW_CHOICES = {
@@ -37,7 +42,7 @@ const LAYOUT_PREVIEW_CHOICES = {
   default_gallery_view: ['lista', 'grade'],
   default_theme: ['escuro', 'claro'],
 }
-const LAYOUT_PREVIEW_COLORS = ['color_background', 'color_surface', 'color_text', 'color_muted', 'color_accent']
+const LAYOUT_PREVIEW_COLORS = ['dark_color_background','dark_color_surface','dark_color_text','dark_color_muted','dark_color_accent','light_color_background','light_color_surface','light_color_text','light_color_muted','light_color_accent']
 
 function parseLayoutPreview(raw) {
   try {
@@ -89,6 +94,14 @@ export default function App() {
     document.documentElement.dataset.theme = tema
     document.documentElement.style.colorScheme = tema === 'claro' ? 'light' : 'dark'
   }, [tema])
+
+  useEffect(() => {
+    const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(conteudo.layout || {}) }
+    const prefix = tema === 'claro' ? 'light' : 'dark'
+    const background = layout[`${prefix}_color_background`]
+    document.documentElement.style.setProperty('--layout-page-background', background)
+    document.body.style.background = 'var(--layout-page-background)'
+  }, [conteudo.layout, tema])
   const secoesNav = useMemo(() => [
     { titulo: 'Início', chave: 'inicio' },
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
@@ -299,14 +312,14 @@ export default function App() {
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
-  const usesDefaultDarkPalette = layout.color_background === '#061522'
-    && layout.color_surface === '#0b2943'
-    && layout.color_text === '#eff7ff'
-    && layout.color_muted === '#a9bdcc'
-    && layout.color_accent === '#93c8f2'
-  const effectiveColors = tema === 'claro' && usesDefaultDarkPalette
-    ? { color_background: '#f5f2eb', color_surface: '#ffffff', color_text: '#24231f', color_muted: '#77746c', color_accent: '#657c62' }
-    : layout
+  const palettePrefix = tema === 'claro' ? 'light' : 'dark'
+  const effectiveColors = {
+    color_background: layout[`${palettePrefix}_color_background`],
+    color_surface: layout[`${palettePrefix}_color_surface`],
+    color_text: layout[`${palettePrefix}_color_text`],
+    color_muted: layout[`${palettePrefix}_color_muted`],
+    color_accent: layout[`${palettePrefix}_color_accent'],
+  }
   const layoutColors = {
     '--azul-escuro': effectiveColors.color_background,
     '--azul-medio': effectiveColors.color_surface,
@@ -314,9 +327,9 @@ export default function App() {
     '--texto': effectiveColors.color_text,
     '--linha': effectiveColors.color_muted + '44',
     '--layout-muted': effectiveColors.color_muted,
-    '--rodape-fundo': usesDefaultDarkPalette ? (tema === 'claro' ? '#f1f6fa' : '#02070d') : effectiveColors.color_background,
-    '--rodape-texto': usesDefaultDarkPalette ? (tema === 'claro' ? '#172b3b' : '#eff7ff') : effectiveColors.color_text,
-    '--rodape-muted': usesDefaultDarkPalette ? (tema === 'claro' ? 'rgba(23,43,59,.66)' : 'rgba(239,247,255,.58)') : effectiveColors.color_muted,
+    '--rodape-fundo': effectiveColors.color_background,
+    '--rodape-texto': effectiveColors.color_text,
+    '--rodape-muted': effectiveColors.color_muted,
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: effectiveColors.color_background, color: effectiveColors.color_text },
