@@ -145,6 +145,20 @@ export default function App() {
   }, [modoGaleria])
 
   useEffect(() => {
+    if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
+      const focus = new URLSearchParams(window.location.search).get('layout_preview_focus')
+      const selector = focus === 'hero' ? '.hero' : focus === 'gallery'
+        ? (modoGaleria === 'grade' ? '.galeria-grade-global' : '.secao')
+        : null
+      if (selector) {
+        window.requestAnimationFrame(() => {
+          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+        })
+      }
+    }
+  }, [carregando, modoGaleria])
+
+  useEffect(() => {
     function atualizarBotaoTopo() {
       setMostrarVoltarTopo(window.scrollY > 560)
     }
