@@ -141,3 +141,19 @@
 .site-shell[data-layout-width] nav.site-nav button:not(.ativo) {
   color:var(--layout-nav-muted,var(--layout-muted))!important;
 }
+
+.site-shell[data-layout-width] .obra-focus-caption > span,
+.site-shell[data-layout-width] .obra-focus-metadados > span,
+.site-shell[data-layout-width] .obra-focus-detalhe {
+  color:var(--layout-accent-on-overlay,#fff)!important;
+}
+.site-shell[data-layout-width] .obra-focus-caption button,
+.site-shell[data-layout-width] .form-contato button,
+.site-shell[data-layout-width] .nav-gallery-switch button.ativo {
+  color:var(--layout-text-on-accent,var(--texto))!important;
+}
+.site-shell[data-layout-width] .editorial-menu-heading>span,
+.site-shell[data-layout-width] .editorial-menu-number,
+.site-shell[data-layout-width] .editorial-menu-arrow {
+  color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
