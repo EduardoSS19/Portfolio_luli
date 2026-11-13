@@ -12,9 +12,7 @@
 html{ scroll-behavior:smooth; scroll-padding-top:6rem; }
 body{
   min-width:320px;
-  background:
-    radial-gradient(ellipse at 50% -20%, rgba(52,113,166,0.32), transparent 55%),
-    linear-gradient(160deg, #061522 0%, #0a233a 58%, #102f4c 100%);
+  background:var(--layout-page-background,linear-gradient(160deg,#061522 0%,#0a233a 58%,#102f4c 100%));
   color:var(--texto);
 }
 .site-shell{ position:relative; z-index:1; overflow:clip; }
