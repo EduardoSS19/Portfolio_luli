@@ -35,7 +35,6 @@ function contrastRatio(a,b){const values=[luminance(a),luminance(b)].sort((x,y)=
 export function CmsLayoutManager(){
   const [settings,setSettings]=useState(DEFAULTS),[saved,setSaved]=useState(DEFAULTS),[canChange,setCanChange]=useState(false)
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
-  const [previewMode,setPreviewMode]=useState(false)
   const [previewOpen,setPreviewOpen]=useState(false)
   const [previewMaximized,setPreviewMaximized]=useState(false)
   const [previewPosition,setPreviewPosition]=useState({x:24,y:72})
@@ -133,7 +132,7 @@ export function CmsLayoutManager(){
       <div className="cms-layout-heading-actions"><button type="button" className="cms-secondary-link cms-layout-preview-toggle" onClick={()=>setPreviewOpen(value=>!value)}>{previewOpen?'Fechar prévia':'◉ Abrir prévia flutuante'}</button><a className="cms-secondary-link" href="/" target="_blank" rel="noreferrer">Site publicado ↗</a></div>
     </header>
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
-    <div className={'cms-layout-workspace'+(previewMode?' preview-focused':'')}>
+    <div className="cms-layout-workspace">
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
