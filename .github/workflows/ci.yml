@@ -63,6 +63,7 @@ jobs:
               - 'src/cms/CmsContentManager.jsx'
               - 'src/cms/CmsWorkEditor.jsx'
               - 'src/cms/CmsCategoryManager.jsx'
+              - 'src/cms/CmsPage.css'
               - 'tests/e2e/cms-content.spec.js'
               - 'tests/e2e/cms-save-state.spec.js'
               - 'portfolio/cms_content_api.py'
