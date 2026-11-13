@@ -13,6 +13,7 @@ class ArtistProfile(models.Model):
         validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
     )
     photo_url = models.CharField("URL alternativa da foto", max_length=500, blank=True)
+    brand_image = models.ImageField("imagem da marca", upload_to="identidade/%Y/%m/", blank=True, validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])])
     bio = models.TextField("biografia (separe os parágrafos com linha em branco)")
     instagram_url = models.URLField("Instagram", max_length=500, blank=True)
     contact_email = models.EmailField("e-mail de contato", blank=True)
