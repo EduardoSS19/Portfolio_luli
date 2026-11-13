@@ -159,6 +159,8 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await page.getByRole('button', { name: 'Abrir janela flutuante' }).click()
   const floatingFrame = page.locator('iframe[title="Prévia flutuante em Desktop"]')
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
+  const floatingPanel = page.locator('.cms-layout-preview-panel.floating')
+  const beforePanelWidth = (await floatingPanel.boundingBox()).width
   const beforeResize = await floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)
   const resizeHandle = page.getByRole('button', { name: 'Redimensionar janela de prévia' })
   const handleBox = await resizeHandle.boundingBox()
@@ -168,5 +170,6 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await page.mouse.down()
   await page.mouse.move(handleBox.x + handleBox.width / 2 + 90, handleBox.y + handleBox.height / 2 + 60)
   await page.mouse.up()
+  await expect.poll(() => floatingPanel.evaluate(panel => panel.getBoundingClientRect().width)).toBeGreaterThan(beforePanelWidth + 50)
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(beforeResize + 50)
 })
