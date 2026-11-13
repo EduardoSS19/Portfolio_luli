@@ -224,7 +224,7 @@ export default function App() {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
           const target = document.querySelector(selector)
           if (!target) return
-          window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - 24), behavior: 'auto' })
+          target.scrollIntoView({ block: 'start', behavior: 'auto' })
         }))
       }
     }
@@ -241,7 +241,7 @@ export default function App() {
         : null
       if (selector) {
         window.requestAnimationFrame(() => {
-          (() => { const target = document.querySelector(selector); if (target) window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - 24), behavior: 'instant' }) })()
+          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
         })
       }
     }
