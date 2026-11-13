@@ -73,7 +73,7 @@ class CmsArtistProfileForm(forms.ModelForm):
     class Meta:
         model = ArtistProfile
         fields = (
-            "name", "tagline", "photo_url", "bio",
+            "name", "tagline", "photo_url", "bio", "brand_background_color",
             "instagram_url", "contact_email", "contact_form_url",
         )
 
@@ -102,6 +102,7 @@ def cms_profile(request):
                 "tagline": profile.tagline,
                 "photo": _cms_image_url(profile.photo),
                 "brand_image": _cms_image_url(profile.brand_image),
+                "brand_background_color": profile.brand_background_color,
                 "photo_url": profile.photo_url,
                 "bio": profile.bio,
                 "instagram_url": profile.instagram_url,
@@ -144,6 +145,7 @@ def cms_profile(request):
             "tagline": profile.tagline,
             "photo": _cms_image_url(profile.photo),
             "brand_image": _cms_image_url(profile.brand_image),
+            "brand_background_color": profile.brand_background_color,
             "photo_url": profile.photo_url,
             "bio": profile.bio,
             "instagram_url": profile.instagram_url,
