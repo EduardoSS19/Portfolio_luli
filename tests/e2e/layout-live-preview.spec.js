@@ -81,4 +81,35 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
   })
   for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
   await expect(page.locator('.galeria-grade-global .obra-texto h3')).toHaveCSS('color', 'rgb(255, 255, 255)')
+
+  await sendSettings(page, {
+    default_theme: 'claro',
+    light_color_background: '#eeeeee',
+    light_color_surface: '#ffffff',
+    light_color_text: '#eeeeee',
+    light_color_muted: '#eeeeee',
+    light_color_accent: '#eeeeee',
+  }, 'page')
+  await expect.poll(() => page.locator('html').getAttribute('data-theme')).toBe('claro')
+  const lightRatios = await page.locator('.site-shell').evaluate(shell => {
+    const luminance = hex => {
+      const rgb = hex.match(/[0-9a-f]{2}/gi).map(value => parseInt(value, 16) / 255)
+      const linear = rgb.map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4)
+      return linear[0] * .2126 + linear[1] * .7152 + linear[2] * .0722
+    }
+    const contrast = (a, b) => {
+      const values = [luminance(a), luminance(b)].sort((x, y) => y - x)
+      return (values[0] + .05) / (values[1] + .05)
+    }
+    const style = getComputedStyle(shell)
+    const color = name => style.getPropertyValue(name).trim()
+    return [
+      contrast(color('--texto'), color('--azul-escuro')),
+      contrast(color('--layout-surface-text'), color('--azul-medio')),
+      contrast(color('--layout-muted'), color('--azul-escuro')),
+      contrast(color('--layout-surface-muted'), color('--azul-medio')),
+      contrast(color('--azul-claro'), color('--azul-escuro')),
+    ]
+  })
+  for (const ratio of lightRatios) expect(ratio).toBeGreaterThanOrEqual(4.5)
 })
