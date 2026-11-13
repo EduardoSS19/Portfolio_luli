@@ -61,6 +61,31 @@ function parseLayoutPreview(raw) {
   }
 }
 
+function colorLuminance(hex){
+  const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4)
+  return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722
+}
+function colorContrast(a,b){
+  const values=[colorLuminance(a),colorLuminance(b)].sort((x,y)=>y-x)
+  return(values[0]+.05)/(values[1]+.05)
+}
+function blendColor(from,to,amount){
+  const a=from.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16))
+  const b=to.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16))
+  return '#'+a.map((value,index)=>Math.round(value+(b[index]-value)*amount).toString(16).padStart(2,'0')).join('')
+}
+function accessibleColor(foreground,background,minimum=4.5){
+  if(!foreground||!background||colorContrast(foreground,background)>=minimum)return foreground
+  const target=colorContrast('#000000',background)>=colorContrast('#ffffff',background)?'#000000':'#ffffff'
+  let low=0,high=1
+  for(let step=0;step<22;step++){
+    const middle=(low+high)/2
+    if(colorContrast(blendColor(foreground,target,middle),background)>=minimum)high=middle
+    else low=middle
+  }
+  return blendColor(foreground,target,high)
+}
+
 const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
@@ -143,6 +168,28 @@ export default function App() {
     }
     trocaModoPendenteRef.current = null
   }, [modoGaleria])
+
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('layout_preview')) return undefined
+    const handleLayoutPreviewUpdate = event => {
+      if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'cms-layout-preview:update') return
+      const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
+      if (!safeSettings) return
+      setConteudo(current => ({ ...current, layout: { ...current.layout, ...safeSettings } }))
+      if (safeSettings.default_gallery_view) setModoGaleria(safeSettings.default_gallery_view)
+      if (safeSettings.default_theme) setTema(safeSettings.default_theme)
+      const focus = event.data.focus
+      if (focus === 'gallery' || focus === 'hero') {
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+          const selector = focus === 'hero' ? '.hero' : (safeSettings.default_gallery_view || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao'
+          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+        }))
+      }
+    }
+    window.addEventListener('message', handleLayoutPreviewUpdate)
+    window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
+    return () => window.removeEventListener('message', handleLayoutPreviewUpdate)
+  }, [])
 
   useEffect(() => {
     if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
@@ -334,19 +381,30 @@ export default function App() {
     color_muted: layout[`${palettePrefix}_color_muted`],
     color_accent: layout[`${palettePrefix}_color_accent`],
   }
+  const readableText = accessibleColor(effectiveColors.color_text, effectiveColors.color_background)
+  const readableSurfaceText = accessibleColor(effectiveColors.color_text, effectiveColors.color_surface)
+  const readableMuted = accessibleColor(effectiveColors.color_muted, effectiveColors.color_background)
+  const readableSurfaceMuted = accessibleColor(effectiveColors.color_muted, effectiveColors.color_surface)
+  const readableAccent = accessibleColor(effectiveColors.color_accent, effectiveColors.color_background)
+  const readableTextOnAccent = accessibleColor(readableText, readableAccent)
   const layoutColors = {
     '--azul-escuro': effectiveColors.color_background,
     '--azul-medio': effectiveColors.color_surface,
-    '--azul-claro': effectiveColors.color_accent,
-    '--texto': effectiveColors.color_text,
+    '--azul-claro': readableAccent,
+    '--texto': readableText,
     '--linha': effectiveColors.color_muted + '44',
-    '--layout-muted': effectiveColors.color_muted,
+    '--layout-muted': readableMuted,
+    '--layout-surface-text': readableSurfaceText,
+    '--layout-surface-muted': readableSurfaceMuted,
+    '--layout-text-on-accent': readableTextOnAccent,
+    '--layout-grid-title': '#ffffff',
+    '--layout-grid-description': '#ffffff',
     '--rodape-fundo': effectiveColors.color_background,
-    '--rodape-texto': effectiveColors.color_text,
-    '--rodape-muted': effectiveColors.color_muted,
+    '--rodape-texto': readableText,
+    '--rodape-muted': readableMuted,
   }
   const layoutAttributes = {
-    style: { ...layoutColors, background: effectiveColors.color_background, color: effectiveColors.color_text },
+    style: { ...layoutColors, background: effectiveColors.color_background, color: readableText },
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
