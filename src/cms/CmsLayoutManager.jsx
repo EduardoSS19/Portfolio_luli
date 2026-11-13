@@ -197,7 +197,7 @@ export function CmsLayoutManager(){
   }
   const scheduleHideOptionPreview=()=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
-    hoverPreviewHideTimerRef.current=window.setTimeout(()=>setHoveredOption(null),220)
+    hoverPreviewHideTimerRef.current=window.setTimeout(()=>setHoveredOption(null),450)
   }
   const keepOptionPreview=()=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
@@ -219,7 +219,7 @@ export function CmsLayoutManager(){
     ]
   },[settings,editingTheme])
   const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
+  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
