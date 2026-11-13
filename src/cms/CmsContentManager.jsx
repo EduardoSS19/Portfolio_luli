@@ -148,7 +148,7 @@ export function CmsContentManager() {
   }
 
   const remove = async item => {
-    if (!(await confirm({ title: 'Excluir item?', message: 'Este conteúdo será removido permanentemente do portfólio. Esta ação não pode ser desfeita.', confirmLabel: 'Excluir item', variant: 'danger' }))) return
+    if (!(await confirm({ title: 'Excluir item?', message: 'Este conteúdo será removido permanentemente do portfólio. Esta ação não pode ser desfeita.', target: item.title + ' · ' + current?.label, confirmLabel: 'Excluir item', variant: 'danger' }))) return
     setSaving(true); setError(''); setNotice('')
     try {
       await api('/api/cms/content/' + type + '/' + item.id + '/', { method: 'DELETE' })

@@ -79,6 +79,7 @@ jobs:
               - 'src/components/SecaoCategoria.jsx'
               - 'src/styles/**'
               - 'tests/e2e/gallery-*.spec.js'
+              - 'tests/e2e/layout-live-preview.spec.js'
             workflow:
               - '.github/workflows/**'
 
@@ -217,7 +218,7 @@ jobs:
           mkdir -p test-results
           PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
           test -n "$PLAYWRIGHT_CLI"
-          node "$PLAYWRIGHT_CLI" test tests/e2e/gallery-focus-desktop.spec.js tests/e2e/gallery-responsive.spec.js --project=chromium-desktop --project=webkit-iphone --workers=1 --retries=0 --reporter=list,junit
+          node "$PLAYWRIGHT_CLI" test tests/e2e/gallery-focus-desktop.spec.js tests/e2e/gallery-responsive.spec.js tests/e2e/layout-live-preview.spec.js --project=chromium-desktop --project=webkit-iphone --workers=1 --retries=0 --reporter=list,junit
 
       - name: Upload browser diagnostics
         if: always()

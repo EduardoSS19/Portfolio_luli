@@ -1360,3 +1360,11 @@
     max-height: 44px;
   }
 }
+
+
+/* Grid titles sit on a deliberately dark image scrim: use a guaranteed light foreground. */
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto h3,
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto > p {
+  color:var(--layout-grid-title,#fff)!important;
+  text-shadow:0 1px 8px rgba(0,0,0,.55);
+}

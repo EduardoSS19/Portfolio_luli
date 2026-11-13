@@ -49,7 +49,7 @@ def cms_layout(request):
         if not is_valid_layout_setting(key, value):
             return JsonResponse({"error": "invalid_layout_setting", "field": key}, status=400)
     settings = normalize_layout_settings(profile.layout_settings)
-    settings.update({key: value.lower() if key.startswith("color_") else value for key, value in payload.items()})
+    settings.update({key: value.lower() if "_color_" in key else value for key, value in payload.items()})
     profile.layout_settings = settings
     profile.save(update_fields=["layout_settings"])
     return JsonResponse({"settings": normalize_layout_settings(profile.layout_settings), "permissions": {"canChange": True}})
