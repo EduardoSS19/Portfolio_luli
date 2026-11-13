@@ -45,6 +45,7 @@ export function CmsLayoutManager(){
   const inlinePreviewIframeRef=useRef(null)
   const inlinePreviewViewportRef=useRef(null)
   const [previewDevice,setPreviewDevice]=useState('desktop')
+  const [previewFocus,setPreviewFocus]=useState('page')
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
   const [inlinePreviewWidth,setInlinePreviewWidth]=useState(0)
@@ -114,10 +115,10 @@ export function CmsLayoutManager(){
     return()=>{active=false}
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
-  const previewUrl=useMemo(()=> '/?layout_preview='+encodeURIComponent(JSON.stringify(settings)),[settings])
+  const previewUrl=useMemo(()=> '/?layout_preview='+encodeURIComponent(JSON.stringify(settings))+'&layout_preview_focus='+previewFocus,[settings,previewFocus])
   const colorKey=name=>`${editingTheme}_${name}`
   const contrast=useMemo(()=>contrastRatio(settings[colorKey('color_text')],settings[colorKey('color_background')]),[settings,editingTheme])
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setError('');setNotice('')}
+  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
@@ -126,7 +127,7 @@ export function CmsLayoutManager(){
   const applyPalette=palette=>{
     const [darkBackground,darkSurface,darkText,darkMuted,darkAccent]=palette.darkColors
     const [lightBackground,lightSurface,lightText,lightMuted,lightAccent]=palette.lightColors
-    setSettings(current=>({...current,dark_color_background:darkBackground,dark_color_surface:darkSurface,dark_color_text:darkText,dark_color_muted:darkMuted,dark_color_accent:darkAccent,light_color_background:lightBackground,light_color_surface:lightSurface,light_color_text:lightText,light_color_muted:lightMuted,light_color_accent:lightAccent}))
+    setSettings(current=>({...current,dark_color_background:darkBackground,dark_color_surface:darkSurface,dark_color_text:darkText,dark_color_muted:darkMuted,dark_color_accent:darkAccent,light_color_background:lightBackground,light_color_surface:lightSurface,light_color_text:lightText,light_color_muted:lightMuted,light_color_accent:lightAccent}));setPreviewFocus('page')
     setError('');setNotice('')
   }
   const save=async event=>{
