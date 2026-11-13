@@ -92,6 +92,32 @@ function accessibleColor(foreground,background,minimum=4.5){
   return blendColor(foreground,target,high)
 }
 
+
+const LAYOUT_PREVIEW_DEMO = {
+  categorias: [
+    { titulo: 'Pintura e experimentação', chave: 'pintura-experimentacao', obras: [
+      { titulo: 'Estudo de luz I', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Uma composição de cores, gestos e camadas.', detalhe: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', fichaTecnica: { tecnica: 'Acrílica sobre tela', material: 'Tinta acrílica e tela', ano: '2025', dimensoes: { altura: '60', largura: '80', unidade: 'cm' } } },
+      { titulo: 'Matéria em suspensão', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', detalhe: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
+    ]},
+    { titulo: 'Fotografia', chave: 'fotografia', obras: [
+      { titulo: 'Entre espaços', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.', detalhe: 'Praesent libero. Sed cursus ante dapibus diam.' },
+      { titulo: 'Paisagem inventada', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1400&q=85', descricao: 'Sed nisi. Nulla quis sem at nibh elementum imperdiet.' },
+    ]},
+    { titulo: 'Desenho e gravura', chave: 'desenho-gravura', obras: [
+      { titulo: 'Linhas de memória', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.', detalhe: 'Mauris massa. Vestibulum lacinia arcu eget nulla.' },
+      { titulo: 'Pequenas narrativas', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Curabitur sodales ligula in libero.' },
+    ]},
+  ],
+  referencias: [
+    { titulo: 'Exposição coletiva — Espaços possíveis', periodo: '2025 · Porto Alegre, Brasil', links: [{ texto: 'Descrição da exposição', url: '#referencia-teste-1' }, { texto: 'Registro fotográfico', url: '#referencia-teste-2' }] },
+    { titulo: 'Residência artística — Laboratório de processos', periodo: '2024 · Projeto fictício para testes', links: [{ texto: 'Sobre o projeto', url: '#referencia-teste-3' }] },
+    { titulo: 'Publicação — Caderno de experimentações', periodo: '2023 · Edição demonstrativa', links: [{ texto: 'Consultar publicação', url: '#referencia-teste-4' }] },
+  ],
+  sobre: { nome: 'Artista de demonstração', frase: 'Arte · Pesquisa · Experimentação', foto: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?w=900&q=85', bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.', instagram: 'https://www.instagram.com/exemplo.artista', email: 'contato@artista-demo.example', formulario: 'https://example.com/contato' },
+  frames: [],
+  redes: [{ titulo: 'Instagram de demonstração', url: '#rede-teste' }],
+}
+
 const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
@@ -147,6 +173,8 @@ export default function App() {
   const trocaModoPendenteRef = useRef(null)
   const selecaoCategoriaTimerRef = useRef(null)
   const scrollEndHandlerRef = useRef(null)
+  // Evita que atualizações visuais repetidas da prévia repitam a navegação até a mesma seção.
+  const lastLayoutPreviewScrollTargetRef = useRef(null)
 
   function trocarModoGaleria(novoModo) {
     if (novoModo === modoGaleria) return
@@ -186,20 +214,38 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const focus = event.data.focus
-      if (focus === 'gallery' || focus === 'hero') {
-        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-          const selector = focus === 'hero' ? '.hero' : (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)'
-          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'auto' })
-        }))
+      const focusSelectors = {
+        hero: '.hero',
+        bio: '#Início',
+        gallery: (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)',
+        references: '#Referências',
+        contact: '#Contato',
       }
+      const selector = focusSelectors[focus]
+      const scrollTarget = selector ? `${focus}:${selector}` : null
+      // O editor envia mensagens também para atualizar cores e conteúdo. Só navegamos
+      // quando o alvo muda; uma atualização do mesmo alvo nunca deve puxar a página de volta.
+      // "page" e atualizações sem foco são apenas mudanças visuais; não apagam
+      // o último destino visitado nem rearmam uma rolagem antiga.
+      if (!scrollTarget) return
+      if (lastLayoutPreviewScrollTargetRef.current === scrollTarget) return
+      lastLayoutPreviewScrollTargetRef.current = scrollTarget
+      window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+        if (lastLayoutPreviewScrollTargetRef.current !== scrollTarget) return
+        const target = document.querySelector(selector)
+        if (!target) return
+        target.scrollIntoView({ block: 'start', behavior: 'auto' })
+      }))
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
     return () => window.removeEventListener('message', handleLayoutPreviewUpdate)
   }, [carregando])
 
+  const initialLayoutPreviewFocusHandledRef = useRef(false)
   useEffect(() => {
-    if (!carregando && new URLSearchParams(window.location.search).has('layout_preview')) {
+    if (!carregando && !initialLayoutPreviewFocusHandledRef.current && new URLSearchParams(window.location.search).has('layout_preview')) {
+      initialLayoutPreviewFocusHandledRef.current = true
       const focus = new URLSearchParams(window.location.search).get('layout_preview_focus')
       const selector = focus === 'hero' ? '.hero' : focus === 'gallery'
         ? (modoGaleria === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao)')
@@ -246,19 +292,20 @@ export default function App() {
         return response.json()
       })
       .then(data => {
+        const demoContent = params.has('layout_preview') ? LAYOUT_PREVIEW_DEMO : null
         setConteudo(atual => ({
-          categorias: Array.isArray(data.categorias) ? data.categorias : [],
-          referencias: Array.isArray(data.referencias) ? data.referencias : [],
-          frames: Array.isArray(data.frames) ? data.frames : [],
-          redes: Array.isArray(data.redes) ? data.redes : [],
-          sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
-          marca: data.marca || '',
+          categorias: demoContent ? demoContent.categorias : Array.isArray(data.categorias) ? data.categorias : [],
+          referencias: demoContent ? demoContent.referencias : Array.isArray(data.referencias) ? data.referencias : [],
+          frames: demoContent ? demoContent.frames : Array.isArray(data.frames) ? data.frames : [],
+          redes: demoContent ? demoContent.redes : Array.isArray(data.redes) ? data.redes : [],
+          sobre: demoContent ? demoContent.sobre : data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
+          marca: demoContent ? '' : data.marca || '',
           layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) },
         }))
         const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) }
         setModoGaleria(layout.default_gallery_view)
         setTema(layout.default_theme)
-        setPrevisualizacao(data.preview ?? null)
+        setPrevisualizacao(params.has('layout_preview') ? null : data.preview ?? null)
       })
       .catch(error => {
         if (error.name !== 'AbortError') {
@@ -510,7 +557,7 @@ export default function App() {
         ))
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
-      <Contato endpoint={sobre.formulario} email={sobre.email} />
+      <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
         <button
