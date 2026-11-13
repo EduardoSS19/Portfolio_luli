@@ -99,3 +99,10 @@
 .site-shell[data-layout-width] .rodape{background:var(--rodape-fundo)!important;color:var(--rodape-texto)!important}
 .site-shell[data-layout-width] .rodape small,
 .site-shell[data-layout-width] .rodape-creditos{color:var(--rodape-muted)}
+
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade{background:var(--azul-medio)}
+.site-shell[data-layout-width] .galeria-grade-global .obra.modo-grade .obra-texto{background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--azul-escuro) 76%,transparent) 38%,var(--azul-escuro) 100%)}
+.site-shell[data-layout-width] nav.site-nav button{color:var(--layout-muted)}
+.site-shell[data-layout-width] nav.site-nav button:hover{color:var(--texto)}
+.site-shell[data-layout-width] nav.site-nav button.ativo{color:var(--azul-escuro);background:var(--azul-claro);border-color:var(--azul-claro)}
+.site-shell[data-layout-width] .secao-contagem{color:var(--layout-muted)}
