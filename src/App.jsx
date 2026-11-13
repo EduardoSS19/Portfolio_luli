@@ -134,7 +134,7 @@ export default function App() {
     document.body.style.background = 'var(--layout-page-background)'
   }, [conteudo.layout, tema])
   const secoesNav = useMemo(() => [
-    ...((conteudo.layout?.show_bio_image ?? true) || (conteudo.layout?.show_bio ?? true) ? [{ titulo: 'Início', chave: 'inicio' }] : []),
+    ...(conteudo.layout?.show_bio ?? true ? [{ titulo: 'Início', chave: 'inicio' }] : []),
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
