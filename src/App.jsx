@@ -225,10 +225,9 @@ export default function App() {
       const scrollTarget = selector ? `${focus}:${selector}` : null
       // O editor envia mensagens também para atualizar cores e conteúdo. Só navegamos
       // quando o alvo muda; uma atualização do mesmo alvo nunca deve puxar a página de volta.
-      if (!scrollTarget) {
-        lastLayoutPreviewScrollTargetRef.current = null
-        return
-      }
+      // "page" e atualizações sem foco são apenas mudanças visuais; não apagam
+      // o último destino visitado nem rearmam uma rolagem antiga.
+      if (!scrollTarget) return
       if (lastLayoutPreviewScrollTargetRef.current === scrollTarget) return
       lastLayoutPreviewScrollTargetRef.current = scrollTarget
       window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
