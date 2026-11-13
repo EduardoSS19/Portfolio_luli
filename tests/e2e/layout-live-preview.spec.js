@@ -171,3 +171,27 @@ test('configurações de visibilidade são preservadas ao alternar entre temas',
   await expect(page.locator('#Referências')).toHaveCount(0)
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'claro')
 })
+
+
+test('prévia de layout apresenta conteúdo demonstrativo em todas as seções', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.hero')).toBeVisible()
+  await expect(page.locator('.sobre-secao')).toBeVisible()
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Lorem ipsum')
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(3)
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(6)
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
+  await expect(page.locator('#Contato')).toBeVisible()
+  await expect(page.locator('#Contato')).toContainText('contato@artista-demo.example')
+})
+
+test('prévia navega para referências e contato sem rearmar rolagens antigas', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { show_references: true }, 'references')
+  await expect(page.locator('#Referências')).toBeInViewport()
+  await sendSettings(page, { dark_color_accent: '#88aacc' }, 'page')
+  await expect(page.locator('#Referências')).toBeInViewport()
+  await sendSettings(page, { show_references: true }, 'contact')
+  await expect(page.locator('#Contato')).toBeInViewport()
+})
