@@ -165,7 +165,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const resizeHandle = page.getByRole('button', { name: 'Redimensionar janela de prévia' })
   const handleBox = await resizeHandle.boundingBox()
   expect(handleBox).not.toBeNull()
-  expect(handleBox.y + handleBox.height).toBeLessThanOrEqual(720)
+  expect(handleBox.y + handleBox.height).toBeLessThanOrEqual(page.viewportSize().height)
   await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
   await page.mouse.down()
   await page.mouse.move(handleBox.x + handleBox.width / 2 + 90, handleBox.y + handleBox.height / 2 + 60)
