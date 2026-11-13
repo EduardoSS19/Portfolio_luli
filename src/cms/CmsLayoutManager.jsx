@@ -55,7 +55,7 @@ export function CmsLayoutManager(){
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
   const [previewOpen,setPreviewOpen]=useState(false)
   const [previewMaximized,setPreviewMaximized]=useState(false)
-  const [previewPosition,setPreviewPosition]=useState({x:24,y:72})
+  const [previewPosition,setPreviewPosition]=useState({x:24,y:108})
   const [previewSize,setPreviewSize]=useState({width:820,height:720})
   const previewDragRef=useRef(null)
   const previewResizeRef=useRef(null)
@@ -66,6 +66,8 @@ export function CmsLayoutManager(){
   const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
+  const [previewDocumentHeight,setPreviewDocumentHeight]=useState(PREVIEW_DEVICES.desktop.height)
+  const previewDocumentObserversRef=useRef(new Map())
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
   const [hoveredOption,setHoveredOption]=useState(null)
@@ -79,14 +81,14 @@ export function CmsLayoutManager(){
   const previewHeight=PREVIEW_DEVICES[previewDevice].height
   const previewScale=previewContainerSize.width>0?Math.min(1,previewContainerSize.width/previewWidth):1
   const previewStageWidth=previewWidth
-  const previewStageHeight=previewHeight
+  const previewStageHeight=previewDocumentHeight
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth
-  const inlinePreviewStageHeight=previewHeight
+  const inlinePreviewStageHeight=previewDocumentHeight
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
   const hoverPreviewScale=Math.min(1,(hoverPreviewSize.width||360)/previewWidth)
   const hoverPreviewStageWidth=previewWidth
-  const hoverPreviewStageHeight=previewHeight
+  const hoverPreviewStageHeight=previewDocumentHeight
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -135,6 +137,33 @@ export function CmsLayoutManager(){
     return()=>window.removeEventListener('resize',clampPreviewPosition)
   },[previewOpen,previewMaximized,previewPosition.x,previewPosition.y,previewSize.width,previewSize.height])
 
+  const observePreviewDocument=frame=>{
+    if(!frame?.contentDocument)return
+    const doc=frame.contentDocument
+    const update=()=>{
+      const height=Math.ceil(Math.max(
+        doc.documentElement?.scrollHeight||0,
+        doc.documentElement?.offsetHeight||0,
+        doc.body?.scrollHeight||0,
+        doc.body?.offsetHeight||0
+      ))
+      if(height>0)setPreviewDocumentHeight(current=>current===height?current:height)
+    }
+    const previous=previewDocumentObserversRef.current.get(frame)
+    previous?.resize?.disconnect()
+    previous?.mutation?.disconnect()
+    update()
+    if(typeof ResizeObserver!=='undefined'){
+      const resize=new ResizeObserver(update)
+      if(doc.documentElement)resize.observe(doc.documentElement)
+      if(doc.body)resize.observe(doc.body)
+      const mutation=typeof MutationObserver!=='undefined'?new MutationObserver(update):null
+      if(mutation&&doc.body)mutation.observe(doc.body,{childList:true,subtree:true,attributes:true,characterData:true})
+      previewDocumentObserversRef.current.set(frame,{resize,mutation})
+    }
+  }
+  const handlePreviewFrameLoad=event=>observePreviewDocument(event.currentTarget)
+  useEffect(()=>()=>{previewDocumentObserversRef.current.forEach(observers=>{observers.resize?.disconnect();observers.mutation?.disconnect()});previewDocumentObserversRef.current.clear()},[])
   useLayoutEffect(()=>{
     const element=previewViewportRef.current
     if(!element)return
@@ -293,7 +322,7 @@ export function CmsLayoutManager(){
             </header>
             {hoverPreviewMounted&&<div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice} style={{display:hoveredOption?'flex':'none'}}>
               <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,zoom:hoverPreviewScale}}>
-                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight}}/>
+                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight}}/>
               </div>
             </div>}
             {!hoverPreviewMounted&&<div className="cms-layout-hover-preview-placeholder"><span>◉</span><p>A prévia da opção aparece aqui antes de você aplicá-la.</p></div>}
@@ -303,12 +332,12 @@ export function CmsLayoutManager(){
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
-      {previewOpen&&<aside className={'cms-layout-preview-panel floating'+(previewMaximized?' maximized':'')} aria-label="Janela flutuante de prévia" style={previewMaximized?undefined:{left:previewPosition.x,top:previewPosition.y,width:previewSize.width,height:previewSize.height}}><div className="cms-layout-preview-heading" onPointerDown={startPreviewDrag} onPointerMove={movePreviewDrag} onPointerUp={stopPreviewDrag} onPointerCancel={stopPreviewDrag}><div><p className="cms-eyebrow">PRÉVIA AO VIVO</p><strong>Seu portfólio</strong><small className="cms-layout-preview-drag-hint">Arraste para mover</small></div><div className="cms-layout-preview-window-actions"><span>Não publicado</span><button className="cms-preview-window-button" type="button" aria-label={previewMaximized?'Restaurar janela':'Maximizar janela'} title={previewMaximized?'Restaurar':'Maximizar'} onClick={()=>setPreviewMaximized(value=>!value)}><svg viewBox="0 0 20 20" aria-hidden="true">{previewMaximized?<path d="M7 3v2H5v10h10v-2h2v4H3V3h4zm3 0h7v7h-2V6.4l-6.3 6.3-1.4-1.4L13.6 5H10V3z"/>:<path d="M3 3h14v14H3V3zm2 2v10h10V5H5z"/>}</svg></button><button className="cms-preview-window-button close" type="button" aria-label="Fechar janela flutuante" title="Fechar" onClick={()=>setPreviewOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame cms-layout-preview-frame-scaled" ref={previewViewportRef} data-device={previewDevice} data-preview-scale={previewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:previewStageWidth,height:previewStageHeight,zoom:previewScale}}><iframe ref={previewIframeRef} title={`Prévia flutuante em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight}}/></div></div><p className="cms-layout-preview-caption">A escala acompanha a largura da janela. Role dentro da prévia para percorrer o conteúdo; nada será publicado até salvar.</p>{!previewMaximized&&<button className="cms-preview-resize-handle" type="button" aria-label="Redimensionar janela de prévia" title="Arraste para redimensionar" onPointerDown={startPreviewResize} onPointerMove={movePreviewResize} onPointerUp={stopPreviewResize} onPointerCancel={stopPreviewResize}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M10 15l5-5"/></svg></button>}</aside>}
+      {previewOpen&&<aside className={'cms-layout-preview-panel floating'+(previewMaximized?' maximized':'')} aria-label="Janela flutuante de prévia" style={previewMaximized?undefined:{left:previewPosition.x,top:previewPosition.y,width:previewSize.width,height:previewSize.height}}><div className="cms-layout-preview-heading" onPointerDown={startPreviewDrag} onPointerMove={movePreviewDrag} onPointerUp={stopPreviewDrag} onPointerCancel={stopPreviewDrag}><div><p className="cms-eyebrow">PRÉVIA AO VIVO</p><strong>Seu portfólio</strong><small className="cms-layout-preview-drag-hint">Arraste para mover</small></div><div className="cms-layout-preview-window-actions"><span>Não publicado</span><button className="cms-preview-window-button" type="button" aria-label={previewMaximized?'Restaurar janela':'Maximizar janela'} title={previewMaximized?'Restaurar':'Maximizar'} onClick={()=>setPreviewMaximized(value=>!value)}><svg viewBox="0 0 20 20" aria-hidden="true">{previewMaximized?<path d="M7 3v2H5v10h10v-2h2v4H3V3h4zm3 0h7v7h-2V6.4l-6.3 6.3-1.4-1.4L13.6 5H10V3z"/>:<path d="M3 3h14v14H3V3zm2 2v10h10V5H5z"/>}</svg></button><button className="cms-preview-window-button close" type="button" aria-label="Fechar janela flutuante" title="Fechar" onClick={()=>setPreviewOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame cms-layout-preview-frame-scaled" ref={previewViewportRef} data-device={previewDevice} data-preview-scale={previewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:previewStageWidth,height:previewStageHeight,zoom:previewScale}}><iframe ref={previewIframeRef} title={`Prévia flutuante em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight}}/></div></div><p className="cms-layout-preview-caption">A escala acompanha a largura da janela. Role dentro da prévia para percorrer o conteúdo; nada será publicado até salvar.</p>{!previewMaximized&&<button className="cms-preview-resize-handle" type="button" aria-label="Redimensionar janela de prévia" title="Arraste para redimensionar" onPointerDown={startPreviewResize} onPointerMove={movePreviewResize} onPointerUp={stopPreviewResize} onPointerCancel={stopPreviewResize}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M10 15l5-5"/></svg></button>}</aside>}
     </div>
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight,zoom:inlinePreviewScale}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight,zoom:inlinePreviewScale}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight}}/></div></div>
       <p className="cms-layout-preview-caption">Escala pela largura: {Math.round(inlinePreviewScale*100)}% · viewport lógico de {previewWidth} × {previewHeight}px. Role dentro da prévia para percorrer a página; a janela flutuante pode ficar aberta ao mesmo tempo.</p>
     </section>
     
