@@ -52,6 +52,28 @@ class CmsLayoutApiTests(TestCase):
         self.assertEqual(self.profile.layout_settings["gallery_columns"], "4")
         self.assertEqual(response.json()["settings"]["hero_alignment"], "center")
 
+    def test_color_picker_accepts_hex_colors_and_persists_them(self):
+        self.client.force_login(self.staff)
+        response = self.client.patch(
+            reverse("cms-layout"),
+            data=json.dumps({"color_background": "#F4F1E8", "color_accent": "#9a735e"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.layout_settings["color_background"], "#f4f1e8")
+        self.assertEqual(response.json()["settings"]["color_accent"], "#9a735e")
+
+    def test_invalid_colors_and_unknown_keys_are_rejected_without_saving(self):
+        self.client.force_login(self.staff)
+        for payload in ({"color_background": "red"}, {"color_accent": "#fff"}, {"color_text": "url(javascript:alert(1))"}, {"unknown": "#ffffff"}):
+            response = self.client.patch(
+                reverse("cms-layout"), data=json.dumps(payload), content_type="application/json"
+            )
+            self.assertEqual(response.status_code, 400)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.layout_settings, {})
+
     def test_invalid_values_and_unknown_keys_are_rejected_without_saving(self):
         self.client.force_login(self.staff)
         for payload in ({"content_width": "100vw"}, {"unknown": "anything"}, {"gallery_columns": 4}):

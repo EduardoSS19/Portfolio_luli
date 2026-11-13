@@ -21,6 +21,11 @@ const DEFAULT_LAYOUT_SETTINGS = {
   gallery_columns: '3',
   default_gallery_view: 'lista',
   default_theme: 'escuro',
+  color_background: '#061522',
+  color_surface: '#0b2943',
+  color_text: '#eff7ff',
+  color_muted: '#a9bdcc',
+  color_accent: '#93c8f2',
 }
 
 const perfilInicial = {
@@ -117,6 +122,10 @@ export default function App() {
     const controller = new AbortController()
 
     const params = new URLSearchParams(window.location.search)
+    let layoutPreview = null
+    if (params.has('layout_preview')) {
+      try { layoutPreview = JSON.parse(params.get('layout_preview')) } catch { layoutPreview = null }
+    }
     const previewToken = params.get('preview_token')
     const categoryPreviewToken = params.get('category_preview_token')
     const apiUrl = previewToken
@@ -138,9 +147,9 @@ export default function App() {
           redes: Array.isArray(data.redes) ? data.redes : [],
           sobre: data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
           marca: data.marca || '',
-          layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) },
+          layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) },
         }))
-        const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}) }
+        const layout = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) }
         setModoGaleria(layout.default_gallery_view)
         setTema(layout.default_theme)
         setPrevisualizacao(data.preview ?? null)
@@ -264,7 +273,16 @@ export default function App() {
 
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
+  const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
+  const layoutColors = {
+    '--azul-escuro': layout.color_background,
+    '--azul-medio': layout.color_surface,
+    '--azul-claro': layout.color_accent,
+    '--texto': layout.color_text,
+    '--linha': layout.color_muted + '44',
+  }
   const layoutAttributes = {
+    style: { ...layoutColors, background: layout.color_background, color: layout.color_text },
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
@@ -320,6 +338,7 @@ export default function App() {
 
   return (
     <div className="site-shell" {...layoutAttributes}>
+      {isLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
