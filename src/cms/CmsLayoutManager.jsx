@@ -6,6 +6,7 @@ const DEFAULTS = {
   section_spacing:'comfortable', gallery_columns:'3', default_gallery_view:'lista', default_theme:'escuro',
   dark_color_background:'#061522', dark_color_surface:'#0b2943', dark_color_text:'#eff7ff', dark_color_muted:'#a9bdcc', dark_color_accent:'#93c8f2',
   light_color_background:'#f5f2eb', light_color_surface:'#ffffff', light_color_text:'#24231f', light_color_muted:'#77746c', light_color_accent:'#657c62',
+  show_bio_image:true, show_bio:true, show_references:true,
 }
 const FIELDS = [
   {name:'content_width',title:'Largura do conteúdo',description:'Define quanto espaço o conteúdo ocupa em telas maiores.',options:[['compact','Enxuto','Mais foco e respiro lateral'],['standard','Equilibrado','Proporção atual'],['wide','Amplo','Mais espaço para imagens']]},
@@ -15,6 +16,9 @@ const FIELDS = [
   {name:'gallery_columns',title:'Colunas da grade',description:'Número de colunas em telas grandes. Em celulares, a grade continua adaptável.',options:[['2','2 colunas','Imagens maiores'],['3','3 colunas','Equilíbrio'],['4','4 colunas','Visão panorâmica']]},
   {name:'default_gallery_view',title:'Visualização inicial',description:'Como o visitante encontra as obras ao abrir o portfólio.',options:[['lista','Lista editorial','Mais espaço para contexto'],['grade','Grade visual','Acervo em composição única']]},
   {name:'default_theme',title:'Tema inicial',description:'O visitante ainda poderá alternar entre claro e escuro.',options:[['escuro','Escuro','Apresentação imersiva'],['claro','Claro','Apresentação luminosa']]},
+  {name:'show_bio_image',title:'Imagem da apresentação',description:'Escolha se a foto ou imagem da artista aparece na seção de apresentação.',options:[[true,'Mostrar imagem','Exibe a imagem junto à apresentação'],[false,'Ocultar imagem','Mantém o texto sem a imagem']]},
+  {name:'show_bio',title:'Texto da biografia',description:'A imagem e o texto podem ser exibidos de forma independente.',options:[[true,'Mostrar biografia','Exibe o texto biográfico'],[false,'Ocultar biografia','Remove o texto da seção']]},
+  {name:'show_references',title:'Seção de referências',description:'Controla também a entrada Referências na navegação do portfólio.',options:[[true,'Mostrar referências','Exibe a seção e seus links'],[false,'Ocultar referências','Remove a seção e a entrada do menu']]},
 ]
 const COLOR_FIELDS = [
   ['color_background','Fundo','Plano de fundo geral'],['color_surface','Superfícies','Cartões e áreas elevadas'],
@@ -56,15 +60,15 @@ export function CmsLayoutManager(){
   const [previewFocus,setPreviewFocus]=useState('page')
   const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
   const [editingTheme,setEditingTheme]=useState('dark')
-  const [previewContainerWidth,setPreviewContainerWidth]=useState(0)
-  const [inlinePreviewWidth,setInlinePreviewWidth]=useState(0)
+  const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
+  const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
   const previewHeight=PREVIEW_DEVICES[previewDevice].height
-  const previewScale=previewContainerWidth>0?Math.min(1,previewContainerWidth/previewWidth):1
+  const previewScale=previewContainerSize.width>0&&previewContainerSize.height>0?Math.min(1,previewContainerSize.width/previewWidth,previewContainerSize.height/previewHeight):1
   const previewStageHeight=Math.ceil(previewHeight*previewScale)
-  const inlinePreviewScale=inlinePreviewWidth>0?Math.min(1,inlinePreviewWidth/previewWidth):1
+  const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewHeight):1
   const inlinePreviewStageHeight=Math.ceil(previewHeight*inlinePreviewScale)
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
@@ -98,7 +102,7 @@ export function CmsLayoutManager(){
   useEffect(()=>{
     const element=previewViewportRef.current
     if(!element)return
-    const update=()=>setPreviewContainerWidth(element.clientWidth)
+    const update=()=>setPreviewContainerSize({width:element.clientWidth,height:element.clientHeight})
     update()
     if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
     const observer=new ResizeObserver(update)
@@ -108,7 +112,7 @@ export function CmsLayoutManager(){
   useEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
-    const update=()=>setInlinePreviewWidth(element.clientWidth)
+    const update=()=>setInlinePreviewSize({width:element.clientWidth,height:element.clientHeight})
     update()
     if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
     const observer=new ResizeObserver(update)
