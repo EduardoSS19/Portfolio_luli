@@ -660,3 +660,233 @@
   .cms-shell :where(button:not(.cms-nav button)){transition:none}
   .cms-shell :where(button:not(.cms-nav button)):active:not(:disabled){transform:none}
 }
+
+
+/* Redesign visual do sistema de ações — hierarquia editorial e menos ruído */
+.cms-shell {
+  --cms-action-primary: #d6dfb0;
+  --cms-action-primary-ink: #202319;
+  --cms-action-hover: rgba(214,223,176,.09);
+  --cms-action-border: rgba(239,235,221,.17);
+  --cms-action-danger: #d99a8c;
+}
+
+/* Ação secundária: contorno discreto, sem competir com a ação principal */
+.cms-shell :where(button:not(.cms-nav button)) {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--cms-action-border);
+  border-radius: 6px;
+  background: transparent;
+  color: #d0d0c5;
+  font: 500 12px/1.2 'DM Sans', sans-serif;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+.cms-shell :where(button:not(.cms-nav button)):hover:not(:disabled) {
+  border-color: rgba(214,223,176,.55);
+  background: var(--cms-action-hover);
+  color: #e4e9ce;
+  box-shadow: none;
+}
+.cms-shell :where(button:not(.cms-nav button)):active:not(:disabled) {
+  transform: translateY(1px);
+}
+.cms-shell :where(button:not(.cms-nav button)):disabled {
+  opacity: .36;
+  cursor: not-allowed;
+}
+
+/* Primária: uma só ação de maior peso por contexto */
+.cms-shell .cms-primary-button,
+.cms-shell button.cms-primary-button,
+.cms-shell .cms-confirm-accept:not(.danger) {
+  min-height: 40px;
+  padding: 10px 17px;
+  border: 1px solid var(--cms-action-primary);
+  border-radius: 6px;
+  background: var(--cms-action-primary);
+  color: var(--cms-action-primary-ink);
+  font: 700 12px/1.2 'DM Sans', sans-serif;
+  box-shadow: none;
+}
+.cms-shell .cms-primary-button:hover:not(:disabled),
+.cms-shell button.cms-primary-button:hover:not(:disabled),
+.cms-shell .cms-confirm-accept:not(.danger):hover:not(:disabled) {
+  border-color: #e5ebc9;
+  background: #e5ebc9;
+  color: var(--cms-action-primary-ink);
+  box-shadow: 0 4px 14px rgba(214,223,176,.1);
+}
+
+/* Cancelar e ações terciárias viram texto/links, não botões concorrentes */
+.cms-shell .cms-editor-cancel,
+.cms-shell button.cms-editor-cancel,
+.cms-shell .cms-confirm-cancel {
+  min-height: 38px;
+  padding: 8px 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--cms-muted);
+}
+.cms-shell .cms-editor-cancel:hover:not(:disabled),
+.cms-shell button.cms-editor-cancel:hover:not(:disabled),
+.cms-shell .cms-confirm-cancel:hover:not(:disabled) {
+  border-color: transparent;
+  background: rgba(255,255,255,.045);
+  color: var(--cms-text);
+}
+.cms-shell .cms-text-button {
+  min-height: 34px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--cms-accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+.cms-shell .cms-text-button:hover {
+  border: 0;
+  background: transparent;
+  color: #e7edc9;
+}
+
+/* Navegação por abas: indicador inferior em vez de cápsulas */
+.cms-shell .cms-content-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  border-bottom: 1px solid var(--cms-line);
+}
+.cms-shell .cms-content-tabs button {
+  min-height: 42px;
+  margin-bottom: -1px;
+  padding: 10px 2px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--cms-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.cms-shell .cms-content-tabs button:hover:not(:disabled) {
+  border-color: transparent;
+  border-bottom-color: rgba(214,223,176,.45);
+  background: transparent;
+  color: var(--cms-text);
+}
+.cms-shell .cms-content-tabs button.active {
+  border: 0;
+  border-bottom: 2px solid var(--cms-accent);
+  background: transparent;
+  color: var(--cms-text);
+  font-weight: 700;
+}
+
+/* Ações compactas de ordenação: controles quadrados e silenciosos */
+.cms-shell .cms-category-work-row button,
+.cms-shell .cms-gallery-item-actions button:not(.delete),
+.cms-shell .cms-video-actions button:not(.delete),
+.cms-shell .cms-pagination button,
+.cms-shell .cms-category-work-pagination button {
+  min-width: 36px;
+  min-height: 34px;
+  padding: 6px 9px;
+  border-radius: 5px;
+  background: rgba(255,255,255,.025);
+  color: #c4c5b9;
+  font-size: 12px;
+}
+.cms-shell .cms-category-work-row button:hover:not(:disabled),
+.cms-shell .cms-gallery-item-actions button:not(.delete):hover:not(:disabled),
+.cms-shell .cms-video-actions button:not(.delete):hover:not(:disabled),
+.cms-shell .cms-pagination button:hover:not(:disabled),
+.cms-shell .cms-category-work-pagination button:hover:not(:disabled) {
+  background: var(--cms-action-hover);
+  color: var(--cms-accent);
+}
+.cms-shell .cms-category-item-actions {
+  gap: 6px;
+}
+.cms-shell .cms-category-item-actions button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 5px;
+  background: transparent;
+  color: #c7c8bc;
+  font-size: 11px;
+}
+.cms-shell .cms-category-item-actions button:first-child {
+  border-color: rgba(214,223,176,.25);
+  color: var(--cms-accent);
+}
+.cms-shell .cms-content-item-actions {
+  gap: 6px;
+}
+.cms-shell .cms-content-item-actions button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+/* Destrutivas sempre identificáveis, sem depender da posição na lista */
+.cms-shell button.delete,
+.cms-shell button.danger,
+.cms-shell .cms-confirm-accept.danger {
+  border: 1px solid rgba(217,154,140,.34);
+  background: rgba(217,154,140,.055);
+  color: var(--cms-action-danger);
+}
+.cms-shell button.delete:hover:not(:disabled),
+.cms-shell button.danger:hover:not(:disabled),
+.cms-shell .cms-confirm-accept.danger:hover:not(:disabled) {
+  border-color: rgba(217,154,140,.7);
+  background: rgba(217,154,140,.13);
+  color: #f0b7aa;
+}
+.cms-shell .cms-content-item-actions button:last-child:not(.delete):not(.danger) {
+  color: #c7c8bc;
+}
+
+/* Grupos de ações com espaçamento e alinhamento consistentes */
+.cms-shell .cms-category-order-actions > div,
+.cms-shell .cms-editor-save-actions,
+.cms-shell .cms-editor-actions,
+.cms-shell .cms-confirm-dialog footer {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.cms-shell .cms-category-order-actions > div {
+  flex-wrap: wrap;
+}
+.cms-shell .cms-bulk-actions {
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.025);
+}
+.cms-shell .cms-home-shortcut {
+  min-height: 34px;
+  padding: 7px 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--cms-muted);
+  font-size: 11px;
+}
+.cms-shell .cms-home-shortcut:hover {
+  border-color: transparent;
+  background: rgba(255,255,255,.045);
+  color: var(--cms-text);
+}
+
+@media (max-width: 700px) {
+  .cms-shell .cms-content-tabs { gap: 17px; overflow-x: auto; flex-wrap: nowrap; }
+  .cms-shell .cms-content-tabs button { flex: 0 0 auto; }
+  .cms-shell .cms-category-item-actions button,
+  .cms-shell .cms-content-item-actions button { min-height: 40px; }
+  .cms-shell .cms-category-order-actions > div { display: flex; flex-wrap: wrap; }
+  .cms-shell .cms-category-order-actions > div .cms-primary-button { flex: 1 0 100%; }
+}
