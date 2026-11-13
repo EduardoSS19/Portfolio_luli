@@ -25,22 +25,22 @@ async function openLiveLayoutPreview(page) {
   await expect.poll(() => page.evaluate(() => Boolean(window.__cmsPreviewReady))).toBe(true)
 }
 
-async function sendSettings(page, settings, focus = 'page') {
-  await page.evaluate(({ settings, focus }) => {
-    window.postMessage({ type: 'cms-layout-preview:update', settings, focus }, window.location.origin)
-  }, { settings, focus })
+async function sendSettings(page, settings, focus = 'page', previewMode) {
+  await page.evaluate(({ settings, focus, previewMode }) => {
+    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode }, window.location.origin)
+  }, { settings, focus, previewMode })
 }
 
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
 
-  await sendSettings(page, { default_gallery_view: 'grade', gallery_columns: '4' }, 'gallery')
+  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
   await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(1)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
-  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery')
+  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao .obra')).toHaveCount(1)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
