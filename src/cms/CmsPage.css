@@ -1341,3 +1341,44 @@
   letter-spacing: .04em;
   text-transform: uppercase;
 }
+
+
+/* Biblioteca de animações por categoria */
+.cms-category-animation-field{min-width:0;margin:2px 0 0;padding:0;border:0}
+.cms-category-animation-field legend{font:600 11px 'Manrope';color:var(--cms-text);margin-bottom:7px}
+.cms-category-animation-field>p{margin:0 0 12px}
+.cms-category-animation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.cms-category-animation-option{display:grid;grid-template-rows:62px auto auto auto;gap:5px;min-width:0;text-align:left;padding:9px;border:1px solid var(--cms-line);border-radius:8px;background:var(--cms-panel-2);color:var(--cms-text);cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.cms-category-animation-option:hover{border-color:var(--cms-accent);transform:translateY(-1px)}
+.cms-category-animation-option.selected{border-color:var(--cms-accent);background:color-mix(in srgb,var(--cms-accent) 10%,var(--cms-panel-2));box-shadow:inset 0 0 0 1px var(--cms-accent)}
+.cms-category-animation-option:focus-visible{outline:2px solid var(--cms-accent);outline-offset:2px}
+.cms-category-animation-option:disabled{opacity:.6;cursor:not-allowed}
+.cms-category-animation-option strong{font:600 11px 'Manrope'}
+.cms-category-animation-option>small{font:400 10px/1.45 'DM Sans';color:var(--cms-muted)}
+.cms-category-animation-selected{font:600 9px 'DM Sans';color:var(--cms-accent)}
+.cms-animation-demo{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;overflow:hidden;border-radius:5px;background:linear-gradient(135deg,#182b32,#263d3b);isolation:isolate}
+.cms-animation-demo:before{content:"";position:absolute;inset:10px 12px;border:1px solid #ffffff20;border-radius:3px}
+.cms-animation-demo i{display:block;width:15%;height:34%;border-radius:2px;background:linear-gradient(180deg,#d4c69b,#7eaa9b);opacity:.85;transform-origin:center;animation-duration:1.25s;animation-iteration-count:infinite;animation-direction:alternate;animation-play-state:paused}
+.cms-animation-demo i:nth-child(2){height:53%;animation-delay:.12s}
+.cms-animation-demo i:nth-child(3){height:42%;animation-delay:.24s}
+.cms-category-animation-option.selected .cms-animation-demo i,.cms-category-animation-option:hover .cms-animation-demo i{animation-play-state:running}
+.cms-animation-demo[data-animation="obra"] i,.cms-animation-demo[data-animation="suave"] i{animation-name:cmsDemoFade}
+.cms-animation-demo[data-animation="ceramica"] i{animation-name:cmsDemoForm}
+.cms-animation-demo[data-animation="gravura"] i,.cms-animation-demo[data-animation="recorte"] i{animation-name:cmsDemoReveal}
+.cms-animation-demo[data-animation="desenho"] i,.cms-animation-demo[data-animation="deslizar"] i{animation-name:cmsDemoSlide}
+.cms-animation-demo[data-animation="glitch"] i{animation-name:cmsDemoGlitch}
+.cms-animation-demo[data-animation="fotografia"] i{animation-name:cmsDemoPhoto}
+.cms-animation-demo[data-animation="videoarte"] i{animation-name:cmsDemoCinema}
+.cms-animation-demo[data-animation="zoom"] i{animation-name:cmsDemoZoom}
+.cms-animation-demo[data-animation="flutuar"] i{animation-name:cmsDemoFloat}
+@keyframes cmsDemoFade{from{opacity:.12}to{opacity:1}}
+@keyframes cmsDemoForm{from{transform:scaleY(.25) scaleX(.65);border-radius:50%}to{transform:scaleY(1) scaleX(1);border-radius:2px}}
+@keyframes cmsDemoReveal{from{clip-path:inset(100% 0 0);opacity:.3}to{clip-path:inset(0);opacity:1}}
+@keyframes cmsDemoSlide{from{transform:translateX(-13px);opacity:.2}to{transform:translateX(0);opacity:1}}
+@keyframes cmsDemoGlitch{0%,100%{transform:translateX(0);opacity:1}25%{transform:translateX(4px) skewX(12deg);opacity:.55}50%{transform:translateX(-3px);opacity:1}75%{transform:translateX(2px) skewX(-8deg)}}
+@keyframes cmsDemoPhoto{from{filter:blur(4px);opacity:.1;transform:scale(1.12)}to{filter:blur(0);opacity:1;transform:scale(1)}}
+@keyframes cmsDemoCinema{from{transform:scaleY(.08);opacity:.1}to{transform:scaleY(1);opacity:1}}
+@keyframes cmsDemoZoom{from{transform:scale(.35);opacity:.2}to{transform:scale(1);opacity:1}}
+@keyframes cmsDemoFloat{from{transform:translateY(5px) rotate(-4deg)}to{transform:translateY(-5px) rotate(4deg)}}
+@media(max-width:420px){.cms-category-animation-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.cms-category-animation-option,.cms-animation-demo i{transition:none!important;animation:none!important;transform:none!important}}
