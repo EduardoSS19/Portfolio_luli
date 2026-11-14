@@ -1414,7 +1414,7 @@
 .cms-category-animation-open:disabled{opacity:.55;cursor:not-allowed}
 .cms-category-address{padding-left:12px;color:var(--cms-muted);font-size:9px}
 .cms-category-animation-editor{
-  grid-column:1/-1;display:grid;gap:16px;min-width:0;padding:22px;
+  grid-column:2;grid-row:1;align-self:start;display:grid;gap:16px;min-width:0;padding:22px;
   border:1px solid color-mix(in srgb,var(--cms-accent) 32%,var(--cms-line));
   border-radius:10px;background:var(--cms-panel);
 }
@@ -1432,10 +1432,13 @@
 .cms-category-animation-empty strong{font:600 14px 'Manrope';color:var(--cms-text)}
 .cms-category-animation-empty p{margin:6px 0 0;color:var(--cms-muted);font:400 11px/1.5 'DM Sans'}
 @media(max-width:700px){
- .cms-category-animation-editor{padding:16px}
+ .cms-category-animation-editor{grid-column:1;grid-row:auto;padding:16px}
  .cms-category-animation-editor-heading{align-items:center}
  .cms-category-animation-editor .cms-category-animation-preview{grid-template-columns:1fr}
  .cms-category-animation-editor .cms-category-animation-preview .cms-animation-demo{height:72px}
  .cms-category-animation-editor-actions{align-items:stretch;flex-direction:column}
  .cms-category-animation-editor-actions button{width:100%}
 }
+
+.cms-category-item.is-animation-selected{border-left:2px solid var(--cms-accent);padding-left:10px}
+.cms-category-animation-open[aria-pressed="true"]{border-color:color-mix(in srgb,var(--cms-accent) 55%,transparent)!important;background:color-mix(in srgb,var(--cms-accent) 10%,transparent)!important}
