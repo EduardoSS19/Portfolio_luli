@@ -47,6 +47,31 @@ const SECTION_TEMPLATES = [
   {type:'guest-spots',title:'Agenda e guest spots',label:'Agenda',intro:'Datas, cidades e estúdios onde o artista estará atendendo.'},
   {type:'studio-team',title:'Estúdio e equipe',label:'Equipe',intro:'Apresentação do estúdio e dos artistas que fazem parte dele.'},
 ]
+const SECTION_ITEM_FIELDS = {
+ exhibitions:[['period','Ano / período','Ex.: 2025'],['venue','Instituição / espaço','Ex.: Museu de Arte'],['location','Cidade / local','Ex.: Porto Alegre, Brasil'],['format','Participação','Ex.: Individual · Coletiva']],
+ process:[['stage','Etapa do processo','Ex.: Pesquisa inicial'],['technique','Técnica','Ex.: Aquarela e colagem'],['materials','Materiais','Ex.: Papel, pigmento, madeira']],
+ services:[['format','Formato do serviço','Ex.: Projeto personalizado'],['price','Investimento','Ex.: A partir de R$ 800'],['duration','Prazo / duração','Ex.: 3 encontros']],
+ press:[['publication','Veículo / publicação','Ex.: Revista Traço'],['author','Autoria','Ex.: Texto de Ana Lima'],['period','Data da publicação','Ex.: Outubro de 2025']],
+ testimonials:[['author','Pessoa / cliente','Ex.: Marina Costa'],['role','Cargo / relação','Ex.: Curadora'],['project','Projeto relacionado','Ex.: Cartografias afetivas']],
+ 'tattoo-flash':[['size','Tamanho','Ex.: 8 cm'],['placement','Local sugerido','Ex.: Antebraço'],['price','Valor','Ex.: R$ 450'],['status','Disponibilidade','Ex.: Disponível · Peça única']],
+ 'tattoo-booking':[['step','Etapa','Ex.: 1 · Envie sua ideia'],['channel','Canal de contato','Ex.: Formulário ou Instagram'],['response_time','Prazo de retorno','Ex.: Até 3 dias úteis'],['policy','Orientação','Ex.: Envie referências e medidas']],
+ 'healed-work':[['placement','Local tatuado','Ex.: Antebraço'],['healing_time','Tempo de cicatrização','Ex.: 6 meses'],['period','Data do registro','Ex.: Janeiro de 2026']],
+ 'guest-spots':[['city','Cidade','Ex.: São Paulo'],['studio','Estúdio anfitrião','Ex.: Casa Tinta'],['dates','Datas','Ex.: 12–16 de março'],['booking_url','Link para agendamento','https://…']],
+ 'studio-team':[['role','Função','Ex.: Artista residente'],['specialties','Especialidades','Ex.: Fine line · Botânica'],['instagram','Instagram','@artista']],
+}
+const SECTION_DESIGNS = {
+ exhibitions:[['timeline','Linha do tempo'],['cards','Cartões'],['list','Lista editorial']],
+ process:[['steps','Etapas numeradas'],['gallery','Galeria visual'],['editorial','Texto e imagem']],
+ services:[['cards','Serviços em cartões'],['list','Lista de serviços'],['featured','Serviço em destaque']],
+ press:[['list','Lista de publicações'],['cards','Capas em cartões']],
+ testimonials:[['quotes','Depoimentos em destaque'],['cards','Cartões']],
+ 'tattoo-flash':[['flash-grid','Grade de flash'],['masonry','Mosaico irregular'],['cards','Cartões']],
+ 'tattoo-booking':[['steps','Passo a passo'],['accordion','Perguntas e orientações'],['cards','Cartões']],
+ 'healed-work':[['gallery','Galeria de resultados'],['before-after','Comparação visual'],['cards','Cartões']],
+ 'guest-spots':[['agenda','Agenda'],['cards','Cartões']],
+ 'studio-team':[['team-grid','Grade da equipe'],['list','Lista da equipe']],
+}
+
 
 const FIELD_GROUPS = [
   {id:'composition',title:'Composição',description:'Defina a estrutura visual e o ritmo de leitura do portfólio.'},
@@ -135,8 +160,8 @@ export function CmsLayoutManager(){
   const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
   // O modal contextual usa a largura móvel real e a altura visível do quadro, sem transform.
   // Isso mantém menus fixos dentro da área visível e preserva o clique/scroll nativos do iframe.
-  const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewStageHeight=hoverPreviewSize.height||260
+  const hoverPreviewStageWidth=390
+  const hoverPreviewStageHeight=844
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -477,12 +502,16 @@ export function CmsLayoutManager(){
   const updateCustomSection=(id,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===id?{...section,...patch}:section)}))
   const addCustomSection=template=>{
     const id=template.type+'-'+Date.now().toString(36)
-    setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,items:[]}]}))
-    setNotice('Seção adicionada. Abra “Editar conteúdo” para preencher os detalhes.')
+    setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,design:{layout:SECTION_DESIGNS[template.type]?.[0]?.[0]||'cards',columns:'2',image_ratio:'landscape',density:'comfortable'},items:[]}]}))
+    setNotice('Seção adicionada. Abra “Conteúdo” para preencher os campos específicos e “Design” para escolher sua apresentação.')
   }
   const moveCustomSection=(id,delta)=>setSettings(current=>{const sections=[...(current.custom_sections||[])];const index=sections.findIndex(section=>section.id===id);const target=index+delta;if(index<0||target<0||target>=sections.length)return current;[sections[index],sections[target]]=[sections[target],sections[index]];return {...current,custom_sections:sections}})
   const removeCustomSection=id=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).filter(section=>section.id!==id)}))
-  const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
+  const addCustomSectionItem=id=>{
+    const section=(settings.custom_sections||[]).find(item=>item.id===id)
+    const defaults=Object.fromEntries((SECTION_ITEM_FIELDS[section?.type]||[]).map(([key])=>[key,'']))
+    updateCustomSection(id,{items:[...(section?.items||[]),{title:'',description:'',url:'',image:'',...defaults}]})
+  }
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
   const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.default_gallery_view);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
@@ -554,34 +583,52 @@ export function CmsLayoutManager(){
         <section className="cms-layout-section-library" ref={postPresetMenuRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">CONTEÚDO MODULAR</p><h2>Biblioteca de seções</h2></div><span className="cms-layout-preset-count">{(settings.custom_sections||[]).length} adicionadas</span></div>
           <p className="cms-layout-help">Adicione apenas o que faz sentido para seu trabalho. Cada seção pode ser editada e organizada; deixe sem itens para mantê-la como rascunho no editor.</p>
-          <div className="cms-layout-section-template-grid">
-            {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
-              <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
-            </button>)}
-          </div>
-          {(settings.custom_sections||[]).map((section,index)=><article className="cms-layout-custom-section" key={section.id}>
-            <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
-            <details className="cms-layout-custom-section-editor">
-              <summary><span>Editar conteúdo</span><small>{(section.items||[]).length} itens cadastrados</small></summary>
-              <div className="cms-layout-custom-section-fields">
-            <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
-            <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
-            <div className="cms-layout-custom-items">
-              {(section.items||[]).map((item,itemIndex)=><div className="cms-layout-custom-item" key={itemIndex}>
-                <div className="cms-layout-custom-item-heading"><strong>Item {itemIndex+1}</strong><button type="button" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button></div>
-                <label>Nome<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
-                <label>Descrição<textarea rows="2" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
-                <div className="cms-layout-custom-item-fields">
-                  <label>Período<input value={item.period||''} maxLength={100} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{period:event.target.value})} disabled={!canChange||saving} placeholder="Ex.: 2025 · Porto Alegre"/></label>
-                  <label>Link externo<input type="url" value={item.url||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
-                  <label>Imagem (URL)<input type="url" value={item.image||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
-                </div>
-              </div>)}
+          <details className="cms-layout-library-add">
+            <summary><span>Adicionar uma seção</span><small>Escolha um formato específico para seu trabalho</small></summary>
+            <div className="cms-layout-section-template-grid">
+              {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
+                <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
+              </button>)}
             </div>
-            <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar conteúdo</button>
-              </div>
-            </details>
-          </article>)}
+          </details>
+          {(settings.custom_sections||[]).map((section,index)=>{
+            const itemFields=SECTION_ITEM_FIELDS[section.type]||[]
+            const designOptions=SECTION_DESIGNS[section.type]||[['cards','Cartões'],['list','Lista']]
+            const design=section.design||{}
+            return <article className="cms-layout-custom-section" key={section.id}>
+              <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
+              <details className="cms-layout-custom-section-editor">
+                <summary><span>Conteúdo</span><small>{(section.items||[]).length} itens</small></summary>
+                <div className="cms-layout-custom-section-fields">
+                  <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
+                  <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
+                  <div className="cms-layout-custom-items">
+                    {(section.items||[]).map((item,itemIndex)=><details className="cms-layout-custom-item" key={itemIndex}>
+                      <summary><strong>{item.title||'Novo item '+(itemIndex+1)}</strong><small>Editar informações</small></summary>
+                      <div className="cms-layout-custom-item-fields">
+                        <label>Nome / título<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
+                        <label>Descrição<textarea rows="3" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
+                        {itemFields.map(([key,label,placeholder])=><label key={key}>{label}<input value={item[key]||''} maxLength={300} placeholder={placeholder} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{[key]:event.target.value})} disabled={!canChange||saving}/></label>)}
+                        {['exhibitions','process','services','tattoo-flash','healed-work','studio-team'].includes(section.type)&&<label>Imagem (URL)<input type="url" value={item.image||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving}/></label>}
+                        {['press','services','tattoo-flash','tattoo-booking','guest-spots','studio-team'].includes(section.type)&&<label>Link / ação (URL)<input type="url" value={item.url||item.booking_url||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving}/></label>}
+                        <button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button>
+                      </div>
+                    </details>)}
+                  </div>
+                  <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar {section.type==='testimonials'?'depoimento':section.type==='studio-team'?'integrante':section.type==='tattoo-flash'?'flash':section.type==='guest-spots'?'data':section.type==='press'?'publicação':'item'}</button>
+                </div>
+              </details>
+              <details className="cms-layout-custom-section-editor cms-layout-custom-section-design">
+                <summary><span>Design da seção</span><small>Layout e apresentação</small></summary>
+                <div className="cms-layout-custom-section-fields">
+                  <label>Estilo de apresentação<select value={design.layout||designOptions[0][0]} onChange={event=>updateCustomSection(section.id,{design:{...design,layout:event.target.value}})} disabled={!canChange||saving}>{designOptions.map(([value,label])=><option value={value} key={value}>{label}</option>)}</select></label>
+                  <label>Colunas no desktop<select value={design.columns||'2'} onChange={event=>updateCustomSection(section.id,{design:{...design,columns:event.target.value}})} disabled={!canChange||saving}><option value="1">1 coluna</option><option value="2">2 colunas</option><option value="3">3 colunas</option></select></label>
+                  <label>Proporção das imagens<select value={design.image_ratio||'landscape'} onChange={event=>updateCustomSection(section.id,{design:{...design,image_ratio:event.target.value}})} disabled={!canChange||saving}><option value="portrait">Vertical</option><option value="square">Quadrada</option><option value="landscape">Horizontal</option></select></label>
+                  <label>Espaçamento<select value={design.density||'comfortable'} onChange={event=>updateCustomSection(section.id,{design:{...design,density:event.target.value}})} disabled={!canChange||saving}><option value="compact">Compacto</option><option value="comfortable">Confortável</option><option value="spacious">Amplo</option></select></label>
+                </div>
+              </details>
+            </article>
+          })}
         </section>
         <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
@@ -592,7 +639,7 @@ export function CmsLayoutManager(){
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onBlur={hideOptionPreview}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
@@ -602,7 +649,7 @@ export function CmsLayoutManager(){
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
+          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device="mobile">
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
               <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
             </div>
