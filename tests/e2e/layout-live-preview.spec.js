@@ -447,3 +447,47 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
   expect(geometry.iframeLayoutWidth).toBe(1440)
   expect(geometry.overflowY).toBe('auto')
 })
+
+test('menu lateral permanece fechado na prévia até o visitante clicar para abrir', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { navigation_mode: 'sidebar' }, 'navigation')
+  const nav = page.locator('.site-nav')
+  await expect(nav).toHaveClass(/navigation-sidebar/)
+  await expect(nav).not.toHaveClass(/menu-aberto/)
+  await expect(nav.locator('.editorial-menu-trigger')).toHaveAttribute('aria-expanded', 'false')
+  await nav.locator('.editorial-menu-trigger').click()
+  await expect(nav).toHaveClass(/menu-aberto/)
+})
+
+test('biblioteca de seções mantém os submenus recolhidos e oferece campos e design específicos', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const library = page.locator('.cms-layout-section-library')
+  const addMenu = library.locator('.cms-layout-library-add')
+  await expect(addMenu).not.toHaveAttribute('open', '')
+  await addMenu.locator('summary').click()
+  await library.getByRole('button', { name: /Flash tattoo/ }).click()
+  const section = library.locator('.cms-layout-custom-section').last()
+  const menus = section.locator('details.cms-layout-custom-section-editor')
+  await expect(menus).toHaveCount(2)
+  await expect(menus.nth(0)).not.toHaveAttribute('open', '')
+  await expect(menus.nth(1)).not.toHaveAttribute('open', '')
+  await menus.nth(1).locator('summary').click()
+  await expect(menus.nth(1).getByLabel('Estilo de apresentação')).toHaveValue('flash-grid')
+  await menus.nth(0).locator('summary').click()
+  await expect(menus.nth(0).getByText('Disponibilidade')).toBeVisible()
+})
