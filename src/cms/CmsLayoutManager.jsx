@@ -212,14 +212,14 @@ export function CmsLayoutManager(){
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
   const previewUrl='/?layout_preview=1&layout_preview_live=1'
   const hoverPreviewState=()=>{
-    if(!hoveredOption)return {settings,focus:previewFocus,previewMode}
+    if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode}
+    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
-    const payload=override||{settings,focus:previewFocus,previewMode}
+    const payload=override||{settings,focus:previewFocus,previewMode,animatePreview:false}
     target?.postMessage({type:'cms-layout-preview:update',...payload},window.location.origin)
   }
   // A prévia final recebe somente as escolhas aplicadas no editor.
