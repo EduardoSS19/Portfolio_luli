@@ -40,7 +40,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   useEffect(() => {
     const handlePreviewNavigation = event => {
       const requestedMode = event.detail?.mode
-      if (['curtain', 'dropdown', 'sidebar'].includes(requestedMode)) setPreviewNavigationMode(requestedMode)
+      setPreviewNavigationMode(requestedMode === 'sidebar' ? 'sidebar' : null)
       if (event.detail?.open || requestedMode === 'sidebar') {
         previewMenuAutoOpenRef.current = true
         setMenuAberto(true)
