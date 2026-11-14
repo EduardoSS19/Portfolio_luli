@@ -210,16 +210,16 @@ export function CmsLayoutManager(){
     return()=>{active=false}
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
-  const previewUrl='/?layout_preview=1'
+  const previewUrl='/?layout_preview=1&layout_preview_live=1'
   const hoverPreviewState=()=>{
-    if(!hoveredOption)return {settings,focus:previewFocus,previewMode}
+    if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode}
+    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
-    const payload=override||{settings,focus:previewFocus,previewMode}
+    const payload=override||{settings,focus:previewFocus,previewMode,animatePreview:false}
     target?.postMessage({type:'cms-layout-preview:update',...payload},window.location.origin)
   }
   // A prévia final recebe somente as escolhas aplicadas no editor.
@@ -251,14 +251,27 @@ export function CmsLayoutManager(){
 
   const showOptionPreview=(name,value,label,detail,event)=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
+    const rect=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
     const viewportHeight=window.innerHeight
-    const panelWidth=Math.min(380,viewportWidth-32)
-    const panelHeight=Math.min(440,viewportHeight-32)
+    const margin=16
+    const gap=12
+    const panelWidth=Math.min(380,viewportWidth-margin*2)
+    const preferredHeight=Math.min(440,viewportHeight-margin*2)
+    const rightSpace=rect?viewportWidth-rect.right-gap-margin:0
+    const leftSpace=rect?rect.left-gap-margin:0
+    const placeRight=rightSpace>=panelWidth||rightSpace>=leftSpace
+    const availableWidth=Math.max(240,Math.min(panelWidth,placeRight?rightSpace:leftSpace))
+    const left=rect
+      ?(placeRight?rect.right+gap:rect.left-gap-availableWidth)
+      :margin
+    const top=rect?Math.min(rect.bottom+gap,viewportHeight-margin-180):margin
+    const maxHeight=Math.max(180,Math.min(preferredHeight,viewportHeight-top-margin))
     setHoverPreviewPosition({
-      left:Math.max(16,(viewportWidth-panelWidth)/2),
-      top:Math.max(16,(viewportHeight-panelHeight)/2),
-      maxHeight:panelHeight,
+      left:Math.max(margin,Math.min(left,viewportWidth-availableWidth-margin)),
+      top:Math.max(margin,top),
+      width:availableWidth,
+      maxHeight,
     })
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
     setHoverPreviewMounted(true)
@@ -319,7 +332,7 @@ export function CmsLayoutManager(){
       <div className="cms-layout-heading-actions"><button type="button" className="cms-secondary-link cms-layout-preview-toggle" onClick={()=>setPreviewOpen(value=>!value)}>{previewOpen?'Ocultar janela flutuante':'◉ Abrir janela flutuante'}</button><a className="cms-secondary-link" href="/" target="_blank" rel="noreferrer">Site publicado ↗</a></div>
     </header>
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
-    <div className="cms-layout-workspace">
+    <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
@@ -337,14 +350,13 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
-            <button type="button" aria-label="Fechar prévia temporária" onClick={hideOptionPreview}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
             </div>
           </div>
           <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>

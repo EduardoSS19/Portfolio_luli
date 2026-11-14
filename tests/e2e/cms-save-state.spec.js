@@ -124,6 +124,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
 
   const leftOption = page.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
   await leftOption.scrollIntoViewIfNeeded()
+  const panelScrollBeforeHover = await page.evaluate(() => window.scrollY)
   const optionBeforeHover = await leftOption.evaluate(element => {
     const rect = element.getBoundingClientRect()
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
@@ -131,9 +132,11 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await leftOption.hover()
   const hoverPreview = page.locator('.cms-layout-hover-preview')
   await expect(hoverPreview).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(panelScrollBeforeHover)
   await expect(hoverPreview.getByText('À esquerda', { exact: true })).toBeVisible()
   const temporaryFrame = hoverPreview.locator('iframe[title="Prévia temporária do portfólio"]')
   await expect(temporaryFrame).toHaveAttribute('src', '/?layout_preview=1')
+  await expect(temporaryFrame).not.toHaveAttribute('src', /layout_preview_live/)
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
@@ -143,11 +146,30 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   })
   expect(optionAfterHover).toEqual(optionBeforeHover)
   await expect(hoverPreview).toHaveCSS('position', 'fixed')
-  await expect(hoverPreview.getByRole('button', { name: 'Fechar prévia temporária' })).toBeEnabled()
+  await expect(hoverPreview).toBeVisible()
+  const anchoredGeometry = await page.evaluate(() => {
+    const option = [...document.querySelectorAll('.cms-layout-option')].find(element => element.textContent.includes('À esquerda'))
+    const preview = document.querySelector('.cms-layout-hover-preview')
+    const optionRect = option.getBoundingClientRect()
+    const previewRect = preview.getBoundingClientRect()
+    const form = document.querySelector('.cms-layout-form')
+    return {
+      option: { left: optionRect.left, right: optionRect.right, bottom: optionRect.bottom },
+      preview: { left: previewRect.left, right: previewRect.right, top: previewRect.top },
+      formWidth: form.getBoundingClientRect().width,
+      viewportWidth: window.innerWidth,
+    }
+  })
+  expect(anchoredGeometry.preview.top).toBeGreaterThanOrEqual(anchoredGeometry.option.bottom)
+  const isToRight = anchoredGeometry.preview.left >= anchoredGeometry.option.right
+  const isToLeft = anchoredGeometry.preview.right <= anchoredGeometry.option.left
+  expect(isToRight || isToLeft).toBeTruthy()
 
+  const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBeforeSelection)
 
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
@@ -160,6 +182,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
 
   await page.getByRole('button', { name: 'Abrir janela flutuante' }).click()
   const floatingFrame = page.locator('iframe[title="Prévia flutuante em Desktop"]')
+  await expect(floatingFrame).toHaveAttribute('src', '/?layout_preview=1&layout_preview_live=1')
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
   const floatingPanel = page.locator('.cms-layout-preview-panel.floating')
   const beforePanelWidth = (await floatingPanel.boundingBox()).width

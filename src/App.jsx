@@ -211,8 +211,28 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
-      // Atualiza a prévia sem deslocar a rolagem: quem está personalizando
-      // decide quando navegar pela página para conferir o resultado.
+
+      // A navegação acontece somente no documento da prévia (iframe).
+      // Nunca envia foco/scroll para a página externa do CMS.
+      // Somente o hover contextual pode navegar dentro do iframe.
+      // Atualizações disparadas por clique/aplicação atualizam o visual sem scroll.
+      if (event.data.animatePreview !== true) return
+
+      const focus = event.data.focus
+      const selector = focus === 'hero' ? '.hero'
+        : focus === 'gallery'
+          ? (previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
+          : focus === 'bio' ? '.sobre-secao'
+            : focus === 'references' ? '#Referências'
+              : focus === 'contact' ? '#Contato'
+                : null
+      if (selector) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+          })
+        })
+      }
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
@@ -269,7 +289,7 @@ export default function App() {
         return response.json()
       })
       .then(data => {
-        const demoContent = params.has('layout_preview') ? LAYOUT_PREVIEW_DEMO : null
+        const demoContent = params.has('layout_preview') && !params.has('layout_preview_live') ? LAYOUT_PREVIEW_DEMO : null
         setConteudo(atual => ({
           categorias: demoContent ? demoContent.categorias : Array.isArray(data.categorias) ? data.categorias : [],
           referencias: demoContent ? demoContent.referencias : Array.isArray(data.referencias) ? data.referencias : [],
