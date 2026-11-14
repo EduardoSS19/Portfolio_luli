@@ -447,6 +447,8 @@ export default function App() {
   const [modoGaleria, setModoGaleria] = useState(DEFAULT_LAYOUT_SETTINGS.default_gallery_view)
   // O portfólio sempre inicia no tema escuro; a escolha clara vale apenas para a sessão atual.
   const [tema, setTema] = useState(DEFAULT_LAYOUT_SETTINGS.default_theme)
+  const [previewMenuOpen, setPreviewMenuOpen] = useState(false)
+  const [previewMenuRequest, setPreviewMenuRequest] = useState(0)
 
   useEffect(() => {
     document.documentElement.dataset.theme = tema
@@ -518,6 +520,12 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
+      if (event.data.focus === 'navigation') {
+        setPreviewMenuOpen(true)
+        setPreviewMenuRequest(current => current + 1)
+      } else {
+        setPreviewMenuOpen(false)
+      }
 
       // A navegação acontece somente no documento da prévia (iframe).
       // Nunca envia foco/scroll para a página externa do CMS.
@@ -852,6 +860,8 @@ export default function App() {
         navigationMode={layout.navigation_mode || 'curtain'}
         nomeArtista={sobre.nome}
         fraseArtista={sobre.frase}
+        previewMenuOpen={previewMenuOpen}
+        previewMenuRequest={previewMenuRequest}
       />
       {(layout.show_bio_image !== false || layout.show_bio !== false) && <Sobre perfil={sobre} mostrarImagem={layout.show_bio_image !== false} mostrarBio={layout.show_bio !== false} />}
       {modoGaleria === 'grade' ? (
