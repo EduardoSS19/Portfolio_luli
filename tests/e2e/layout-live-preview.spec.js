@@ -31,18 +31,19 @@ async function sendSettings(page, settings, focus = 'page', previewMode) {
   }, { settings, focus, previewMode })
 }
 
-test('atualizar opções não provoca rolagem automática dentro da prévia', async ({ page }) => {
+test('a prévia navega até a seção editada dentro do iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await page.evaluate(() => window.scrollTo(0, 0))
   const initialScrollY = await page.evaluate(() => window.scrollY)
 
   await sendSettings(page, { show_references: true }, 'references')
   await expect(page.locator('#Referências')).toBeVisible()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 
+  await page.evaluate(() => window.scrollTo(0, 0))
   await sendSettings(page, { show_bio: true }, 'bio')
   await expect(page.locator('.sobre-secao')).toBeVisible()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 })
 
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
