@@ -410,17 +410,27 @@ const PREVIEW_SECTION_EXAMPLES = {
 }
 
 function PortfolioCustomSections({ sections = [], preview = false, examples = null }) {
+  const metaFields = {
+    exhibitions:['venue','location','format'],process:['stage','technique','materials'],services:['format','price','duration'],
+    press:['publication','author','period'],testimonials:['author','role','project'],'tattoo-flash':['size','placement','price','status'],
+    'tattoo-booking':['step','channel','response_time','policy'],'healed-work':['placement','healing_time','period'],
+    'guest-spots':['city','studio','dates'],'studio-team':['role','specialties','instagram'],
+  }
+  const labels = {venue:'Espaço',location:'Local',format:'Formato',stage:'Etapa',technique:'Técnica',materials:'Materiais',price:'Investimento',duration:'Prazo',publication:'Publicação',author:'Autoria',role:'Função',project:'Projeto',size:'Tamanho',placement:'Local',status:'Disponibilidade',step:'Etapa',channel:'Contato',response_time:'Retorno',policy:'Orientação',healing_time:'Cicatrização',city:'Cidade',studio:'Estúdio',dates:'Datas',specialties:'Especialidades',instagram:'Instagram',period:'Período'}
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
     const items = section.items.length ? section.items : (preview ? examples?.[section.type] || PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
+    const design = section.design || {}
     return (
-      <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
+      <section className={'secao portfolio-custom-section section-'+section.type+' section-layout-'+(design.layout||'cards')+' section-density-'+(design.density||'comfortable')} id={section.id} key={section.id} data-columns={design.columns||'2'} data-image-ratio={design.image_ratio||'landscape'} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
         <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
         {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
         <div className="portfolio-custom-grid">
           {items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
             {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
-            <div><h3>{item.title}</h3>{item.period && <small>{item.period}</small>}{item.description && <p>{item.description}</p>}
-              {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
+            <div><h3>{item.title}</h3>
+              {(metaFields[section.type]||['period']).filter(key=>item[key]).map(key=><small className={'portfolio-custom-meta meta-'+key} key={key}><strong>{labels[key]||key}:</strong> {item[key]}</small>)}
+              {item.description && <p>{item.description}</p>}
+              {(item.url||item.booking_url) && <a href={item.url||item.booking_url} target="_blank" rel="noreferrer">{section.type==='tattoo-booking'?'Solicitar agendamento':section.type==='services'?'Consultar serviço':'Saiba mais'} ↗</a>}
             </div>
           </article>)}
         </div>
@@ -519,7 +529,7 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
-        detail: { open: event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
+        detail: { open: false, mode: safeSettings.navigation_mode || 'curtain' },
       }))
 
       // A navegação acontece somente no documento da prévia (iframe).
