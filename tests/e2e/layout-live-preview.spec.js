@@ -186,12 +186,64 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(page.locator('#Contato')).toContainText('contato@artista-demo.example')
 })
 
-test('prévia navega para referências e contato sem rearmar rolagens antigas', async ({ page }) => {
+test('prévia mantém a posição de rolagem ao alterar opções de layout', async ({ page }) => {
   await openLiveLayoutPreview(page)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const initialScrollY = await page.evaluate(() => window.scrollY)
+
   await sendSettings(page, { show_references: true }, 'references')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { dark_color_accent: '#88aacc' }, 'page')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { show_references: true }, 'contact')
-  await expect(page.locator('#Contato')).toBeInViewport()
+  await expect(page.locator('#Contato')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+})
+
+
+test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertical', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli', email: 'contato@artista-demo.example' }, layout: {} }),
+  }))
+
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const preview = page.locator('.cms-layout-inline-preview')
+  await expect(preview).toBeVisible()
+  const viewport = preview.locator('.cms-layout-preview-frame-inline')
+  const iframe = preview.locator('iframe')
+  await expect(iframe).toBeVisible()
+  await expect.poll(() => viewport.getAttribute('data-preview-scale').then(Number)).toBeLessThan(1)
+
+  const geometry = await preview.evaluate(root => {
+    const frame = root.querySelector('.cms-layout-preview-frame-inline')
+    const stage = root.querySelector('.cms-layout-preview-stage-inline')
+    const iframe = root.querySelector('iframe')
+    return {
+      availableWidth: frame.clientWidth,
+      stageWidth: stage.getBoundingClientRect().width,
+      iframeWidth: iframe.getBoundingClientRect().width,
+      iframeLayoutWidth: iframe.clientWidth,
+      overflowY: getComputedStyle(frame).overflowY,
+    }
+  })
+  expect(Math.abs(geometry.stageWidth - geometry.availableWidth)).toBeLessThanOrEqual(3)
+  expect(geometry.iframeLayoutWidth).toBe(1440)
+  expect(geometry.overflowY).toBe('auto')
 })
