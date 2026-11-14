@@ -311,3 +311,24 @@
 /* A prévia de hover não deve revelar a cor de fundo da página no espaço vazio do iframe. */
 .cms-layout-hover-preview-frame{background:#171914!important}
 .cms-layout-hover-preview-frame iframe{background:transparent!important}
+
+
+/* A prévia completa preserva a escala legível e rola verticalmente dentro do próprio quadro. */
+.cms-layout-preview-frame-inline{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+}
+.cms-layout-preview-stage-inline{
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  min-height:0!important;
+  flex:0 0 auto;
+}
+.cms-layout-preview-frame-inline iframe{
+  flex:0 0 auto;
+  display:block;
+}
