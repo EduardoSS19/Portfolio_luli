@@ -31,6 +31,18 @@ async function sendSettings(page, settings, focus = 'page', previewMode) {
   }, { settings, focus, previewMode })
 }
 
+test('foco de prévia navega dentro do iframe e não desloca o painel', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await sendSettings(page, { show_references: true }, 'references')
+  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+
+  await sendSettings(page, { show_bio: true }, 'bio')
+  await expect(page.locator('.sobre-secao')).toBeInViewport()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+})
+
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
