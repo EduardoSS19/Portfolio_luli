@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -82,7 +82,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   }
 
   return (
-    <nav className={`site-nav editorial-nav ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
+    <nav className={`site-nav editorial-nav navigation-${navigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
       <button
         ref={botaoMenuRef}
         type="button"
