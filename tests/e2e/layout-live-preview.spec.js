@@ -16,7 +16,7 @@ async function openLiveLayoutPreview(page) {
         { titulo: 'Obra de teste', imagem: image, descricao: 'Estudo de contraste.' },
       ] }],
       referencias: [{ titulo: 'Exposição coletiva', periodo: '2025', links: [{ texto: 'Instituição', url: 'https://example.com' }] }], frames: [], redes: [],
-      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: 'contato@artista-demo.example', instagram: '', formulario: '' },
       layout: { default_gallery_view: 'lista', default_theme: 'escuro' },
     }),
   }))
