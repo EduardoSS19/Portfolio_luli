@@ -306,3 +306,8 @@
   flex:0 0 auto;
   background:transparent;
 }
+
+
+/* A prévia de hover não deve revelar a cor de fundo da página no espaço vazio do iframe. */
+.cms-layout-hover-preview-frame{background:#171914!important}
+.cms-layout-hover-preview-frame iframe{background:transparent!important}
