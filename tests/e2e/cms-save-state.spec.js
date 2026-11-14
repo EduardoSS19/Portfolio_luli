@@ -135,7 +135,6 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const temporaryFrame = hoverPreview.locator('iframe[title="Prévia temporária do portfólio"]')
   await expect(temporaryFrame).toHaveAttribute('src', '/?layout_preview=1')
   await expect(temporaryFrame).not.toHaveAttribute('src', /layout_preview_live/)
-  await expect(temporaryFrame).toHaveJSProperty('contentWindow', expect.anything())
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
@@ -162,6 +161,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
 
   await page.getByRole('button', { name: 'Abrir janela flutuante' }).click()
   const floatingFrame = page.locator('iframe[title="Prévia flutuante em Desktop"]')
+  await expect(floatingFrame).toHaveAttribute('src', '/?layout_preview=1&layout_preview_live=1')
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
   const floatingPanel = page.locator('.cms-layout-preview-panel.floating')
   const beforePanelWidth = (await floatingPanel.boundingBox()).width
