@@ -259,16 +259,15 @@ export function CmsLayoutManager(){
     const gap=16
     const minEdge=16
     if(anchor){
-      const rightSpace=viewportWidth-anchor.right-gap-minEdge
-      const leftSpace=anchor.left-gap-minEdge
-      const sideFits=rightSpace>=panelWidth||leftSpace>=panelWidth
-      const placeRight=sideFits?rightSpace>=panelWidth:rightSpace>=leftSpace
-      // Mantém a prévia acima do controle para não encobrir o menu
-      // nem os campos que a pessoa está explorando.
-      const left=sideFits
-        ?(placeRight?anchor.right+gap:anchor.left-panelWidth-gap)
+      // Em telas largas, a prévia ocupa uma faixa reservada à direita.
+      // O formulário encolhe enquanto ela está aberta, sem cobrir opções ou ações.
+      const desktopDock=viewportWidth>1100
+      const left=desktopDock
+        ?Math.max(minEdge,viewportWidth-panelWidth-minEdge)
         :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
-      const top=Math.max(minEdge,anchor.top-panelHeight-gap)
+      const top=desktopDock
+        ?Math.max(minEdge,Math.min(anchor.top,viewportHeight-panelHeight-minEdge))
+        :Math.max(minEdge,anchor.top-panelHeight-gap)
       const maxHeight=Math.max(80,Math.min(panelHeight,viewportHeight-top-minEdge))
       setHoverPreviewPosition({left,top,maxHeight})
     }else{
@@ -336,7 +335,7 @@ export function CmsLayoutManager(){
       <div className="cms-layout-heading-actions"><button type="button" className="cms-secondary-link cms-layout-preview-toggle" onClick={()=>setPreviewOpen(value=>!value)}>{previewOpen?'Ocultar janela flutuante':'◉ Abrir janela flutuante'}</button><a className="cms-secondary-link" href="/" target="_blank" rel="noreferrer">Site publicado ↗</a></div>
     </header>
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
-    <div className="cms-layout-workspace">
+    <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
