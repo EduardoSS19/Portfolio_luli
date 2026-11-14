@@ -261,7 +261,7 @@ export function CmsLayoutManager(){
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const hasBio=(hoveredOption.name==='show_bio'?hoveredOption.value:settings.show_bio)!==false||(hoveredOption.name==='show_bio_image'?hoveredOption.value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):'page'
+    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):hoveredOption.name==='navigation_mode'?'navigation':'page'
     return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -412,7 +412,7 @@ export function CmsLayoutManager(){
     if(name==='default_gallery_view')setPreviewMode(value)
     else if(name==='gallery_columns')setPreviewMode('grade')
     const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):'page'
+    const focus=['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
     setPreviewFocus(focus)
     setError('');setNotice('')
   }
