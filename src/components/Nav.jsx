@@ -14,6 +14,7 @@ function tipoDeAnimacao(categoria) {
 export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
+  const previewMenuAutoOpenRef = useRef(false)
   const primeiroLinkRef = useRef(null)
   const overflowAnteriorRef = useRef({ body: '', html: '' })
   const categoriaAtual = categorias.find(cat => cat.titulo === categoriaAtiva)
@@ -22,7 +23,15 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     : ''
 
   useEffect(() => {
-    const handlePreviewNavigation = event => setMenuAberto(Boolean(event.detail?.open))
+    const handlePreviewNavigation = event => {
+      if (event.detail?.open) {
+        previewMenuAutoOpenRef.current = true
+        setMenuAberto(true)
+      } else if (previewMenuAutoOpenRef.current) {
+        previewMenuAutoOpenRef.current = false
+        setMenuAberto(false)
+      }
+    }
     window.addEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
     return () => window.removeEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
   }, [])
@@ -95,7 +104,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
         className="editorial-menu-trigger"
         aria-expanded={menuAberto}
         aria-controls="editorial-navigation"
-        onClick={() => setMenuAberto(aberto => !aberto)}
+        onClick={() => { previewMenuAutoOpenRef.current = false; setMenuAberto(aberto => !aberto) }}
       >
         <span className="editorial-menu-trigger-label">{menuAberto ? 'FECHAR' : 'MENU'}</span>
         <span className={`editorial-menu-mark ${menuAberto ? 'aberto' : ''}`} aria-hidden="true">
