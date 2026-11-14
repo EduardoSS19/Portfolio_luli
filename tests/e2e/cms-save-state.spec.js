@@ -145,10 +145,29 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   expect(optionAfterHover).toEqual(optionBeforeHover)
   await expect(hoverPreview).toHaveCSS('position', 'fixed')
   await expect(hoverPreview).toBeVisible()
+  const anchoredGeometry = await page.evaluate(() => {
+    const option = [...document.querySelectorAll('.cms-layout-option')].find(element => element.textContent.includes('À esquerda'))
+    const preview = document.querySelector('.cms-layout-hover-preview')
+    const optionRect = option.getBoundingClientRect()
+    const previewRect = preview.getBoundingClientRect()
+    const form = document.querySelector('.cms-layout-form')
+    return {
+      option: { left: optionRect.left, right: optionRect.right, bottom: optionRect.bottom },
+      preview: { left: previewRect.left, right: previewRect.right, top: previewRect.top },
+      formWidth: form.getBoundingClientRect().width,
+      viewportWidth: window.innerWidth,
+    }
+  })
+  expect(anchoredGeometry.preview.top).toBeGreaterThanOrEqual(anchoredGeometry.option.bottom)
+  const isToRight = anchoredGeometry.preview.left >= anchoredGeometry.option.right
+  const isToLeft = anchoredGeometry.preview.right <= anchoredGeometry.option.left
+  expect(isToRight || isToLeft).toBeTruthy()
 
+  const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBeforeSelection)
 
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
