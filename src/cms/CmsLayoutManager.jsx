@@ -145,9 +145,7 @@ export function CmsLayoutManager(){
   const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
-  const [previewDocumentHeights,setPreviewDocumentHeights]=useState({floating:PREVIEW_DEVICES.desktop.height,inline:PREVIEW_DEVICES.desktop.height})
-  const previewDocumentHeight=previewDocumentHeights.floating
-  const inlinePreviewDocumentHeight=previewDocumentHeights.inline
+  const [previewDocumentHeight,setPreviewDocumentHeight]=useState(PREVIEW_DEVICES.desktop.height)
   const previewDocumentObserversRef=useRef(new Map())
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
@@ -170,7 +168,7 @@ export function CmsLayoutManager(){
   // Mantém o viewport lógico do dispositivo e reduz a página inteira pela largura disponível.
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
-  const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
+  const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
   // O modal contextual usa a largura móvel real e a altura visível do quadro, sem transform.
   // Isso mantém menus fixos dentro da área visível e preserva o clique/scroll nativos do iframe.
   const hoverPreviewStageWidth=hoverPreviewSize.width||350
@@ -224,7 +222,7 @@ export function CmsLayoutManager(){
   },[previewOpen,previewMaximized,previewPosition.x,previewPosition.y,previewSize.width,previewSize.height])
 
   const observePreviewDocument=frame=>{
-    if(!frame?.contentDocument)return
+    if(!frame?.contentDocument||frame===inlinePreviewIframeRef.current)return
     const doc=frame.contentDocument
     const update=()=>{
       const footer=doc.querySelector('.rodape, footer')
@@ -243,8 +241,7 @@ export function CmsLayoutManager(){
         : Math.max(doc.documentElement?.scrollHeight||0,doc.body?.scrollHeight||0,PREVIEW_DEVICES[previewDevice]?.height||0)
       )
       if(height>0){
-        const key=frame===inlinePreviewIframeRef.current?'inline':'floating'
-        setPreviewDocumentHeights(current=>current[key]===height?current:{...current,[key]:height})
+        setPreviewDocumentHeight(current=>current===height?current:height)
       }
     }
     const previous=previewDocumentObserversRef.current.get(frame)
@@ -261,7 +258,7 @@ export function CmsLayoutManager(){
     }
   }
   const handlePreviewFrameLoad=event=>observePreviewDocument(event.currentTarget)
-  useEffect(()=>{setPreviewDocumentHeights({floating:previewHeight,inline:previewHeight})},[previewDevice])
+  useEffect(()=>{setPreviewDocumentHeight(previewHeight)},[previewDevice])
   useEffect(()=>()=>{previewDocumentObserversRef.current.forEach(observers=>{observers.resize?.disconnect();observers.mutation?.disconnect()});previewDocumentObserversRef.current.clear()},[])
   useLayoutEffect(()=>{
     const element=previewViewportRef.current
@@ -687,7 +684,7 @@ export function CmsLayoutManager(){
         <div className="cms-layout-preset-preview-actions"><button type="button" className="cms-editor-cancel" onClick={cancelPreviewPreset}>Voltar sem escolher</button><button type="button" className="cms-primary-button" onClick={confirmPreviewPreset}>Confirmar este layout <span>✓</span></button></div>
       </div>}
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:inlinePreviewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)} style={{height:inlinePreviewStageHeight}}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
       <p className="cms-layout-preview-caption">Largura ajustada automaticamente ({Math.round(inlinePreviewScale*100)}%). Role para cima e para baixo para percorrer todo o portfólio.</p>
     </section>
     
