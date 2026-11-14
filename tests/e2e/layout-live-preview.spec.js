@@ -37,12 +37,12 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
-  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(1)
+  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(6)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
-  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(1)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(6)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
   expect(await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)).toBe(initialNavigation)
 })
@@ -57,7 +57,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
     dark_color_muted: '#858585',
     dark_color_accent: '#777777',
   }, 'page')
-  await expect(page.locator('.galeria-grade-global .obra-texto h3')).toBeVisible()
+  await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toBeVisible()
 
   const ratios = await page.locator('.site-shell').evaluate(shell => {
     const luminance = hex => {
@@ -83,7 +83,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
     ]
   })
   for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
-  await expect(page.locator('.galeria-grade-global .obra-texto h3')).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toHaveCSS('color', 'rgb(255, 255, 255)')
 
   await sendSettings(page, {
     default_gallery_view: 'lista',
@@ -178,7 +178,7 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(page.locator('.hero')).toBeVisible()
   await expect(page.locator('.sobre-secao')).toBeVisible()
   await expect(page.locator('.sobre-secao .biografia')).toContainText('Lorem ipsum')
-  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(3)
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(4)
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(6)
   await expect(page.locator('#Referências')).toBeVisible()
   await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
