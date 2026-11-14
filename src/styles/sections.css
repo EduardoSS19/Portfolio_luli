@@ -119,3 +119,10 @@
   color: #0b2943;
   text-decoration-color: #285f8d;
 }
+
+
+/* Placeholders aparecem apenas na prévia privada dos modelos ainda sem conteúdo. */
+.portfolio-custom-empty-preview{display:grid;place-items:center;gap:.45rem;min-height:150px;padding:1.5rem;border:1px dashed rgba(160,174,145,.38);border-radius:12px;background:rgba(160,174,145,.045);text-align:center}
+.portfolio-custom-empty-preview>span{color:var(--azul-claro,#93c8f2);font-size:1.4rem}
+.portfolio-custom-empty-preview strong{font-size:.92rem}
+.portfolio-custom-empty-preview p{max-width:430px;margin:0;color:var(--texto-secundario,rgba(234,242,251,.65));font-size:.78rem;line-height:1.55}
