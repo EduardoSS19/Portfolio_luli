@@ -126,3 +126,41 @@
 .portfolio-custom-empty-preview>span{color:var(--azul-claro,#93c8f2);font-size:1.4rem}
 .portfolio-custom-empty-preview strong{font-size:.92rem}
 .portfolio-custom-empty-preview p{max-width:430px;margin:0;color:var(--texto-secundario,rgba(234,242,251,.65));font-size:.78rem;line-height:1.55}
+
+
+/* Tema claro: formulário de contato com contraste explícito em todos os estados. */
+:root[data-theme="claro"] .secao-contato,
+:root[data-theme="claro"] .secao-contato h2,
+:root[data-theme="claro"] .form-contato label {
+  color: #172b3b;
+}
+:root[data-theme="claro"] .form-contato input,
+:root[data-theme="claro"] .form-contato textarea {
+  color: #172b3b;
+  background: #ffffff;
+  border: 1px solid #526b7d;
+}
+:root[data-theme="claro"] .form-contato input::placeholder,
+:root[data-theme="claro"] .form-contato textarea::placeholder {
+  color: #5d6871;
+  opacity: 1;
+}
+:root[data-theme="claro"] .form-contato input:focus-visible,
+:root[data-theme="claro"] .form-contato textarea:focus-visible {
+  border-color: #174d70;
+  outline: 3px solid rgba(40, 95, 141, .24);
+  outline-offset: 2px;
+}
+:root[data-theme="claro"] .form-contato button {
+  color: #ffffff;
+  background: #1f4e70;
+}
+:root[data-theme="claro"] .form-contato button:hover:not(:disabled) {
+  background: #153c58;
+}
+:root[data-theme="claro"] .form-status.sucesso {
+  color: #17613a;
+}
+:root[data-theme="claro"] .form-status.erro {
+  color: #a12525;
+}
