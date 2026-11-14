@@ -24,6 +24,7 @@ DEFAULT_LAYOUT_SETTINGS = {
     "show_bio_image": True,
     "show_bio": True,
     "show_references": True,
+    "show_contact": True,
     "custom_sections": [],
 }
 LAYOUT_SETTING_CHOICES = {
@@ -38,7 +39,7 @@ LAYOUT_SETTING_CHOICES = {
     "default_theme": {"escuro", "claro"},
 }
 COLOR_SETTING_KEYS = {f"{theme}_{key}" for theme in ("dark", "light") for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent")}
-BOOLEAN_SETTING_KEYS = {"show_bio_image", "show_bio", "show_references"}
+BOOLEAN_SETTING_KEYS = {"show_bio_image", "show_bio", "show_references", "show_contact"}
 CUSTOM_SECTION_TYPES = {"exhibitions", "process", "services", "press", "testimonials", "tattoo-flash", "tattoo-booking", "healed-work", "guest-spots", "studio-team"}
 
 
