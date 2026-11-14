@@ -80,6 +80,12 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'carousel')
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-navigation', 'dropdown')
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-dropdown/)
+  const menuTrigger = page.locator('.editorial-menu-trigger')
+  const menuBackdrop = page.locator('.editorial-menu-backdrop')
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
   const carousel = await page.locator('.secao:not(.sobre-secao) .obras-lista').first().evaluate(element => ({
     display: getComputedStyle(element).display,
     overflowX: getComputedStyle(element).overflowX,
@@ -92,9 +98,17 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await sendSettings(page, { presentation_mode: 'immersive', navigation_mode: 'sidebar' }, 'page')
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'immersive')
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-sidebar/)
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
   await sendSettings(page, { presentation_mode: 'masonry', navigation_mode: 'curtain' }, 'page')
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'masonry')
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-curtain/)
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
 })
 
 test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
