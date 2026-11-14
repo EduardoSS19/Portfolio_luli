@@ -1694,3 +1694,25 @@
     object-fit:cover;
   }
 }
+
+
+/* A criação/seleção da categoria ocupa uma linha inteira antes da listagem. */
+.cms-category-page{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:22px;
+  width:100%;
+  min-width:0;
+}
+.cms-category-page>.cms-category-form,
+.cms-category-page>.cms-permission-note,
+.cms-category-page>.cms-category-list{
+  order:0;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  box-sizing:border-box;
+}
+.cms-category-page>.cms-category-form,
+.cms-category-page>.cms-permission-note{order:-1}
