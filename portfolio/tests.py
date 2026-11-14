@@ -144,6 +144,17 @@ class PortfolioApiTests(TestCase):
             {"sobre": None, "frames": [], "marca": "", "layout": DEFAULT_LAYOUT_SETTINGS, "redes": [], "categorias": [], "referencias": []},
         )
 
+    def test_active_category_remains_visible_when_its_works_are_drafts(self):
+        category = Category.objects.create(title="Fotografia", key="fotografia")
+        Work.objects.create(category=category, title="Ensaio não publicado", is_active=False)
+
+        response = self.client.get(reverse("portfolio-data"))
+
+        self.assertEqual(response.status_code, 200)
+        photography = next(item for item in response.json()["categorias"] if item["chave"] == "fotografia")
+        self.assertEqual(photography["titulo"], "Fotografia")
+        self.assertEqual(photography["obras"], [])
+
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
         DEFAULT_FROM_EMAIL="portfolio@example.com",
