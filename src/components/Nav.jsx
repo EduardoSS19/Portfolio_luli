@@ -13,8 +13,7 @@ function tipoDeAnimacao(categoria) {
 
 export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
-  const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
-  const effectiveNavigationMode = previewNavigationMode || navigationMode
+  const effectiveNavigationMode = navigationMode
   const botaoMenuRef = useRef(null)
   const previewMenuAutoOpenRef = useRef(false)
   const primeiroLinkRef = useRef(null)
@@ -28,7 +27,6 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     if (!new URLSearchParams(window.location.search).has('layout_preview')) return
     // A prop atualizada é a fonte de verdade para cada opção temporária.
     // Não deixe um modo recebido por evento anterior mascarar a nova escolha.
-    setPreviewNavigationMode(navigationMode)
     if (navigationMode === 'sidebar') {
       previewMenuAutoOpenRef.current = true
       setMenuAberto(true)
@@ -41,9 +39,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   useEffect(() => {
     const handlePreviewNavigation = event => {
       const requestedMode = event.detail?.mode
-      if (['curtain', 'dropdown', 'sidebar'].includes(requestedMode)) {
-        setPreviewNavigationMode(requestedMode)
-      }
+      // O modo visual vem diretamente da prop atualizada pelo estado da prévia.
       if (event.detail?.open || requestedMode === 'sidebar') {
         previewMenuAutoOpenRef.current = true
         setMenuAberto(true)
