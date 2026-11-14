@@ -339,18 +339,29 @@ export function CmsLayoutManager(){
     return()=>window.removeEventListener('message',handlePreviewReady)
   },[settings,previewFocus,previewMode,previewOpen,previewingPresetId])
 
-  // A simulação de hover é isolada do preview final e atualizada no máximo uma vez por frame.
+  // A simulação de hover é isolada do preview final. O iframe pode concluir
+  // o carregamento entre o commit do portal e a instalação do listener do pai;
+  // por isso combinamos o handshake "ready" com reenvios curtos após a montagem.
+  // Isso evita perder a primeira atualização ao trocar rapidamente de opção.
   useEffect(()=>{
     if(!hoverPreviewMounted||!hoveredOption)return
     const hoverWindow=hoverPreviewIframeRef.current?.contentWindow
     if(!hoverWindow)return
     const hoverState=hoverPreviewState()
+    const deliverPreview=()=>sendPreviewUpdate(hoverWindow,hoverState)
     const handlePreviewReady=event=>{
-      if(event.origin===window.location.origin&&event.data?.type==='cms-layout-preview:ready'&&event.source===hoverWindow)sendPreviewUpdate(hoverWindow,hoverState)
+      if(event.origin===window.location.origin&&event.data?.type==='cms-layout-preview:ready'&&event.source===hoverWindow)deliverPreview()
     }
     window.addEventListener('message',handlePreviewReady)
-    const frame=window.requestAnimationFrame(()=>sendPreviewUpdate(hoverWindow,hoverState))
-    return()=>{window.cancelAnimationFrame(frame);window.removeEventListener('message',handlePreviewReady)}
+    const frame=window.requestAnimationFrame(deliverPreview)
+    const retryAfterPaint=window.setTimeout(deliverPreview,80)
+    const retryAfterHydration=window.setTimeout(deliverPreview,240)
+    return()=>{
+      window.cancelAnimationFrame(frame)
+      window.clearTimeout(retryAfterPaint)
+      window.clearTimeout(retryAfterHydration)
+      window.removeEventListener('message',handlePreviewReady)
+    }
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
   const cancelOptionPreviewHide=()=>{
