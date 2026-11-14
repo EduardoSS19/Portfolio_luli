@@ -123,6 +123,10 @@ export function CmsCategoryManager({
   const filteredWorks = categoryWorks.filter(work => (work.title || '').toLocaleLowerCase('pt-BR').includes(workQuery.trim().toLocaleLowerCase('pt-BR')))
   const totalWorkPages = Math.max(1, Math.ceil(filteredWorks.length / WORKS_PER_PAGE))
   const visibleWorks = filteredWorks.slice(workPage * WORKS_PER_PAGE, (workPage + 1) * WORKS_PER_PAGE)
+  const animationPreviewWork = categoryWorks.find(work => work.image) || categoryWorks[0] || null
+  const animationPreviewImage = animationPreviewWork?.image || 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1000&q=85'
+  const animationPreviewTitle = animationPreviewWork?.title || 'Estudo de luz — composição em camadas'
+  const animationPreviewDescription = animationPreviewWork?.description || animationPreviewWork?.detail || 'Uma composição de cores, gestos e camadas. Esta imagem demonstrativa permite perceber o efeito mesmo antes de cadastrar obras nesta categoria.'
 
   const hasOrderChanges = categoryWorks.length === savedCategoryWorks.length && categoryWorks.some((item, index) => item.id !== savedCategoryWorks[index]?.id)
 
@@ -390,7 +394,9 @@ export function CmsCategoryManager({
                 <div className="cms-category-title-line">
                   <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
                   {canEditCategory && <button type="button" className="cms-category-animation-trigger" aria-pressed={String(animationCategory?.id) === String(item.id)} onClick={() => openAnimationEditor(item)} disabled={saving}>
-                    {String(animationCategory?.id) === String(item.id) ? 'Configurando' : 'Configurar animação'} <span aria-hidden="true">↗</span>
+                    <span className="cms-category-animation-trigger-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 2.5 11.7 7l4.5 1.7-4.5 1.7L10 15l-1.7-4.6L3.8 8.7 8.3 7 10 2.5Z"/><path d="m15.8 12.8.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8.8-2.1Z"/></svg></span>
+                    <span>{String(animationCategory?.id) === String(item.id) ? 'Editando efeito' : 'Animação'}</span>
+                    <span className="cms-category-animation-trigger-arrow" aria-hidden="true">↗</span>
                   </button>}
                 </div>
                 <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
@@ -428,28 +434,23 @@ export function CmsCategoryManager({
               </label>
               <div className="cms-category-animation-live-preview" aria-live="polite">
                 <div className="cms-category-animation-preview-heading">
-                  <strong>Veja como fica no portfólio</strong>
-                  <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Entrada discreta e elegante.'}</small>
+                  <strong>Prévia no formato real do portfólio</strong>
+                  <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Veja a entrada da imagem, do título e da descrição.'}</small>
                 </div>
-                {worksLoading ? (
-                  <div className="cms-animation-live-loading">Carregando uma obra desta categoria…</div>
-                ) : (
-                  <article className={'cms-animation-live-card obra arte-' + animation + ' visivel'} key={animation + '-' + (categoryWorks.find(work => work.image)?.id || 'sample')}>
-                    <div className="cms-animation-live-image-wrap obra-imagem">
-                      {categoryWorks.find(work => work.image)?.image ? (
-                        <div className="obra-zoom-trigger">
-                          <img className="cms-animation-live-image" src={categoryWorks.find(work => work.image).image} alt={categoryWorks.find(work => work.image)?.title || 'Obra do acervo'} />
-                        </div>
-                      ) : (
-                        <div className="cms-animation-live-image cms-animation-live-image-placeholder" role="img" aria-label="Prévia sem imagem cadastrada"><span>Esta categoria ainda não tem uma obra com imagem</span></div>
-                      )}
+                <article className={'cms-animation-live-card obra arte-' + animation + ' visivel'} key={animation + '-' + (animationPreviewWork?.id || 'sample')}>
+                  <div className="cms-animation-live-image-wrap obra-imagem">
+                    <div className="obra-zoom-trigger">
+                      <img className="cms-animation-live-image" src={animationPreviewImage} alt={animationPreviewWork?.title || 'Imagem demonstrativa de uma obra'} />
                     </div>
-                    <div className="cms-animation-live-copy obra-texto">
-                      <span>{animationCategory.title}</span>
-                      <h3>{categoryWorks.find(work => work.image)?.title || categoryWorks[0]?.title || 'Título da obra'}</h3>
-                    </div>
-                  </article>
-                )}
+                  </div>
+                  <div className="cms-animation-live-copy obra-texto">
+                    <span>{animationCategory.title}</span>
+                    <h3>{animationPreviewTitle}</h3>
+                    <p>{animationPreviewDescription}</p>
+                  </div>
+                </article>
+                {!animationPreviewWork && <small className="cms-animation-live-sample-note">Imagem e texto demonstrativos — serão substituídos automaticamente por uma obra desta categoria quando houver conteúdo cadastrado.</small>}
+                {worksLoading && <small className="cms-animation-live-sample-note">Atualizando conteúdo da categoria…</small>}
               </div>
               <div className="cms-category-animation-editor-actions">
                 <span>{animation === (animationCategory.animation || 'obra') ? 'Animação atual' : 'Alteração ainda não salva'}</span>
