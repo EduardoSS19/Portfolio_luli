@@ -95,15 +95,15 @@ function accessibleColor(foreground,background,minimum=4.5){
 
 const LAYOUT_PREVIEW_DEMO = {
   categorias: [
-    { titulo: 'Pintura e experimentação', chave: 'pintura-experimentacao', obras: [
+    { titulo: 'Pintura e experimentação', chave: 'pintura-experimentacao', animacao: 'obra', obras: [
       { titulo: 'Estudo de luz I', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Uma composição de cores, gestos e camadas.', detalhe: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', fichaTecnica: { tecnica: 'Acrílica sobre tela', material: 'Tinta acrílica e tela', ano: '2025', dimensoes: { altura: '60', largura: '80', unidade: 'cm' } } },
       { titulo: 'Matéria em suspensão', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', detalhe: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
     ]},
-    { titulo: 'Fotografia', chave: 'fotografia', obras: [
+    { titulo: 'Fotografia', chave: 'fotografia', animacao: 'fotografia', obras: [
       { titulo: 'Entre espaços', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.', detalhe: 'Praesent libero. Sed cursus ante dapibus diam.' },
       { titulo: 'Paisagem inventada', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1400&q=85', descricao: 'Sed nisi. Nulla quis sem at nibh elementum imperdiet.' },
     ]},
-    { titulo: 'Desenho e gravura', chave: 'desenho-gravura', obras: [
+    { titulo: 'Desenho e gravura', chave: 'desenho-gravura', animacao: 'gravura', obras: [
       { titulo: 'Linhas de memória', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.', detalhe: 'Mauris massa. Vestibulum lacinia arcu eget nulla.' },
       { titulo: 'Pequenas narrativas', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Curabitur sodales ligula in libero.' },
     ]},
