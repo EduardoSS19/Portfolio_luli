@@ -216,7 +216,7 @@ export function CmsLayoutManager(){
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode}
+    return {settings:nextSettings,focus,previewMode:nextMode,navigateToFocus:true}
   }
   const sendPreviewUpdate=(target,override)=>{
     const payload=override||{settings,focus:previewFocus,previewMode}
@@ -255,9 +255,13 @@ export function CmsLayoutManager(){
     const viewportHeight=window.innerHeight
     const panelWidth=Math.min(380,viewportWidth-32)
     const panelHeight=Math.min(440,viewportHeight-32)
+    const anchorTop=event?.currentTarget?.getBoundingClientRect?.().top??16
+    const desktopDock=viewportWidth>1100
     setHoverPreviewPosition({
-      left:Math.max(16,(viewportWidth-panelWidth)/2),
-      top:Math.max(16,(viewportHeight-panelHeight)/2),
+      left:desktopDock?Math.max(16,viewportWidth-panelWidth-16):16,
+      top:desktopDock
+        ?Math.max(16,Math.min(anchorTop,viewportHeight-panelHeight-16))
+        :Math.max(16,viewportHeight-panelHeight-16),
       maxHeight:panelHeight,
     })
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
@@ -319,7 +323,7 @@ export function CmsLayoutManager(){
       <div className="cms-layout-heading-actions"><button type="button" className="cms-secondary-link cms-layout-preview-toggle" onClick={()=>setPreviewOpen(value=>!value)}>{previewOpen?'Ocultar janela flutuante':'◉ Abrir janela flutuante'}</button><a className="cms-secondary-link" href="/" target="_blank" rel="noreferrer">Site publicado ↗</a></div>
     </header>
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
-    <div className="cms-layout-workspace">
+    <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
@@ -340,7 +344,6 @@ export function CmsLayoutManager(){
         <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
-            <button type="button" aria-label="Fechar prévia temporária" onClick={hideOptionPreview}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
