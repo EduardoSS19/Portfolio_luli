@@ -174,7 +174,6 @@ export default function App() {
   const selecaoCategoriaTimerRef = useRef(null)
   const scrollEndHandlerRef = useRef(null)
   // Evita que atualizações visuais repetidas da prévia repitam a navegação até a mesma seção.
-  const lastLayoutPreviewScrollTargetRef = useRef(null)
 
   function trocarModoGaleria(novoModo) {
     if (novoModo === modoGaleria) return
