@@ -86,10 +86,8 @@ export function CmsLayoutManager(){
   const previewStageWidth=previewWidth*previewScale
   const previewStageHeight=previewDocumentHeight*previewScale
   // A prévia fixa reduz largura e altura juntas para mostrar a página inteira sem rolagem.
-  // A prévia completa usa a largura disponível, mas preserva a altura real da página.
-  // A rolagem acontece no quadro externo, em vez de reduzir tudo até ficar ilegível.
-  const inlinePreviewScale=inlinePreviewSize.width>0
-    ?Math.min(1,inlinePreviewSize.width/previewWidth):1
+  const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0&&previewDocumentHeight>0
+    ?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewDocumentHeight):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewDocumentHeight*inlinePreviewScale
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
@@ -251,51 +249,17 @@ export function CmsLayoutManager(){
     return()=>{window.cancelAnimationFrame(frame);window.removeEventListener('message',handlePreviewReady)}
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
-  const handleHoverPreviewFrameLoad=event=>{
-    try{
-      const previewDocument=event.currentTarget.contentDocument
-      if(!previewDocument)return
-      let surfaceFix=previewDocument.getElementById('cms-hover-preview-surface-fix')
-      if(!surfaceFix){
-        surfaceFix=previewDocument.createElement('style')
-        surfaceFix.id='cms-hover-preview-surface-fix'
-        previewDocument.head.appendChild(surfaceFix)
-      }
-      // A prévia contextual deve terminar na própria superfície do modal,
-      // sem expor o fundo azul do documento abaixo do conteúdo do portfólio.
-      surfaceFix.textContent='html,body,#root{background:transparent!important;background-color:transparent!important}'
-    }catch(error){
-      // O preview continua funcional caso o navegador restrinja o acesso ao iframe.
-    }
-  }
-
   const showOptionPreview=(name,value,label,detail,event)=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
-    const anchor=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
     const viewportHeight=window.innerHeight
     const panelWidth=Math.min(380,viewportWidth-32)
     const panelHeight=Math.min(440,viewportHeight-32)
-    const gap=16
-    const minEdge=16
-    if(anchor){
-      // Em telas largas, a prévia ocupa uma faixa reservada à direita.
-      // O formulário encolhe enquanto ela está aberta, sem cobrir opções ou ações.
-      const desktopDock=viewportWidth>1100
-      const left=desktopDock
-        ?Math.max(minEdge,viewportWidth-panelWidth-minEdge)
-        :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
-      const top=desktopDock
-        ?Math.max(minEdge,Math.min(anchor.top,viewportHeight-panelHeight-minEdge))
-        :Math.max(minEdge,anchor.top-panelHeight-gap)
-      const maxHeight=Math.max(80,Math.min(panelHeight,viewportHeight-top-minEdge))
-      setHoverPreviewPosition({left,top,maxHeight})
-    }else{
-      setHoverPreviewPosition({
-        left:Math.max(minEdge,(viewportWidth-panelWidth)/2),
-        top:Math.max(minEdge,(viewportHeight-panelHeight)/2),
-      })
-    }
+    setHoverPreviewPosition({
+      left:Math.max(16,(viewportWidth-panelWidth)/2),
+      top:Math.max(16,(viewportHeight-panelHeight)/2),
+      maxHeight:panelHeight,
+    })
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
     setHoverPreviewMounted(true)
   }
@@ -304,26 +268,10 @@ export function CmsLayoutManager(){
       window.clearTimeout(hoverPreviewHideTimerRef.current)
       hoverPreviewHideTimerRef.current=null
     }
+    // A prévia é estritamente contextual: saiu do campo, desmonta o iframe
+    // imediatamente para impedir mensagens/foco de uma opção anterior.
     setHoveredOption(null)
     setHoverPreviewMounted(false)
-  }
-  const clearOptionPreview=()=>{
-    if(hoverPreviewHideTimerRef.current){
-      window.clearTimeout(hoverPreviewHideTimerRef.current)
-      hoverPreviewHideTimerRef.current=null
-    }
-    setHoveredOption(null)
-    setHoverPreviewMounted(true)
-  }
-  const scheduleHideOptionPreview=()=>{
-    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
-    // A faixa reservada à prévia altera a largura do formulário; aguarde o
-    // reposicionamento do ponteiro antes de concluir que o usuário saiu da opção.
-    hoverPreviewHideTimerRef.current=window.setTimeout(()=>{
-      setHoveredOption(null)
-      setHoverPreviewMounted(false)
-      hoverPreviewHideTimerRef.current=null
-    },900)
   }
   const colorKey=name=>`${editingTheme}_${name}`
   const contrastMetrics=useMemo(()=>{
@@ -371,7 +319,7 @@ export function CmsLayoutManager(){
       <div className="cms-layout-heading-actions"><button type="button" className="cms-secondary-link cms-layout-preview-toggle" onClick={()=>setPreviewOpen(value=>!value)}>{previewOpen?'Ocultar janela flutuante':'◉ Abrir janela flutuante'}</button><a className="cms-secondary-link" href="/" target="_blank" rel="noreferrer">Site publicado ↗</a></div>
     </header>
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
-    <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
+    <div className="cms-layout-workspace">
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-color-panel">
@@ -383,25 +331,23 @@ export function CmsLayoutManager(){
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={scheduleHideOptionPreview} onFocus={event=>showOptionPreview(field.name,value,label,detail,event)} onBlur={scheduleHideOptionPreview} onClick={clearOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>showOptionPreview(field.name,value,label,detail,event)} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
-      {hoverPreviewMounted&&createPortal(
-        <aside className={'cms-layout-hover-preview cms-layout-hover-preview-floating'+(hoveredOption?'':' is-empty')} aria-label="Prévia temporária da opção" style={{left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
-          {hoveredOption ? <>
-            <header className="cms-layout-hover-preview-heading">
-              <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
-              <button type="button" aria-label="Fechar prévia temporária" onClick={hideOptionPreview}>×</button>
-            </header>
-            <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice} style={{height:hoverPreviewStageHeight,maxHeight:"none",minHeight:0}}>
-              <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} onLoad={handleHoverPreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
-              </div>
+      {hoverPreviewMounted&&hoveredOption&&createPortal(
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
+          <header className="cms-layout-hover-preview-heading">
+            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
+            <button type="button" aria-label="Fechar prévia temporária" onClick={hideOptionPreview}>×</button>
+          </header>
+          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
+            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
             </div>
-            <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
-          </> : <div className="cms-layout-hover-preview-placeholder"><span aria-hidden="true">✓</span><p>Opção aplicada. Passe o mouse sobre outra escolha para comparar a prévia.</p><button type="button" onClick={hideOptionPreview}>Fechar</button></div>}
+          </div>
+          <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
         </aside>,
         document.body
       )}
@@ -410,8 +356,8 @@ export function CmsLayoutManager(){
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
-      <p className="cms-layout-preview-caption">Largura ajustada a {Math.round(inlinePreviewScale*100)}% · role dentro da prévia para percorrer toda a página ({previewWidth} × {previewDocumentHeight}px).</p>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
+      <p className="cms-layout-preview-caption">Página inteira: {Math.round(inlinePreviewScale*100)}% · visualização de {previewWidth} × {previewDocumentHeight}px ajustada automaticamente à área disponível.</p>
     </section>
     
   </section>

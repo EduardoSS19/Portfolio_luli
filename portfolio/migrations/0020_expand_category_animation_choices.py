@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("portfolio", "0018_category_animation"),
+        ("portfolio", "0019_alter_category_animation"),
     ]
 
     operations = [
