@@ -160,7 +160,7 @@ export function CmsLayoutManager(){
   const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
   // O modal contextual usa a largura móvel real e a altura visível do quadro, sem transform.
   // Isso mantém menus fixos dentro da área visível e preserva o clique/scroll nativos do iframe.
-  const hoverPreviewStageWidth=390
+  const hoverPreviewStageWidth=hoverPreviewSize.width||350
   const hoverPreviewStageHeight=844
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
@@ -649,8 +649,8 @@ export function CmsLayoutManager(){
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device="mobile">
-            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
+          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
+            <div className="cms-layout-preview-stage" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
               <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
             </div>
           </div>
