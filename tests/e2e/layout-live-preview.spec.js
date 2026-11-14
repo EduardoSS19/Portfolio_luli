@@ -331,7 +331,7 @@ test('modelos preenchem todas as seções preparadas com exemplos adequados ao t
   }, 'page')
   await expect(page.locator('[data-preview-example="true"]')).toHaveCount(types.length)
   await expect(page.locator('.portfolio-custom-empty-preview')).toHaveCount(0)
-  await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(20)
+  await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(22)
   await expect(page.locator('.section-tattoo-flash .portfolio-custom-card')).toContainText('Flash disponível')
   await expect(page.locator('.section-tattoo-booking .portfolio-custom-card')).toContainText('orçamento')
   await expect(page.locator('.section-healed-work .portfolio-custom-card')).toContainText('cicatrizada')
