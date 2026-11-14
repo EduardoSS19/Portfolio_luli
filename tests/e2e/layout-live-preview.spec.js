@@ -25,10 +25,10 @@ async function openLiveLayoutPreview(page) {
   await expect.poll(() => page.evaluate(() => Boolean(window.__cmsPreviewReady))).toBe(true)
 }
 
-async function sendSettings(page, settings, focus = 'page', previewMode) {
-  await page.evaluate(({ settings, focus, previewMode }) => {
-    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode }, window.location.origin)
-  }, { settings, focus, previewMode })
+async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false) {
+  await page.evaluate(({ settings, focus, previewMode, animatePreview }) => {
+    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview }, window.location.origin)
+  }, { settings, focus, previewMode, animatePreview })
 }
 
 test('a prévia navega até a seção editada dentro do iframe', async ({ page }) => {
@@ -36,12 +36,12 @@ test('a prévia navega até a seção editada dentro do iframe', async ({ page }
   await page.evaluate(() => window.scrollTo(0, 0))
   const initialScrollY = await page.evaluate(() => window.scrollY)
 
-  await sendSettings(page, { show_references: true }, 'references')
+  await sendSettings(page, { show_references: true }, 'references', undefined, true)
   await expect(page.locator('#Referências')).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 
   await page.evaluate(() => window.scrollTo(0, 0))
-  await sendSettings(page, { show_bio: true }, 'bio')
+  await sendSettings(page, { show_bio: true }, 'bio', undefined, true)
   await expect(page.locator('.sobre-secao')).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 })
