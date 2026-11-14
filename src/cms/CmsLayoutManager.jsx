@@ -200,7 +200,7 @@ export function CmsLayoutManager(){
     const observer=new ResizeObserver(update)
     observer.observe(element)
     return()=>observer.disconnect()
-  },[])
+  },[loading])
   useEffect(()=>{
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
