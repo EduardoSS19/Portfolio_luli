@@ -38,7 +38,7 @@ class PortfolioApiTests(TestCase):
         BackgroundFrame.objects.all().delete()
 
     def test_portfolio_endpoint_returns_frontend_shape(self):
-        category = Category.objects.create(title="Desenho", key="desenho")
+        category = Category.objects.create(title="Desenho", key="desenho", animation="desenho")
         Work.objects.create(
             category=category,
             title="Gaiola",
@@ -80,6 +80,7 @@ class PortfolioApiTests(TestCase):
             "categorias": [{
                 "titulo": "Desenho",
                 "chave": "desenho",
+                "animacao": "desenho",
                 "obras": [{
                     "titulo": "Gaiola",
                     "imagem": "/static/gaiola.jpg",
@@ -1868,6 +1869,28 @@ class CmsCategoryManagementApiTests(TestCase):
         response = self.client.post(reverse("cms-categories"), data=json.dumps({"title": "Arte têxtil"}), content_type="application/json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["key"], "arte-textil")
+
+    def test_category_animation_can_be_selected_and_is_returned(self):
+        self.client.force_login(self.editor)
+        updated = self.client.post(
+            reverse("cms-category-update", args=[self.category.pk]),
+            data=json.dumps({"animation": "glitch"}),
+            content_type="application/json",
+        )
+        self.assertEqual(updated.status_code, 200)
+        self.assertEqual(updated.json()["animation"], "glitch")
+        listed = self.client.get(reverse("cms-categories"))
+        self.assertEqual(listed.json()["results"][0]["animation"], "glitch")
+
+    def test_category_animation_rejects_unknown_presets(self):
+        self.client.force_login(self.editor)
+        response = self.client.post(
+            reverse("cms-category-update", args=[self.category.pk]),
+            data=json.dumps({"animation": "javascript:alert(1)"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "invalid_category_animation")
 
     def test_update_and_deactivate_preserve_linked_works(self):
         self.client.force_login(self.editor)
