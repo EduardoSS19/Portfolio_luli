@@ -127,87 +127,232 @@ const LAYOUT_PREVIEW_DEMO = {
 
 
 function getLayoutPreviewDemo(layout = {}) {
-  const types = (layout.custom_sections || []).map(section => section.type)
-  const isTattoo = types.includes('tattoo-flash') || types.includes('tattoo-booking') || types.includes('healed-work')
-  const isStudio = types.includes('studio-team')
-  const isPhoto = layout.presentation_mode === 'immersive'
-  const isDesign = layout.presentation_mode === 'carousel' && layout.default_theme === 'claro'
-  const isIllustration = layout.presentation_mode === 'masonry' && layout.default_theme === 'claro'
+  const sections = layout.custom_sections || []
+  const sectionTypes = sections.map(section => section.type)
+  const preset = ['editorial-current','visual-artist','illustrator','photographer','designer','tattoo-artist','tattoo-studio']
+    .find(id => sections.some(section => String(section.id).includes('preset-' + id + '-')))
+  const isTattoo = preset === 'tattoo-artist' || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
+  const isStudio = preset === 'tattoo-studio' || sectionTypes.includes('studio-team')
+  const isPhoto = preset === 'photographer' || (!preset && layout.presentation_mode === 'immersive')
+  const isDesign = preset === 'designer' || (!preset && layout.presentation_mode === 'carousel' && layout.default_theme === 'claro')
+  const isIllustration = preset === 'illustrator' || (!preset && layout.presentation_mode === 'masonry' && layout.default_theme === 'claro')
 
-  if (isTattoo || isStudio) {
-    const studio = isStudio
-    return {
-      ...LAYOUT_PREVIEW_DEMO,
-      categorias: [
-        { titulo: studio ? 'Trabalhos do estúdio' : 'Tatuagens autorais', chave: 'tatuagens-autorais', animacao: 'obra', obras: [
-          { titulo: 'Botânica em linha fina', imagem: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1400&q=85', descricao: 'Composição botânica delicada, desenhada para acompanhar o movimento do corpo.', detalhe: 'Projeto demonstrativo · Fine line · Preto e cinza', fichaTecnica: { tecnica: 'Fine line', material: 'Tinta preta', ano: '2026' } },
-          { titulo: 'Ornamental solar', imagem: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1400&q=85', descricao: 'Geometria, simetria e contraste em uma composição ornamental.', detalhe: 'Projeto demonstrativo · Ornamental' },
-          { titulo: 'Natureza em movimento', imagem: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1400&q=85', descricao: 'Desenho orgânico com linhas leves e áreas de respiro.', detalhe: 'Projeto demonstrativo · Botânica' },
-        ]},
-        { titulo: studio ? 'Artistas residentes' : 'Flash e projetos disponíveis', chave: 'flash-disponiveis', animacao: 'desenho', obras: [
-          { titulo: 'Flash botânico 08', imagem: 'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1400&q=85', descricao: 'Desenho autoral disponível para reserva.', detalhe: 'Tamanho sugerido: 8 cm' },
-          { titulo: 'Estudo ornamental 03', imagem: 'https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=1400&q=85', descricao: 'Composição exclusiva, adaptável em escala.', detalhe: 'Consulte disponibilidade' },
-        ]},
-      ],
-      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: studio ? 'Casa Tinta Tattoo' : 'Maya Reis', frase: studio ? 'Estúdio de tatuagem · Porto Alegre' : 'Tatuagem autoral · Fine line · Botânica', bio: studio ? 'Um espaço independente dedicado à tatuagem autoral, ao desenho e à troca entre artistas. Nossa equipe trabalha com diferentes linguagens, mantendo o cuidado com cada projeto e cada pessoa.' : 'Tatuadora e ilustradora, desenvolve projetos autorais inspirados em formas botânicas, símbolos e narrativas pessoais. Cada desenho é pensado para o corpo e construído em diálogo com quem vai receber a tatuagem.' },
-    }
+  const profiles = {
+    editorial: {
+      nome: 'Helena Duarte', frase: 'Artes visuais · Pintura · Pesquisa material',
+      foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90',
+      bio: 'Artista visual e pesquisadora independente. Investiga as relações entre matéria, memória e paisagem por meio da pintura, da fotografia e de processos gráficos.\\n\\nSeu trabalho nasce de observações cotidianas e experimentações no ateliê, aproximando gesto, cor e território.',
+      instagram: 'https://www.instagram.com/', email: 'contato@helenaduarte.art',
+    },
+    visual: {
+      nome: 'Marina Azevedo', frase: 'Artista visual · Pintura · Escultura',
+      foto: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1000&q=90',
+      bio: 'Artista visual que trabalha entre pintura, objeto e instalação. Sua pesquisa explora a memória dos materiais, as marcas do tempo e as relações entre corpo e espaço.\\n\\nParticipa de exposições individuais e coletivas, desenvolve projetos site-specific e conduz oficinas de experimentação.',
+      instagram: 'https://www.instagram.com/', email: 'studio@marinaazevedo.art',
+    },
+    illustration: {
+      nome: 'Bia Campos', frase: 'Ilustração · Desenho · Narrativas visuais',
+      foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1000&q=90',
+      bio: 'Ilustradora e desenhista. Cria imagens para livros, revistas, projetos culturais e marcas, combinando desenho manual, cor e composição digital.\\n\\nSeu universo visual reúne personagens, botânica e pequenas narrativas do cotidiano.',
+      instagram: 'https://www.instagram.com/', email: 'oi@biacampos.illustration',
+    },
+    photo: {
+      nome: 'Clara Nogueira', frase: 'Fotografia · Retrato · Arquitetura',
+      foto: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=1000&q=90',
+      bio: 'Fotógrafa independente especializada em retratos, arquitetura e projetos editoriais. Trabalha com luz natural e narrativas visuais que valorizam gestos, texturas e atmosferas.\\n\\nAtende projetos autorais, editoriais e ensaios comissionados.',
+      instagram: 'https://www.instagram.com/', email: 'contato@claranogueira.photo',
+    },
+    design: {
+      nome: 'Estúdio Norte', frase: 'Design estratégico · Branding · Direção de arte',
+      foto: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1000&q=90',
+      bio: 'Estúdio independente de design e direção de arte. Conecta estratégia, identidade e experiências digitais para construir marcas com linguagem própria.\\n\\nAtua em branding, design editorial, interfaces, campanhas e sistemas visuais.',
+      instagram: 'https://www.instagram.com/', email: 'hello@estudionorte.design',
+    },
+    tattoo: {
+      nome: 'Maya Reis', frase: 'Tatuagem autoral · Fine line · Botânica',
+      foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90',
+      bio: 'Tatuadora e ilustradora. Desenvolve desenhos autorais inspirados em botânica, símbolos e narrativas pessoais. Cada projeto é pensado para o corpo e construído em diálogo com quem vai receber a tatuagem.\\n\\nAtendimentos com hora marcada e projetos personalizados.',
+      instagram: 'https://www.instagram.com/', email: 'agenda@mayareis.tattoo',
+    },
+    studio: {
+      nome: 'Casa Tinta Tattoo', frase: 'Estúdio independente · Porto Alegre · Brasil',
+      foto: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1000&q=90',
+      bio: 'Um estúdio independente dedicado à tatuagem autoral, ao desenho e à troca entre artistas. Reunimos diferentes especialidades em um espaço acolhedor, com atenção ao processo criativo, à biossegurança e ao cuidado em cada sessão.',
+      instagram: 'https://www.instagram.com/', email: 'agenda@casatinta.studio',
+    },
   }
 
-  if (isPhoto) {
-    return {
-      ...LAYOUT_PREVIEW_DEMO,
-      categorias: [
-        { titulo: 'Ensaios autorais', chave: 'ensaios-autorais', animacao: 'fotografia', obras: [
-          { titulo: 'A cidade respira', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1800&q=90', descricao: 'Luz, arquitetura e silêncio em uma série sobre a cidade.', detalhe: 'Fotografia digital · 2025' },
-          { titulo: 'Horizonte de dentro', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1800&q=90', descricao: 'Paisagens observadas como espaços de memória.', detalhe: 'Ensaio autoral · 2024' },
-          { titulo: 'Entre marés', imagem: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800&q=90', descricao: 'Um estudo sobre movimento, água e luz natural.', detalhe: 'Série documental · 2024' },
-        ]},
-        { titulo: 'Retratos e editoriais', chave: 'retratos-editoriais', animacao: 'fotografia', obras: [
-          { titulo: 'Corpos em pausa', imagem: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1400&q=85', descricao: 'Retratos com luz natural e direção intimista.', detalhe: 'Editorial · 2025' },
-          { titulo: 'Matéria e presença', imagem: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1400&q=85', descricao: 'Retrato e pesquisa de textura.', detalhe: 'Ensaio · 2024' },
-        ]},
-      ],
-      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Clara Nogueira', frase: 'Fotografia · Retrato · Paisagem', bio: 'Fotógrafa independente dedicada a ensaios autorais, retratos e projetos editoriais. Seu trabalho investiga luz, arquitetura e presença, construindo narrativas visuais a partir de pequenos gestos e observações cotidianas.' },
-    }
+  const artwork = {
+    editorial: [
+      { titulo:'Cartografia do silêncio', imagem:'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&q=90', imagens:['https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&q=90','https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&q=90','https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1600&q=90'], descricao:'Camadas de pigmento e gestos sobrepostos constroem uma paisagem entre lembrança e invenção.', detalhe:'Série Cartografias · Obra demonstrativa', fichaTecnica:{tecnica:'Acrílica e pigmento mineral',material:'Tela de algodão e madeira',ano:'2025',dimensoes:{altura:'100',largura:'80',unidade:'cm'},serie:'Cartografias',disponibilidade:'Sob consulta'} },
+      { titulo:'Matéria em suspensão', imagem:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&q=90', descricao:'Uma investigação sobre transparência, densidade e a presença física da cor.', detalhe:'Trabalho de ateliê · 2025', fichaTecnica:{tecnica:'Técnica mista',material:'Acrílica, grafite e tecido',ano:'2025',dimensoes:{altura:'70',largura:'50',unidade:'cm'}} },
+      { titulo:'O peso das coisas leves', imagem:'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1600&q=90', descricao:'Pequenas formas e áreas de respiro criam um equilíbrio instável entre matéria e vazio.', detalhe:'Série Objetos de memória · 2024', fichaTecnica:{tecnica:'Óleo sobre tela',material:'Tela e pigmentos',ano:'2024',dimensoes:{altura:'90',largura:'70',unidade:'cm'}} },
+      { titulo:'Inventário de gestos', imagem:'https://images.unsplash.com/photo-1549490349-8643362247b5?w=1600&q=90', descricao:'Estudos cromáticos reunidos a partir de movimentos repetidos no ateliê.', detalhe:'Caderno de pesquisa · 2024' },
+    ],
+    visual: [
+      { titulo:'Corpo-território I', imagem:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&q=90', imagens:['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&q=90','https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&q=90'], descricao:'Pintura em grande escala sobre pertencimento, corpo e paisagem.', detalhe:'Série Corpo-território · 2025', fichaTecnica:{tecnica:'Óleo e cera',material:'Linho sobre chassi',ano:'2025',dimensoes:{altura:'180',largura:'140',unidade:'cm'}} },
+      { titulo:'Arquivo das águas', imagem:'https://images.unsplash.com/photo-1549490349-8643362247b5?w=1600&q=90', descricao:'Instalação composta por módulos cerâmicos e registros de paisagem.', detalhe:'Instalação · 2024', fichaTecnica:{tecnica:'Instalação',material:'Cerâmica, argila e som',ano:'2024'} },
+      { titulo:'Entre paredes', imagem:'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1600&q=90', descricao:'Pintura mural desenvolvida a partir da arquitetura do espaço expositivo.', detalhe:'Projeto site-specific · 2024' },
+      { titulo:'Pequeno atlas', imagem:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1600&q=90', descricao:'Objetos e desenhos que registram percursos e memórias de viagem.', detalhe:'Série de estudos · 2023' },
+    ],
+    illustration: [
+      { titulo:'O jardim depois da chuva', imagem:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1600&q=90', imagens:['https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1600&q=90','https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1600&q=90','https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1600&q=90'], descricao:'Ilustração editorial sobre crescimento, transformação e pequenos encontros.', detalhe:'Editorial · 2025', fichaTecnica:{tecnica:'Guache e finalização digital',material:'Papel algodão',ano:'2025',serie:'Pequenas histórias'} },
+      { titulo:'Manual de criaturas gentis', imagem:'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1600&q=90', descricao:'Personagens e cenários para um livro ilustrado infantil.', detalhe:'Livro ilustrado · Projeto autoral · 2025' },
+      { titulo:'Botânica imaginária', imagem:'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1600&q=90', descricao:'Estudos de formas vegetais, padrões e cores.', detalhe:'Série de prints · 2024' },
+      { titulo:'Caderno de campo', imagem:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1600&q=90', descricao:'Desenhos, anotações e estudos de composição.', detalhe:'Sketchbook · 2024' },
+    ],
+    photo: [
+      { titulo:'A cidade em suspensão', imagem:'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1800&q=90', imagens:['https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1800&q=90','https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=1800&q=90','https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1800&q=90'], descricao:'Uma leitura da arquitetura urbana no intervalo entre luz e sombra.', detalhe:'Ensaio autoral · 2025', fichaTecnica:{tecnica:'Fotografia digital',material:'Impressão fine art',ano:'2025',serie:'Cidade em suspensão'} },
+      { titulo:'Entre marés', imagem:'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800&q=90', descricao:'Paisagens costeiras observadas como espaços de passagem e permanência.', detalhe:'Série documental · 2024' },
+      { titulo:'Presença', imagem:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1800&q=90', descricao:'Retratos com luz natural e direção intimista.', detalhe:'Retrato editorial · 2025' },
+      { titulo:'Linhas de concreto', imagem:'https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=1800&q=90', descricao:'Geometrias e texturas de edifícios em transformação.', detalhe:'Arquitetura · 2024' },
+    ],
+    design: [
+      { titulo:'Casa Orla · Identidade visual', imagem:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=90', imagens:['https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=90','https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1600&q=90'], descricao:'Estratégia, identidade e aplicações para uma marca de hospitalidade conectada à paisagem.', detalhe:'Branding completo · 2025', fichaTecnica:{tecnica:'Estratégia de marca e direção de arte',material:'Identidade visual e aplicações',ano:'2025'} },
+      { titulo:'Ponto de Encontro · Editorial', imagem:'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1600&q=90', descricao:'Sistema editorial para uma iniciativa cultural, da linguagem gráfica à publicação impressa.', detalhe:'Design editorial · 2024' },
+      { titulo:'Forma Viva · Embalagem', imagem:'https://images.unsplash.com/photo-1558655146-d09347e92766?w=1600&q=90', descricao:'Sistema de embalagem e comunicação para uma linha de produtos botânicos.', detalhe:'Design de produto · 2024' },
+      { titulo:'Norte Digital · Experiência', imagem:'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=1600&q=90', descricao:'Arquitetura de informação e interface para uma plataforma cultural.', detalhe:'Produto digital · 2025' },
+    ],
+    tattoo: [
+      { titulo:'Ramo de oliveira', imagem:'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1600&q=90', imagens:['https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1600&q=90','https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1600&q=90'], descricao:'Composição botânica em fine line, desenhada para acompanhar o movimento do antebraço.', detalhe:'Projeto autoral · Fine line · 8 cm', fichaTecnica:{tecnica:'Fine line',material:'Tinta preta',ano:'2026',localCriacao:'Porto Alegre',disponibilidade:'Projeto demonstrativo'} },
+      { titulo:'Eclipse ornamental', imagem:'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1600&q=90', descricao:'Geometria, simetria e contraste em uma composição ornamental.', detalhe:'Blackwork · 12 cm · Projeto autoral' },
+      { titulo:'Serpente e flores', imagem:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=90', descricao:'Desenho orgânico que mistura elementos botânicos e movimento.', detalhe:'Blackwork · Panturrilha' },
+      { titulo:'Pequeno amuleto', imagem:'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1600&q=90', descricao:'Flash delicado pensado para aplicação em pequena escala.', detalhe:'Flash · 6 cm · Disponível' },
+    ],
+    studio: [
+      { titulo:'Projeto coletivo · Botânica', imagem:'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1600&q=90', descricao:'Trabalho desenvolvido por artista residente da Casa Tinta.', detalhe:'Fine line · 2026' },
+      { titulo:'Ornamental em movimento', imagem:'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1600&q=90', descricao:'Composição ornamental criada em sessão de projeto personalizado.', detalhe:'Ornamental · 2025' },
+      { titulo:'Blackwork · Forma e contraste', imagem:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=90', descricao:'Estudo de grandes áreas e desenho gráfico.', detalhe:'Blackwork · 2025' },
+      { titulo:'Natureza simbólica', imagem:'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1600&q=90', descricao:'Flash autoral inspirado em formas orgânicas.', detalhe:'Flash · 2025' },
+    ],
   }
 
-  if (isDesign) {
-    return {
-      ...LAYOUT_PREVIEW_DEMO,
-      categorias: [
-        { titulo: 'Identidade e branding', chave: 'identidade-branding', animacao: 'obra', obras: [
-          { titulo: 'Casa Orla · Identidade visual', imagem: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1400&q=85', descricao: 'Sistema visual, direção de arte e aplicações para uma marca de hospitalidade.', detalhe: 'Branding · 2025' },
-          { titulo: 'Ponto de Encontro · Editorial', imagem: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1400&q=85', descricao: 'Projeto editorial e linguagem gráfica para uma iniciativa cultural.', detalhe: 'Direção de arte · 2024' },
-          { titulo: 'Forma Viva · Embalagem', imagem: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1400&q=85', descricao: 'Design de embalagem e sistema de comunicação.', detalhe: 'Design de produto · 2024' },
-        ]},
-        { titulo: 'Digital e motion', chave: 'digital-motion', animacao: 'obra', obras: [
-          { titulo: 'Interface em movimento', imagem: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=1400&q=85', descricao: 'Experiência digital e protótipo interativo.', detalhe: 'UI/UX · 2025' },
-          { titulo: 'Sistema modular', imagem: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=1400&q=85', descricao: 'Componentes, tipografia e direção visual.', detalhe: 'Design system · 2024' },
-        ]},
-      ],
-      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Estúdio Norte', frase: 'Design · Branding · Direção de arte', bio: 'Estúdio independente que conecta estratégia, identidade e experiências digitais. Desenvolve sistemas visuais, projetos editoriais e produtos digitais para marcas que buscam uma linguagem própria.' },
-    }
+  const references = {
+    editorial: [
+      { titulo:'Exposição individual · Cartografias do silêncio', periodo:'2025 · Galeria Horizonte, Porto Alegre', links:[{texto:'Apresentação da exposição',url:'#demo-exposicao'},{texto:'Registro fotográfico',url:'#demo-registro'}] },
+      { titulo:'Residência artística · Casa Aberta', periodo:'2024 · Florianópolis, Brasil', links:[{texto:'Sobre a residência',url:'#demo-residencia'}] },
+      { titulo:'Publicação · Caderno de matéria', periodo:'2023 · Edição independente', links:[{texto:'Consultar publicação',url:'#demo-publicacao'}] },
+    ],
+    visual: [
+      { titulo:'Exposição · Corpo-território', periodo:'2025 · Museu de Arte Contemporânea', links:[{texto:'Ver exposição',url:'#demo-exposicao'}] },
+      { titulo:'Residência · Laboratório de matéria', periodo:'2024 · São Paulo, Brasil', links:[{texto:'Projeto e pesquisa',url:'#demo-residencia'}] },
+      { titulo:'Prêmio aquisição · Salão de Artes', periodo:'2023 · Edição demonstrativa', links:[{texto:'Conhecer seleção',url:'#demo-premio'}] },
+    ],
+    illustration: [
+      { titulo:'Livro ilustrado · O jardim depois da chuva', periodo:'2025 · Editora Pétala', links:[{texto:'Ver publicação',url:'#demo-livro'}] },
+      { titulo:'Editorial · Revista Miolo', periodo:'2024 · Edição 18', links:[{texto:'Ler matéria',url:'#demo-revista'}] },
+      { titulo:'Seleção · Feira de ilustração', periodo:'2023 · Porto Alegre, Brasil', links:[{texto:'Ver participantes',url:'#demo-feira'}] },
+    ],
+    photo: [
+      { titulo:'Exposição · A cidade em suspensão', periodo:'2025 · Centro Cultural', links:[{texto:'Ver ensaio',url:'#demo-ensaio'}] },
+      { titulo:'Editorial · Revista Vértice', periodo:'2024 · Edição 42', links:[{texto:'Ler publicação',url:'#demo-editorial'}] },
+    ],
+    design: [
+      { titulo:'Prêmio · Brasil Design Award', periodo:'2025 · Projeto demonstrativo', links:[{texto:'Ver case premiado',url:'#demo-premio'}] },
+      { titulo:'Publicação · Latin American Design', periodo:'2024 · Seleção editorial', links:[{texto:'Ver publicação',url:'#demo-publicacao'}] },
+      { titulo:'Palestra · Design em processo', periodo:'2023 · Semana de Design', links:[{texto:'Programação',url:'#demo-palestra'}] },
+    ],
+    tattoo: [
+      { titulo:'Convenção · Tattoo Week', periodo:'2025 · São Paulo, Brasil', links:[{texto:'Artistas participantes',url:'#demo-convencao'}] },
+      { titulo:'Guest spot · Estúdio Norte', periodo:'2024 · Curitiba, Brasil', links:[{texto:'Agenda demonstrativa',url:'#demo-guest'}] },
+    ],
+    studio: [
+      { titulo:'Convenção · Tattoo Week', periodo:'2025 · São Paulo, Brasil', links:[{texto:'Artistas participantes',url:'#demo-convencao'}] },
+      { titulo:'Matéria · Cultura da tatuagem', periodo:'2024 · Revista Traço', links:[{texto:'Ler matéria',url:'#demo-materia'}] },
+    ],
   }
 
-  if (isIllustration) {
-    return {
-      ...LAYOUT_PREVIEW_DEMO,
-      categorias: [
-        { titulo: 'Ilustração editorial', chave: 'ilustracao-editorial', animacao: 'desenho', obras: [
-          { titulo: 'Pequenas histórias', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Ilustrações narrativas para publicações e projetos editoriais.', detalhe: 'Digital e guache · 2025' },
-          { titulo: 'Jardim imaginário', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Personagens, plantas e paisagens inventadas.', detalhe: 'Série autoral · 2024' },
-          { titulo: 'Caderno de formas', imagem: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1400&q=85', descricao: 'Estudos de composição e desenho.', detalhe: 'Sketchbook · 2024' },
-        ]},
-        { titulo: 'Personagens e gravura', chave: 'personagens-gravura', animacao: 'gravura', obras: [
-          { titulo: 'O observador', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Personagem criado para uma narrativa ilustrada.', detalhe: 'Ilustração · 2025' },
-          { titulo: 'Impressões botânicas', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Gravuras em pequenas tiragens.', detalhe: 'Xilogravura · 2024' },
-        ]},
-      ],
-      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Bia Campos', frase: 'Ilustração · Desenho · Narrativas', bio: 'Ilustradora que cria imagens para livros, projetos editoriais e narrativas visuais. Sua pesquisa mistura desenho, cor e personagens para transformar ideias em histórias visuais.' },
-    }
+  const variant = isStudio ? 'studio' : isTattoo ? 'tattoo' : isPhoto ? 'photo' : isDesign ? 'design' : isIllustration ? 'illustration' : preset === 'visual-artist' ? 'visual' : 'editorial'
+  const profile = profiles[variant]
+  const works = artwork[variant]
+  const categoryNames = {
+    editorial:['Pintura e experimentação','Fotografia e paisagem','Desenho e gravura'],
+    visual:['Pintura e matéria','Escultura e instalação','Intervenções e projetos'],
+    illustration:['Ilustração editorial','Personagens e narrativas','Desenho e sketchbook'],
+    photo:['Ensaios autorais','Retratos e editoriais','Arquitetura e espaço'],
+    design:['Identidade e branding','Design editorial','Digital e experiências'],
+    tattoo:['Tatuagens autorais','Flash disponíveis','Trabalhos cicatrizados'],
+    studio:['Trabalhos do estúdio','Artistas residentes','Flash coletivo'],
+  }[variant]
+  const categories = categoryNames.map((title,index) => ({
+    titulo:title,
+    chave:title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),
+    animacao:variant === 'photo' ? 'fotografia' : variant === 'illustration' ? 'desenho' : variant === 'tattoo' || variant === 'studio' ? 'obra' : index === 1 ? 'gravura' : 'obra',
+    obras: works.slice(index === 0 ? 0 : index === 1 ? 1 : 2, index === 0 ? 3 : index === 1 ? 4 : 4),
+  }))
+  if (variant === 'tattoo') {
+    categories[1].obras = [
+      { titulo:'Flash botânico 08', imagem:'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1600&q=90', descricao:'Desenho autoral disponível para reserva.', detalhe:'8 cm · Fine line · Disponível', fichaTecnica:{tecnica:'Fine line',disponibilidade:'Disponível'} },
+      { titulo:'Amuleto solar 03', imagem:'https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=1600&q=90', descricao:'Composição ornamental exclusiva, adaptável em escala.', detalhe:'10 cm · Ornamental · Disponível', fichaTecnica:{tecnica:'Ornamental',disponibilidade:'Disponível'} },
+      { titulo:'Pequena serpente', imagem:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=90', descricao:'Flash botânico com desenho fluido.', detalhe:'7 cm · Blackwork · Disponível' },
+    ]
+    categories[2].obras = [
+      { titulo:'Botânica cicatrizada · 6 meses', imagem:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1600&q=90', descricao:'Registro demonstrativo após cicatrização completa.', detalhe:'Acompanhamento · 6 meses' },
+      { titulo:'Ornamental cicatrizada · 1 ano', imagem:'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1600&q=90', descricao:'Evolução do contraste e da definição após um ano.', detalhe:'Acompanhamento · 12 meses' },
+    ]
   }
-
-  return LAYOUT_PREVIEW_DEMO
+  if (variant === 'studio') {
+    categories[1].obras = [
+      { titulo:'Ana Reis · Fine line e botânica', imagem:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=85', descricao:'Traços delicados, composições botânicas e desenhos autorais.', detalhe:'Artista residente · Agenda aberta' },
+      { titulo:'Caio Nunes · Blackwork', imagem:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000&q=85', descricao:'Contraste, formas gráficas e composições de grande escala.', detalhe:'Artista residente · Agenda aberta' },
+      { titulo:'Lia Monteiro · Ornamental', imagem:'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=1000&q=85', descricao:'Simetria, geometria e desenhos ornamentais.', detalhe:'Artista convidada · Agenda sob consulta' },
+    ]
+  }
+  const extraSections = {
+    exhibitions: [
+      {title:'Cartografias afetivas',period:'2025 · Galeria Horizonte',description:'Exposição coletiva sobre memória, território e paisagem.',image:'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1000&q=85',url:'#demo-exposicao'},
+      {title:'Matéria em trânsito',period:'2024 · Espaço independente',description:'Participação em mostra dedicada a processos e experimentações.',image:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1000&q=85',url:'#demo-mostra'},
+    ],
+    process: [
+      {title:'Caderno de ateliê',period:'Processo · 2025',description:'Estudos, testes de materiais e composições que antecedem uma série.',image:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85'},
+      {title:'Da ideia à matéria',period:'Processo · 2024',description:'Registro das etapas de pesquisa, experimentação e finalização.',image:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1000&q=85'},
+    ],
+    services: [
+      {title:'Projeto sob encomenda',period:'Briefing e orçamento',description:'Criação personalizada com pesquisa visual, estudos e acompanhamento das etapas.',image:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85'},
+      {title:'Oficinas e encontros',period:'Individual ou em grupo',description:'Experiências práticas e encontros de experimentação em diferentes linguagens.',image:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1000&q=85'},
+    ],
+    press: [
+      {title:'Conversas sobre processo',period:'Revista Traço · 2025',description:'Entrevista sobre pesquisa, prática profissional e circulação de trabalhos.',url:'#demo-entrevista'},
+      {title:'Novas linguagens visuais',period:'Caderno de Arte · 2024',description:'Publicação sobre artistas e práticas contemporâneas.',url:'#demo-publicacao'},
+    ],
+    testimonials: [
+      {title:'Marina Costa · Curadora',period:'Exposição Cartografias',description:'“Uma pesquisa sensível, consistente e aberta ao diálogo com diferentes públicos.”'},
+      {title:'João Martins · Cliente',period:'Projeto comissionado',description:'“O processo foi colaborativo do início ao fim, com cuidado em cada detalhe.”'},
+    ],
+    'tattoo-flash': [
+      {title:'Ramo botânico 08',period:'Flash disponível · 8 cm',description:'Fine line em preto. Aplicação sugerida no antebraço ou panturrilha.',image:'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1000&q=85'},
+      {title:'Eclipse ornamental',period:'Flash disponível · 10 cm',description:'Composição ornamental em preto, adaptável mediante consulta.',image:'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1000&q=85'},
+      {title:'Pequena serpente',period:'Flash disponível · 7 cm',description:'Desenho autoral de linhas fluidas e formas orgânicas.',image:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1000&q=85'},
+    ],
+    'tattoo-booking': [
+      {title:'Como solicitar um orçamento',period:'Agenda aberta · 2026',description:'Envie sua ideia, referências, região do corpo e tamanho aproximado. Retornaremos com disponibilidade e estimativa.'},
+      {title:'Preparação para a sessão',period:'Antes da tatuagem',description:'Após a confirmação, você recebe orientações de preparo, cuidados e reserva da data.'},
+    ],
+    'healed-work': [
+      {title:'Botânica cicatrizada',period:'Registro após 6 meses',description:'Resultado demonstrativo após cicatrização completa, com textura e contraste preservados.',image:'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1000&q=85'},
+      {title:'Composição ornamental',period:'Registro após 1 ano',description:'Acompanhamento da evolução do trabalho na pele.',image:'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1000&q=85'},
+    ],
+    'guest-spots': [
+      {title:'São Paulo · Estúdio Horizonte',period:'12–16 de março de 2027',description:'Agenda especial para projetos autorais e consultas presenciais.'},
+      {title:'Curitiba · Casa Tinta',period:'02–05 de abril de 2027',description:'Vagas limitadas para flash e projetos previamente aprovados.'},
+    ],
+    'studio-team': [
+      {title:'Ana Reis · Fine line e botânica',period:'Artista residente',description:'Pesquisa traços delicados, composições botânicas e desenhos autorais.',image:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=85'},
+      {title:'Caio Nunes · Blackwork',period:'Artista residente',description:'Trabalha com contraste, formas gráficas e composições de grande escala.',image:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1000&q=85'},
+      {title:'Lia Monteiro · Ornamental',period:'Artista convidada',description:'Explora simetria, geometria e ornamentos inspirados em arquitetura.',image:'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=1000&q=85'},
+    ],
+  }
+  const social = variant === 'studio'
+    ? [{titulo:'Instagram',url:'https://www.instagram.com/'},{titulo:'Agendamentos',url:'mailto:agenda@casatinta.studio'},{titulo:'Localização',url:'https://maps.google.com/?q=Porto+Alegre'}]
+    : [{titulo:'Instagram',url:profile.instagram},{titulo:'Behance',url:'https://www.behance.net/'},{titulo:'E-mail',url:'mailto:'+profile.email}]
+  return {
+    categorias,
+    referencias: references[variant],
+    frames: [],
+    redes: social,
+    sobre: {...profile, formulario:'#demo-contato'},
+    marca: '',
+  }
 }
 
 const perfilInicial = {
@@ -315,7 +460,7 @@ export default function App() {
     document.body.style.background = 'var(--layout-page-background)'
   }, [conteudo.layout, tema])
   const secoesNav = useMemo(() => [
-    ...(conteudo.layout?.show_bio ?? true ? [{ titulo: 'Início', chave: 'inicio' }] : []),
+    ...(conteudo.layout?.show_bio_image !== false || conteudo.layout?.show_bio !== false ? [{ titulo: 'Início', chave: 'inicio' }] : []),
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     ...(conteudo.layout?.custom_sections || []).filter(section => section.title && (section.items?.length || new URLSearchParams(window.location.search).has('layout_preview'))).map(section => ({ titulo: section.title, chave: section.id })),
@@ -367,7 +512,7 @@ export default function App() {
       setConteudo(current => {
         const nextLayout = { ...current.layout, ...safeSettings }
         const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
-        return { ...current, ...(demo ? { categorias: demo.categorias, sobre: demo.sobre } : {}), layout: nextLayout }
+        return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, marca: demo.marca } : {}), layout: nextLayout }
       })
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
