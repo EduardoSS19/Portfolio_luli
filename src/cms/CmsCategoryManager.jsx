@@ -14,6 +14,11 @@ const CATEGORY_ANIMATIONS = [
   { value: 'zoom', label: 'Aproximar', detail: 'A imagem começa um pouco menor e chega ao tamanho natural.' },
   { value: 'recorte', label: 'Abrir em cortina', detail: 'A imagem se abre do centro para os lados.' },
   { value: 'flutuar', label: 'Flutuar', detail: 'A imagem chega com leveza, como se estivesse suspensa.' },
+  { value: 'perspectiva', label: 'Perspectiva', detail: 'A composição gira em profundidade e se encaixa de frente.' },
+  { value: 'foco', label: 'Foco gradual', detail: 'A imagem sai do desfoque e ganha nitidez progressivamente.' },
+  { value: 'cascata', label: 'Cascata', detail: 'A imagem é revelada em faixas sucessivas, de cima para baixo.' },
+  { value: 'pulso', label: 'Pulso', detail: 'A imagem chega com uma expansão breve e elástica.' },
+  { value: 'pincelada', label: 'Pincelada', detail: 'A imagem se revela em uma diagonal, como uma pincelada.' },
   { value: 'nenhuma', label: 'Sem animação', detail: 'Conteúdo estático, sem efeitos de entrada.' },
 ]
 
@@ -235,6 +240,9 @@ export function CmsCategoryManager({
     setAnimation(item.animation || 'obra')
     setError('')
     setNotice('')
+    window.requestAnimationFrame(() => {
+      document.getElementById('cms-category-animation-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const saveCategoryAnimation = async () => {
@@ -251,6 +259,9 @@ export function CmsCategoryManager({
       setAnimationCategory(current => current ? { ...current, animation } : current)
       setNotice('Animação de “' + animationCategory.title + '” salva.')
       onChanged?.()
+      window.requestAnimationFrame(() => {
+        document.getElementById('cms-category-' + animationCategory.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -385,6 +396,7 @@ export function CmsCategoryManager({
           <p>Selecione uma categoria para escolher e visualizar sua animação. Cada categoria pode usar qualquer efeito, independentemente do tipo de obra.</p>
           {loading ? <div className="cms-loading">Carregando categorias…</div> : items.length ? items.map(item => (
             <article
+              id={'cms-category-' + item.id}
               className={'cms-category-item' + (String(animationCategory?.id) === String(item.id) ? ' is-animation-selected' : '') + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
               key={item.id}
               draggable={supportsDrag && canEditCategory && !saving}
@@ -431,7 +443,7 @@ export function CmsCategoryManager({
             </article>
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
         </section>
-        <section className="cms-category-animation-editor" aria-live="polite">
+        <section id="cms-category-animation-editor" className="cms-category-animation-editor" aria-live="polite">
           {animationCategory ? (
             <>
               <div className="cms-category-animation-editor-heading">
