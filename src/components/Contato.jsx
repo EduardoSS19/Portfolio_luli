@@ -85,7 +85,7 @@ export function Contato({ endpoint, email }) {
         <button type="submit" disabled={enviando}>
           {enviando ? 'Enviando...' : 'Enviar mensagem'}
         </button>
-        {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Obrigada pelo contato.</p>}
+        {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Agradecemos o contato.</p>}
         {status === 'erro' && <p className="form-status erro" role="alert">Não foi possível enviar agora. Tente novamente mais tarde.</p>}
       </form>
     </section>
