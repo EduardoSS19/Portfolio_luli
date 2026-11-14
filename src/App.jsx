@@ -36,6 +36,7 @@ const DEFAULT_LAYOUT_SETTINGS = {
   show_bio_image: true,
   show_bio: true,
   show_references: true,
+  show_contact: true,
   custom_sections: [],
 }
 
@@ -64,7 +65,7 @@ function parseLayoutPreview(raw) {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
     })
     if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.filter(section => section && typeof section.id === 'string' && typeof section.title === 'string' && Array.isArray(section.items)).slice(0, 10)
-    ;['show_bio_image','show_bio','show_references'].forEach(key => {
+    ;['show_bio_image','show_bio','show_references','show_contact'].forEach(key => {
       if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
     return safe
@@ -233,8 +234,8 @@ export default function App() {
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     ...(conteudo.layout?.custom_sections || []).filter(section => section.title && section.items?.length).map(section => ({ titulo: section.title, chave: section.id })),
-    { titulo: 'Contato', chave: 'contato' },
-  ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio, conteudo.layout?.custom_sections])
+    ...(conteudo.layout?.show_contact !== false ? [{ titulo: 'Contato', chave: 'contato' }] : []),
+  ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio, conteudo.layout?.show_contact, conteudo.layout?.custom_sections])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
@@ -631,7 +632,7 @@ export default function App() {
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
       <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} />
       {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" hidden />}
-      <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
+      {layout.show_contact !== false && <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />}
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
         <button
