@@ -34,6 +34,7 @@ const DEFAULT_LAYOUT_SETTINGS = {
   show_bio_image: true,
   show_bio: true,
   show_references: true,
+  custom_sections: [],
 }
 
 const LAYOUT_PREVIEW_CHOICES = {
@@ -58,6 +59,7 @@ function parseLayoutPreview(raw) {
     LAYOUT_PREVIEW_COLORS.forEach(key => {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
     })
+    if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.slice(0, 10)
     ;['show_bio_image','show_bio','show_references'].forEach(key => {
       if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
