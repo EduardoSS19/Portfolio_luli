@@ -217,7 +217,7 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await openLiveLayoutPreview(page)
   await expect(page.locator('.hero')).toBeVisible()
   await expect(page.locator('.sobre-secao')).toBeVisible()
-  await expect(page.locator('.sobre-secao .biografia')).toContainText('Lorem ipsum')
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Artista visual que pesquisa as relações entre matéria, memória e paisagem.')
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(4)
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(6)
   await expect(page.locator('#Referências')).toBeVisible()
@@ -228,6 +228,32 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(contactForm.getByLabel('Nome')).toBeVisible()
   await expect(contactForm.getByLabel('E-mail')).toBeVisible()
   await expect(contactForm.getByLabel('Mensagem')).toBeVisible()
+})
+
+test('modelos preenchem todas as seções preparadas com exemplos adequados ao tipo', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  const types = ['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team']
+  await sendSettings(page, {
+    custom_sections: types.map((type,index) => ({
+      id: 'demo-'+type,
+      type,
+      title: ({
+        exhibitions:'Exposições e trajetória', process:'Processo criativo', services:'Serviços e encomendas',
+        press:'Imprensa e publicações', testimonials:'Depoimentos', 'tattoo-flash':'Flash disponíveis',
+        'tattoo-booking':'Agendamento de tatuagem', 'healed-work':'Trabalhos cicatrizados',
+        'guest-spots':'Agenda e guest spots', 'studio-team':'Estúdio e equipe',
+      })[type],
+      intro:'Conteúdo demonstrativo para visualizar este modelo.',
+      items:[],
+    })),
+  }, 'page')
+  await expect(page.locator('[data-preview-example="true"]')).toHaveCount(types.length)
+  await expect(page.locator('.portfolio-custom-empty-preview')).toHaveCount(0)
+  await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(20)
+  await expect(page.locator('.section-tattoo-flash .portfolio-custom-card')).toContainText('Flash disponível')
+  await expect(page.locator('.section-tattoo-booking .portfolio-custom-card')).toContainText('orçamento')
+  await expect(page.locator('.section-healed-work .portfolio-custom-card')).toContainText('cicatrizada')
+  await expect(page.locator('.section-studio-team .portfolio-custom-card')).toContainText('Artista residente')
 })
 
 test('prévia mantém a posição de rolagem ao alterar opções de layout', async ({ page }) => {
