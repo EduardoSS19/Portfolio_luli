@@ -1362,3 +1362,85 @@ html {
 
 .sobre-secao .sobre-entrada.sem-imagem{grid-template-columns:minmax(0,1fr)}
 .sobre-secao .sobre-entrada.sem-imagem .obra-texto{grid-column:1/-1;min-width:0}
+
+/* Navigation variants share the same accessible menu semantics, but use distinct spatial patterns. */
+.editorial-nav.navigation-dropdown .editorial-menu-backdrop {
+  align-items:flex-start;
+  justify-content:flex-end;
+  padding:5.25rem calc(1.4rem + env(safe-area-inset-right)) 1rem 1rem;
+  background:transparent;
+  backdrop-filter:none;
+}
+.editorial-nav.navigation-dropdown .editorial-menu-panel {
+  width:min(390px,calc(100vw - 2rem));
+  max-height:min(78vh,720px);
+  overflow:auto;
+  margin:0;
+  padding:1.35rem;
+  border:1px solid var(--linha);
+  border-radius:1.15rem;
+  background:var(--azul-medio);
+  box-shadow:0 24px 80px rgba(0,0,0,.28);
+  transform:translateY(-10px) scale(.98);
+  transition:transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.editorial-nav.navigation-dropdown.menu-aberto .editorial-menu-panel { transform:translateY(0) scale(1); }
+.editorial-nav.navigation-dropdown .editorial-menu-heading { margin-bottom:1rem; }
+.editorial-nav.navigation-dropdown .editorial-menu-links { gap:.15rem; }
+.editorial-nav.navigation-dropdown .nav-overlay-link {
+  grid-template-columns:2rem minmax(0,1fr) 1.5rem;
+  min-height:3.5rem;
+  gap:.5rem;
+  padding:.35rem .25rem;
+}
+.editorial-nav.navigation-dropdown .editorial-menu-title { font-size:clamp(1.15rem,2vw,1.5rem); }
+.editorial-nav.navigation-dropdown .editorial-menu-controls { margin-top:1rem; }
+.editorial-nav.navigation-dropdown .editorial-menu-footer { margin-top:1rem; }
+.editorial-nav.navigation-sidebar .editorial-menu-backdrop {
+  justify-content:flex-start;
+  align-items:stretch;
+  padding:0;
+  background:rgba(2,10,17,.48);
+}
+.editorial-nav.navigation-sidebar .editorial-menu-panel {
+  width:min(440px,88vw);
+  height:100%;
+  max-height:100%;
+  justify-content:center;
+  margin:0;
+  padding:clamp(1.5rem,5vw,3.5rem);
+  overflow-y:auto;
+  border-right:1px solid var(--linha);
+  background:var(--azul-medio);
+  box-shadow:20px 0 70px rgba(0,0,0,.2);
+  transform:translateX(-102%);
+  transition:transform .42s cubic-bezier(.2,.8,.2,1);
+}
+.editorial-nav.navigation-sidebar.menu-aberto .editorial-menu-panel { transform:translateX(0); }
+.editorial-nav.navigation-sidebar .editorial-menu-title { font-size:clamp(2rem,5vw,3.6rem); }
+:root[data-theme="claro"] .editorial-nav.navigation-dropdown .editorial-menu-panel,
+:root[data-theme="claro"] .editorial-nav.navigation-sidebar .editorial-menu-panel {
+  color:#172b3b;
+  background:#f7fbfe;
+  border-color:rgba(28,65,94,.22);
+}
+@media(max-width:760px) {
+  .editorial-nav.navigation-dropdown .editorial-menu-backdrop {
+    padding:calc(4.7rem + env(safe-area-inset-top)) .75rem 1rem;
+  }
+  .editorial-nav.navigation-dropdown .editorial-menu-panel {
+    width:100%;
+    max-height:calc(100dvh - 5.5rem - env(safe-area-inset-top));
+    padding:1rem;
+  }
+  .editorial-nav.navigation-dropdown .nav-overlay-link { min-height:3.15rem; }
+  .editorial-nav.navigation-dropdown .editorial-menu-title { font-size:1.2rem; }
+  .editorial-nav.navigation-sidebar .editorial-menu-panel {
+    width:min(88vw,390px);
+    padding:calc(1.25rem + env(safe-area-inset-top)) 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .editorial-nav.navigation-dropdown .editorial-menu-panel,
+  .editorial-nav.navigation-sidebar .editorial-menu-panel { transition:none; }
+}
