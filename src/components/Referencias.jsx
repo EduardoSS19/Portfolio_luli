@@ -34,7 +34,7 @@ export function Referencias({ referencias }) {
         ref={cabecalhoRef}
         className={`secao-cabecalho secao-cabecalho-referencias ${cabecalhoVisivel ? 'visivel' : ''}`}
       >
-        <span className="secao-indice">PERCURSO</span>
+        <span className="secao-indice">TRAJETÓRIA</span>
         <h2>Referências</h2>
         <span className="secao-contagem">{String(referencias.length).padStart(2, '0')} itens</span>
       </header>
