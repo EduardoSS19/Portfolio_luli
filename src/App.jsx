@@ -141,37 +141,37 @@ function getLayoutPreviewDemo(layout = {}) {
     editorial: {
       nome: 'Helena Duarte', frase: 'Artes visuais · Pintura · Pesquisa material',
       foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90',
-      bio: 'Artista visual e pesquisadora independente. Investiga as relações entre matéria, memória e paisagem por meio da pintura, da fotografia e de processos gráficos.\\n\\nSeu trabalho nasce de observações cotidianas e experimentações no ateliê, aproximando gesto, cor e território.',
+      bio: 'Artista visual e pesquisadora independente. Investiga as relações entre matéria, memória e paisagem por meio da pintura, da fotografia e de processos gráficos.\n\nSeu trabalho nasce de observações cotidianas e experimentações no ateliê, aproximando gesto, cor e território.',
       instagram: 'https://www.instagram.com/', email: 'contato@helenaduarte.art',
     },
     visual: {
       nome: 'Marina Azevedo', frase: 'Artista visual · Pintura · Escultura',
       foto: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1000&q=90',
-      bio: 'Artista visual que trabalha entre pintura, objeto e instalação. Sua pesquisa explora a memória dos materiais, as marcas do tempo e as relações entre corpo e espaço.\\n\\nParticipa de exposições individuais e coletivas, desenvolve projetos site-specific e conduz oficinas de experimentação.',
+      bio: 'Artista visual que trabalha entre pintura, objeto e instalação. Sua pesquisa explora a memória dos materiais, as marcas do tempo e as relações entre corpo e espaço.\n\nParticipa de exposições individuais e coletivas, desenvolve projetos site-specific e conduz oficinas de experimentação.',
       instagram: 'https://www.instagram.com/', email: 'studio@marinaazevedo.art',
     },
     illustration: {
       nome: 'Bia Campos', frase: 'Ilustração · Desenho · Narrativas visuais',
       foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1000&q=90',
-      bio: 'Ilustradora e desenhista. Cria imagens para livros, revistas, projetos culturais e marcas, combinando desenho manual, cor e composição digital.\\n\\nSeu universo visual reúne personagens, botânica e pequenas narrativas do cotidiano.',
+      bio: 'Ilustradora e desenhista. Cria imagens para livros, revistas, projetos culturais e marcas, combinando desenho manual, cor e composição digital.\n\nSeu universo visual reúne personagens, botânica e pequenas narrativas do cotidiano.',
       instagram: 'https://www.instagram.com/', email: 'oi@biacampos.illustration',
     },
     photo: {
       nome: 'Clara Nogueira', frase: 'Fotografia · Retrato · Arquitetura',
       foto: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=1000&q=90',
-      bio: 'Fotógrafa independente especializada em retratos, arquitetura e projetos editoriais. Trabalha com luz natural e narrativas visuais que valorizam gestos, texturas e atmosferas.\\n\\nAtende projetos autorais, editoriais e ensaios comissionados.',
+      bio: 'Fotógrafa independente especializada em retratos, arquitetura e projetos editoriais. Trabalha com luz natural e narrativas visuais que valorizam gestos, texturas e atmosferas.\n\nAtende projetos autorais, editoriais e ensaios comissionados.',
       instagram: 'https://www.instagram.com/', email: 'contato@claranogueira.photo',
     },
     design: {
       nome: 'Estúdio Norte', frase: 'Design estratégico · Branding · Direção de arte',
       foto: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1000&q=90',
-      bio: 'Estúdio independente de design e direção de arte. Conecta estratégia, identidade e experiências digitais para construir marcas com linguagem própria.\\n\\nAtua em branding, design editorial, interfaces, campanhas e sistemas visuais.',
+      bio: 'Estúdio independente de design e direção de arte. Conecta estratégia, identidade e experiências digitais para construir marcas com linguagem própria.\n\nAtua em branding, design editorial, interfaces, campanhas e sistemas visuais.',
       instagram: 'https://www.instagram.com/', email: 'hello@estudionorte.design',
     },
     tattoo: {
       nome: 'Maya Reis', frase: 'Tatuagem autoral · Fine line · Botânica',
       foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&q=90',
-      bio: 'Tatuadora e ilustradora. Desenvolve desenhos autorais inspirados em botânica, símbolos e narrativas pessoais. Cada projeto é pensado para o corpo e construído em diálogo com quem vai receber a tatuagem.\\n\\nAtendimentos com hora marcada e projetos personalizados.',
+      bio: 'Tatuadora e ilustradora. Desenvolve desenhos autorais inspirados em botânica, símbolos e narrativas pessoais. Cada projeto é pensado para o corpo e construído em diálogo com quem vai receber a tatuagem.\n\nAtendimentos com hora marcada e projetos personalizados.',
       instagram: 'https://www.instagram.com/', email: 'agenda@mayareis.tattoo',
     },
     studio: {
