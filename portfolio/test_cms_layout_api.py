@@ -133,3 +133,28 @@ class CmsLayoutApiTests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_editor_can_save_artist_specific_sections(self):
+        self.client.force_login(self.staff)
+        sections = [{
+            "id": "tattoo-flash-demo", "type": "tattoo-flash",
+            "title": "Flash disponíveis", "intro": "Desenhos prontos.",
+            "items": [{"title": "Lua crescente", "description": "Blackwork", "url": "https://example.com/flash", "image": "https://example.com/flash.jpg", "period": "Disponível"}],
+        }]
+        response = self.client.patch(
+            reverse("cms-layout"), data=json.dumps({"custom_sections": sections}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(response.json()["settings"]["custom_sections"], sections)
+        self.assertEqual(self.profile.layout_settings["custom_sections"], sections)
+
+    def test_custom_sections_reject_unsafe_links(self):
+        self.client.force_login(self.staff)
+        response = self.client.patch(
+            reverse("cms-layout"),
+            data=json.dumps({"custom_sections": [{"id": "unsafe", "type": "services", "title": "Serviços", "intro": "", "items": [{"title": "Contato", "url": "javascript:alert(1)"}]}]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
