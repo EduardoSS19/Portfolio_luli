@@ -7,7 +7,7 @@ const DEFAULTS = {
   section_spacing:'comfortable', gallery_columns:'3', default_gallery_view:'lista', default_theme:'escuro',
   dark_color_background:'#061522', dark_color_surface:'#0b2943', dark_color_text:'#eff7ff', dark_color_muted:'#a9bdcc', dark_color_accent:'#93c8f2',
   light_color_background:'#f5f2eb', light_color_surface:'#ffffff', light_color_text:'#24231f', light_color_muted:'#77746c', light_color_accent:'#657c62',
-  show_bio_image:true, show_bio:true, show_references:true,
+  show_bio_image:true, show_bio:true, show_references:true, custom_sections:[],
 }
 const FIELDS = [
   {group:'composition',name:'content_width',title:'Largura do conteúdo',description:'Define quanto espaço o conteúdo ocupa em telas maiores.',options:[['compact','Enxuto','Mais foco e respiro lateral'],['standard','Equilibrado','Proporção atual'],['wide','Amplo','Mais espaço para imagens']]},
@@ -21,6 +21,30 @@ const FIELDS = [
   {group:'content',name:'show_bio',title:'Texto da biografia',description:'A imagem e o texto podem ser exibidos de forma independente.',options:[[true,'Mostrar biografia','Exibe o texto biográfico'],[false,'Ocultar biografia','Remove o texto da seção']]},
   {group:'content',name:'show_references',title:'Seção de referências',description:'Controla também a entrada Referências na navegação do portfólio.',options:[[true,'Mostrar referências','Exibe a seção e seus links'],[false,'Ocultar referências','Remove a seção e a entrada do menu']]},
 ]
+
+const LAYOUT_PRESETS = [
+  {id:'editorial-current',title:'Editorial contemporâneo',kind:'Modelo atual · portfólio autoral',description:'Preserva a composição equilibrada do portfólio atual, com espaço para trajetória e processo.',sections:['exhibitions','process'],settings:{content_width:'standard',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'lista',default_theme:'escuro'}},
+  {id:'visual-artist',title:'Artista visual',kind:'Artes visuais · pintura · escultura',description:'Composição editorial, obras em destaque e espaço generoso para contextualizar séries.',sections:['exhibitions','process','services'],settings:{content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'lista',default_theme:'escuro'}},
+  {id:'illustrator',title:'Ilustração e desenho',kind:'Ilustração · quadrinhos · gravura',description:'Grade visual com mais obras por tela e apresentação compacta para explorar o acervo.',sections:['process','services'],settings:{content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',default_theme:'claro'}},
+  {id:'photographer',title:'Fotografia',kind:'Fotografia · imagem · editorial',description:'Imagens amplas, navegação limpa e uma apresentação discreta para deixar as fotografias conduzirem.',sections:['exhibitions','services'],settings:{content_width:'wide',hero_alignment:'center',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',default_theme:'escuro'}},
+  {id:'designer',title:'Design e direção de arte',kind:'Design · branding · 3D · motion',description:'Estrutura equilibrada para apresentar projetos, contexto, entregáveis e estudos de caso.',sections:['process','services','press','testimonials'],settings:{content_width:'standard',hero_alignment:'left',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'lista',default_theme:'claro'}},
+  {id:'tattoo-artist',title:'Tatuador(a)',kind:'Tatuagem · flash · trabalhos cicatrizados',description:'Galeria visual em destaque, navegação compacta e tema escuro para valorizar os trabalhos.',sections:['tattoo-flash','tattoo-booking','healed-work','guest-spots'],settings:{content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',default_gallery_view:'grade',default_theme:'escuro'}},
+  {id:'tattoo-studio',title:'Estúdio de tatuagem',kind:'Estúdio · equipe · agenda',description:'Apresentação institucional equilibrada, com espaço para equipe, especialidades e agendamentos.',sections:['studio-team','tattoo-flash','tattoo-booking','healed-work','guest-spots'],settings:{content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',default_theme:'escuro'}},
+]
+
+const SECTION_TEMPLATES = [
+  {type:'exhibitions',title:'Exposições e trajetória',label:'Exposições',intro:'Exposições, formação, residências, prêmios e participações.'},
+  {type:'process',title:'Processo criativo',label:'Processo',intro:'Bastidores, etapas, estudos e materiais de criação.'},
+  {type:'services',title:'Serviços e encomendas',label:'Serviços',intro:'Trabalhos disponíveis, formatos de contratação e orçamento.'},
+  {type:'press',title:'Imprensa e publicações',label:'Imprensa',intro:'Entrevistas, matérias, revistas, vídeos e publicações.'},
+  {type:'testimonials',title:'Depoimentos',label:'Depoimentos',intro:'Relatos de clientes, parceiros e instituições.'},
+  {type:'tattoo-flash',title:'Flash disponíveis',label:'Flash tattoo',intro:'Desenhos prontos, disponibilidade e informações para reservar.'},
+  {type:'tattoo-booking',title:'Agendamento de tatuagem',label:'Agendamento',intro:'Como solicitar orçamento, enviar referências e agendar.'},
+  {type:'healed-work',title:'Trabalhos cicatrizados',label:'Cicatrizados',intro:'Resultados após a cicatrização, separados dos trabalhos recentes.'},
+  {type:'guest-spots',title:'Agenda e guest spots',label:'Agenda',intro:'Datas, cidades e estúdios onde o artista estará atendendo.'},
+  {type:'studio-team',title:'Estúdio e equipe',label:'Equipe',intro:'Apresentação do estúdio e dos artistas que fazem parte dele.'},
+]
+
 const FIELD_GROUPS = [
   {id:'composition',title:'Composição',description:'Defina a estrutura visual e o ritmo de leitura do portfólio.'},
   {id:'content',title:'Conteúdo e seções',description:'Escolha quais partes da apresentação ficam visíveis para o visitante.'},
@@ -303,7 +327,18 @@ export function CmsLayoutManager(){
     ]
   },[settings,editingTheme])
   const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
+  const updateCustomSection=(id,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===id?{...section,...patch}:section)}))
+  const addCustomSection=template=>{
+    const id=template.type+'-'+Date.now().toString(36)
+    setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,items:[]}]}))
+    setNotice('Seção adicionada. Inclua os conteúdos e salve para publicar.')
+  }
+  const moveCustomSection=(id,delta)=>setSettings(current=>{const sections=[...(current.custom_sections||[])];const index=sections.findIndex(section=>section.id===id);const target=index+delta;if(index<0||target<0||target>=sections.length)return current;[sections[index],sections[target]]=[sections[target],sections[index]];return {...current,custom_sections:sections}})
+  const removeCustomSection=id=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).filter(section=>section.id!==id)}))
+  const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
+  const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
+  const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
+  const applyLayoutPreset=preset=>{const stamp=Date.now().toString(36);setSettings(current=>{const existing=current.custom_sections||[];const additions=(preset.sections||[]).filter(type=>!existing.some(section=>section.type===type)).map((type,index)=>{const template=SECTION_TEMPLATES.find(item=>item.type===type);return template?{id:type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null}).filter(Boolean);return {...current,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}});setPreviewMode(preset.settings.default_gallery_view);setError('');setNotice('Modelo “'+preset.title+'” aplicado com suas seções sugeridas. Edite os conteúdos abaixo e salve quando estiver pronto.')}\n  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
@@ -335,6 +370,44 @@ export function CmsLayoutManager(){
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
+        <section className="cms-layout-presets">
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">7 modelos</span></div>
+          <p className="cms-layout-help">Escolha uma estrutura inicial para sua área artística. Depois, ajuste livremente cada opção, cores e conteúdo. Aplicar um modelo não publica nada até salvar.</p>
+          <div className="cms-layout-preset-grid">
+            {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
+              <div className={'cms-layout-preset-art preset-'+preset.id} aria-hidden="true"><span/><span/><span/><i/></div>
+              <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p></div>
+              <button type="button" className="cms-layout-preset-apply" onClick={()=>applyLayoutPreset(preset)} disabled={!canChange||saving}>Usar este modelo <span>→</span></button>
+            </article>)}
+          </div>
+        </section>
+        <section className="cms-layout-section-library">
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">CONTEÚDO MODULAR</p><h2>Biblioteca de seções</h2></div><span className="cms-layout-preset-count">{(settings.custom_sections||[]).length} adicionadas</span></div>
+          <p className="cms-layout-help">Adicione apenas o que faz sentido para seu trabalho. Cada seção pode ser editada e organizada; deixe sem itens para mantê-la como rascunho no editor.</p>
+          <div className="cms-layout-section-template-grid">
+            {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
+              <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
+            </button>)}
+          </div>
+          {(settings.custom_sections||[]).map((section,index)=><article className="cms-layout-custom-section" key={section.id}>
+            <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
+            <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
+            <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
+            <div className="cms-layout-custom-items">
+              {(section.items||[]).map((item,itemIndex)=><div className="cms-layout-custom-item" key={itemIndex}>
+                <div className="cms-layout-custom-item-heading"><strong>Item {itemIndex+1}</strong><button type="button" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button></div>
+                <label>Nome<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
+                <label>Descrição<textarea rows="2" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
+                <div className="cms-layout-custom-item-fields">
+                  <label>Período<input value={item.period||''} maxLength={100} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{period:event.target.value})} disabled={!canChange||saving} placeholder="Ex.: 2025 · Porto Alegre"/></label>
+                  <label>Link externo<input type="url" value={item.url||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
+                  <label>Imagem (URL)<input type="url" value={item.image||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
+                </div>
+              </div>)}
+            </div>
+            <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar conteúdo</button>
+          </article>)}
+        </section>
         <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
