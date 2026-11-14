@@ -100,6 +100,19 @@ function buildPresetSettings(base,preset){
   return {...base,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}
 }
 
+function normalizeLayoutSettings(raw={}) {
+  const next={...DEFAULTS,...raw}
+  next.custom_sections=(Array.isArray(next.custom_sections)?next.custom_sections:[]).map(section=>({
+    ...section,
+    design:{
+      layout:section.design?.layout||SECTION_DESIGNS[section.type]?.[0]?.[0]||'cards',
+      columns:section.design?.columns||'2',
+      image_ratio:section.design?.image_ratio||'landscape',
+      density:section.design?.density||'comfortable',
+    },
+  }))
+  return next
+}
 function readCookie(name){const prefix=name+'=';const item=document.cookie.split('; ').find(cookie=>cookie.startsWith(prefix));return item?decodeURIComponent(item.slice(prefix.length)):''}
 function luminance(hex){const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722}
 function contrastRatio(a,b){const values=[luminance(a),luminance(b)].sort((x,y)=>y-x);return(values[0]+.05)/(values[1]+.05)}
@@ -214,12 +227,21 @@ export function CmsLayoutManager(){
     if(!frame?.contentDocument)return
     const doc=frame.contentDocument
     const update=()=>{
-      const height=Math.ceil(Math.max(
-        doc.documentElement?.scrollHeight||0,
-        doc.documentElement?.offsetHeight||0,
-        doc.body?.scrollHeight||0,
-        doc.body?.offsetHeight||0
-      ))
+      const footer=doc.querySelector('.rodape, footer')
+      const shell=doc.querySelector('.site-shell')
+      const footerBottom=footer
+        ? Math.ceil(footer.getBoundingClientRect().bottom+(doc.defaultView?.scrollY||0))
+        : 0
+      const shellBottom=shell
+        ? Math.ceil(shell.getBoundingClientRect().bottom+(doc.defaultView?.scrollY||0))
+        : 0
+      // Prefer the actual end of portfolio content. Root/body offsetHeight can
+      // include min-height and leave a large empty tail after the contact section.
+      const contentBottom=footerBottom||shellBottom
+      const height=Math.ceil(contentBottom>0
+        ? contentBottom+12
+        : Math.max(doc.documentElement?.scrollHeight||0,doc.body?.scrollHeight||0,PREVIEW_DEVICES[previewDevice]?.height||0)
+      )
       if(height>0){
         const key=frame===inlinePreviewIframeRef.current?'inline':'floating'
         setPreviewDocumentHeights(current=>current[key]===height?current:{...current,[key]:height})
@@ -301,7 +323,7 @@ export function CmsLayoutManager(){
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
       .then(async response=>{const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(response.status===403?'Sua conta não tem permissão para acessar o layout.':'Não foi possível carregar as opções de layout.');return data})
-      .then(data=>{if(!active)return;const next={...DEFAULTS,...(data.settings||{})};setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
+      .then(data=>{if(!active)return;const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
       .catch(err=>{if(active)setError(err.message)}).finally(()=>{if(active)setLoading(false)})
     return()=>{active=false}
   },[])
@@ -551,7 +573,7 @@ export function CmsLayoutManager(){
       const response=await fetch('/api/cms/layout/',{method:'PATCH',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json','Content-Type':'application/json','X-CSRFToken':readCookie('csrftoken')},body:JSON.stringify(settings)})
       const data=await response.json().catch(()=>({}))
       if(!response.ok)throw new Error(data.error==='layout_edit_permission_required'?'Sua conta não tem permissão para alterar o layout.':'Não foi possível salvar. Tente novamente.')
-      const next={...DEFAULTS,...data.settings};setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
+      const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
     }catch(err){setError(err.message||'Não foi possível salvar.')}finally{setSaving(false)}
   }
   const discard=()=>{setSettings(saved);setPreviewMode(saved.default_gallery_view);setError('');setNotice('Alterações descartadas.')}
