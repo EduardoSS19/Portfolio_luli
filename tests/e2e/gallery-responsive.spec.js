@@ -894,7 +894,7 @@ test('fotografia permanece totalmente renderizada após ciclos repetidos de abri
         carregada: img.complete && img.naturalWidth > 0,
         opacidade: style.opacity,
         visibilidade: style.visibility,
-        recorteCompleto: /^inset\\(0px(?: 0px){0,2}(?: 0px| 0%)?\\)$/.test(style.clipPath),
+        recorteCompleto: /^inset\(0px(?: 0px){0,2}(?: 0px| 0%)?\)$/.test(style.clipPath),
         largura: rect.width,
         altura: rect.height,
       }
