@@ -64,6 +64,7 @@ export function CmsCategoryManager({
   const [title, setTitle] = useState('')
   const [key, setKey] = useState('')
   const [animation, setAnimation] = useState('obra')
+  const [animationCategory, setAnimationCategory] = useState(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryWorks, setCategoryWorks] = useState([])
   const [savedCategoryWorks, setSavedCategoryWorks] = useState([])
@@ -212,9 +213,36 @@ export function CmsCategoryManager({
     setEditing(item)
     setTitle(item.title)
     setKey(item.key)
+    setError('')
+    setNotice('')
+  }
+
+  const openAnimationEditor = item => {
+    setAnimationCategory(item)
     setAnimation(item.animation || 'obra')
     setError('')
     setNotice('')
+  }
+
+  const saveCategoryAnimation = async () => {
+    if (!animationCategory || !canEditCategory) return
+    setSaving(true)
+    setError('')
+    setNotice('')
+    try {
+      await categoryRequest('/api/cms/categories/' + animationCategory.id + '/', {
+        method: 'POST',
+        body: JSON.stringify({ animation }),
+      })
+      setItems(current => current.map(item => String(item.id) === String(animationCategory.id) ? { ...item, animation } : item))
+      setAnimationCategory(current => current ? { ...current, animation } : current)
+      setNotice('Animação de “' + animationCategory.title + '” salva.')
+      onChanged?.()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const save = async event => {
@@ -341,7 +369,7 @@ export function CmsCategoryManager({
       <div className="cms-category-page">
         <section className="cms-category-list">
           <h2>Suas categorias</h2>
-          <p>Para definir a animação, clique em <strong>Editar</strong> na categoria desejada e escolha uma opção na lista. Desativar uma categoria não apaga suas obras.</p>
+          <p>Selecione uma categoria para escolher e visualizar sua animação. Cada categoria pode usar qualquer efeito, independentemente do tipo de obra.</p>
           {loading ? <div className="cms-loading">Carregando categorias…</div> : items.length ? items.map(item => (
             <article
               className={'cms-category-item' + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
@@ -363,8 +391,12 @@ export function CmsCategoryManager({
               onDragEnd={() => { setDraggingCategoryId(null); setDragOverCategoryId(null) }}
             >
               <div>
-                <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
-                <small>{item.workCount} {item.workCount === 1 ? 'obra vinculada' : 'obras vinculadas'} · /{item.key} · Animação: {CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'}</small>
+                <button type="button" className="cms-category-animation-open" onClick={() => openAnimationEditor(item)} disabled={!canEditCategory || saving} aria-label={'Configurar animação da categoria ' + item.title}>
+                  <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
+                  <small>{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
+                  <span>Configurar animação →</span>
+                </button>
+                <small className="cms-category-address">/{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
@@ -379,6 +411,43 @@ export function CmsCategoryManager({
               </div>
             </article>
           )) : <div className="cms-gallery-empty"><strong>Nenhuma categoria cadastrada</strong><small>Crie a primeira ao lado.</small></div>}
+        </section>
+        <section className="cms-category-animation-editor" aria-live="polite">
+          {animationCategory ? (
+            <>
+              <div className="cms-category-animation-editor-heading">
+                <div>
+                  <p className="cms-eyebrow">PERSONALIZAÇÃO DA CATEGORIA</p>
+                  <h2>{animationCategory.title}</h2>
+                  <p>Escolha qualquer animação. A seleção vale somente para esta categoria.</p>
+                </div>
+                <button type="button" className="cms-editor-cancel" onClick={() => setAnimationCategory(null)} disabled={saving}>Voltar</button>
+              </div>
+              <label className="cms-category-animation-select">Animação desta categoria
+                <select value={animation} onChange={event => setAnimation(event.target.value)} disabled={saving}>
+                  {CATEGORY_ANIMATIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </label>
+              <div className="cms-category-animation-preview" aria-live="polite">
+                <div className="cms-category-animation-preview-heading">
+                  <strong>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial'}</strong>
+                  <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Entrada discreta e elegante.'}</small>
+                </div>
+                <div className="cms-animation-demo" data-animation={animation} aria-label={'Prévia da animação ' + (CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial')}>
+                  <i /><i /><i />
+                </div>
+              </div>
+              <div className="cms-category-animation-editor-actions">
+                <span>{animation === (animationCategory.animation || 'obra') ? 'Animação atual' : 'Alteração ainda não salva'}</span>
+                <button type="button" className="cms-primary-button" onClick={saveCategoryAnimation} disabled={saving || animation === (animationCategory.animation || 'obra')}>{saving ? 'Salvando…' : 'Salvar animação'}</button>
+              </div>
+            </>
+          ) : (
+            <div className="cms-category-animation-empty">
+              <strong>Escolha uma categoria</strong>
+              <p>Clique em uma categoria ao lado para configurar sua animação, ver a prévia e salvar.</p>
+            </div>
+          )}
         </section>
         <section className="cms-category-work-order">
           <div className="cms-category-work-order-heading"><div><h2>Ordem das obras</h2><p>Esta sequência define como as obras aparecem dentro da categoria no portfólio. Use as setas para mover uma obra; em computadores, também é possível arrastar.</p></div>
@@ -456,30 +525,6 @@ export function CmsCategoryManager({
             <input value={key} onChange={event => setKey(event.target.value)} maxLength={50} placeholder="Gerada automaticamente pelo nome" />
             <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
           </label>
-          <fieldset className="cms-category-animation-field">
-            <legend>Animação desta categoria</legend>
-            <p className="cms-field-help">Cada categoria tem sua própria animação. Escolha uma opção na lista e confira o exemplo antes de salvar.</p>
-            <label className="cms-category-animation-select">Escolher animação
-              <select
-                value={animation}
-                onChange={event => setAnimation(event.target.value)}
-                disabled={saving}
-              >
-                {CATEGORY_ANIMATIONS.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-            <div className="cms-category-animation-preview" aria-live="polite">
-              <div className="cms-category-animation-preview-heading">
-                <strong>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial'}</strong>
-                <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Entrada discreta e elegante.'}</small>
-              </div>
-              <div className="cms-animation-demo" data-animation={animation} aria-label={'Exemplo da animação ' + (CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial')}>
-                <i /><i /><i />
-              </div>
-            </div>
-          </fieldset>
           <div className="cms-category-form-actions">
             <button className="cms-primary-button" type="submit" disabled={saving || !title.trim() || (editing ? !canEditCategory : !canCreateCategory)}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
             {editing && <button className="cms-editor-cancel" type="button" onClick={reset} disabled={saving}>Cancelar</button>}
