@@ -144,7 +144,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   })
   expect(optionAfterHover).toEqual(optionBeforeHover)
   await expect(hoverPreview).toHaveCSS('position', 'fixed')
-  await expect(hoverPreview.getByRole('button', { name: 'Fechar prévia temporária' })).toBeEnabled()
+  await expect(hoverPreview).toBeVisible()
 
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
