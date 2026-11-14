@@ -165,11 +165,35 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const isToLeft = anchoredGeometry.preview.right <= anchoredGeometry.option.left
   expect(isToRight || isToLeft).toBeTruthy()
 
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-hero-align'))).toBe('left')
+  const hoverFrameBox = await temporaryFrame.boundingBox()
+  await page.mouse.move(hoverFrameBox.x + hoverFrameBox.width / 2, hoverFrameBox.y + hoverFrameBox.height / 2)
+  await page.mouse.wheel(0, 560)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)).toBeGreaterThan(0)
+  await expect(hoverPreview).toBeVisible()
+
+  const previewDocument = page.frameLocator('iframe[title="Prévia temporária do portfólio"]')
+  await previewDocument.locator('.editorial-menu-trigger').click()
+  await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'false')
+  await previewDocument.locator('.nav-overlay-link').first().click()
+  await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'true')
+  await expect(hoverPreview).toBeVisible()
+
   const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBeforeSelection)
+
+  const paletteOption = page.getByRole('button', { name: 'Aplicar paleta Oliva e papel' })
+  await paletteOption.hover()
+  await expect(hoverPreview).toBeVisible()
+  await expect(hoverPreview).toContainText('Oliva e papel')
+  await expect.poll(() => temporaryFrame.evaluate(frame => getComputedStyle(frame.contentDocument.querySelector('.site-shell')).getPropertyValue('--azul-escuro').trim())).toBe('#171912')
+  const backgroundColorOption = page.locator('.cms-layout-color-field').filter({ hasText: 'Fundo' })
+  await backgroundColorOption.hover()
+  await expect(hoverPreview).toBeVisible()
+  await expect(hoverPreview).toContainText('Fundo')
 
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
