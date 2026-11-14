@@ -2,19 +2,14 @@ import { useCallback, useEffect, useState } from 'react'
 import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const CATEGORY_ANIMATIONS = [
-  { value: 'obra', label: 'Editorial', detail: 'Entrada discreta e elegante.' },
-  { value: 'ceramica', label: 'Cerâmica', detail: 'A imagem ganha forma como no torno.' },
-  { value: 'gravura', label: 'Gravura', detail: 'Revelação vertical com passagem de rolo.' },
-  { value: 'desenho', label: 'Desenho', detail: 'Traço revelado da esquerda para a direita.' },
-  { value: 'glitch', label: 'Glitch', detail: 'Aparição digital fragmentada.' },
-  { value: 'fotografia', label: 'Fotografia', detail: 'Revelação gradual de uma imagem.' },
-  { value: 'videoarte', label: 'Videoarte', detail: 'Abertura cinematográfica.' },
-  { value: 'suave', label: 'Aparição suave', detail: 'Opacidade que cresce sem deslocamento.' },
-  { value: 'deslizar', label: 'Deslizar', detail: 'Movimento curto vindo de baixo.' },
-  { value: 'zoom', label: 'Zoom', detail: 'Aproximação sutil até o tamanho natural.' },
-  { value: 'recorte', label: 'Revelação por recorte', detail: 'A seção aparece como uma cortina.' },
-  { value: 'flutuar', label: 'Flutuação', detail: 'Entrada leve com movimento orgânico.' },
-  { value: 'nenhuma', label: 'Sem animação', detail: 'Conteúdo estático, sem efeitos de entrada.' },
+  { value: 'obra', label: 'Editorial' },
+  { value: 'ceramica', label: 'Cerâmica' },
+  { value: 'gravura', label: 'Gravura' },
+  { value: 'desenho', label: 'Desenho' },
+  { value: 'glitch', label: 'Glitch' },
+  { value: 'fotografia', label: 'Fotografia' },
+  { value: 'videoarte', label: 'Videoarte' },
+  { value: 'nenhuma', label: 'Sem animação' },
 ]
 
 function readCsrf() {
@@ -392,13 +387,13 @@ export function CmsCategoryManager({
               onDragEnd={() => { setDraggingCategoryId(null); setDragOverCategoryId(null) }}
             >
               <div>
-                <button type="button" className="cms-category-animation-open" aria-pressed={String(animationCategory?.id) === String(item.id)} onClick={() => openAnimationEditor(item)} disabled={!canEditCategory || saving} aria-label={'Clique para configurar a animação da categoria ' + item.title}>
-                  <span className="cms-category-animation-open-main">
-                    <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
-                    <small>{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
-                  </span>
-                  <span className="cms-category-animation-cta"><span aria-hidden="true">✳</span> Escolher animação <span aria-hidden="true">→</span></span>
-                </button>
+                <div className="cms-category-title-line">
+                  <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
+                  {canEditCategory && <button type="button" className="cms-category-animation-trigger" aria-pressed={String(animationCategory?.id) === String(item.id)} onClick={() => openAnimationEditor(item)} disabled={saving}>
+                    {String(animationCategory?.id) === String(item.id) ? 'Configurando' : 'Configurar animação'} <span aria-hidden="true">↗</span>
+                  </button>}
+                </div>
+                <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}
                 <small className="cms-category-address">/{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
@@ -439,17 +434,19 @@ export function CmsCategoryManager({
                 {worksLoading ? (
                   <div className="cms-animation-live-loading">Carregando uma obra desta categoria…</div>
                 ) : (
-                  <article className="cms-animation-live-card" data-animation={animation} key={animation + '-' + (categoryWorks.find(work => work.image)?.id || 'sample')}>
-                    <div className="cms-animation-live-image-wrap">
+                  <article className={'cms-animation-live-card obra arte-' + animation + ' visivel'} key={animation + '-' + (categoryWorks.find(work => work.image)?.id || 'sample')}>
+                    <div className="cms-animation-live-image-wrap obra-imagem">
                       {categoryWorks.find(work => work.image)?.image ? (
-                        <img className="cms-animation-live-image" src={categoryWorks.find(work => work.image).image} alt={categoryWorks.find(work => work.image)?.title || 'Obra do acervo'} />
+                        <div className="obra-zoom-trigger">
+                          <img className="cms-animation-live-image" src={categoryWorks.find(work => work.image).image} alt={categoryWorks.find(work => work.image)?.title || 'Obra do acervo'} />
+                        </div>
                       ) : (
                         <div className="cms-animation-live-image cms-animation-live-image-placeholder" role="img" aria-label="Prévia sem imagem cadastrada"><span>Esta categoria ainda não tem uma obra com imagem</span></div>
                       )}
                     </div>
-                    <div className="cms-animation-live-copy">
+                    <div className="cms-animation-live-copy obra-texto">
                       <span>{animationCategory.title}</span>
-                      <strong>{categoryWorks.find(work => work.image)?.title || categoryWorks[0]?.title || 'Título da obra'}</strong>
+                      <h3>{categoryWorks.find(work => work.image)?.title || categoryWorks[0]?.title || 'Título da obra'}</h3>
                     </div>
                   </article>
                 )}
