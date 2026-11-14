@@ -1787,3 +1787,5 @@
 .cms-layout-custom-item-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
 .cms-layout-add-item{justify-self:start;padding:.55rem .7rem;border:1px dashed var(--cms-border,rgba(255,255,255,.2));border-radius:8px;background:transparent;color:var(--cms-accent,#c9d39a);font-size:.75rem;cursor:pointer}
 @media(max-width:560px){.cms-layout-section-library{padding:.7rem}.cms-layout-section-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cms-layout-custom-item-fields{grid-template-columns:1fr}}
+
+.cms-layout-custom-section-actions{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
