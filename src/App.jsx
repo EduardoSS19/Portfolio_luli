@@ -214,6 +214,10 @@ export default function App() {
 
       // A navegação acontece somente no documento da prévia (iframe).
       // Nunca envia foco/scroll para a página externa do CMS.
+      // Somente o hover contextual pode navegar dentro do iframe.
+      // Atualizações disparadas por clique/aplicação atualizam o visual sem scroll.
+      if (event.data.animatePreview !== true) return
+
       const focus = event.data.focus
       const selector = focus === 'hero' ? '.hero'
         : focus === 'gallery'
