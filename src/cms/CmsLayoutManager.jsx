@@ -332,6 +332,7 @@ export function CmsLayoutManager(){
     setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,items:[]}]}))
     setNotice('Seção adicionada. Inclua os conteúdos e salve para publicar.')
   }
+  const moveCustomSection=(id,delta)=>setSettings(current=>{const sections=[...(current.custom_sections||[])];const index=sections.findIndex(section=>section.id===id);const target=index+delta;if(index<0||target<0||target>=sections.length)return current;[sections[index],sections[target]]=[sections[target],sections[index]];return {...current,custom_sections:sections}})
   const removeCustomSection=id=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).filter(section=>section.id!==id)}))
   const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
@@ -388,7 +389,7 @@ export function CmsLayoutManager(){
             </button>)}
           </div>
           {(settings.custom_sections||[]).map((section,index)=><article className="cms-layout-custom-section" key={section.id}>
-            <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></header>
+            <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
             <label>Título da seção<input value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
             <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
             <div className="cms-layout-custom-items">
