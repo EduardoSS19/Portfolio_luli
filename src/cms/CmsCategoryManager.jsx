@@ -396,6 +396,28 @@ export function CmsCategoryManager({
       </section>
       {error && <div className="cms-error" role="alert">{error}<button type="button" onClick={load}>Tentar novamente</button></div>}
       <div className="cms-category-page">
+        {(canCreateCategory || (editing && canEditCategory)) ? <form className="cms-category-form" onSubmit={save}>
+          <div>
+            <h2>{editing ? 'Editar categoria' : 'Nova categoria'}</h2>
+            <p>O nome aparece no portfólio. A chave identifica a categoria nos endereços e filtros.</p>
+          </div>
+          <label>Nome da categoria
+            <input value={title} onChange={event => setTitle(event.target.value)} maxLength={100} required placeholder="Ex.: Pinturas" />
+            <small className="cms-field-help">Nome que os visitantes verão para encontrar este grupo de obras.</small>
+          </label>
+          <label>Chave / endereço
+            <input value={key} onChange={event => setKey(event.target.value)} maxLength={50} placeholder="Gerada automaticamente pelo nome" />
+            <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
+          </label>
+          <div className="cms-category-form-actions">
+            <button className="cms-primary-button" type="submit" disabled={saving || !title.trim() || (editing ? !canEditCategory : !canCreateCategory)}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
+            {editing && <button className="cms-editor-cancel" type="button" onClick={reset} disabled={saving}>Cancelar</button>}
+          </div>
+          {notice && <div className="cms-category-notice" role="status">{notice}</div>}
+        </form> : <aside className="cms-category-form cms-permission-note" role="note">
+          <h2>Permissões de categoria</h2>
+          <p>{canEditCategory ? 'Sua conta pode editar categorias existentes, mas não criar novas categorias.' : 'Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.'}</p>
+        </aside>}
         <section className="cms-category-list">
           <h2>Suas categorias</h2>
           <p>Selecione uma categoria para escolher e visualizar sua animação. Cada categoria pode usar qualquer efeito, independentemente do tipo de obra.</p>
@@ -564,28 +586,7 @@ export function CmsCategoryManager({
             </>
           ) : <div className="cms-gallery-empty"><strong>{selectedCategoryId ? 'Nenhuma obra nesta categoria' : 'Selecione uma categoria'}</strong><small>Use a busca para localizar uma obra ou as setas para reorganizar a sequência.</small></div>}
         </section>
-        {(canCreateCategory || (editing && canEditCategory)) ? <form className="cms-category-form" onSubmit={save}>
-          <div>
-            <h2>{editing ? 'Editar categoria' : 'Nova categoria'}</h2>
-            <p>O nome aparece no portfólio. A chave identifica a categoria nos endereços e filtros.</p>
-          </div>
-          <label>Nome da categoria
-            <input value={title} onChange={event => setTitle(event.target.value)} maxLength={100} required placeholder="Ex.: Pinturas" />
-            <small className="cms-field-help">Nome que os visitantes verão para encontrar este grupo de obras.</small>
-          </label>
-          <label>Chave / endereço
-            <input value={key} onChange={event => setKey(event.target.value)} maxLength={50} placeholder="Gerada automaticamente pelo nome" />
-            <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
-          </label>
-          <div className="cms-category-form-actions">
-            <button className="cms-primary-button" type="submit" disabled={saving || !title.trim() || (editing ? !canEditCategory : !canCreateCategory)}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
-            {editing && <button className="cms-editor-cancel" type="button" onClick={reset} disabled={saving}>Cancelar</button>}
-          </div>
-          {notice && <div className="cms-category-notice" role="status">{notice}</div>}
-        </form> : <aside className="cms-category-form cms-permission-note" role="note">
-          <h2>Permissões de categoria</h2>
-          <p>{canEditCategory ? 'Sua conta pode editar categorias existentes, mas não criar novas categorias.' : 'Sua conta pode consultar o acervo, mas não tem autorização para criar ou editar categorias.'}</p>
-        </aside>}
+
       </div>
       {dialogNode}
     </>
