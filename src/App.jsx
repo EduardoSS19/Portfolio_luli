@@ -181,9 +181,10 @@ export default function App() {
   const secoesNav = useMemo(() => [
     ...(conteudo.layout?.show_bio ?? true ? [{ titulo: 'Início', chave: 'inicio' }] : []),
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
+    ...(conteudo.layout?.custom_sections || []).filter(section => section.title && section.items?.length).map(section => ({ titulo: section.title, chave: section.id })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
     { titulo: 'Contato', chave: 'contato' },
-  ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio])
+  ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio, conteudo.layout?.custom_sections])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
   const [animando, setAnimando] = useState(null)
   const [mostrarVoltarTopo, setMostrarVoltarTopo] = useState(false)
