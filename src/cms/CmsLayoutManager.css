@@ -410,3 +410,24 @@
 .cms-layout-custom-section-fields{display:grid;gap:.7rem;padding:.2rem 0 .3rem}
 .cms-layout-custom-section-fields label,.cms-layout-custom-item-fields label{display:grid;gap:.3rem;color:var(--cms-text,#f2f0e8);font-size:.72rem;font-weight:600}
 @media(max-width:560px){.cms-layout-preset-grid{grid-template-columns:1fr}.cms-layout-custom-section>header{align-items:flex-start;flex-direction:column}.cms-layout-custom-section-actions{width:100%}.cms-layout-custom-section-actions button{flex:1}}
+
+
+/* Fluxo de escolha de modelo: preview no iframe antes de aplicar ao editor. */
+.cms-layout-presets{scroll-margin-top:28px}
+.cms-layout-section-library{scroll-margin-top:28px}
+.cms-layout-inline-preview{scroll-margin-top:20px}
+.cms-layout-inline-preview.is-preset-preview{border:1px solid color-mix(in srgb,var(--cms-accent) 48%,var(--cms-line));border-radius:14px;padding:clamp(14px,2vw,22px);background:color-mix(in srgb,var(--cms-accent) 4%,var(--cms-panel))}
+.cms-layout-preset-preview-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0 16px;padding:12px;border:1px solid var(--cms-line);border-radius:10px;background:var(--cms-panel)}
+.cms-layout-preset-preview-nav{display:flex;align-items:center;gap:10px}
+.cms-layout-preset-preview-nav button{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--cms-line);border-radius:9px;background:var(--cms-panel-2);color:var(--cms-text);font-size:20px;cursor:pointer}
+.cms-layout-preset-preview-nav button:hover{border-color:var(--cms-accent);background:color-mix(in srgb,var(--cms-accent) 12%,var(--cms-panel-2))}
+.cms-layout-preset-preview-nav span{min-width:46px;text-align:center;color:var(--cms-muted);font:600 11px 'DM Sans';font-variant-numeric:tabular-nums}
+.cms-layout-preset-preview-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.cms-layout-preset-preview-actions button{min-height:38px}
+.cms-layout-preset-apply{white-space:nowrap}
+@media(max-width:620px){
+ .cms-layout-preset-preview-controls{align-items:stretch;flex-direction:column}
+ .cms-layout-preset-preview-nav{justify-content:space-between}
+ .cms-layout-preset-preview-actions{display:grid;grid-template-columns:1fr}
+ .cms-layout-preset-preview-actions button{width:100%}
+}
