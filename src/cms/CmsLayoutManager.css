@@ -540,3 +540,21 @@
 .cms-layout-hover-preview-floating{width:min(380px,calc(100vw - 32px));overflow:hidden!important}
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{height:260px!important;max-height:260px!important;overflow:hidden!important}
 .cms-layout-hover-preview-floating iframe{pointer-events:none!important;transform:none!important;zoom:1!important}
+
+/* The full preview is a true device viewport. Scroll happens inside this iframe,
+   keeping fixed navigation overlays bounded to the simulated screen height. */
+.cms-layout-inline-preview .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
+  overflow:hidden!important;
+  min-height:0!important;
+  max-height:none!important;
+  scrollbar-gutter:auto!important;
+}
+.cms-layout-inline-preview .cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{
+  min-height:0!important;
+  flex:0 0 auto;
+  overflow:visible!important;
+}
+.cms-layout-inline-preview .cms-layout-preview-frame-inline iframe{
+  pointer-events:auto!important;
+  overflow:auto!important;
+}
