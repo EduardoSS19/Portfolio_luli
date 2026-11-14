@@ -525,3 +525,77 @@ nav button[class*="anim-video"],
 @media(prefers-reduced-motion:reduce){
   .secao-cabecalho.arte-ceramica.animando h2{will-change:auto}
 }
+
+
+
+/* Opção explícita para manter uma categoria sem animação. */
+.secao-cabecalho.arte-nenhuma{opacity:1;transform:none;clip-path:none;transition:none}
+.secao-cabecalho.arte-nenhuma h2,.secao-cabecalho.arte-nenhuma .secao-indice,.secao-cabecalho.arte-nenhuma .secao-contagem{opacity:1;transform:none;transition:none}
+.obra.arte-nenhuma .obra-imagem img{animation:none!important;transition:none}
+
+
+
+/* Novos movimentos de entrada: os nomes descrevem o gesto, sem alterar os efeitos clássicos. */
+.obra.arte-suave.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:obraDissolver .9s ease both;
+}
+@keyframes obraDissolver{from{opacity:0}to{opacity:1}}
+.obra.arte-deslizar.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:obraSubir .85s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes obraSubir{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.obra.arte-zoom.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:obraAproximar 1s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes obraAproximar{from{opacity:.55;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+.obra.arte-recorte .obra-imagem{isolation:isolate}
+.obra.arte-recorte.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:obraCortina .95s cubic-bezier(.65,0,.35,1) both;
+}
+@keyframes obraCortina{from{opacity:.65;clip-path:inset(0 50% 0 50%)}to{opacity:1;clip-path:inset(0)}}
+.obra.arte-flutuar.visivel .obra-imagem .obra-zoom-trigger img{
+  animation:obraFlutuar 1.1s cubic-bezier(.2,.7,.2,1) both;
+}
+@keyframes obraFlutuar{0%{opacity:0;transform:translateY(18px) scale(.97)}70%{opacity:1;transform:translateY(-3px) scale(1.005)}100%{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Os títulos de categoria usam o mesmo reveal do cabeçalho público. */
+.secao-cabecalho.arte-suave,.secao-cabecalho.arte-deslizar,
+.secao-cabecalho.arte-zoom,.secao-cabecalho.arte-recorte,.secao-cabecalho.arte-flutuar{
+  transform:translateY(10px);
+  clip-path:inset(0);
+}
+.secao-cabecalho.arte-zoom{transform:scale(.97)}
+.secao-cabecalho.arte-recorte{clip-path:inset(0 50% 0 50%)}
+.secao-cabecalho.arte-flutuar{transform:translateY(16px) scale(.985)}
+.secao-cabecalho.arte-suave.visivel,.secao-cabecalho.arte-deslizar.visivel,
+.secao-cabecalho.arte-zoom.visivel,.secao-cabecalho.arte-recorte.visivel,
+.secao-cabecalho.arte-flutuar.visivel{
+  opacity:1;transform:none;clip-path:inset(0);
+}
+@media(prefers-reduced-motion:reduce){
+  .obra.arte-suave .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-deslizar .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-zoom .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-recorte .obra-imagem .obra-zoom-trigger img,
+  .obra.arte-flutuar .obra-imagem .obra-zoom-trigger img{animation:none!important}
+}
+
+
+/* Novas entradas visuais para a biblioteca de categorias. */
+.obra.arte-perspectiva.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPerspectiva 1s cubic-bezier(.2,.7,.2,1) both;transform-origin:center}
+@keyframes obraPerspectiva{0%{opacity:0;transform:perspective(900px) rotateY(-22deg) scale(.92)}70%{opacity:1;transform:perspective(900px) rotateY(3deg) scale(1.01)}100%{opacity:1;transform:perspective(900px) rotateY(0) scale(1)}}
+.obra.arte-foco.visivel .obra-imagem .obra-zoom-trigger img{animation:obraFoco 1.15s ease both}
+@keyframes obraFoco{0%{opacity:.35;filter:blur(16px);transform:scale(1.06)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
+.obra.arte-cascata.visivel .obra-imagem .obra-zoom-trigger img{animation:obraCascata 1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes obraCascata{0%{opacity:0;clip-path:inset(0 0 100%);transform:translateY(-12px)}100%{opacity:1;clip-path:inset(0);transform:translateY(0)}}
+.obra.arte-pulso.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPulso .9s cubic-bezier(.18,.75,.25,1.25) both}
+@keyframes obraPulso{0%{opacity:0;transform:scale(.82)}65%{opacity:1;transform:scale(1.045)}82%{transform:scale(.985)}100%{opacity:1;transform:scale(1)}}
+.obra.arte-pincelada.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPincelada 1s cubic-bezier(.65,0,.35,1) both}
+@keyframes obraPincelada{0%{opacity:.3;clip-path:polygon(0 100%,0 100%,0 100%,0 100%)}100%{opacity:1;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}}
+.secao-cabecalho.arte-perspectiva{opacity:0;transform:perspective(900px) rotateX(12deg) translateY(10px);transform-origin:center bottom}
+.secao-cabecalho.arte-foco{opacity:0;filter:blur(10px);transform:scale(1.025)}
+.secao-cabecalho.arte-cascata{opacity:0;clip-path:inset(0 0 100%);transform:translateY(-8px)}
+.secao-cabecalho.arte-pulso{opacity:0;transform:scale(.88)}
+.secao-cabecalho.arte-pincelada{opacity:0;clip-path:polygon(0 100%,0 100%,0 100%,0 100%)}
+.secao-cabecalho.arte-perspectiva.visivel,.secao-cabecalho.arte-foco.visivel,.secao-cabecalho.arte-cascata.visivel,.secao-cabecalho.arte-pulso.visivel,.secao-cabecalho.arte-pincelada.visivel{opacity:1;transform:none;filter:none;clip-path:inset(0);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1),filter 1s ease,clip-path 1s ease}
+@media(prefers-reduced-motion:reduce){.obra.arte-perspectiva .obra-imagem img,.obra.arte-foco .obra-imagem img,.obra.arte-cascata .obra-imagem img,.obra.arte-pulso .obra-imagem img,.obra.arte-pincelada .obra-imagem img{animation:none!important}}

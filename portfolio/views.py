@@ -206,6 +206,7 @@ def portfolio_data(request):
                 {
                     "titulo": category.title,
                     "chave": category.key,
+                    "animacao": category.animation,
                     "obras": [
                         _work_data(work) for work in (
                             sorted(category.works.all(), key=lambda work: category_preview["work_ids"].index(work.pk))

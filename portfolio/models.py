@@ -63,8 +63,29 @@ class BackgroundFrame(models.Model):
 
 
 class Category(models.Model):
+    ANIMATION_CHOICES = (
+        ("obra", "Entrada editorial"),
+        ("ceramica", "Modelagem no torno"),
+        ("gravura", "Impressão na prensa"),
+        ("desenho", "Traço revelado"),
+        ("glitch", "Glitch"),
+        ("fotografia", "Abertura de íris"),
+        ("videoarte", "Varredura de tela"),
+        ("suave", "Dissolver"),
+        ("deslizar", "Subir suavemente"),
+        ("zoom", "Aproximar"),
+        ("recorte", "Abrir em cortina"),
+        ("flutuar", "Flutuar"),
+        ("perspectiva", "Perspectiva"),
+        ("foco", "Foco gradual"),
+        ("cascata", "Cascata"),
+        ("pulso", "Pulso"),
+        ("pincelada", "Pincelada"),
+        ("nenhuma", "Sem animação"),
+    )
     title = models.CharField("título", max_length=100)
     key = models.SlugField("chave", max_length=50, unique=True)
+    animation = models.CharField("animação", max_length=20, choices=ANIMATION_CHOICES, default="obra")
     position = models.PositiveIntegerField("ordem", default=0)
     is_active = models.BooleanField("publicada", default=True)
 
