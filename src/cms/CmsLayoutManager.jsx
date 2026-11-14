@@ -385,7 +385,13 @@ export function CmsLayoutManager(){
     },320)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
-    if(suppressOptionPreviewRef.current)return
+    // Uma nova opção sob o ponteiro/foco deve reabrir a prévia imediatamente;
+    // a supressão serve apenas para impedir que a opção recém-aplicada reabra sozinha.
+    if(suppressOptionPreviewRef.current){
+      suppressOptionPreviewRef.current=false
+      if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
+      suppressOptionPreviewTimerRef.current=null
+    }
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
