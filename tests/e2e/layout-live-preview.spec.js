@@ -46,6 +46,29 @@ test('a prévia navega até a seção editada dentro do iframe', async ({ page }
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 })
 
+test('modelos alteram a apresentação e a navegação sem recarregar a prévia', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { presentation_mode: 'carousel', navigation_mode: 'dropdown' }, 'page')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'carousel')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-navigation', 'dropdown')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-dropdown/)
+  const carousel = await page.locator('.secao:not(.sobre-secao) .obras-lista').first().evaluate(element => ({
+    display: getComputedStyle(element).display,
+    overflowX: getComputedStyle(element).overflowX,
+    snap: getComputedStyle(element).scrollSnapType,
+  }))
+  expect(carousel.display).toBe('flex')
+  expect(['auto', 'scroll']).toContain(carousel.overflowX)
+  expect(carousel.snap).toContain('x')
+
+  await sendSettings(page, { presentation_mode: 'immersive', navigation_mode: 'sidebar' }, 'page')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'immersive')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-sidebar/)
+  await sendSettings(page, { presentation_mode: 'masonry', navigation_mode: 'curtain' }, 'page')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'masonry')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-curtain/)
+})
+
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
