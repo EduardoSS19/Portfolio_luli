@@ -150,6 +150,28 @@ class CmsLayoutApiTests(TestCase):
         self.assertEqual(response.json()["settings"]["custom_sections"], sections)
         self.assertEqual(self.profile.layout_settings["custom_sections"], sections)
 
+
+    def test_editor_can_save_section_design_and_type_specific_content(self):
+        self.client.force_login(self.staff)
+        sections = [{
+            "id": "tattoo-booking-demo", "type": "tattoo-booking",
+            "title": "Agendamento", "intro": "Como reservar.",
+            "design": {"layout": "accordion", "columns": "1", "image_ratio": "portrait", "density": "compact"},
+            "items": [{
+                "title": "Solicitar orçamento", "step": "1 · Envie sua ideia",
+                "channel": "Instagram", "response_time": "3 dias úteis",
+                "policy": "Envie referências.", "url": "https://example.com/agendar",
+            }],
+        }]
+        response = self.client.patch(
+            reverse("cms-layout"), data=json.dumps({"custom_sections": sections}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.profile.refresh_from_db()
+        self.assertEqual(response.json()["settings"]["custom_sections"], sections)
+        self.assertEqual(self.profile.layout_settings["custom_sections"], sections)
+
     def test_custom_sections_reject_unsafe_links(self):
         self.client.force_login(self.staff)
         response = self.client.patch(
