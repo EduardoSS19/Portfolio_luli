@@ -31,9 +31,6 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     if (navigationMode === 'sidebar') {
       previewMenuAutoOpenRef.current = true
       setMenuAberto(true)
-    } else if (previewMenuAutoOpenRef.current) {
-      previewMenuAutoOpenRef.current = false
-      setMenuAberto(false)
     }
   }, [navigationMode])
 
