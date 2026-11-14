@@ -13,7 +13,8 @@ function tipoDeAnimacao(categoria) {
 
 export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
-  const effectiveNavigationMode = navigationMode
+  const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
+  const effectiveNavigationMode = previewNavigationMode || navigationMode
   const botaoMenuRef = useRef(null)
   const previewMenuAutoOpenRef = useRef(false)
   const primeiroLinkRef = useRef(null)
@@ -39,7 +40,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   useEffect(() => {
     const handlePreviewNavigation = event => {
       const requestedMode = event.detail?.mode
-      // O modo visual vem diretamente da prop atualizada pelo estado da prévia.
+      if (['curtain', 'dropdown', 'sidebar'].includes(requestedMode)) setPreviewNavigationMode(requestedMode)
       if (event.detail?.open || requestedMode === 'sidebar') {
         previewMenuAutoOpenRef.current = true
         setMenuAberto(true)
