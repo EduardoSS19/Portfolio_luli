@@ -1880,7 +1880,8 @@ class CmsCategoryManagementApiTests(TestCase):
         self.assertEqual(updated.status_code, 200)
         self.assertEqual(updated.json()["animation"], "glitch")
         listed = self.client.get(reverse("cms-categories"))
-        self.assertEqual(listed.json()["results"][0]["animation"], "glitch")
+        listed_category = next(item for item in listed.json()["results"] if item["id"] == self.category.pk)
+        self.assertEqual(listed_category["animation"], "glitch")
 
     def test_category_animation_rejects_unknown_presets(self):
         self.client.force_login(self.editor)
