@@ -183,15 +183,79 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(page.locator('#Referências')).toBeVisible()
   await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
   await expect(page.locator('#Contato')).toBeVisible()
-  await expect(page.locator('#Contato')).toContainText('contato@artista-demo.example')
+  const contactForm = page.locator('#Contato .form-contato')
+  await expect(contactForm).toBeVisible()
+  await expect(contactForm.getByLabel('Nome')).toBeVisible()
+  await expect(contactForm.getByLabel('E-mail')).toBeVisible()
+  await expect(contactForm.getByLabel('Mensagem')).toBeVisible()
 })
 
-test('prévia navega para referências e contato sem rearmar rolagens antigas', async ({ page }) => {
+test('prévia mantém a posição de rolagem ao alterar opções de layout', async ({ page }) => {
   await openLiveLayoutPreview(page)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const initialScrollY = await page.evaluate(() => window.scrollY)
+
   await sendSettings(page, { show_references: true }, 'references')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { dark_color_accent: '#88aacc' }, 'page')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { show_references: true }, 'contact')
-  await expect(page.locator('#Contato')).toBeInViewport()
+  await expect(page.locator('#Contato')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+})
+
+test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertical', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli', email: 'contato@artista-demo.example' }, layout: {} }),
+  }))
+
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const preview = page.locator('.cms-layout-inline-preview')
+  await expect(preview).toBeVisible()
+  // Mantém a área de teste dentro do viewport de cada projeto (desktop e iPhone),
+  // mas limita a largura para exercitar a redução do viewport lógico nos dois.
+  await preview.evaluate(element => {
+    element.style.width = 'min(700px, calc(100vw - 32px))'
+    element.style.maxWidth = 'min(700px, calc(100vw - 32px))'
+  })
+  const viewport = preview.locator('.cms-layout-preview-frame-inline')
+  const iframe = preview.locator('iframe')
+  await expect(iframe).toBeVisible()
+  await expect.poll(() => viewport.evaluate(element => {
+    const expectedScale = Math.min(1, element.clientWidth / 1440)
+    return Math.abs(Number(element.dataset.previewScale) - expectedScale)
+  })).toBeLessThanOrEqual(0.002)
+
+  const geometry = await preview.evaluate(root => {
+    const frame = root.querySelector('.cms-layout-preview-frame-inline')
+    const stage = root.querySelector('.cms-layout-preview-stage-inline')
+    const iframe = root.querySelector('iframe')
+    return {
+      availableWidth: frame.clientWidth,
+      stageWidth: stage.getBoundingClientRect().width,
+      iframeWidth: iframe.getBoundingClientRect().width,
+      iframeLayoutWidth: iframe.clientWidth,
+      overflowY: getComputedStyle(frame).overflowY,
+    }
+  })
+  expect(Math.abs(geometry.stageWidth - geometry.availableWidth)).toBeLessThanOrEqual(3)
+  expect(geometry.iframeLayoutWidth).toBe(1440)
+  expect(geometry.overflowY).toBe('auto')
 })

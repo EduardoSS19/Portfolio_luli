@@ -4,19 +4,19 @@ const imagemTeste = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/s
 const imagemTesteAlternativa = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 100%22%3E%3Crect width=%2280%22 height=%22100%22 fill=%22%23883b66%22/%3E%3Ccircle cx=%2240%22 cy=%2250%22 r=%2220%22 fill=%22%23a2e5f5%22/%3E%3C/svg%3E'
 
 const categorias = [
-  { titulo: 'Glitch Art', chave: 'glitch-art', obras: [
+  { titulo: 'Glitch Art', chave: 'glitch-art', animacao: 'glitch', obras: [
     { titulo: 'Ruído cromático', imagem: imagemTeste, midias: [{ tipo: 'imagem', src: imagemTeste }, { tipo: 'imagem', src: imagemTesteAlternativa }], descricao: 'Estudo de cor e interferência.' },
     { titulo: 'Falha de sinal', imagem: imagemTeste, descricao: 'Composição digital.' },
   ] },
-  { titulo: 'Vídeos', chave: 'videos', obras: [
+  { titulo: 'Vídeos', chave: 'videos', animacao: 'videoarte', obras: [
     { titulo: 'Movimento I', imagem: '', midias: [{ tipo: 'youtube', videoId: 'abcdefghijk', miniatura: imagemTeste }] },
     { titulo: 'Movimento II', imagem: imagemTeste, descricao: 'Experimento audiovisual.' },
   ] },
-  { titulo: 'Cerâmica', chave: 'ceramica', obras: [
+  { titulo: 'Cerâmica', chave: 'ceramica', animacao: 'ceramica', obras: [
     { titulo: 'Forma orgânica', imagem: imagemTeste, descricao: 'Peça de estudo.' },
     { titulo: 'Vaso azul', imagem: imagemTeste, descricao: 'Cerâmica experimental.' },
   ] },
-  { titulo: 'Desenhos', chave: 'desenhos', obras: [
+  { titulo: 'Desenhos', chave: 'desenhos', animacao: 'desenho', obras: [
     { titulo: 'Traço I', imagem: imagemTeste, descricao: 'Desenho em papel.' },
     { titulo: 'Traço II', imagem: imagemTeste, descricao: 'Estudo de linha.' },
   ] },
@@ -182,13 +182,13 @@ const imagemFotoReal = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA
 
 test('fotos reais ocupam o card inteiro no grid mobile sem quebrar vídeo ou glitch', async ({ page }, testInfo) => {
   const categoriasComFoto = [
-    { titulo: 'Cerâmica', chave: 'ceramica', obras: [{ titulo: 'Foto cerâmica', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Gravura', chave: 'gravura', obras: [{ titulo: 'Foto gravura', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Desenhos', chave: 'desenhos', obras: [{ titulo: 'Foto desenho', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Fotografia', chave: 'fotografia', obras: [{ titulo: 'Foto real', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Outras obras', chave: 'outras', obras: [{ titulo: 'Foto sem técnica', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Glitch Art', chave: 'glitch-art', obras: [{ titulo: 'Glitch preservado', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
-    { titulo: 'Vídeos', chave: 'videos', obras: [{ titulo: 'Vídeo preservado', imagem: imagemFotoReal, midias: [{ tipo: 'youtube', videoId: 'abcdefghijk', miniatura: imagemFotoReal }] }] },
+    { titulo: 'Cerâmica', chave: 'ceramica', animacao: 'ceramica', obras: [{ titulo: 'Foto cerâmica', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Gravura', chave: 'gravura', animacao: 'gravura', obras: [{ titulo: 'Foto gravura', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Desenhos', chave: 'desenhos', animacao: 'desenho', obras: [{ titulo: 'Foto desenho', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Fotografia', chave: 'fotografia', animacao: 'fotografia', obras: [{ titulo: 'Foto real', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Outras obras', chave: 'outras', animacao: 'obra', obras: [{ titulo: 'Foto sem técnica', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Glitch Art', chave: 'glitch-art', animacao: 'glitch', obras: [{ titulo: 'Glitch preservado', imagem: imagemFotoReal, midias: [{ tipo: 'imagem', src: imagemFotoReal }] }] },
+    { titulo: 'Vídeos', chave: 'videos', animacao: 'videoarte', obras: [{ titulo: 'Vídeo preservado', imagem: imagemFotoReal, midias: [{ tipo: 'youtube', videoId: 'abcdefghijk', miniatura: imagemFotoReal }] }] },
   ]
 
   await page.route('**/api/portfolio/**', route => route.fulfill({
@@ -487,7 +487,8 @@ test('na lista, as miniaturas ficam sobre a mídia sem reservar altura extra', a
   expect(Math.abs((caixaMiniaturas.y + caixaMiniaturas.height) - (caixaGaleria.y + caixaGaleria.height))).toBeLessThanOrEqual(2)
 })
 
-test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o card', async ({ page }) => {
+test('o carrossel pausa a troca automática enquanto o ponteiro está sobre o card', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'webkit-iphone', 'iPhone simulado não oferece hover real; a pausa por toque é validada em teste separado.')
   await page.clock.install()
   await abrirPortfolio(page)
   const card = page.locator('.galeria-grade-global .obra.tem-carrossel').first()
@@ -893,7 +894,7 @@ test('fotografia permanece totalmente renderizada após ciclos repetidos de abri
         carregada: img.complete && img.naturalWidth > 0,
         opacidade: style.opacity,
         visibilidade: style.visibility,
-        recorte: style.clipPath,
+        recorteCompleto: /^inset\(0px(?: 0px){0,2}(?: 0px| 0%)?\)$/.test(style.clipPath),
         largura: rect.width,
         altura: rect.height,
       }
@@ -901,7 +902,7 @@ test('fotografia permanece totalmente renderizada após ciclos repetidos de abri
       carregada: true,
       opacidade: '1',
       visibilidade: 'visible',
-      recorte: 'inset(0px)',
+      recorteCompleto: true,
       largura: expect.any(Number),
       altura: expect.any(Number),
     })
