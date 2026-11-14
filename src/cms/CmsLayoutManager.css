@@ -455,6 +455,7 @@
 /* A prévia contextual deve ficar acima dos cartões de opção e conter sua altura real. */
 .cms-layout-hover-preview-floating{
   z-index:2147483000!important;
+  box-sizing:border-box!important;
   display:flex!important;
   flex-direction:column!important;
   min-height:0!important;
