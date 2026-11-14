@@ -250,33 +250,19 @@ export function CmsLayoutManager(){
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
   const showOptionPreview=(name,value,label,detail,event)=>{
-    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
-    const anchor=event?.currentTarget?.getBoundingClientRect?.()
-    const viewportWidth=window.innerWidth
-    const viewportHeight=window.innerHeight
-    const panelWidth=Math.min(380,viewportWidth-32)
-    const panelHeight=Math.min(440,viewportHeight-32)
-    const gap=16
-    const minEdge=16
-    if(anchor){
-      const rightSpace=viewportWidth-anchor.right-gap-minEdge
-      const leftSpace=anchor.left-gap-minEdge
-      const sideFits=rightSpace>=panelWidth||leftSpace>=panelWidth
-      const placeRight=sideFits?rightSpace>=panelWidth:rightSpace>=leftSpace
-      // Nunca desloca o painel para cima: usa a lateral do controle ou,
-      // se não houver largura lateral suficiente, ancora abaixo dele.
-      const left=sideFits
-        ?(placeRight?anchor.right+gap:anchor.left-panelWidth-gap)
-        :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
-      const top=sideFits?Math.max(minEdge,anchor.top):anchor.bottom+gap
-      const maxHeight=Math.max(80,viewportHeight-top-minEdge)
-      setHoverPreviewPosition({left,top,maxHeight})
-    }else{
-      setHoverPreviewPosition({
-        left:Math.max(minEdge,(viewportWidth-panelWidth)/2),
-        top:Math.max(minEdge,(viewportHeight-panelHeight)/2),
-      })
+    if(hoverPreviewHideTimerRef.current){
+      window.clearTimeout(hoverPreviewHideTimerRef.current)
+      hoverPreviewHideTimerRef.current=null
     }
+    // A prévia volta a ser um modal centralizado: sua abertura não depende
+    // da posição do botão e nunca interfere no fluxo/layout dos controles.
+    const panelWidth=Math.min(380,window.innerWidth-32)
+    const panelHeight=Math.min(440,window.innerHeight-32)
+    setHoverPreviewPosition({
+      left:Math.max(16,(window.innerWidth-panelWidth)/2),
+      top:Math.max(16,(window.innerHeight-panelHeight)/2),
+      maxHeight:panelHeight,
+    })
     setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
     setHoverPreviewMounted(true)
   }
