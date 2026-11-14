@@ -189,7 +189,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await paletteOption.hover()
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Oliva e papel')
-  await expect.poll(() => temporaryFrame.evaluate(frame => getComputedStyle(frame.contentDocument.querySelector('.site-shell')).getPropertyValue('--azul-escuro').trim())).toBe('#171912')
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.getComputedStyle(frame.contentDocument.querySelector('.site-shell')).getPropertyValue('--azul-escuro').trim())).toBe('#171912')
   const backgroundColorOption = page.locator('.cms-layout-color-field').filter({ hasText: 'Fundo' })
   await backgroundColorOption.hover()
   await expect(hoverPreview).toBeVisible()
