@@ -249,6 +249,24 @@ export function CmsLayoutManager(){
     return()=>{window.cancelAnimationFrame(frame);window.removeEventListener('message',handlePreviewReady)}
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
+  const handleHoverPreviewFrameLoad=event=>{
+    try{
+      const previewDocument=event.currentTarget.contentDocument
+      if(!previewDocument)return
+      let surfaceFix=previewDocument.getElementById('cms-hover-preview-surface-fix')
+      if(!surfaceFix){
+        surfaceFix=previewDocument.createElement('style')
+        surfaceFix.id='cms-hover-preview-surface-fix'
+        previewDocument.head.appendChild(surfaceFix)
+      }
+      // A prévia contextual deve terminar na própria superfície do modal,
+      // sem expor o fundo azul do documento abaixo do conteúdo do portfólio.
+      surfaceFix.textContent='html,body,#root{background:transparent!important;background-color:transparent!important}'
+    }catch(error){
+      // O preview continua funcional caso o navegador restrinja o acesso ao iframe.
+    }
+  }
+
   const showOptionPreview=(name,value,label,detail,event)=>{
     if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
     const anchor=event?.currentTarget?.getBoundingClientRect?.()
@@ -377,7 +395,7 @@ export function CmsLayoutManager(){
             </header>
             <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice} style={{height:hoverPreviewStageHeight,maxHeight:"none",minHeight:0}}>
               <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
+                <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} onLoad={handleHoverPreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
               </div>
             </div>
             <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
