@@ -346,7 +346,7 @@ function getLayoutPreviewDemo(layout = {}) {
     ? [{titulo:'Instagram',url:'https://www.instagram.com/'},{titulo:'Agendamentos',url:'mailto:agenda@casatinta.studio'},{titulo:'Localização',url:'https://maps.google.com/?q=Porto+Alegre'}]
     : [{titulo:'Instagram',url:profile.instagram},{titulo:'Behance',url:'https://www.behance.net/'},{titulo:'E-mail',url:'mailto:'+profile.email}]
   return {
-    categorias,
+    categorias: categories,
     referencias: references[variant],
     frames: [],
     redes: social,
