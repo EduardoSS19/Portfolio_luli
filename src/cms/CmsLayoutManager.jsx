@@ -238,6 +238,30 @@ export function CmsLayoutManager(){
     return()=>observer.disconnect()
   },[hoverPreviewMounted])
   useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)},[])
+  useEffect(()=>{
+    if(!hoverPreviewMounted)return
+    const iframe=hoverPreviewIframeRef.current
+    if(!iframe)return
+    let frameWindow=null
+    let frameRoot=null
+    const keepPreviewOpen=()=>cancelOptionPreviewHide()
+    const leavePreview=()=>hideOptionPreview()
+    const attachFrameListeners=()=>{
+      frameWindow=iframe.contentWindow
+      frameRoot=frameWindow?.document?.documentElement||null
+      frameWindow?.addEventListener('mousemove',keepPreviewOpen)
+      frameWindow?.addEventListener('pointermove',keepPreviewOpen)
+      frameRoot?.addEventListener('mouseleave',leavePreview)
+    }
+    iframe.addEventListener('load',attachFrameListeners)
+    attachFrameListeners()
+    return()=>{
+      iframe.removeEventListener('load',attachFrameListeners)
+      frameWindow?.removeEventListener('mousemove',keepPreviewOpen)
+      frameWindow?.removeEventListener('pointermove',keepPreviewOpen)
+      frameRoot?.removeEventListener('mouseleave',leavePreview)
+    }
+  },[hoverPreviewMounted])
   useLayoutEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
@@ -533,7 +557,7 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onMouseEnter={cancelOptionPreviewHide} onMouseLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onMouseEnter={cancelOptionPreviewHide} onMouseMove={cancelOptionPreviewHide} onMouseLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
           </header>
