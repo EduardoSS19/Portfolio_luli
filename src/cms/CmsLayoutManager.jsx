@@ -119,7 +119,7 @@ export function CmsLayoutManager(){
   const hoverPreviewIframeRef=useRef(null)
   const hoverPreviewViewportRef=useRef(null)
   const hoverPreviewHideTimerRef=useRef(null)
-  const suppressOptionPreviewRef=useRef(false)
+  const suppressOptionPreviewRef=useRef(null)
   const suppressOptionPreviewTimerRef=useRef(null)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
@@ -362,10 +362,10 @@ export function CmsLayoutManager(){
   }
   const closeOptionPreview=()=>{
     cancelOptionPreviewHide()
-    suppressOptionPreviewRef.current=true
+    suppressOptionPreviewRef.current=hoveredOption?{name:hoveredOption.name,value:hoveredOption.value}:null
     if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
     suppressOptionPreviewTimerRef.current=window.setTimeout(()=>{
-      suppressOptionPreviewRef.current=false
+      suppressOptionPreviewRef.current=null
       suppressOptionPreviewTimerRef.current=null
     },450)
     setHoveredOption(null)
@@ -385,10 +385,12 @@ export function CmsLayoutManager(){
     },320)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
-    // Uma nova opção sob o ponteiro/foco deve reabrir a prévia imediatamente;
-    // a supressão serve apenas para impedir que a opção recém-aplicada reabra sozinha.
-    if(suppressOptionPreviewRef.current){
-      suppressOptionPreviewRef.current=false
+    // Ignora apenas o evento sintético da mesma opção que acabou de ser fechada.
+    // Uma opção diferente continua podendo abrir sua prévia sem esperar o timeout.
+    const suppressedOption=suppressOptionPreviewRef.current
+    if(suppressedOption?.name===name&&suppressedOption?.value===value)return
+    if(suppressedOption){
+      suppressOptionPreviewRef.current=null
       if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
       suppressOptionPreviewTimerRef.current=null
     }
