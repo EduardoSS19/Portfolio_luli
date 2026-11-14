@@ -420,7 +420,8 @@ function PortfolioCustomSections({ sections = [], preview = false, examples = nu
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
     const items = section.items.length ? section.items : (preview ? examples?.[section.type] || PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
     const design = section.design || {}
-    const layout = design.layout || 'cards'
+    const defaultLayouts = {exhibitions:'timeline',process:'steps',services:'cards',press:'list',testimonials:'quotes','tattoo-flash':'flash-grid','tattoo-booking':'steps','healed-work':'gallery','guest-spots':'agenda','studio-team':'team-grid'}
+    const layout = design.layout || defaultLayouts[section.type] || 'cards'
     return (
       <section className={'secao portfolio-custom-section section-'+section.type+' section-layout-'+layout+' section-density-'+(design.density||'comfortable')} id={section.id} key={section.id} data-columns={design.columns||'2'} data-image-ratio={design.image_ratio||'landscape'} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
         <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
