@@ -102,16 +102,16 @@ function accessibleColor(foreground,background,minimum=4.5){
 const LAYOUT_PREVIEW_DEMO = {
   categorias: [
     { titulo: 'Pintura e experimentação', chave: 'pintura-experimentacao', animacao: 'obra', obras: [
-      { titulo: 'Estudo de luz I', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Uma composição de cores, gestos e camadas.', detalhe: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', fichaTecnica: { tecnica: 'Acrílica sobre tela', material: 'Tinta acrílica e tela', ano: '2025', dimensoes: { altura: '60', largura: '80', unidade: 'cm' } } },
-      { titulo: 'Matéria em suspensão', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', detalhe: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.' },
+      { titulo: 'Estudo de luz I', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Camadas de cor e gestos sobrepostos investigam a luz como matéria.', detalhe: 'Acrílica, pigmento e textura constroem uma paisagem entre abstração e memória.', fichaTecnica: { tecnica: 'Acrílica sobre tela', material: 'Tinta acrílica e tela', ano: '2025', dimensoes: { altura: '60', largura: '80', unidade: 'cm' } } },
+      { titulo: 'Matéria em suspensão', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Uma pesquisa visual sobre cor, espaço e memória.', detalhe: 'A série reúne estudos feitos no ateliê ao longo de um processo de experimentação.' },
     ]},
     { titulo: 'Fotografia', chave: 'fotografia', animacao: 'fotografia', obras: [
-      { titulo: 'Entre espaços', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85', descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio.', detalhe: 'Praesent libero. Sed cursus ante dapibus diam.' },
-      { titulo: 'Paisagem inventada', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1400&q=85', descricao: 'Sed nisi. Nulla quis sem at nibh elementum imperdiet.' },
+      { titulo: 'Entre espaços', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1400&q=85', descricao: 'Uma pesquisa visual sobre cor, espaço e memória. Integer nec odio.', detalhe: 'Imagens produzidas em caminhadas por espaços urbanos e paisagens de transição.' },
+      { titulo: 'Paisagem inventada', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1400&q=85', descricao: 'Fotografias de paisagem e observações de campo.' },
     ]},
     { titulo: 'Desenho e gravura', chave: 'desenho-gravura', animacao: 'gravura', obras: [
-      { titulo: 'Linhas de memória', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.', detalhe: 'Mauris massa. Vestibulum lacinia arcu eget nulla.' },
-      { titulo: 'Pequenas narrativas', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Curabitur sodales ligula in libero.' },
+      { titulo: 'Linhas de memória', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Desenhos em tinta e grafite exploram linhas, ritmo e pequenas narrativas.', detalhe: 'Série de gravuras experimentais impressas em papel de algodão.' },
+      { titulo: 'Pequenas narrativas', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Caderno de estudos, matrizes e impressões em pequena escala.' },
     ]},
   ],
   referencias: [
@@ -119,7 +119,7 @@ const LAYOUT_PREVIEW_DEMO = {
     { titulo: 'Residência artística — Laboratório de processos', periodo: '2024 · Projeto fictício para testes', links: [{ texto: 'Sobre o projeto', url: '#referencia-teste-3' }] },
     { titulo: 'Publicação — Caderno de experimentações', periodo: '2023 · Edição demonstrativa', links: [{ texto: 'Consultar publicação', url: '#referencia-teste-4' }] },
   ],
-  sobre: { nome: 'Artista de demonstração', frase: 'Arte · Pesquisa · Experimentação', foto: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?w=900&q=85', bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\nSed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.', instagram: 'https://www.instagram.com/exemplo.artista', email: 'contato@artista-demo.example', formulario: 'https://example.com/contato' },
+  sobre: { nome: 'Artista de demonstração', frase: 'Arte · Pesquisa · Experimentação', foto: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?w=900&q=85', bio: 'Artista visual que pesquisa as relações entre matéria, memória e paisagem. Seu trabalho combina pintura, fotografia e processos gráficos para criar narrativas sobre os lugares que habitamos.\n\nEntre o ateliê e a cidade, desenvolve séries autorais, projetos colaborativos e experiências educativas. Cada trabalho nasce de experimentações com cor, textura e diferentes escalas.', instagram: 'https://www.instagram.com/exemplo.artista', email: 'contato@artista-demo.example', formulario: 'https://example.com/contato' },
   frames: [],
   redes: [{ titulo: 'Instagram de demonstração', url: '#rede-teste' }],
 }
@@ -128,28 +128,73 @@ const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
   foto: '',
-  bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+  bio: 'Uma pesquisa visual sobre cor, espaço e memória.',
   instagram: '',
   email: '',
   formulario: '',
 }
 
+const PREVIEW_SECTION_EXAMPLES = {
+  exhibitions: [
+    { title: 'Cartografias afetivas', period: '2025 · Galeria Municipal', description: 'Exposição coletiva sobre memória, território e paisagem. Porto Alegre, Brasil.', image: 'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=1000&q=85', url: '#exposicao-demo' },
+    { title: 'Matéria em trânsito', period: '2024 · Espaço independente', description: 'Participação em mostra dedicada a processos e experimentações contemporâneas.', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1000&q=85', url: '#mostra-demo' },
+  ],
+  process: [
+    { title: 'Estudos de cor e composição', period: 'Caderno de ateliê · 2025', description: 'Testes de pigmentos, transparências e sobreposições que antecedem a série principal.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85' },
+    { title: 'Da matriz à impressão', period: 'Processo · 2024', description: 'Registro das etapas de preparação, gravação e impressão manual.', image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1000&q=85' },
+  ],
+  services: [
+    { title: 'Projeto sob encomenda', period: 'Sob consulta', description: 'Criação de obras e imagens personalizadas, com briefing, estudo visual e acompanhamento das etapas.', image: 'https://images.unsplash.com/photo-151351 இருந்து' },
+    { title: 'Oficinas e encontros', period: 'Individual ou em grupo', description: 'Experiências práticas de desenho, pintura e experimentação de materiais.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85' },
+  ],
+  press: [
+    { title: 'Conversas sobre processo', period: 'Revista Traço · 2025', description: 'Entrevista sobre pesquisa artística, prática de ateliê e circulação de trabalhos.', url: '#entrevista-demo' },
+    { title: 'Novas materialidades', period: 'Caderno de Arte · 2024', description: 'Publicação que reúne artistas que investigam matéria e tecnologia.', url: '#publicacao-demo' },
+  ],
+  testimonials: [
+    { title: 'Marina Costa · Curadora', period: 'Projeto Cartografias', description: '“Uma pesquisa sensível, consistente e aberta ao diálogo com diferentes públicos.”' },
+    { title: 'João Martins · Cliente', period: 'Projeto autoral', description: '“O processo foi colaborativo do início ao fim, com cuidado em cada detalhe.”' },
+  ],
+  'tattoo-flash': [
+    { title: 'Botânica — ramo de oliveira', period: 'Flash disponível · 8 cm', description: 'Fine line em preto. Aplicação sugerida no antebraço ou panturrilha. Peça única.', image: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1000&q=85' },
+    { title: 'Ornamental — eclipse', period: 'Flash disponível · 10 cm', description: 'Composição ornamental em preto, com adaptação de tamanho mediante consulta.', image: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1000&q=85' },
+  ],
+  'tattoo-booking': [
+    { title: 'Como solicitar um orçamento', period: 'Agendamentos abertos', description: 'Envie a ideia, referências visuais, região do corpo e tamanho aproximado. Retornaremos com disponibilidade e estimativa.' },
+    { title: 'Preparação para a sessão', period: 'Antes da tatuagem', description: 'Após a confirmação, você recebe orientações de preparo, cuidados e sinal para reserva da data.' },
+  ],
+  'healed-work': [
+    { title: 'Botânica cicatrizada', period: 'Registro após 6 meses', description: 'Resultado após cicatrização completa, com textura e contraste preservados.', image: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1000&q=85' },
+    { title: 'Composição ornamental', period: 'Registro após 1 ano', description: 'Acompanhamento da evolução do trabalho na pele.', image: 'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1000&q=85' },
+  ],
+  'guest-spots': [
+    { title: 'São Paulo · Casa Tinta', period: '12–16 de março de 2027', description: 'Agenda especial para projetos autorais e consultas presenciais.' },
+    { title: 'Curitiba · Estúdio Norte', period: '02–05 de abril de 2027', description: 'Vagas limitadas para flash e projetos previamente aprovados.' },
+  ],
+  'studio-team': [
+    { title: 'Ana Reis · Fine line e botânica', period: 'Artista residente', description: 'Pesquisa traços delicados, composições botânicas e desenhos autorais.', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&q=85' },
+    { title: 'Caio Nunes · Blackwork', period: 'Artista residente', description: 'Trabalha com contraste, formas gráficas e composições de grande escala.', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=85' },
+  ],
+}
+
 function PortfolioCustomSections({ sections = [], preview = false }) {
-  return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => (
-    <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id}>
-      <header className="secao-cabecalho visivel"><span className="secao-indice">PORTFÓLIO</span><h2>{section.title}</h2><span className="secao-contagem">{String(section.items.length).padStart(2,'0')} itens</span></header>
-      {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
-      <div className="portfolio-custom-grid">
-        {section.items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
-          {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
-          <div><h3>{item.title}</h3>{item.period && <small>{item.period}</small>}{item.description && <p>{item.description}</p>}
-            {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
-          </div>
-        </article>)}
-        {!section.items.length && preview && <div className="portfolio-custom-empty-preview"><span>✳</span><strong>Seção preparada</strong><p>Adicione seus conteúdos pelo painel. Esta área ficará oculta no site até receber o primeiro item.</p></div>}
-      </div>
-    </section>
-  ))
+  return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
+    const items = section.items.length ? section.items : (preview ? PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
+    return (
+      <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
+        <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
+        {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
+        <div className="portfolio-custom-grid">
+          {items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
+            {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
+            <div><h3>{item.title}</h3>{item.period && <small>{item.period}</small>}{item.description && <p>{item.description}</p>}
+              {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
+            </div>
+          </article>)}
+        </div>
+      </section>
+    )
+  })
 }
 
 export default function App() {
@@ -585,7 +630,7 @@ export default function App() {
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
       <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} />
-      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" />}
+      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" hidden />}
       <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
