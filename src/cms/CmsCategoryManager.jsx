@@ -458,25 +458,26 @@ export function CmsCategoryManager({
           </label>
           <fieldset className="cms-category-animation-field">
             <legend>Animação desta categoria</legend>
-            <p className="cms-field-help">Escolha um efeito independente do nome e da chave. Selecione uma opção para ver sua prévia em movimento.</p>
-            <div className="cms-category-animation-grid">
-              {CATEGORY_ANIMATIONS.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={'cms-category-animation-option' + (animation === option.value ? ' selected' : '')}
-                  onClick={() => setAnimation(option.value)}
-                  aria-pressed={animation === option.value}
-                  disabled={saving}
-                >
-                  <span className="cms-animation-demo" data-animation={option.value} aria-hidden="true">
-                    <i /><i /><i />
-                  </span>
-                  <strong>{option.label}</strong>
-                  <small>{option.detail}</small>
-                  {animation === option.value && <span className="cms-category-animation-selected">Selecionada</span>}
-                </button>
-              ))}
+            <p className="cms-field-help">Cada categoria tem sua própria animação. Escolha uma opção na lista e confira o exemplo antes de salvar.</p>
+            <label className="cms-category-animation-select">Escolher animação
+              <select
+                value={animation}
+                onChange={event => setAnimation(event.target.value)}
+                disabled={saving}
+              >
+                {CATEGORY_ANIMATIONS.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <div className="cms-category-animation-preview" aria-live="polite">
+              <div className="cms-category-animation-preview-heading">
+                <strong>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial'}</strong>
+                <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Entrada discreta e elegante.'}</small>
+              </div>
+              <div className="cms-animation-demo" data-animation={animation} aria-label={'Exemplo da animação ' + (CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial')}>
+                <i /><i /><i />
+              </div>
             </div>
           </fieldset>
           <div className="cms-category-form-actions">
