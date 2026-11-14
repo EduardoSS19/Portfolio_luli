@@ -47,6 +47,7 @@
 }
 .layout-preview-banner{
   position:relative;
+  pointer-events:none;
   z-index:80;
   padding:.7rem 1rem;
   color:#171912;
