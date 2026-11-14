@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '', previewMenuOpen = false, previewMenuRequest = 0 }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -22,8 +22,10 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     : ''
 
   useEffect(() => {
-    setMenuAberto(previewMenuOpen)
-  }, [previewMenuOpen, previewMenuRequest])
+    const handlePreviewNavigation = event => setMenuAberto(Boolean(event.detail?.open))
+    window.addEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
+    return () => window.removeEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
+  }, [])
 
   useEffect(() => {
     if (!menuAberto) return undefined
