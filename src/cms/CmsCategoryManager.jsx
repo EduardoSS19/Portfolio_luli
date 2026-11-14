@@ -240,10 +240,15 @@ export function CmsCategoryManager({
     setAnimation(item.animation || 'obra')
     setError('')
     setNotice('')
-    window.requestAnimationFrame(() => {
+  }
+
+  useEffect(() => {
+    if (!animationCategory) return
+    const frame = window.requestAnimationFrame(() => {
       document.getElementById('cms-category-animation-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
-  }
+    return () => window.cancelAnimationFrame(frame)
+  }, [animationCategory?.id])
 
   const saveCategoryAnimation = async () => {
     if (!animationCategory || !canEditCategory) return
