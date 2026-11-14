@@ -519,7 +519,7 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
-        detail: { open: event.data.focus === 'navigation' },
+        detail: { open: event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
       }))
 
       // A navegação acontece somente no documento da prévia (iframe).
