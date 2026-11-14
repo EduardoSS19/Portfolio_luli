@@ -21,6 +21,16 @@ const FIELDS = [
   {group:'content',name:'show_bio',title:'Texto da biografia',description:'A imagem e o texto podem ser exibidos de forma independente.',options:[[true,'Mostrar biografia','Exibe o texto biográfico'],[false,'Ocultar biografia','Remove o texto da seção']]},
   {group:'content',name:'show_references',title:'Seção de referências',description:'Controla também a entrada Referências na navegação do portfólio.',options:[[true,'Mostrar referências','Exibe a seção e seus links'],[false,'Ocultar referências','Remove a seção e a entrada do menu']]},
 ]
+
+const LAYOUT_PRESETS = [
+  {id:'visual-artist',title:'Artista visual',kind:'Artes visuais · pintura · escultura',description:'Composição editorial, obras em destaque e espaço generoso para contextualizar séries.',settings:{content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'lista',default_theme:'escuro'}},
+  {id:'illustrator',title:'Ilustração e desenho',kind:'Ilustração · quadrinhos · gravura',description:'Grade visual com mais obras por tela e apresentação compacta para explorar o acervo.',settings:{content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',default_theme:'claro'}},
+  {id:'photographer',title:'Fotografia',kind:'Fotografia · imagem · editorial',description:'Imagens amplas, navegação limpa e uma apresentação discreta para deixar as fotografias conduzirem.',settings:{content_width:'wide',hero_alignment:'center',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',default_theme:'escuro'}},
+  {id:'designer',title:'Design e direção de arte',kind:'Design · branding · 3D · motion',description:'Estrutura equilibrada para apresentar projetos, contexto, entregáveis e estudos de caso.',settings:{content_width:'standard',hero_alignment:'left',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'lista',default_theme:'claro'}},
+  {id:'tattoo-artist',title:'Tatuador(a)',kind:'Tatuagem · flash · trabalhos cicatrizados',description:'Galeria visual em destaque, navegação compacta e tema escuro para valorizar os trabalhos.',settings:{content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',default_gallery_view:'grade',default_theme:'escuro'}},
+  {id:'tattoo-studio',title:'Estúdio de tatuagem',kind:'Estúdio · equipe · agenda',description:'Apresentação institucional equilibrada, com espaço para equipe, especialidades e agendamentos.',settings:{content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',default_theme:'escuro'}},
+]
+
 const FIELD_GROUPS = [
   {id:'composition',title:'Composição',description:'Defina a estrutura visual e o ritmo de leitura do portfólio.'},
   {id:'content',title:'Conteúdo e seções',description:'Escolha quais partes da apresentação ficam visíveis para o visitante.'},
@@ -303,7 +313,7 @@ export function CmsLayoutManager(){
     ]
   },[settings,editingTheme])
   const contrast=Math.min(...contrastMetrics.map(([,ratio])=>ratio))
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
+  const applyLayoutPreset=preset=>{setSettings(current=>({...current,...preset.settings}));setPreviewMode(preset.settings.default_gallery_view);setError('');setNotice('Modelo “'+preset.title+'” aplicado. Personalize as opções abaixo e salve quando estiver pronto.')}\n  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
@@ -335,6 +345,17 @@ export function CmsLayoutManager(){
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
+        <section className="cms-layout-presets">
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">6 modelos</span></div>
+          <p className="cms-layout-help">Escolha uma estrutura inicial para sua área artística. Depois, ajuste livremente cada opção, cores e conteúdo. Aplicar um modelo não publica nada até salvar.</p>
+          <div className="cms-layout-preset-grid">
+            {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
+              <div className={'cms-layout-preset-art preset-'+preset.id} aria-hidden="true"><span/><span/><span/><i/></div>
+              <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p></div>
+              <button type="button" className="cms-layout-preset-apply" onClick={()=>applyLayoutPreset(preset)} disabled={!canChange||saving}>Usar este modelo <span>→</span></button>
+            </article>)}
+          </div>
+        </section>
         <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
