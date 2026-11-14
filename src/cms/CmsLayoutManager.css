@@ -484,8 +484,6 @@
 .cms-layout-hover-preview-floating iframe,
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{pointer-events:auto!important}
 
-/* A barra de ações fixa não pode bloquear hover/clique nos campos que passam
-   por trás dela durante a navegação do formulário. Os botões seguem interativos. */
-.cms-layout-page .cms-editor-actions{pointer-events:none!important}
-.cms-layout-page .cms-editor-actions .cms-editor-save-actions,
-.cms-layout-page .cms-editor-actions .cms-editor-save-actions button{pointer-events:auto!important}
+/* No editor de layout, as ações pertencem ao fluxo do formulário.
+   Não devem ficar fixas sobre as opções nem interceptar sua interação. */
+.cms-layout-page .cms-editor-actions{position:static!important;pointer-events:auto!important}
