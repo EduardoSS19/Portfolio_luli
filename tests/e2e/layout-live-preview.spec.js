@@ -489,5 +489,42 @@ test('biblioteca de seções mantém os submenus recolhidos e oferece campos e d
   await menus.nth(1).locator('summary').click()
   await expect(menus.nth(1).getByLabel('Estilo de apresentação')).toHaveValue('flash-grid')
   await menus.nth(0).locator('summary').click()
-  await expect(menus.nth(0).getByText('Disponibilidade')).toBeVisible()
+  await section.locator('.cms-layout-custom-item summary').click()
+  await expect(section.getByText('Disponibilidade')).toBeVisible()
+})
+
+test('modal de hover usa viewport nativo e não recebe interação ou rolagem', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const composition = page.locator('.cms-layout-field-group').first()
+  await composition.locator('summary').click()
+  await composition.locator('.cms-layout-option').first().hover()
+  const modal = page.locator('.cms-layout-hover-preview-floating')
+  await expect(modal).toBeVisible()
+  const behavior = await modal.locator('iframe').evaluate(frame => ({
+    pointerEvents: getComputedStyle(frame).pointerEvents,
+    transform: getComputedStyle(frame).transform,
+    zoom: getComputedStyle(frame).zoom,
+    scrolling: frame.getAttribute('scrolling'),
+    frameHeight: frame.parentElement.clientHeight,
+  }))
+  expect(behavior.pointerEvents).toBe('none')
+  expect(behavior.transform).toBe('none')
+  expect(behavior.zoom).toBe('1')
+  expect(behavior.scrolling).toBe('no')
+  expect(behavior.frameHeight).toBeLessThanOrEqual(260)
 })
