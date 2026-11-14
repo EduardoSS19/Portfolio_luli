@@ -76,6 +76,11 @@ class Category(models.Model):
         ("zoom", "Aproximar"),
         ("recorte", "Abrir em cortina"),
         ("flutuar", "Flutuar"),
+        ("perspectiva", "Perspectiva"),
+        ("foco", "Foco gradual"),
+        ("cascata", "Cascata"),
+        ("pulso", "Pulso"),
+        ("pincelada", "Pincelada"),
         ("nenhuma", "Sem animação"),
     )
     title = models.CharField("título", max_length=100)
