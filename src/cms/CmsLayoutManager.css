@@ -271,7 +271,7 @@
 .cms-layout-hover-preview-heading strong{color:#f0eee6;font-size:13px}
 .cms-layout-hover-preview-heading small{color:#aaa99f;font-size:10px;line-height:1.4}
 .cms-layout-hover-preview-heading button{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:8px;color:#e9eadf;background:rgba(255,255,255,.05);font-size:20px;cursor:pointer}
-.cms-layout-hover-preview-frame{height:260px;min-height:0;max-height:260px;border-radius:9px}
+.cms-layout-hover-preview-frame{height:260px;min-height:0;max-height:260px;overflow:hidden;border-radius:9px}
 .cms-layout-hover-preview .cms-layout-preview-caption{margin:8px 2px 1px;font-size:9px}
 .cms-layout-hover-preview-placeholder{display:grid;place-items:center;gap:8px;min-height:260px;padding:20px;border:1px dashed rgba(201,211,154,.22);border-radius:9px;background:rgba(255,255,255,.02);text-align:center}
 .cms-layout-hover-preview-placeholder span{color:#c9d39a;font-size:26px}
