@@ -539,3 +539,31 @@ test('layouts espaçosos não deixam um vão exagerado depois do contato', async
   })
   expect(gap).toBeLessThan(80)
 })
+
+test('prévia de hover foca automaticamente a seção alterada sem permitir navegação manual', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [{ titulo: 'Referência', links: [] }], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const contentGroup = page.locator('.cms-layout-field-group').nth(1)
+  await contentGroup.locator('summary').click()
+  const contactField = contentGroup.locator('fieldset').filter({ has: page.getByText('Seção de contato') })
+  await contactField.locator('.cms-layout-option').first().hover()
+  const modal = page.locator('.cms-layout-hover-preview-floating')
+  await expect(modal).toBeVisible()
+  const frame = modal.locator('iframe')
+  await expect.poll(() => frame.evaluate(element => element.contentWindow.scrollY)).toBeGreaterThan(0)
+  await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('none')
+})
