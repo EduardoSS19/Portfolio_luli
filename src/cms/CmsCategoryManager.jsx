@@ -232,7 +232,7 @@ export function CmsCategoryManager({
       } else {
         await categoryRequest('/api/cms/categories/', {
           method: 'POST',
-          body: JSON.stringify({ title, key }),
+          body: JSON.stringify({ title, key, animation }),
         })
         setNotice('Categoria criada.')
       }
