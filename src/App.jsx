@@ -497,6 +497,7 @@ export default function App() {
           <SecaoCategoria
             titulo={categoriaPreview.titulo}
             chave={categoriaPreview.chave}
+            animacao={categoriaPreview.animacao}
             obras={[obraPreview]}
             indice={0}
           />
@@ -516,7 +517,7 @@ export default function App() {
           <div><span>PRÉVIA DE ORGANIZAÇÃO · LINK TEMPORÁRIO</span><h1>{categoria?.titulo || previsualizacao.titulo}</h1><p>Somente esta categoria e sua nova ordem são exibidas. Nada foi publicado.</p></div>
           <a href="/" aria-label="Sair da prévia e voltar ao portfólio">Sair da prévia ↗</a>
         </header>
-        {categoria ? <SecaoCategoria titulo={categoria.titulo} chave={categoria.chave} obras={categoria.obras} indice={0} /> : <p className="preview-only-empty">Não foi possível carregar esta categoria. Gere outra prévia pelo painel.</p>}
+        {categoria ? <SecaoCategoria titulo={categoria.titulo} chave={categoria.chave} animacao={categoria.animacao} obras={categoria.obras} indice={0} /> : <p className="preview-only-empty">Não foi possível carregar esta categoria. Gere outra prévia pelo painel.</p>}
       </main>
     )
   }
@@ -550,6 +551,7 @@ export default function App() {
             key={cat.titulo}
             titulo={cat.titulo}
             chave={cat.chave}
+            animacao={cat.animacao}
             obras={cat.obras}
             indice={indice}
             animando={animando === cat.chave}
