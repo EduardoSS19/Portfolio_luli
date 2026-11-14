@@ -61,3 +61,30 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(settings["show_references"])
         self.assertFalse(is_valid_layout_setting("show_bio", "false"))
         self.assertTrue(is_valid_layout_setting("show_bio", False))
+
+    def test_custom_artist_sections_are_normalized_and_allow_listed(self):
+        sections = [{
+            "id": "tattoo-flash-demo",
+            "type": "tattoo-flash",
+            "title": "Flash disponíveis",
+            "intro": "Desenhos prontos para reservar.",
+            "items": [{
+                "title": "Lua crescente",
+                "description": "Blackwork",
+                "period": "Disponível",
+                "url": "https://example.com/flash",
+                "image": "https://example.com/flash.jpg",
+            }],
+        }]
+        normalized = normalize_layout_settings({"custom_sections": sections})
+        self.assertEqual(normalized["custom_sections"], sections)
+        self.assertTrue(is_valid_layout_setting("custom_sections", sections))
+
+    def test_custom_sections_reject_unsafe_urls_and_unknown_types(self):
+        unsafe = [{
+            "id": "bad-section", "type": "process", "title": "Processo",
+            "intro": "", "items": [{"title": "Item", "url": "javascript:alert(1)"}],
+        }]
+        self.assertFalse(is_valid_layout_setting("custom_sections", unsafe))
+        unknown = [{"id": "bad-type", "type": "made-up", "title": "Outro", "intro": "", "items": []}]
+        self.assertFalse(is_valid_layout_setting("custom_sections", unknown))
