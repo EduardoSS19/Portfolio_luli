@@ -379,9 +379,8 @@ export function CmsLayoutManager(){
     setHoverPreviewMounted(false)
     setHoveredOption(null)
   }
-  // A prévia é fixa no viewport; ao rolar o painel externo, ela deixaria de
-  // acompanhar a opção e poderia cobrir os próximos controles. O scroll dentro
-  // do iframe não chega a este listener e continua livre para explorar o site.
+  // A prévia de hover é apenas visual e não recebe navegação. A exploração
+  // interativa do portfólio fica restrita à prévia completa no fim da página.
   useEffect(()=>{
     if(!hoverPreviewMounted)return
     const dismissFromWorkspaceGesture=event=>{
@@ -605,7 +604,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="yes" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
             </div>
           </div>
         </aside>,
