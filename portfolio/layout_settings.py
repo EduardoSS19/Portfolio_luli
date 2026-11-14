@@ -8,6 +8,8 @@ DEFAULT_LAYOUT_SETTINGS = {
     "section_spacing": "comfortable",
     "gallery_columns": "3",
     "default_gallery_view": "lista",
+    "presentation_mode": "editorial",
+    "navigation_mode": "curtain",
     "default_theme": "escuro",
     "dark_color_background": "#061522",
     "dark_color_surface": "#0b2943",
@@ -31,6 +33,8 @@ LAYOUT_SETTING_CHOICES = {
     "section_spacing": {"compact", "comfortable", "spacious"},
     "gallery_columns": {"2", "3", "4"},
     "default_gallery_view": {"lista", "grade"},
+    "presentation_mode": {"editorial", "carousel", "immersive", "masonry"},
+    "navigation_mode": {"curtain", "dropdown", "sidebar"},
     "default_theme": {"escuro", "claro"},
 }
 COLOR_SETTING_KEYS = {f"{theme}_{key}" for theme in ("dark", "light") for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent")}
