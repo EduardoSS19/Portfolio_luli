@@ -263,13 +263,13 @@ export function CmsLayoutManager(){
       const leftSpace=anchor.left-gap-minEdge
       const sideFits=rightSpace>=panelWidth||leftSpace>=panelWidth
       const placeRight=sideFits?rightSpace>=panelWidth:rightSpace>=leftSpace
-      // Nunca desloca o painel para cima: usa a lateral do controle ou,
-      // se não houver largura lateral suficiente, ancora abaixo dele.
+      // Mantém a prévia acima do controle para não encobrir o menu
+      // nem os campos que a pessoa está explorando.
       const left=sideFits
         ?(placeRight?anchor.right+gap:anchor.left-panelWidth-gap)
         :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
-      const top=sideFits?Math.max(minEdge,anchor.top):anchor.bottom+gap
-      const maxHeight=Math.max(80,viewportHeight-top-minEdge)
+      const top=Math.max(minEdge,anchor.top-panelHeight-gap)
+      const maxHeight=Math.max(80,Math.min(panelHeight,viewportHeight-top-minEdge))
       setHoverPreviewPosition({left,top,maxHeight})
     }else{
       setHoverPreviewPosition({
