@@ -20,6 +20,8 @@ const DEFAULT_LAYOUT_SETTINGS = {
   section_spacing: 'comfortable',
   gallery_columns: '3',
   default_gallery_view: 'lista',
+  presentation_mode: 'editorial',
+  navigation_mode: 'curtain',
   default_theme: 'escuro',
   dark_color_background: '#061522',
   dark_color_surface: '#0b2943',
@@ -44,6 +46,8 @@ const LAYOUT_PREVIEW_CHOICES = {
   section_spacing: ['compact', 'comfortable', 'spacious'],
   gallery_columns: ['2', '3', '4'],
   default_gallery_view: ['lista', 'grade'],
+  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry'],
+  navigation_mode: ['curtain', 'dropdown', 'sidebar'],
   default_theme: ['escuro', 'claro'],
 }
 const LAYOUT_PREVIEW_COLORS = ['dark_color_background','dark_color_surface','dark_color_text','dark_color_muted','dark_color_accent','light_color_background','light_color_surface','light_color_text','light_color_muted','light_color_accent']
@@ -488,6 +492,8 @@ export default function App() {
     'data-layout-hero-size': layout.hero_size,
     'data-layout-spacing': layout.section_spacing,
     'data-layout-gallery-columns': layout.gallery_columns,
+    'data-layout-presentation': layout.presentation_mode || 'editorial',
+    'data-layout-navigation': layout.navigation_mode || 'curtain',
     'data-layout-show-bio-image': String(layout.show_bio_image !== false),
     'data-layout-show-bio': String(layout.show_bio !== false),
     'data-layout-show-references': String(layout.show_references !== false),
@@ -559,6 +565,7 @@ export default function App() {
         aoTrocarModo={trocarModoGaleria}
         tema={tema}
         aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
+        navigationMode={layout.navigation_mode || 'curtain'}
       />
       {(layout.show_bio_image !== false || layout.show_bio !== false) && <Sobre perfil={sobre} mostrarImagem={layout.show_bio_image !== false} mostrarBio={layout.show_bio !== false} />}
       {modoGaleria === 'grade' ? (
