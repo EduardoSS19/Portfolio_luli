@@ -123,6 +123,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Layout')
 
   const leftOption = page.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
+  await leftOption.scrollIntoViewIfNeeded()
   const optionBeforeHover = await leftOption.evaluate(element => {
     const rect = element.getBoundingClientRect()
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
@@ -146,7 +147,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
 
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
-  await expect(hoverPreview).toHaveClass(/is-empty/)
+  await expect(hoverPreview).toBeHidden()
 
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
