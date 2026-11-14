@@ -254,13 +254,13 @@ export function CmsCategoryManager({
       if (editing) {
         await categoryRequest('/api/cms/categories/' + editing.id + '/', {
           method: 'POST',
-          body: JSON.stringify({ title, key, animation }),
+          body: JSON.stringify({ title, key }),
         })
         setNotice('Categoria atualizada.')
       } else {
         await categoryRequest('/api/cms/categories/', {
           method: 'POST',
-          body: JSON.stringify({ title, key, animation }),
+          body: JSON.stringify({ title, key }),
         })
         setNotice('Categoria criada.')
       }
