@@ -1510,3 +1510,9 @@
   .cms-animation-live-image{height:100%;min-height:0;aspect-ratio:16/10}
   .cms-animation-live-copy{padding:18px}
 }
+
+.cms-layout-hover-preview-floating button{pointer-events:auto}
+.cms-layout-hover-preview.is-empty{min-height:108px;padding:12px}
+.cms-layout-hover-preview.is-empty .cms-layout-hover-preview-placeholder{min-height:82px;border:0;padding:8px}
+.cms-layout-hover-preview.is-empty .cms-layout-hover-preview-placeholder button{justify-self:center;padding:6px 12px;border:1px solid rgba(201,211,154,.42);border-radius:8px;color:#e9eadf;background:rgba(255,255,255,.06);font:600 10px 'DM Sans';cursor:pointer}
+.cms-layout-hover-preview.is-empty .cms-layout-hover-preview-placeholder button:hover{background:rgba(201,211,154,.14)}
