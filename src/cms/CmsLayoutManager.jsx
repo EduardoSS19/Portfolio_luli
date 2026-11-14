@@ -367,6 +367,22 @@ export function CmsLayoutManager(){
     setHoverPreviewMounted(false)
     setHoveredOption(null)
   }
+  // A prévia é fixa no viewport; ao rolar o painel externo, ela deixaria de
+  // acompanhar a opção e poderia cobrir os próximos controles. O scroll dentro
+  // do iframe não chega a este listener e continua livre para explorar o site.
+  useEffect(()=>{
+    if(!hoverPreviewMounted)return
+    const handleWorkspaceScroll=event=>{
+      const preview=document.querySelector('.cms-layout-hover-preview')
+      if(preview&&(event.target===preview||preview.contains(event.target)))return
+      cancelOptionPreviewHide()
+      suppressOptionPreviewRef.current=hoveredOption
+      setHoverPreviewMounted(false)
+      setHoveredOption(null)
+    }
+    window.addEventListener('scroll',handleWorkspaceScroll,true)
+    return()=>window.removeEventListener('scroll',handleWorkspaceScroll,true)
+  },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
     const preview=document.querySelector('.cms-layout-hover-preview')
     // Navegadores podem reportar relatedTarget=null ao atravessar a borda de um iframe.
@@ -561,7 +577,7 @@ export function CmsLayoutManager(){
       {hoverPreviewMounted&&hoveredOption&&createPortal(
         <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onMouseEnter={cancelOptionPreviewHide} onMouseMove={cancelOptionPreviewHide} onMouseLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
-            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onMouseDown={event=>event.preventDefault()} onClick={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
+            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onClick={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
