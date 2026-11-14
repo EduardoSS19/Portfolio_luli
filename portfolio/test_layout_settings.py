@@ -59,6 +59,8 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(settings["show_bio_image"])
         self.assertTrue(settings["show_bio"])
         self.assertTrue(settings["show_references"])
+        self.assertTrue(settings["show_contact"])
+        self.assertTrue(is_valid_layout_setting("show_contact", False))
         self.assertFalse(is_valid_layout_setting("show_bio", "false"))
         self.assertTrue(is_valid_layout_setting("show_bio", False))
 
