@@ -62,6 +62,18 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertFalse(is_valid_layout_setting("show_bio", "false"))
         self.assertTrue(is_valid_layout_setting("show_bio", False))
 
+    def test_presentation_and_navigation_modes_are_allow_listed(self):
+        defaults = normalize_layout_settings({})
+        self.assertEqual(defaults["presentation_mode"], "editorial")
+        self.assertEqual(defaults["navigation_mode"], "curtain")
+        self.assertTrue(is_valid_layout_setting("presentation_mode", "carousel"))
+        self.assertTrue(is_valid_layout_setting("presentation_mode", "immersive"))
+        self.assertTrue(is_valid_layout_setting("presentation_mode", "masonry"))
+        self.assertTrue(is_valid_layout_setting("navigation_mode", "dropdown"))
+        self.assertTrue(is_valid_layout_setting("navigation_mode", "sidebar"))
+        self.assertFalse(is_valid_layout_setting("presentation_mode", "random"))
+        self.assertFalse(is_valid_layout_setting("navigation_mode", "random"))
+
     def test_custom_artist_sections_are_normalized_and_allow_listed(self):
         sections = [{
             "id": "tattoo-flash-demo",
