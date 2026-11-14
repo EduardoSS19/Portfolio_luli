@@ -120,7 +120,6 @@ export function CmsLayoutManager(){
   const hoverPreviewViewportRef=useRef(null)
   const hoverPreviewHideTimerRef=useRef(null)
   const suppressOptionPreviewRef=useRef(null)
-  const suppressOptionPreviewTimerRef=useRef(null)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
@@ -237,7 +236,7 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[hoverPreviewMounted])
-  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)},[])
+  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)},[])
   useEffect(()=>{
     if(!hoverPreviewMounted)return
     const iframe=hoverPreviewIframeRef.current
@@ -363,11 +362,6 @@ export function CmsLayoutManager(){
   const closeOptionPreview=()=>{
     cancelOptionPreviewHide()
     suppressOptionPreviewRef.current=hoveredOption?{name:hoveredOption.name,value:hoveredOption.value}:null
-    if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
-    suppressOptionPreviewTimerRef.current=window.setTimeout(()=>{
-      suppressOptionPreviewRef.current=null
-      suppressOptionPreviewTimerRef.current=null
-    },450)
     setHoveredOption(null)
     setHoverPreviewMounted(false)
   }
@@ -391,8 +385,6 @@ export function CmsLayoutManager(){
     if(suppressedOption?.name===name&&suppressedOption?.value===value)return
     if(suppressedOption){
       suppressOptionPreviewRef.current=null
-      if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
-      suppressOptionPreviewTimerRef.current=null
     }
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
