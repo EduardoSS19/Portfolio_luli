@@ -40,7 +40,7 @@ test('preview inicial é um portfólio completo com perfil, imagens, obras, traj
   await expect(page.locator('.obras-lista .obra')).toHaveCount(8)
   await expect(page.locator('.obra img').first()).toHaveAttribute('src', /images\.unsplash\.com/)
   await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
-  await expect(page.locator('.rodape-links a')).toHaveCount(3)
+  await expect(page.locator('.rodape-links a')).toHaveCount(4)
   await expect(page.locator('#Contato form')).toBeVisible()
 })
 
@@ -289,7 +289,7 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(4)
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(8)
   await expect(page.locator('#Referências')).toBeVisible()
-  await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
+  await expect(page.locator('#Referências')).toContainText('Exposição individual')
   await expect(page.locator('#Contato')).toBeVisible()
   const contactForm = page.locator('#Contato .form-contato')
   await expect(contactForm).toBeVisible()
