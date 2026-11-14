@@ -125,6 +125,91 @@ const LAYOUT_PREVIEW_DEMO = {
   redes: [{ titulo: 'Instagram de demonstração', url: '#rede-teste' }],
 }
 
+
+function getLayoutPreviewDemo(layout = {}) {
+  const types = (layout.custom_sections || []).map(section => section.type)
+  const isTattoo = types.includes('tattoo-flash') || types.includes('tattoo-booking') || types.includes('healed-work')
+  const isStudio = types.includes('studio-team')
+  const isPhoto = layout.presentation_mode === 'immersive'
+  const isDesign = layout.presentation_mode === 'carousel' && layout.default_theme === 'claro'
+  const isIllustration = layout.presentation_mode === 'masonry' && layout.default_theme === 'claro'
+
+  if (isTattoo || isStudio) {
+    const studio = isStudio
+    return {
+      ...LAYOUT_PREVIEW_DEMO,
+      categorias: [
+        { titulo: studio ? 'Trabalhos do estúdio' : 'Tatuagens autorais', chave: 'tatuagens-autorais', animacao: 'obra', obras: [
+          { titulo: 'Botânica em linha fina', imagem: 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?w=1400&q=85', descricao: 'Composição botânica delicada, desenhada para acompanhar o movimento do corpo.', detalhe: 'Projeto demonstrativo · Fine line · Preto e cinza', fichaTecnica: { tecnica: 'Fine line', material: 'Tinta preta', ano: '2026' } },
+          { titulo: 'Ornamental solar', imagem: 'https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=1400&q=85', descricao: 'Geometria, simetria e contraste em uma composição ornamental.', detalhe: 'Projeto demonstrativo · Ornamental' },
+          { titulo: 'Natureza em movimento', imagem: 'https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=1400&q=85', descricao: 'Desenho orgânico com linhas leves e áreas de respiro.', detalhe: 'Projeto demonstrativo · Botânica' },
+        ]},
+        { titulo: studio ? 'Artistas residentes' : 'Flash e projetos disponíveis', chave: 'flash-disponiveis', animacao: 'desenho', obras: [
+          { titulo: 'Flash botânico 08', imagem: 'https://images.unsplash.com/photo-1590246814883-57c511e1e5d1?w=1400&q=85', descricao: 'Desenho autoral disponível para reserva.', detalhe: 'Tamanho sugerido: 8 cm' },
+          { titulo: 'Estudo ornamental 03', imagem: 'https://images.unsplash.com/photo-1562962230-16e4623d36e6?w=1400&q=85', descricao: 'Composição exclusiva, adaptável em escala.', detalhe: 'Consulte disponibilidade' },
+        ]},
+      ],
+      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: studio ? 'Casa Tinta Tattoo' : 'Maya Reis', frase: studio ? 'Estúdio de tatuagem · Porto Alegre' : 'Tatuagem autoral · Fine line · Botânica', bio: studio ? 'Um espaço independente dedicado à tatuagem autoral, ao desenho e à troca entre artistas. Nossa equipe trabalha com diferentes linguagens, mantendo o cuidado com cada projeto e cada pessoa.' : 'Tatuadora e ilustradora, desenvolve projetos autorais inspirados em formas botânicas, símbolos e narrativas pessoais. Cada desenho é pensado para o corpo e construído em diálogo com quem vai receber a tatuagem.' },
+    }
+  }
+
+  if (isPhoto) {
+    return {
+      ...LAYOUT_PREVIEW_DEMO,
+      categorias: [
+        { titulo: 'Ensaios autorais', chave: 'ensaios-autorais', animacao: 'fotografia', obras: [
+          { titulo: 'A cidade respira', imagem: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1800&q=90', descricao: 'Luz, arquitetura e silêncio em uma série sobre a cidade.', detalhe: 'Fotografia digital · 2025' },
+          { titulo: 'Horizonte de dentro', imagem: 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1800&q=90', descricao: 'Paisagens observadas como espaços de memória.', detalhe: 'Ensaio autoral · 2024' },
+          { titulo: 'Entre marés', imagem: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=1800&q=90', descricao: 'Um estudo sobre movimento, água e luz natural.', detalhe: 'Série documental · 2024' },
+        ]},
+        { titulo: 'Retratos e editoriais', chave: 'retratos-editoriais', animacao: 'fotografia', obras: [
+          { titulo: 'Corpos em pausa', imagem: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1400&q=85', descricao: 'Retratos com luz natural e direção intimista.', detalhe: 'Editorial · 2025' },
+          { titulo: 'Matéria e presença', imagem: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1400&q=85', descricao: 'Retrato e pesquisa de textura.', detalhe: 'Ensaio · 2024' },
+        ]},
+      ],
+      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Clara Nogueira', frase: 'Fotografia · Retrato · Paisagem', bio: 'Fotógrafa independente dedicada a ensaios autorais, retratos e projetos editoriais. Seu trabalho investiga luz, arquitetura e presença, construindo narrativas visuais a partir de pequenos gestos e observações cotidianas.' },
+    }
+  }
+
+  if (isDesign) {
+    return {
+      ...LAYOUT_PREVIEW_DEMO,
+      categorias: [
+        { titulo: 'Identidade e branding', chave: 'identidade-branding', animacao: 'obra', obras: [
+          { titulo: 'Casa Orla · Identidade visual', imagem: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1400&q=85', descricao: 'Sistema visual, direção de arte e aplicações para uma marca de hospitalidade.', detalhe: 'Branding · 2025' },
+          { titulo: 'Ponto de Encontro · Editorial', imagem: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1400&q=85', descricao: 'Projeto editorial e linguagem gráfica para uma iniciativa cultural.', detalhe: 'Direção de arte · 2024' },
+          { titulo: 'Forma Viva · Embalagem', imagem: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=1400&q=85', descricao: 'Design de embalagem e sistema de comunicação.', detalhe: 'Design de produto · 2024' },
+        ]},
+        { titulo: 'Digital e motion', chave: 'digital-motion', animacao: 'obra', obras: [
+          { titulo: 'Interface em movimento', imagem: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=1400&q=85', descricao: 'Experiência digital e protótipo interativo.', detalhe: 'UI/UX · 2025' },
+          { titulo: 'Sistema modular', imagem: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=1400&q=85', descricao: 'Componentes, tipografia e direção visual.', detalhe: 'Design system · 2024' },
+        ]},
+      ],
+      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Estúdio Norte', frase: 'Design · Branding · Direção de arte', bio: 'Estúdio independente que conecta estratégia, identidade e experiências digitais. Desenvolve sistemas visuais, projetos editoriais e produtos digitais para marcas que buscam uma linguagem própria.' },
+    }
+  }
+
+  if (isIllustration) {
+    return {
+      ...LAYOUT_PREVIEW_DEMO,
+      categorias: [
+        { titulo: 'Ilustração editorial', chave: 'ilustracao-editorial', animacao: 'desenho', obras: [
+          { titulo: 'Pequenas histórias', imagem: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1400&q=85', descricao: 'Ilustrações narrativas para publicações e projetos editoriais.', detalhe: 'Digital e guache · 2025' },
+          { titulo: 'Jardim imaginário', imagem: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=1400&q=85', descricao: 'Personagens, plantas e paisagens inventadas.', detalhe: 'Série autoral · 2024' },
+          { titulo: 'Caderno de formas', imagem: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1400&q=85', descricao: 'Estudos de composição e desenho.', detalhe: 'Sketchbook · 2024' },
+        ]},
+        { titulo: 'Personagens e gravura', chave: 'personagens-gravura', animacao: 'gravura', obras: [
+          { titulo: 'O observador', imagem: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1400&q=85', descricao: 'Personagem criado para uma narrativa ilustrada.', detalhe: 'Ilustração · 2025' },
+          { titulo: 'Impressões botânicas', imagem: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=1400&q=85', descricao: 'Gravuras em pequenas tiragens.', detalhe: 'Xilogravura · 2024' },
+        ]},
+      ],
+      sobre: { ...LAYOUT_PREVIEW_DEMO.sobre, nome: 'Bia Campos', frase: 'Ilustração · Desenho · Narrativas', bio: 'Ilustradora que cria imagens para livros, projetos editoriais e narrativas visuais. Sua pesquisa mistura desenho, cor e personagens para transformar ideias em histórias visuais.' },
+    }
+  }
+
+  return LAYOUT_PREVIEW_DEMO
+}
+
 const perfilInicial = {
   nome: 'Nome da artista',
   frase: 'Arte · Pesquisa · Experimentação',
@@ -278,7 +363,12 @@ export default function App() {
       if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'cms-layout-preview:update') return
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
       if (!safeSettings) return
-      setConteudo(current => ({ ...current, layout: { ...current.layout, ...safeSettings } }))
+      const previewRoute = new URLSearchParams(window.location.search).has('layout_preview') && !new URLSearchParams(window.location.search).has('layout_preview_live')
+      setConteudo(current => {
+        const nextLayout = { ...current.layout, ...safeSettings }
+        const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
+        return { ...current, ...(demo ? { categorias: demo.categorias, sobre: demo.sobre } : {}), layout: nextLayout }
+      })
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
@@ -360,7 +450,8 @@ export default function App() {
         return response.json()
       })
       .then(data => {
-        const demoContent = params.has('layout_preview') && !params.has('layout_preview_live') ? LAYOUT_PREVIEW_DEMO : null
+        const previewSettings = { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) }
+        const demoContent = params.has('layout_preview') && !params.has('layout_preview_live') ? getLayoutPreviewDemo(previewSettings) : null
         setConteudo(atual => ({
           categorias: demoContent ? demoContent.categorias : Array.isArray(data.categorias) ? data.categorias : [],
           referencias: demoContent ? demoContent.referencias : Array.isArray(data.referencias) ? data.referencias : [],
