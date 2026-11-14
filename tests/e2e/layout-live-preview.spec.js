@@ -230,6 +230,44 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(contactForm.getByLabel('Mensagem')).toBeVisible()
 })
 
+test('cada família de modelo recebe conteúdo demonstrativo da sua área', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, {
+    presentation_mode:'carousel',
+    navigation_mode:'dropdown',
+    default_theme:'escuro',
+    custom_sections:[{id:'preset-tattoo-flash',type:'tattoo-flash',title:'Flash disponíveis',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Maya Reis')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Tatuagens autorais')
+
+  await sendSettings(page, {
+    presentation_mode:'immersive',
+    navigation_mode:'sidebar',
+    custom_sections:[{id:'preset-photo-exhibitions',type:'exhibitions',title:'Exposições',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Clara Nogueira')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Ensaios autorais')
+
+  await sendSettings(page, {
+    presentation_mode:'carousel',
+    navigation_mode:'dropdown',
+    default_theme:'claro',
+    custom_sections:[{id:'preset-design-services',type:'services',title:'Serviços',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Estúdio Norte')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Identidade e branding')
+
+  await sendSettings(page, {
+    presentation_mode:'masonry',
+    navigation_mode:'dropdown',
+    default_theme:'claro',
+    custom_sections:[{id:'preset-illustration-process',type:'process',title:'Processo',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Bia Campos')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Ilustração editorial')
+})
+
 test('seções centrais podem ser removidas do modelo sem deixar links órfãos', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, { show_bio:false, show_bio_image:false, show_references:false, show_contact:false }, 'page')
