@@ -26,14 +26,14 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
 
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('layout_preview')) return
-    if (navigationMode === 'sidebar') {
+    if (effectiveNavigationMode === 'sidebar') {
       previewMenuAutoOpenRef.current = true
       setMenuAberto(true)
     } else if (previewMenuAutoOpenRef.current) {
       previewMenuAutoOpenRef.current = false
       setMenuAberto(false)
     }
-  }, [navigationMode])
+  }, [effectiveNavigationMode])
 
   useEffect(() => {
     const handlePreviewNavigation = event => {
