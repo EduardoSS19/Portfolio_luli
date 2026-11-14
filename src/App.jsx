@@ -213,29 +213,8 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
-      const focus = event.data.focus
-      const focusSelectors = {
-        hero: '.hero',
-        bio: '#Início',
-        gallery: (previewMode || modoGaleria) === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)',
-        references: '#Referências',
-        contact: '#Contato',
-      }
-      const selector = focusSelectors[focus]
-      const scrollTarget = selector ? `${focus}:${selector}` : null
-      // O editor envia mensagens também para atualizar cores e conteúdo. Só navegamos
-      // quando o alvo muda; uma atualização do mesmo alvo nunca deve puxar a página de volta.
-      // "page" e atualizações sem foco são apenas mudanças visuais; não apagam
-      // o último destino visitado nem rearmam uma rolagem antiga.
-      if (!scrollTarget) return
-      if (lastLayoutPreviewScrollTargetRef.current === scrollTarget) return
-      lastLayoutPreviewScrollTargetRef.current = scrollTarget
-      window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-        if (lastLayoutPreviewScrollTargetRef.current !== scrollTarget) return
-        const target = document.querySelector(selector)
-        if (!target) return
-        target.scrollIntoView({ block: 'start', behavior: 'auto' })
-      }))
+      // Atualiza a prévia sem deslocar a rolagem: quem está personalizando
+      // decide quando navegar pela página para conferir o resultado.
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
