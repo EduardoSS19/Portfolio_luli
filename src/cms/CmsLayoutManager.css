@@ -431,3 +431,21 @@
  .cms-layout-preset-preview-actions{display:grid;grid-template-columns:1fr}
  .cms-layout-preset-preview-actions button{width:100%}
 }
+
+
+.cms-layout-preset-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.55rem}
+.cms-layout-preset-tags span{display:inline-flex;align-items:center;min-height:1.45rem;padding:.2rem .48rem;border:1px solid var(--cms-border,rgba(255,255,255,.16));border-radius:999px;color:var(--cms-muted,#aab5b9);font-size:.62rem;font-weight:700;letter-spacing:.035em}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-content{display:flex;gap:5px;overflow:hidden}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-image{flex:0 0 56%;min-height:72px}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-copy{flex:0 0 38%;align-self:center}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-content{display:block;position:relative;min-height:72px}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-image{position:absolute;inset:0;min-height:72px}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-copy{position:absolute;left:8px;right:8px;bottom:8px;z-index:1}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-content{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:start}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-image{min-height:38px}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.nav-dropdown .cms-layout-preset-mock-nav{border:0;justify-content:flex-end}
+.cms-layout-preset-art.nav-dropdown .cms-layout-preset-mock-nav:after{content:"";position:absolute;top:27px;right:12px;width:64px;height:66px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:linear-gradient(rgba(255,255,255,.2) 2px,transparent 2px) 8px 12px/35px 12px repeat-y,rgba(10,24,31,.94)}
+.cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-nav:after{content:"";position:absolute;inset:0 auto 0 0;width:31%;background:rgba(7,17,22,.88);border-right:1px solid rgba(255,255,255,.3)}
+.cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-content{margin-left:30%}
