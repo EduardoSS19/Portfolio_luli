@@ -163,6 +163,11 @@
   max-height:none;
   background:#061522;
 }
+.cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
 .cms-layout-preview-panel.floating{
   padding:.8rem .8rem 1.15rem;
 }
