@@ -420,19 +420,32 @@ function PortfolioCustomSections({ sections = [], preview = false, examples = nu
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
     const items = section.items.length ? section.items : (preview ? examples?.[section.type] || PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
     const design = section.design || {}
+    const layout = design.layout || 'cards'
     return (
-      <section className={'secao portfolio-custom-section section-'+section.type+' section-layout-'+(design.layout||'cards')+' section-density-'+(design.density||'comfortable')} id={section.id} key={section.id} data-columns={design.columns||'2'} data-image-ratio={design.image_ratio||'landscape'} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
+      <section className={'secao portfolio-custom-section section-'+section.type+' section-layout-'+layout+' section-density-'+(design.density||'comfortable')} id={section.id} key={section.id} data-columns={design.columns||'2'} data-image-ratio={design.image_ratio||'landscape'} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
         <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
         {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
         <div className="portfolio-custom-grid">
-          {items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
-            {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
-            <div><h3>{item.title}</h3>
-              {(metaFields[section.type]||['period']).filter(key=>item[key]).map(key=><small className={'portfolio-custom-meta meta-'+key} key={key}><strong>{labels[key]||key}:</strong> {item[key]}</small>)}
-              {item.description && <p>{item.description}</p>}
-              {(item.url||item.booking_url) && <a href={item.url||item.booking_url} target="_blank" rel="noreferrer">{section.type==='tattoo-booking'?'Solicitar agendamento':section.type==='services'?'Consultar serviço':'Saiba mais'} ↗</a>}
-            </div>
-          </article>)}
+          {items.map((item,index)=>{
+            const meta=(metaFields[section.type]||['period']).filter(key=>item[key])
+            const content=(
+              <>
+                {layout==='before-after'&&<div className="portfolio-custom-before-after">
+                  {item.image_before&&<figure><img src={item.image_before} alt={item.title+' — antes'} loading="lazy"/><figcaption>Antes</figcaption></figure>}
+                  {item.image_after&&<figure><img src={item.image_after} alt={item.title+' — cicatrizado'} loading="lazy"/><figcaption>Depois</figcaption></figure>}
+                </div>}
+                {item.image&&<img src={item.image} alt={item.title||''} loading="lazy"/>}
+                <div><h3>{item.title}</h3>
+                  {meta.map(key=><small className={'portfolio-custom-meta meta-'+key} key={key}><strong>{labels[key]||key}:</strong> {item[key]}</small>)}
+                  {item.description&&<p>{item.description}</p>}
+                  {(item.url||item.booking_url)&&<a href={item.url||item.booking_url} target="_blank" rel="noreferrer">{section.type==='tattoo-booking'?'Solicitar agendamento':section.type==='services'?'Consultar serviço':'Saiba mais'} ↗</a>}
+                </div>
+              </>
+            )
+            return layout==='accordion'
+              ? <details className="portfolio-custom-card portfolio-custom-accordion" key={section.id+'-'+index}><summary><strong>{item.title||'Detalhes'}</strong><span>{meta[0]?item[meta[0]]:''}</span></summary><div className="portfolio-custom-accordion-content">{content}</div></details>
+              : <article className="portfolio-custom-card" key={section.id+'-'+index}>{content}</article>
+          })}
         </div>
       </section>
     )
