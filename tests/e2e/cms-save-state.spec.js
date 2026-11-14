@@ -203,6 +203,8 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const sidebarOption = page.locator('.cms-layout-option').filter({ hasText: 'Painel lateral' })
   await sidebarOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-nav')?.classList.contains('navigation-sidebar'))).toBe(true)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.editorial-menu-backdrop')?.getAttribute('aria-hidden'))).toBe('false')
+  await expect(sidebarOption.locator('input')).not.toBeChecked()
 
   const hideReferencesOption = page.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
   await hideReferencesOption.hover()
