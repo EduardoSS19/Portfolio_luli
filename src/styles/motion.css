@@ -16,11 +16,6 @@
 .secao-cabecalho.arte-fotografia,
 .secao-cabecalho.arte-videoarte,
 .secao-cabecalho.arte-obra,
-.secao-cabecalho.arte-suave,
-.secao-cabecalho.arte-deslizar,
-.secao-cabecalho.arte-zoom,
-.secao-cabecalho.arte-recorte,
-.secao-cabecalho.arte-flutuar,
 .sobre-entrada,
 .referencia-item,
 .secao-contato{
@@ -532,36 +527,8 @@ nav button[class*="anim-video"],
 }
 
 
-/* Presets novos: animações selecionáveis por categoria, sem depender da chave/slug. */
-.secao-cabecalho.arte-suave,
-.secao-cabecalho.arte-deslizar,
-.secao-cabecalho.arte-zoom,
-.secao-cabecalho.arte-recorte,
-.secao-cabecalho.arte-flutuar{transform:translateY(14px)}
-.secao-cabecalho.arte-suave.visivel,
-.secao-cabecalho.arte-deslizar.visivel,
-.secao-cabecalho.arte-zoom.visivel,
-.secao-cabecalho.arte-recorte.visivel,
-.secao-cabecalho.arte-flutuar.visivel{opacity:1;transform:none;clip-path:inset(0)}
-.secao-cabecalho.arte-suave.visivel h2{animation:categoriaFade .9s ease both}
-.secao-cabecalho.arte-deslizar.visivel h2{animation:categoriaSlide .8s cubic-bezier(.2,.7,.2,1) both}
-.secao-cabecalho.arte-zoom.visivel h2{animation:categoriaZoom .9s cubic-bezier(.2,.7,.2,1) both}
-.secao-cabecalho.arte-recorte.visivel h2{animation:categoriaWipe 1s cubic-bezier(.65,0,.35,1) both}
-.secao-cabecalho.arte-flutuar.visivel h2{animation:categoriaFloat 1.2s cubic-bezier(.2,.7,.2,1) both}
-.obra.arte-suave.visivel .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:categoriaFade .9s ease both}
-.obra.arte-deslizar.visivel .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:categoriaSlide .85s cubic-bezier(.2,.7,.2,1) both}
-.obra.arte-zoom.visivel .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:categoriaZoom .95s cubic-bezier(.2,.7,.2,1) both}
-.obra.arte-recorte.visivel .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:categoriaWipe 1s cubic-bezier(.65,0,.35,1) both}
-.obra.arte-flutuar.visivel .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:categoriaFloat 1.15s cubic-bezier(.2,.7,.2,1) both}
+
+/* Opção explícita para manter uma categoria sem animação. */
 .secao-cabecalho.arte-nenhuma{opacity:1;transform:none;clip-path:none;transition:none}
 .secao-cabecalho.arte-nenhuma h2,.secao-cabecalho.arte-nenhuma .secao-indice,.secao-cabecalho.arte-nenhuma .secao-contagem{opacity:1;transform:none;transition:none}
- .obra.arte-nenhuma .obra-imagem :is(.obra-zoom-trigger,.obra-video-trigger) img{animation:none!important;transition:none}
-@keyframes categoriaFade{from{opacity:0}to{opacity:1}}
-@keyframes categoriaSlide{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-@keyframes categoriaZoom{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
-@keyframes categoriaWipe{from{opacity:.25;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0)}}
-@keyframes categoriaFloat{0%{opacity:0;transform:translateY(16px) rotate(-1deg)}70%{opacity:1;transform:translateY(-3px) rotate(.3deg)}100%{opacity:1;transform:translateY(0) rotate(0)}}
-@media(prefers-reduced-motion:reduce){
-  .secao-cabecalho.arte-suave,.secao-cabecalho.arte-deslizar,.secao-cabecalho.arte-zoom,.secao-cabecalho.arte-recorte,.secao-cabecalho.arte-flutuar,
-   .obra.arte-suave .obra-imagem img,.obra.arte-deslizar .obra-imagem img,.obra.arte-zoom .obra-imagem img,.obra.arte-recorte .obra-imagem img,.obra.arte-flutuar .obra-imagem img{animation:none!important;transition:none!important;transform:none!important;opacity:1!important;clip-path:none!important}
-}
+.obra.arte-nenhuma .obra-imagem img{animation:none!important;transition:none}
