@@ -13,6 +13,8 @@ function tipoDeAnimacao(categoria) {
 
 export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
+  const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
+  const effectiveNavigationMode = previewNavigationMode || navigationMode
   const botaoMenuRef = useRef(null)
   const previewMenuAutoOpenRef = useRef(false)
   const primeiroLinkRef = useRef(null)
@@ -35,7 +37,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
 
   useEffect(() => {
     const handlePreviewNavigation = event => {
-      if (event.detail?.open) {
+      const requestedMode = event.detail?.mode
+      if (['curtain', 'dropdown', 'sidebar'].includes(requestedMode)) {
+        setPreviewNavigationMode(requestedMode)
+      }
+      if (event.detail?.open || requestedMode === 'sidebar') {
         previewMenuAutoOpenRef.current = true
         setMenuAberto(true)
       } else if (previewMenuAutoOpenRef.current) {
@@ -108,7 +114,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   }
 
   return (
-    <nav className={`site-nav editorial-nav navigation-${navigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
+    <nav className={`site-nav editorial-nav navigation-${effectiveNavigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
       <button
         ref={botaoMenuRef}
         type="button"
