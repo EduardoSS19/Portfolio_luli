@@ -1748,3 +1748,23 @@
 .cms-category-animation-option-demo .arte-nenhuma,.cms-category-animation-option-demo .arte-nenhuma *{animation:none!important;transition:none!important}
 .cms-category-animation-option-demo .obra{margin:0!important;gap:0!important;padding:0!important}
 @media(max-width:560px){.cms-category-animation-options{grid-template-columns:repeat(2,minmax(0,1fr))}.cms-category-animation-option{padding:.45rem}.cms-category-animation-option-demo{padding:.4rem}.cms-category-animation-option-work{grid-template-columns:42px minmax(0,1fr)}.cms-category-animation-option-work img{width:42px;height:42px}}
+
+/* Âncora exclusiva da demonstração para a seção Referências oculta. */
+.layout-preview-hidden-anchor{display:block;width:100%;height:1px;min-height:1px;pointer-events:none}
+.cms-layout-presets{display:grid;gap:.75rem;margin:0 0 1.4rem;padding:1rem;border:1px solid var(--cms-border,rgba(255,255,255,.12));border-radius:16px;background:rgba(255,255,255,.018)}
+.cms-layout-preset-count{align-self:center;padding:.3rem .55rem;border:1px solid var(--cms-border,rgba(255,255,255,.14));border-radius:999px;color:var(--cms-muted,#aaa99f);font-size:.7rem}
+.cms-layout-preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:.75rem}
+.cms-layout-preset-card{display:flex;flex-direction:column;gap:.7rem;min-width:0;padding:.7rem;border:1px solid var(--cms-border,rgba(255,255,255,.12));border-radius:12px;background:rgba(255,255,255,.025)}
+.cms-layout-preset-art{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5px;height:92px;padding:9px;border-radius:8px;background:linear-gradient(135deg,#202923,#101712);overflow:hidden}
+.cms-layout-preset-art span{display:block;border-radius:3px;background:linear-gradient(135deg,rgba(222,213,179,.75),rgba(113,139,108,.55))}
+.cms-layout-preset-art span:first-child{grid-row:span 2}
+.cms-layout-preset-art i{position:absolute;left:9px;top:9px;width:24%;height:5px;border-radius:9px;background:rgba(245,242,229,.75)}
+.preset-illustrator{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}.preset-illustrator span:first-child{grid-row:auto}
+.preset-photographer{grid-template-columns:1.5fr 1fr}.preset-photographer span:first-child{grid-row:span 2;background:linear-gradient(145deg,#c7d0cf,#536d72)}
+.preset-designer{background:linear-gradient(135deg,#e8e4d8,#a8b4a2)}.preset-designer span{background:linear-gradient(135deg,#4e5f52,#9ca78c)}
+.preset-tattoo-artist{background:linear-gradient(135deg,#171717,#36312b)}.preset-tattoo-artist span{background:linear-gradient(135deg,#d5c7b2,#665d52)}
+.preset-tattoo-studio{grid-template-columns:repeat(3,1fr);background:linear-gradient(135deg,#24201d,#51433a)}.preset-tattoo-studio span:first-child{grid-row:auto}
+.cms-layout-preset-copy{display:grid;gap:.25rem}.cms-layout-preset-copy>small{color:var(--cms-accent,#c9d39a);font-size:.64rem;letter-spacing:.04em;text-transform:uppercase}.cms-layout-preset-copy>strong{color:var(--cms-text,#f2f0e8);font-size:.9rem}.cms-layout-preset-copy>p{margin:0;color:var(--cms-muted,#aaa99f);font-size:.72rem;line-height:1.45}
+.cms-layout-preset-apply{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:auto;padding:.55rem .65rem;border:1px solid var(--cms-border,rgba(255,255,255,.14));border-radius:8px;background:rgba(255,255,255,.035);color:var(--cms-text,#f2f0e8);font-size:.75rem;cursor:pointer}
+.cms-layout-preset-apply:hover:not(:disabled){border-color:var(--cms-accent,#c9d39a);background:rgba(201,211,154,.08)}.cms-layout-preset-apply:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:560px){.cms-layout-presets{padding:.7rem}.cms-layout-preset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cms-layout-preset-card{padding:.5rem}.cms-layout-preset-art{height:72px}}
