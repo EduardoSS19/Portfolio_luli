@@ -198,3 +198,36 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect.poll(() => floatingPanel.evaluate(panel => panel.getBoundingClientRect().width)).toBeGreaterThan(beforePanelWidth + 50)
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(beforeResize + 50)
 })
+
+
+test('modelos prontos e biblioteca de seções permitem configurar conteúdo especializado', async ({ page }) => {
+  let savedSettings = null
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', async route => {
+    if (route.request().method() === 'PATCH') savedSettings = route.request().postDataJSON()
+    return route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        settings: savedSettings || {
+          content_width:'standard',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',
+          gallery_columns:'3',default_gallery_view:'lista',default_theme:'escuro',
+          dark_color_background:'#061522',dark_color_surface:'#0b2943',dark_color_text:'#eff7ff',dark_color_muted:'#a9bdcc',dark_color_accent:'#93c8f2',
+          light_color_background:'#f5f2eb',light_color_surface:'#ffffff',light_color_text:'#24231f',light_color_muted:'#77746c',light_color_accent:'#657c62',
+          show_bio_image:true,show_bio:true,show_references:true,custom_sections:[],
+        },
+        permissions:{canChange:true},
+      }),
+    })
+  })
+  await page.route('**/api/portfolio/', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
+  await page.goto('/painel',{waitUntil:'domcontentloaded'})
+  await page.locator('.cms-nav').getByRole('button',{name:/Layout/}).click()
+  await page.getByRole('button',{name:/Usar este modelo/}).filter({has:page.getByText('Tatuador(a)')}).click()
+  await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
+  await page.getByRole('button',{name:/Adicionar seção/}).filter({has:page.getByText('Flash tattoo')}).click()
+  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(1)
+  await page.locator('.cms-layout-custom-section').getByLabel('Nome').fill('Lua crescente')
+  await page.locator('.cms-layout-custom-section').getByLabel('Descrição').fill('Flash blackwork disponível')
+  await page.locator('.cms-layout-custom-section').getByRole('button',{name:'Salvar personalização'}).click()
+  await expect.poll(()=>savedSettings?.custom_sections?.[0]?.items?.[0]?.title).toBe('Lua crescente')
+})
