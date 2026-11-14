@@ -186,14 +186,22 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(page.locator('#Contato')).toContainText('contato@artista-demo.example')
 })
 
-test('prévia navega para referências e contato sem rearmar rolagens antigas', async ({ page }) => {
+test('prévia mantém a posição de rolagem ao alterar opções de layout', async ({ page }) => {
   await openLiveLayoutPreview(page)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const initialScrollY = await page.evaluate(() => window.scrollY)
+
   await sendSettings(page, { show_references: true }, 'references')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { dark_color_accent: '#88aacc' }, 'page')
-  await expect(page.locator('#Referências')).toBeInViewport()
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
+
   await sendSettings(page, { show_references: true }, 'contact')
-  await expect(page.locator('#Contato')).toBeInViewport()
+  await expect(page.locator('#Contato')).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(initialScrollY)
 })
 
 
