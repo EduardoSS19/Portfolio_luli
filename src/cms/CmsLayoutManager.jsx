@@ -119,6 +119,8 @@ export function CmsLayoutManager(){
   const hoverPreviewIframeRef=useRef(null)
   const hoverPreviewViewportRef=useRef(null)
   const hoverPreviewHideTimerRef=useRef(null)
+  const suppressOptionPreviewRef=useRef(false)
+  const suppressOptionPreviewTimerRef=useRef(null)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
@@ -235,7 +237,7 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[hoverPreviewMounted])
-  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)},[])
+  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)},[])
   useLayoutEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
@@ -284,11 +286,14 @@ export function CmsLayoutManager(){
     setPreviewingPresetId(LAYOUT_PRESETS[nextIndex].id)
   }
   const confirmPreviewPreset=()=>{
-    if(!previewingPreset)return
-    setSettings(previewingPresetSettings)
-    setPreviewMode(previewingPreset.settings.default_gallery_view)
+    const preset=LAYOUT_PRESETS.find(item=>item.id===previewingPresetId)
+    if(!preset)return
+    const nextSettings=buildPresetSettings(settings,preset)
+    setSettings(nextSettings)
+    setPreviewMode(preset.settings.default_gallery_view)
+    setPreviewFocus('page')
     setPreviewingPresetId(null)
-    setNotice('Modelo “'+previewingPreset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
+    setNotice('Modelo “'+preset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
     window.setTimeout(()=>scrollToElement(postPresetMenuRef.current),80)
   }
   const cancelPreviewPreset=()=>{
@@ -333,12 +338,21 @@ export function CmsLayoutManager(){
   }
   const closeOptionPreview=()=>{
     cancelOptionPreviewHide()
+    suppressOptionPreviewRef.current=true
+    if(suppressOptionPreviewTimerRef.current)window.clearTimeout(suppressOptionPreviewTimerRef.current)
+    suppressOptionPreviewTimerRef.current=window.setTimeout(()=>{
+      suppressOptionPreviewRef.current=false
+      suppressOptionPreviewTimerRef.current=null
+    },450)
     setHoveredOption(null)
     setHoverPreviewMounted(false)
   }
-  const hideOptionPreview=()=>{
+  const hideOptionPreview=(event)=>{
+    const preview=document.querySelector('.cms-layout-hover-preview')
+    if(event?.relatedTarget&&preview?.contains(event.relatedTarget))return
+    if(suppressOptionPreviewRef.current)return
     cancelOptionPreviewHide()
-    // Pequena tolerância para o ponteiro atravessar o espaço entre a opção e a prévia.
+    // Mantém a prévia viva ao atravessar para o iframe; fora dela, fecha com uma breve tolerância.
     hoverPreviewHideTimerRef.current=window.setTimeout(()=>{
       setHoveredOption(null)
       setHoverPreviewMounted(false)
@@ -346,6 +360,7 @@ export function CmsLayoutManager(){
     },240)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
+    if(suppressOptionPreviewRef.current)return
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
