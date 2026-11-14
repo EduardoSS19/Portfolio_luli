@@ -219,6 +219,7 @@ export function CmsCategoryManager({
 
   const openAnimationEditor = item => {
     setAnimationCategory(item)
+    setSelectedCategoryId(String(item.id))
     setAnimation(item.animation || 'obra')
     setError('')
     setNotice('')
@@ -428,14 +429,29 @@ export function CmsCategoryManager({
                   {CATEGORY_ANIMATIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
               </label>
-              <div className="cms-category-animation-preview" aria-live="polite">
+              <div className="cms-category-animation-preview cms-category-animation-live-preview" aria-live="polite">
                 <div className="cms-category-animation-preview-heading">
-                  <strong>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial'}</strong>
+                  <strong>Prévia no portfólio</strong>
                   <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Entrada discreta e elegante.'}</small>
                 </div>
-                <div className="cms-animation-demo" data-animation={animation} aria-label={'Prévia da animação ' + (CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label || 'Editorial')}>
-                  <i /><i /><i />
-                </div>
+                {worksLoading ? (
+                  <div className="cms-animation-live-loading">Carregando uma obra desta categoria…</div>
+                ) : (
+                  <article className="cms-animation-live-card" data-animation={animation} key={animation + '-' + (categoryWorks[0]?.id || 'sample')}>
+                    <div className="cms-animation-live-image-wrap">
+                      {categoryWorks.find(work => work.image)?.image ? (
+                        <img className="cms-animation-live-image" src={categoryWorks.find(work => work.image).image} alt={categoryWorks.find(work => work.image)?.title || 'Obra do acervo'} />
+                      ) : (
+                        <div className="cms-animation-live-image cms-animation-live-image-placeholder" role="img" aria-label="Imagem ilustrativa da prévia"><span>Imagem da obra</span></div>
+                      )}
+                    </div>
+                    <div className="cms-animation-live-copy">
+                      <span>ACERVO · {animationCategory.title}</span>
+                      <strong>{categoryWorks[0]?.title || 'Título da obra'}</strong>
+                      <p>Uma composição do acervo de {animationCategory.title}, apresentada com a animação selecionada. Assim você visualiza o efeito aplicado à imagem e ao texto.</p>
+                    </div>
+                  </article>
+                )}
               </div>
               <div className="cms-category-animation-editor-actions">
                 <span>{animation === (animationCategory.animation || 'obra') ? 'Animação atual' : 'Alteração ainda não salva'}</span>
