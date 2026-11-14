@@ -240,6 +240,10 @@ test('cada família de modelo recebe conteúdo demonstrativo da sua área', asyn
   }, 'page')
   await expect(page.locator('.hero')).toContainText('Maya Reis')
   await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Tatuagens autorais')
+  await page.locator('.editorial-menu-trigger').click()
+  await expect(page.locator('.nav-overlay-link', { hasText:'Flash disponíveis' })).toHaveCount(1)
+  await expect(page.locator('.editorial-menu-footer')).toContainText('Maya Reis')
+  await page.keyboard.press('Escape')
 
   await sendSettings(page, {
     presentation_mode:'immersive',
