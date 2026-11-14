@@ -235,3 +235,7 @@
  .portfolio-custom-section.section-layout-steps .portfolio-custom-card,
  .portfolio-custom-section.section-layout-agenda .portfolio-custom-card{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Prevent excessive dead space after the contact form in spacious layout presets. */
+.site-shell[data-layout-spacing] .secao-contato{padding-block:clamp(1.75rem,3vw,3rem)!important;margin-bottom:0!important}
+.site-shell[data-layout-spacing] .rodape{margin-top:0!important}
