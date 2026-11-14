@@ -68,6 +68,7 @@ export function CmsLayoutManager(){
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
   const [previewDocumentHeight,setPreviewDocumentHeight]=useState(PREVIEW_DEVICES.desktop.height)
+  const [previewDocumentWidth,setPreviewDocumentWidth]=useState(PREVIEW_DEVICES.desktop.width)
   const previewDocumentObserversRef=useRef(new Map())
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
@@ -86,8 +87,9 @@ export function CmsLayoutManager(){
   const previewStageWidth=previewWidth*previewScale
   const previewStageHeight=previewDocumentHeight*previewScale
   // A prévia fixa ajusta somente a largura; a altura do iframe continua rolável.
-  const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
-  const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
+  const inlinePreviewContentWidth=Math.max(previewWidth,previewDocumentWidth)
+  const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/inlinePreviewContentWidth):1
+  const inlinePreviewStageWidth=inlinePreviewContentWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewDocumentHeight*inlinePreviewScale
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
   const hoverPreviewScale=Math.min(1,(hoverPreviewSize.width||360)/previewWidth)
@@ -151,7 +153,14 @@ export function CmsLayoutManager(){
         doc.body?.scrollHeight||0,
         doc.body?.offsetHeight||0
       ))
+      const width=Math.ceil(Math.max(
+        doc.documentElement?.scrollWidth||0,
+        doc.documentElement?.offsetWidth||0,
+        doc.body?.scrollWidth||0,
+        doc.body?.offsetWidth||0
+      ))
       if(height>0)setPreviewDocumentHeight(current=>current===height?current:height)
+      if(width>0)setPreviewDocumentWidth(current=>current===width?current:width)
     }
     const previous=previewDocumentObserversRef.current.get(frame)
     previous?.resize?.disconnect()
@@ -372,7 +381,7 @@ export function CmsLayoutManager(){
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:inlinePreviewContentWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
       <p className="cms-layout-preview-caption">Largura ajustada automaticamente ({Math.round(inlinePreviewScale*100)}%). Role para cima e para baixo para percorrer todo o portfólio.</p>
     </section>
     
