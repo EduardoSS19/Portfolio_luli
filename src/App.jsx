@@ -271,7 +271,7 @@ function getLayoutPreviewDemo(layout = {}) {
     illustration:['Ilustração editorial','Personagens e narrativas','Desenho e sketchbook'],
     photo:['Ensaios autorais','Retratos e editoriais','Arquitetura e espaço'],
     design:['Identidade e branding','Design editorial','Digital e experiências'],
-    tattoo:['Tatuagens autorais','Flash disponíveis','Trabalhos cicatrizados'],
+    tattoo:['Tatuagens autorais','Projetos personalizados','Detalhes e estudos'],
     studio:['Trabalhos do estúdio','Artistas residentes','Flash coletivo'],
   }[variant]
   const categories = categoryNames.map((title,index) => ({
@@ -677,7 +677,7 @@ export default function App() {
         behavior: comportamentoRolagem,
       })
     }
-    const secao = document.getElementById(titulo)
+    const secao = document.getElementById(titulo) || (categoriaAnimacao?.chave ? document.getElementById(categoriaAnimacao.chave) : null)
     if (secao) {
       rolarPara(secao)
       return
@@ -871,7 +871,7 @@ export default function App() {
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
       <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} examples={conteudo.previewSectionExamples} />
-      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" hidden />}
+      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" hidden style={{display:'none'}} />}
       {layout.show_contact !== false && <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />}
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
