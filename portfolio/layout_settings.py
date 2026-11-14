@@ -22,6 +22,7 @@ DEFAULT_LAYOUT_SETTINGS = {
     "show_bio_image": True,
     "show_bio": True,
     "show_references": True,
+    "custom_sections": [],
 }
 LAYOUT_SETTING_CHOICES = {
     "content_width": {"compact", "standard", "wide"},
@@ -34,6 +35,41 @@ LAYOUT_SETTING_CHOICES = {
 }
 COLOR_SETTING_KEYS = {f"{theme}_{key}" for theme in ("dark", "light") for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent")}
 BOOLEAN_SETTING_KEYS = {"show_bio_image", "show_bio", "show_references"}
+CUSTOM_SECTION_TYPES = {"exhibitions", "process", "services", "press", "testimonials", "tattoo-flash", "tattoo-booking", "healed-work", "guest-spots", "studio-team"}
+
+
+def normalize_custom_sections(value):
+    if not isinstance(value, list):
+        return []
+    sections = []
+    for section in value[:10]:
+        if not isinstance(section, dict) or section.get("type") not in CUSTOM_SECTION_TYPES:
+            continue
+        section_id = section.get("id")
+        if not isinstance(section_id, str) or not re.fullmatch(r"[a-z0-9-]{1,48}", section_id):
+            continue
+        title = section.get("title")
+        if not isinstance(title, str) or not title.strip():
+            continue
+        items = []
+        for item in (section.get("items") if isinstance(section.get("items"), list) else [])[:20]:
+            if not isinstance(item, dict):
+                continue
+            item_title = item.get("title")
+            if not isinstance(item_title, str) or not item_title.strip():
+                continue
+            clean = {"title": item_title.strip()[:120]}
+            for key, limit in (("description", 1200), ("url", 500), ("image", 500), ("period", 100)):
+                candidate = item.get(key)
+                if isinstance(candidate, str) and (not candidate or (key not in {"url", "image"} or candidate.startswith(("https://", "http://")))):
+                    clean[key] = candidate[:limit]
+            items.append(clean)
+        sections.append({
+            "id": section_id, "type": section["type"], "title": title.strip()[:100],
+            "intro": section.get("intro", "")[:500] if isinstance(section.get("intro", ""), str) else "",
+            "items": items,
+        })
+    return sections
 LEGACY_COLOR_KEYS = {"color_background", "color_surface", "color_text", "color_muted", "color_accent"}
 HEX_COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
@@ -46,6 +82,7 @@ def normalize_layout_settings(value):
     }
     for key in BOOLEAN_SETTING_KEYS:
         normalized[key] = source.get(key) if isinstance(source.get(key), bool) else DEFAULT_LAYOUT_SETTINGS[key]
+    normalized["custom_sections"] = normalize_custom_sections(source.get("custom_sections", []))
     for theme in ("dark", "light"):
         for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent"):
             setting_key = f"{theme}_{key}"
@@ -65,4 +102,6 @@ def is_valid_layout_setting(key, value):
         return isinstance(value, str) and bool(HEX_COLOR_RE.fullmatch(value))
     if key in BOOLEAN_SETTING_KEYS:
         return isinstance(value, bool)
+    if key == "custom_sections":
+        return isinstance(value, list) and len(value) <= 10 and normalize_custom_sections(value) == value
     return False
