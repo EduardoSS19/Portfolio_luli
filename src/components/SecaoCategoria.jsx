@@ -2,7 +2,9 @@ import { ObraCard } from './ObraCard.jsx'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
 
 export function SecaoCategoria({ titulo, chave, animacao = 'obra', obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0, animando = false }) {
-  const tipo = animacao || 'obra'
+  const animacoesConhecidas = ['obra', 'ceramica', 'gravura', 'desenho', 'glitch', 'fotografia', 'videoarte', 'suave', 'deslizar', 'zoom', 'recorte', 'flutuar', 'nenhuma']
+  const animacaoDaCategoria = chave === 'glitch-art' ? 'glitch' : chave
+  const tipo = animacao || (animacoesConhecidas.includes(animacaoDaCategoria) ? animacaoDaCategoria : 'obra')
   const [cabecalhoRef, cabecalhoVisivel] = useScrollReveal()
 
   return (
