@@ -341,7 +341,7 @@ export function CmsCategoryManager({
       <div className="cms-category-page">
         <section className="cms-category-list">
           <h2>Suas categorias</h2>
-          <p>Desativar uma categoria não apaga as obras vinculadas a ela.</p>
+          <p>Para definir a animação, clique em <strong>Editar</strong> na categoria desejada e escolha uma opção na lista. Desativar uma categoria não apaga suas obras.</p>
           {loading ? <div className="cms-loading">Carregando categorias…</div> : items.length ? items.map(item => (
             <article
               className={'cms-category-item' + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
