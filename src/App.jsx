@@ -560,10 +560,17 @@ export default function App() {
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
                 : null
-      if (selector) {
+      const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
+      const target = selector
+        ? document.querySelector(selector)
+        : null
+      const fallbackTarget = target || (focus === 'references' || focus === 'contact'
+        ? document.querySelector('#Contato, .rodape')
+        : null)
+      if (fallbackTarget) {
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
-            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+            fallbackTarget.scrollIntoView({ block: 'start', behavior: hoverSnapshot ? 'instant' : 'smooth' })
           })
         })
       }
