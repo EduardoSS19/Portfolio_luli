@@ -318,7 +318,7 @@ export default function App() {
     ...(conteudo.layout?.show_bio ?? true ? [{ titulo: 'Início', chave: 'inicio' }] : []),
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
-    ...(conteudo.layout?.custom_sections || []).filter(section => section.title && section.items?.length).map(section => ({ titulo: section.title, chave: section.id })),
+    ...(conteudo.layout?.custom_sections || []).filter(section => section.title && (section.items?.length || new URLSearchParams(window.location.search).has('layout_preview'))).map(section => ({ titulo: section.title, chave: section.id })),
     ...(conteudo.layout?.show_contact !== false ? [{ titulo: 'Contato', chave: 'contato' }] : []),
   ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio, conteudo.layout?.show_contact, conteudo.layout?.custom_sections])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
@@ -703,6 +703,8 @@ export default function App() {
         tema={tema}
         aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
         navigationMode={layout.navigation_mode || 'curtain'}
+        nomeArtista={sobre.nome}
+        fraseArtista={sobre.frase}
       />
       {(layout.show_bio_image !== false || layout.show_bio !== false) && <Sobre perfil={sobre} mostrarImagem={layout.show_bio_image !== false} mostrarBio={layout.show_bio !== false} />}
       {modoGaleria === 'grade' ? (
