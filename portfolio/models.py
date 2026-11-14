@@ -71,11 +71,6 @@ class Category(models.Model):
         ("glitch", "Glitch"),
         ("fotografia", "Fotografia"),
         ("videoarte", "Videoarte"),
-        ("suave", "Aparição suave"),
-        ("deslizar", "Deslizar"),
-        ("zoom", "Zoom"),
-        ("recorte", "Revelação por recorte"),
-        ("flutuar", "Flutuação"),
         ("nenhuma", "Sem animação"),
     )
     title = models.CharField("título", max_length=100)
