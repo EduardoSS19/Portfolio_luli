@@ -133,10 +133,9 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
-  // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
-  const hoverPreviewScale=Math.min(1,(hoverPreviewSize.width||360)/previewWidth)
-  const hoverPreviewStageWidth=previewWidth*hoverPreviewScale
-  const hoverPreviewStageHeight=previewHeight*hoverPreviewScale
+  // O modal contextual usa um viewport móvel real, sem coordenadas distorcidas por transform.
+  const hoverPreviewStageWidth=hoverPreviewSize.width||358
+  const hoverPreviewStageHeight=PREVIEW_DEVICES.mobile.height
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -563,10 +562,10 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
             </div>
           </div>
-          <p className="cms-layout-preview-caption">Prévia interativa: navegue pelo menu e role para explorar. Clique na opção para aplicá-la ao editor.</p>
+          <p className="cms-layout-preview-caption">Prévia interativa em largura de celular: navegue pelo menu e role para explorar. Clique na opção para aplicá-la ao editor.</p>
         </aside>,
         document.body
       )}
