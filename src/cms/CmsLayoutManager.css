@@ -280,13 +280,8 @@
 @media(max-width:600px){.cms-layout-hover-preview-floating{padding:9px}.cms-layout-hover-preview-frame{height:220px;min-height:220px;max-height:220px}}
 
 
-/* A prévia contextual tem uma faixa própria: nunca fica sobre os controles. */
-@media(min-width:1101px){
-  .cms-layout-workspace.has-hover-preview .cms-layout-form{
-    width:calc(100% - 396px);
-  }
-}
-
+/* A prévia contextual é renderizada em portal e fica sobreposta à página.
+   Ela não participa do fluxo nem altera a largura do formulário. */
 
 /* A prévia contextual termina exatamente no fim do viewport escalado do iframe. */
 .cms-layout-hover-preview-frame{
@@ -344,9 +339,8 @@
 }
 
 
-/* Em telas estreitas a prévia fica no rodapé e nunca intercepta o ponteiro. */
+/* A prévia contextual permanece sobreposta também em telas estreitas. */
 @media(max-width:1100px){
-  .cms-layout-workspace.has-hover-preview .cms-layout-form{width:100%}
   .cms-layout-hover-preview-floating{max-height:min(440px,55vh)!important}
 }
 
