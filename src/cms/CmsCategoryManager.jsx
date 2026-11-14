@@ -481,14 +481,18 @@ export function CmsCategoryManager({
                 </div>
                 <button type="button" className="cms-editor-cancel" onClick={() => setAnimationCategory(null)} disabled={saving}>Voltar</button>
               </div>
-              <label className="cms-category-animation-select">Animação desta categoria
-                <select value={animation} onChange={event => setAnimation(event.target.value)} disabled={saving}>
-                  {CATEGORY_ANIMATIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
-              </label>
+              <div className="cms-category-animation-select-row" role="group" aria-label="Escolha uma animação">
+                <button type="button" className="cms-category-animation-step" aria-label="Animação anterior" title="Anterior" disabled={saving||CATEGORY_ANIMATIONS.findIndex(option=>option.value===animation)===0} onClick={()=>setAnimation(CATEGORY_ANIMATIONS[Math.max(0,CATEGORY_ANIMATIONS.findIndex(option=>option.value===animation)-1)].value)}>←</button>
+                <label className="cms-category-animation-select">Animação desta categoria
+                  <select value={animation} onChange={event=>setAnimation(event.target.value)} disabled={saving}>
+                    {CATEGORY_ANIMATIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}
+                  </select>
+                </label>
+                <button type="button" className="cms-category-animation-step" aria-label="Próxima animação" title="Próxima" disabled={saving||CATEGORY_ANIMATIONS.findIndex(option=>option.value===animation)===CATEGORY_ANIMATIONS.length-1} onClick={()=>setAnimation(CATEGORY_ANIMATIONS[Math.min(CATEGORY_ANIMATIONS.length-1,CATEGORY_ANIMATIONS.findIndex(option=>option.value===animation)+1)].value)}>→</button>
+              </div>
               <div className="cms-category-animation-live-preview" aria-live="polite" key={animation + '-' + animationCategory.id}>
                 <div className="cms-category-animation-preview-heading">
-                  <strong>Prévia no formato real do portfólio</strong>
+                  <strong>Prévia ampliada · {CATEGORY_ANIMATIONS.find(option => option.value === animation)?.label}</strong>
                   <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Veja a entrada da imagem, do título e da descrição.'}</small>
                 </div>
                 <header className={'secao-cabecalho arte-' + animation + (previewHeaderVisible ? ' visivel' : '')}>
@@ -497,16 +501,8 @@ export function CmsCategoryManager({
                   <span className="secao-contagem">{String(categoryWorks.length || 2).padStart(2, '0')} obras</span>
                 </header>
                 <article className={'cms-animation-live-card obra arte-' + animation + ' visivel'} key={animation + '-' + (animationPreviewWork?.id || 'sample')}>
-                  <div className="cms-animation-live-image-wrap obra-imagem">
-                    <div className="obra-zoom-trigger">
-                      <img className="cms-animation-live-image" src={animationPreviewImage} alt={animationPreviewWork?.title || 'Imagem demonstrativa de uma obra'} />
-                    </div>
-                  </div>
-                  <div className="cms-animation-live-copy obra-texto">
-                    <span className="categoria-legenda">{animationCategory.title}</span>
-                    <h3>{animationPreviewTitle}</h3>
-                    <p>{animationPreviewDescription}</p>
-                  </div>
+                  <div className="cms-animation-live-image-wrap obra-imagem"><div className="obra-zoom-trigger"><img className="cms-animation-live-image" src={animationPreviewImage} alt={animationPreviewWork?.title || 'Imagem demonstrativa de uma obra'} /></div></div>
+                  <div className="cms-animation-live-copy obra-texto"><span className="categoria-legenda">{animationCategory.title}</span><h3>{animationPreviewTitle}</h3><p>{animationPreviewDescription}</p></div>
                 </article>
                 {!animationPreviewWork && <small className="cms-animation-live-sample-note">Imagem e texto demonstrativos — serão substituídos automaticamente por uma obra desta categoria quando houver conteúdo cadastrado.</small>}
                 {worksLoading && <small className="cms-animation-live-sample-note">Atualizando conteúdo da categoria…</small>}

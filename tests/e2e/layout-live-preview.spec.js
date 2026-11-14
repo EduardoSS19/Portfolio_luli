@@ -31,6 +31,34 @@ async function sendSettings(page, settings, focus = 'page', previewMode, animate
   }, { settings, focus, previewMode, animatePreview })
 }
 
+test('preview inicial é um portfólio completo com perfil, imagens, obras, trajetória e redes', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.hero h1')).toHaveText('Helena Duarte')
+  await expect(page.locator('.hero p')).toContainText('Artes visuais')
+  await expect(page.locator('.sobre-secao img')).toHaveAttribute('src', /images\.unsplash\.com/)
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Artista visual e pesquisadora independente')
+  await expect(page.locator('.obras-lista .obra')).toHaveCount(8)
+  await expect(page.locator('.obra img').first()).toHaveAttribute('src', /images\.unsplash\.com/)
+  await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
+  await expect(page.locator('.rodape-links a')).toHaveCount(4)
+  await expect(page.locator('#Contato form')).toBeVisible()
+})
+
+test('formulário do preview simula envio sem chamar nenhum serviço externo', async ({ page }) => {
+  let contactRequests = 0
+  await page.route('**/api/contact/**', route => {
+    contactRequests += 1
+    return route.fulfill({ status: 500, body: 'Preview must not send' })
+  })
+  await openLiveLayoutPreview(page)
+  await page.locator('#Contato input[name="nome"]').fill('Pessoa visitante')
+  await page.locator('#Contato input[name="email"]').fill('visitante@example.com')
+  await page.locator('#Contato textarea[name="mensagem"]').fill('Gostaria de saber mais sobre este trabalho.')
+  await page.locator('#Contato button[type="submit"]').click()
+  await expect(page.locator('#Contato .form-status')).toContainText('nenhuma mensagem foi enviada')
+  expect(contactRequests).toBe(0)
+})
+
 test('a prévia navega até a seção editada dentro do iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await page.evaluate(() => window.scrollTo(0, 0))
@@ -46,18 +74,81 @@ test('a prévia navega até a seção editada dentro do iframe', async ({ page }
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScrollY)
 })
 
+test('modelos alteram a apresentação e a navegação sem recarregar a prévia', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { presentation_mode: 'carousel', navigation_mode: 'dropdown' }, 'page')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'carousel')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-navigation', 'dropdown')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-dropdown/)
+  const menuTrigger = page.locator('.editorial-menu-trigger')
+  const menuBackdrop = page.locator('.editorial-menu-backdrop')
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+  const carousel = await page.locator('.secao:not(.sobre-secao) .obras-lista').first().evaluate(element => ({
+    display: getComputedStyle(element).display,
+    overflowX: getComputedStyle(element).overflowX,
+    snap: getComputedStyle(element).scrollSnapType,
+  }))
+  expect(carousel.display).toBe('flex')
+  expect(['auto', 'scroll']).toContain(carousel.overflowX)
+  expect(carousel.snap).toContain('x')
+
+  await sendSettings(page, { presentation_mode: 'immersive', navigation_mode: 'sidebar' }, 'navigation')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'immersive')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-sidebar/)
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+  await menuTrigger.click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+  await sendSettings(page, { presentation_mode: 'masonry', navigation_mode: 'curtain' }, 'navigation')
+  await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'masonry')
+  await expect(page.locator('.site-nav')).toHaveClass(/navigation-curtain/)
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
+  await page.locator('.nav-overlay-link').first().click()
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+})
+
+test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, {
+    default_gallery_view: 'grade',
+    custom_sections: [{
+      id: 'custom-processo',
+      type: 'process',
+      title: 'Processo criativo',
+      intro: 'Etapas e experimentações do trabalho.',
+      items: [],
+    }],
+  }, 'page', 'grade')
+
+  const customSection = page.locator('#custom-processo')
+  await expect(customSection).toBeVisible()
+  const initialScroll = await page.evaluate(() => window.scrollY)
+  await page.locator('.editorial-menu-trigger').click()
+  const customLink = page.locator('.nav-overlay-link').filter({ hasText: 'Processo criativo' })
+  await expect(customLink).toHaveCount(1)
+  await customLink.click()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll)
+  await expect(customSection).toBeInViewport()
+})
+
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
-  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(6)
+  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
-  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(6)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
   expect(await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)).toBe(initialNavigation)
 })
@@ -168,13 +259,14 @@ test('prévia respeita opções independentes da apresentação e referências',
   await sendSettings(page, { show_bio_image: false, show_bio: true, show_references: false }, 'page')
   await expect(page.locator('.sobre-secao .obra-imagem')).toHaveCount(0)
   await expect(page.locator('.sobre-secao .biografia')).toBeVisible()
-  await expect(page.locator('#Referências')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toHaveCount(1)
+  await expect(page.locator('#Referências')).toBeHidden()
   await expect(page.locator('.nav-overlay-link', { hasText: 'Referências' })).toHaveCount(0)
   await sendSettings(page, { show_bio_image: true, show_bio: false, show_references: true }, 'page')
   await expect(page.locator('.sobre-secao .obra-imagem')).toBeVisible()
   await expect(page.locator('.sobre-secao .biografia')).toHaveCount(0)
   await expect(page.locator('.sobre-secao .categoria-legenda')).toHaveCount(0)
-  await expect(page.locator('.nav-overlay-link', { hasText: 'Início' })).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText: 'Início' })).toHaveCount(1)
   await expect(page.locator('#Referências')).toBeVisible()
 })
 
@@ -183,7 +275,8 @@ test('configurações de visibilidade são preservadas ao alternar entre temas',
   await sendSettings(page, { show_bio_image: false, show_bio: false, show_references: false, default_theme: 'claro' }, 'page')
   await expect(page.locator('.sobre-secao')).toHaveCount(0)
   await expect(page.locator('.nav-overlay-link', { hasText: 'Início' })).toHaveCount(0)
-  await expect(page.locator('#Referências')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toHaveCount(1)
+  await expect(page.locator('#Referências')).toBeHidden()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'claro')
 })
 
@@ -192,17 +285,97 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await openLiveLayoutPreview(page)
   await expect(page.locator('.hero')).toBeVisible()
   await expect(page.locator('.sobre-secao')).toBeVisible()
-  await expect(page.locator('.sobre-secao .biografia')).toContainText('Lorem ipsum')
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Artista visual e pesquisadora independente')
   await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(4)
-  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(6)
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(8)
   await expect(page.locator('#Referências')).toBeVisible()
-  await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
+  await expect(page.locator('#Referências')).toContainText('Exposição individual')
   await expect(page.locator('#Contato')).toBeVisible()
   const contactForm = page.locator('#Contato .form-contato')
   await expect(contactForm).toBeVisible()
   await expect(contactForm.getByLabel('Nome')).toBeVisible()
   await expect(contactForm.getByLabel('E-mail')).toBeVisible()
   await expect(contactForm.getByLabel('Mensagem')).toBeVisible()
+})
+
+test('cada família de modelo recebe conteúdo demonstrativo da sua área', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, {
+    presentation_mode:'carousel',
+    navigation_mode:'dropdown',
+    default_theme:'escuro',
+    custom_sections:[{id:'preset-tattoo-flash',type:'tattoo-flash',title:'Flash disponíveis',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Maya Reis')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Tatuagens autorais')
+  await page.locator('.editorial-menu-trigger').click()
+  await expect(page.locator('.nav-overlay-link', { hasText:'Flash disponíveis' })).toHaveCount(1)
+  await expect(page.locator('.editorial-menu-footer')).toContainText('Maya Reis')
+  await page.keyboard.press('Escape')
+
+  await sendSettings(page, {
+    presentation_mode:'immersive',
+    navigation_mode:'sidebar',
+    custom_sections:[{id:'preset-photo-exhibitions',type:'exhibitions',title:'Exposições',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Clara Nogueira')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Ensaios autorais')
+
+  await sendSettings(page, {
+    presentation_mode:'carousel',
+    navigation_mode:'dropdown',
+    default_theme:'claro',
+    custom_sections:[{id:'preset-design-services',type:'services',title:'Serviços',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Estúdio Norte')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Identidade e branding')
+
+  await sendSettings(page, {
+    presentation_mode:'masonry',
+    navigation_mode:'dropdown',
+    default_theme:'claro',
+    custom_sections:[{id:'preset-illustration-process',type:'process',title:'Processo',intro:'Exemplos',items:[]}],
+  }, 'page')
+  await expect(page.locator('.hero')).toContainText('Bia Campos')
+  await expect(page.locator('.secao:not(.sobre-secao) h2').first()).toContainText('Ilustração editorial')
+})
+
+test('seções centrais podem ser removidas do modelo sem deixar links órfãos', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { show_bio:false, show_bio_image:false, show_references:false, show_contact:false }, 'page')
+  await expect(page.locator('.sobre-secao')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toHaveCount(1)
+  await expect(page.locator('#Referências')).toBeHidden()
+  await expect(page.locator('#Contato')).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Início' })).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Referências' })).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Contato' })).toHaveCount(0)
+})
+
+test('modelos preenchem todas as seções preparadas com exemplos adequados ao tipo', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  const types = ['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team']
+  await sendSettings(page, {
+    custom_sections: types.map((type,index) => ({
+      id: 'demo-'+type,
+      type,
+      title: ({
+        exhibitions:'Exposições e trajetória', process:'Processo criativo', services:'Serviços e encomendas',
+        press:'Imprensa e publicações', testimonials:'Depoimentos', 'tattoo-flash':'Flash disponíveis',
+        'tattoo-booking':'Agendamento de tatuagem', 'healed-work':'Trabalhos cicatrizados',
+        'guest-spots':'Agenda e guest spots', 'studio-team':'Estúdio e equipe',
+      })[type],
+      intro:'Conteúdo demonstrativo para visualizar este modelo.',
+      items:[],
+    })),
+  }, 'page')
+  await expect(page.locator('[data-preview-example="true"]')).toHaveCount(types.length)
+  await expect(page.locator('.portfolio-custom-empty-preview')).toHaveCount(0)
+  await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(22)
+  await expect(page.locator('.section-tattoo-flash')).toContainText('Flash disponível')
+  await expect(page.locator('.section-tattoo-booking')).toContainText('orçamento')
+  await expect(page.locator('.section-healed-work')).toContainText('cicatrizada')
+  await expect(page.locator('.section-studio-team')).toContainText('Artista residente')
 })
 
 test('prévia mantém a posição de rolagem ao alterar opções de layout', async ({ page }) => {

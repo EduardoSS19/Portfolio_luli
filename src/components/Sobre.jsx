@@ -7,10 +7,10 @@ export function Sobre({ perfil, mostrarImagem = true, mostrarBio = true }) {
     <section id="Início" className="secao sobre-secao">
       <div ref={ref} className={`obra sobre-entrada ${!mostrarImagem ? 'sem-imagem' : ''} ${visivel ? 'visivel' : ''}`}>
         {mostrarImagem && <div className={`obra-imagem ${perfil.foto ? '' : 'obra-imagem-placeholder'}`}>
-          {perfil.foto ? <img src={perfil.foto} alt={perfil.nome} /> : <span>Foto da artista</span>}
+          {perfil.foto ? <img src={perfil.foto} alt={perfil.nome} /> : <span>Imagem de apresentação</span>}
         </div>}
         <div className="obra-texto">
-          {mostrarBio && <span className="categoria-legenda">Início</span>}
+          {mostrarBio && <span className="categoria-legenda">Apresentação</span>}
           <h2>{perfil.nome}</h2>
           {mostrarBio && <p className="biografia" style={{ whiteSpace: 'pre-line' }}>{perfil.bio}</p>}
         </div>

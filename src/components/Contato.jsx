@@ -9,7 +9,7 @@ function lerCookie(nome) {
   return cookie ? decodeURIComponent(cookie.slice(nome.length + 1)) : ''
 }
 
-export function Contato({ endpoint, email }) {
+export function Contato({ endpoint, email, demoMode = false }) {
   const [enviando, setEnviando] = useState(false)
   const [status, setStatus] = useState(null)
   const [ref, visivel] = useScrollReveal()
@@ -20,6 +20,14 @@ export function Contato({ endpoint, email }) {
     setStatus(null)
 
     const formulario = e.currentTarget
+    if (demoMode) {
+      window.setTimeout(() => {
+        setEnviando(false)
+        setStatus('demonstracao')
+        formulario.reset()
+      }, 450)
+      return
+    }
     const dados = new FormData(formulario)
     const usarApiDoPortfolio = Boolean(email)
 
@@ -85,7 +93,8 @@ export function Contato({ endpoint, email }) {
         <button type="submit" disabled={enviando}>
           {enviando ? 'Enviando...' : 'Enviar mensagem'}
         </button>
-        {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Obrigada pelo contato.</p>}
+        {status === 'sucesso' && <p className="form-status sucesso" role="status">Mensagem enviada! Agradecemos o contato.</p>}
+        {status === 'demonstracao' && <p className="form-status sucesso" role="status">Prévia demonstrativa: nenhuma mensagem foi enviada.</p>}
         {status === 'erro' && <p className="form-status erro" role="alert">Não foi possível enviar agora. Tente novamente mais tarde.</p>}
       </form>
     </section>

@@ -32,7 +32,7 @@ def cms_layout(request):
             "settings": normalize_layout_settings(profile.layout_settings if profile else {}),
             "permissions": {"canChange": bool(profile and request.user.has_perm("portfolio.change_artistprofile"))},
         })
-    if request.content_type != "application/json" or len(request.body) > 8192:
+    if request.content_type != "application/json" or len(request.body) > 65536:
         return JsonResponse({"error": "invalid_request"}, status=400)
     try:
         payload = json.loads(request.body.decode("utf-8"))

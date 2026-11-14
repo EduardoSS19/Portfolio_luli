@@ -11,15 +11,44 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
+  const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
+  const effectiveNavigationMode = previewNavigationMode || navigationMode
   const botaoMenuRef = useRef(null)
+  const previewMenuAutoOpenRef = useRef(false)
   const primeiroLinkRef = useRef(null)
   const overflowAnteriorRef = useRef({ body: '', html: '' })
   const categoriaAtual = categorias.find(cat => cat.titulo === categoriaAtiva)
   const animacaoAtual = categoriaAtual && animando === categoriaAtual.chave
     ? `anim-${tipoDeAnimacao(categoriaAtual)}`
     : ''
+
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('layout_preview')) return
+    // A prop atualizada é a fonte de verdade para cada opção temporária.
+    // Não deixe um modo recebido por evento anterior mascarar a nova escolha.
+    if (navigationMode === 'sidebar') {
+      previewMenuAutoOpenRef.current = true
+      setMenuAberto(true)
+    }
+  }, [navigationMode])
+
+  useEffect(() => {
+    const handlePreviewNavigation = event => {
+      const requestedMode = event.detail?.mode
+      setPreviewNavigationMode(requestedMode === 'sidebar' ? 'sidebar' : null)
+      if (event.detail?.open || requestedMode === 'sidebar') {
+        previewMenuAutoOpenRef.current = true
+        setMenuAberto(true)
+      } else if (previewMenuAutoOpenRef.current) {
+        previewMenuAutoOpenRef.current = false
+        setMenuAberto(false)
+      }
+    }
+    window.addEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
+    return () => window.removeEventListener('cms-layout-preview:navigation', handlePreviewNavigation)
+  }, [])
 
   useEffect(() => {
     if (!menuAberto) return undefined
@@ -82,14 +111,14 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   }
 
   return (
-    <nav className={`site-nav editorial-nav ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
+    <nav className={`site-nav editorial-nav navigation-${effectiveNavigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
       <button
         ref={botaoMenuRef}
         type="button"
         className="editorial-menu-trigger"
         aria-expanded={menuAberto}
         aria-controls="editorial-navigation"
-        onClick={() => setMenuAberto(aberto => !aberto)}
+        onClick={() => { previewMenuAutoOpenRef.current = false; setMenuAberto(aberto => !aberto) }}
       >
         <span className="editorial-menu-trigger-label">{menuAberto ? 'FECHAR' : 'MENU'}</span>
         <span className={`editorial-menu-mark ${menuAberto ? 'aberto' : ''}`} aria-hidden="true">
@@ -140,8 +169,8 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
             </button>
           </div>
           <div className="editorial-menu-footer">
-            <span>ARTE · PESQUISA · EXPERIMENTAÇÃO</span>
-            <span>PORTO ALEGRE, BRASIL</span>
+            <span>{fraseArtista || 'PORTFÓLIO AUTORAL'}</span>
+            <span>{nomeArtista || 'PORTFÓLIO'}</span>
           </div>
         </div>
       </div>

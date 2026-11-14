@@ -165,11 +165,51 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const isToLeft = anchoredGeometry.preview.right <= anchoredGeometry.option.left
   expect(isToRight || isToLeft).toBeTruthy()
 
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-hero-align'))).toBe('left')
+  const hoverFrameBox = await temporaryFrame.boundingBox()
+  await page.mouse.move(hoverFrameBox.x + hoverFrameBox.width / 2, hoverFrameBox.y + hoverFrameBox.height / 2)
+  await page.mouse.wheel(0, 560)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)).toBeGreaterThan(0)
+  await expect(hoverPreview).toBeVisible()
+
+  const previewDocument = page.frameLocator('iframe[title="Prévia temporária do portfólio"]')
+  await previewDocument.locator('.editorial-menu-trigger').click()
+  await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'false')
+  await previewDocument.locator('.nav-overlay-link').first().click()
+  await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'true')
+  await expect(hoverPreview).toBeVisible()
+
   const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBeforeSelection)
+
+  const paletteOption = page.getByRole('button', { name: 'Aplicar paleta Oliva e papel' })
+  await paletteOption.hover()
+  await expect(hoverPreview).toBeVisible()
+  await expect(hoverPreview).toContainText('Oliva e papel')
+  await expect.poll(() => temporaryFrame.evaluate(frame => (() => { const shell = frame.contentDocument?.querySelector('.site-shell'); return shell ? frame.contentWindow.getComputedStyle(shell).getPropertyValue('--azul-escuro').trim() : ''; })())).toBe('#171912')
+  const backgroundColorOption = page.locator('.cms-layout-color-field').filter({ hasText: 'Fundo' })
+  await backgroundColorOption.hover()
+  await expect(hoverPreview).toBeVisible()
+  await expect(hoverPreview).toContainText('Fundo')
+
+  const carouselOption = page.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
+  await carouselOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-presentation'))).toBe('carousel')
+  await expect(temporaryFrame).toBeVisible()
+
+  const sidebarOption = page.locator('.cms-layout-option').filter({ hasText: 'Painel lateral' })
+  await sidebarOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-nav')?.classList.contains('navigation-sidebar'))).toBe(true)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.editorial-menu-backdrop')?.getAttribute('aria-hidden'))).toBe('false')
+  await expect(sidebarOption.locator('input')).not.toBeChecked()
+
+  const hideReferencesOption = page.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
+  await hideReferencesOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-show-references'))).toBe('false')
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('#Referências')?.hidden)).toBe(true)
 
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
@@ -197,4 +237,85 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await page.mouse.up()
   await expect.poll(() => floatingPanel.evaluate(panel => panel.getBoundingClientRect().width)).toBeGreaterThan(beforePanelWidth + 50)
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(beforeResize + 50)
+})
+
+
+test('prévia contextual permanece acessível e dentro da tela em celular', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ settings: { hero_alignment: 'center' }, permissions: { canChange: true } }),
+  }))
+  await page.route('**/api/portfolio/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: null, layout: {} }),
+  }))
+
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const option = page.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
+  await option.scrollIntoViewIfNeeded()
+  await option.locator('input').focus()
+
+  const preview = page.locator('.cms-layout-hover-preview')
+  await expect(preview).toBeVisible()
+  const bounds = await preview.boundingBox()
+  expect(bounds).not.toBeNull()
+  expect(bounds.x).toBeGreaterThanOrEqual(0)
+  expect(bounds.y).toBeGreaterThanOrEqual(0)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390)
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(844)
+
+  await preview.getByRole('button', { name: 'Fechar prévia temporária' }).click()
+  await expect(preview).toBeHidden()
+  await option.locator('input').check()
+  await expect(option.locator('input')).toBeChecked()
+})
+
+test('modelos prontos e biblioteca de seções permitem configurar conteúdo especializado', async ({ page }) => {
+  let savedSettings = null
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', async route => {
+    if (route.request().method() === 'PATCH') savedSettings = route.request().postDataJSON()
+    return route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({
+        settings: savedSettings || {
+          content_width:'standard',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',
+          gallery_columns:'3',default_gallery_view:'lista',default_theme:'escuro',
+          dark_color_background:'#061522',dark_color_surface:'#0b2943',dark_color_text:'#eff7ff',dark_color_muted:'#a9bdcc',dark_color_accent:'#93c8f2',
+          light_color_background:'#f5f2eb',light_color_surface:'#ffffff',light_color_text:'#24231f',light_color_muted:'#77746c',light_color_accent:'#657c62',
+          show_bio_image:true,show_bio:true,show_references:true,custom_sections:[],
+        },
+        permissions:{canChange:true},
+      }),
+    })
+  })
+  await page.route('**/api/portfolio/', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
+  await page.goto('/painel',{waitUntil:'domcontentloaded'})
+  await page.locator('.cms-nav').getByRole('button',{name:/Layout/}).click()
+  const tattooPreset = page.locator('.cms-layout-preset-card').filter({ hasText: 'Tatuador(a)' })
+  await tattooPreset.getByRole('button', { name: /Visualizar modelo/ }).click()
+  const inlinePreview = page.locator('.cms-layout-inline-preview')
+  await expect(inlinePreview).toContainText('Tatuador(a)')
+  await expect(inlinePreview.getByRole('button', { name: 'Confirmar este layout' })).toBeVisible()
+  await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
+  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
+  await inlinePreview.getByRole('button', { name: 'Próximo modelo' }).click()
+  await expect(inlinePreview).toContainText('7 de 7')
+  await inlinePreview.getByRole('button', { name: 'Modelo anterior' }).click()
+  await expect(inlinePreview).toContainText('Tatuador(a)')
+  await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
+  await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
+  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(4)
+  const flashSection = page.locator('.cms-layout-custom-section').filter({ hasText: 'Flash disponíveis' }).first()
+  const flashEditor = flashSection.locator('details.cms-layout-custom-section-editor')
+  await expect(flashEditor).not.toHaveAttribute('open', '')
+  await flashEditor.locator('summary').click()
+  await flashSection.getByRole('button', { name: '+ Adicionar conteúdo' }).click()
+  await flashSection.locator('.cms-layout-custom-item input').first().fill('Lua crescente')
+  await flashSection.locator('.cms-layout-custom-item textarea').fill('Flash blackwork disponível')
+  await page.getByRole('button',{name:'Salvar personalização'}).click()
+  await expect.poll(()=>savedSettings?.custom_sections?.[0]?.items?.[0]?.title).toBe('Lua crescente')
 })

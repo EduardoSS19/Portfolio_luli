@@ -47,6 +47,7 @@
 }
 .layout-preview-banner{
   position:relative;
+  pointer-events:none;
   z-index:80;
   padding:.7rem 1rem;
   color:#171912;
@@ -173,4 +174,34 @@
 .site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao,
 .site-shell[data-layout-width] .obra:not(.modo-grade) .obra-detalhe-botao span {
   color:var(--layout-accent-on-surface,var(--layout-surface-text))!important;
+}
+
+.portfolio-custom-section{padding-block:clamp(2rem,5vw,5rem)}
+.portfolio-custom-intro{max-width:760px;margin:0 auto 1.5rem;color:var(--layout-text-muted,var(--cor-texto-secundario,#999));line-height:1.7}
+.portfolio-custom-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(1rem,2vw,2rem)}
+.portfolio-custom-card{display:grid;grid-template-columns:minmax(0,1fr);gap:.9rem;min-width:0;padding:1rem;border:1px solid color-mix(in srgb,currentColor 14%,transparent);border-radius:12px;background:color-mix(in srgb,currentColor 3%,transparent)}
+.portfolio-custom-card>img{display:block;width:100%;max-height:340px;aspect-ratio:16/10;object-fit:cover;border-radius:7px}
+.portfolio-custom-card>div{display:grid;align-content:start;gap:.45rem}
+.portfolio-custom-card h3{margin:0;font-size:1.05rem;font-weight:500}
+.portfolio-custom-card small{color:var(--layout-text-muted,var(--cor-texto-secundario,#999));font-size:.78rem}
+.portfolio-custom-card p{margin:0;line-height:1.6;color:var(--layout-text-muted,var(--cor-texto-secundario,#999))}
+.portfolio-custom-card a{width:max-content;margin-top:.25rem;color:inherit;text-underline-offset:4px;font-size:.82rem}
+.section-testimonials .portfolio-custom-card{padding:1.5rem}
+.section-testimonials .portfolio-custom-card h3:before{content:'“';margin-right:.15rem;font:2rem Georgia,serif}
+.section-tattoo-flash .portfolio-custom-card>img,.section-healed-work .portfolio-custom-card>img{aspect-ratio:1/1}
+@media(max-width:600px){.portfolio-custom-grid{grid-template-columns:1fr}.portfolio-custom-card{padding:.8rem}}
+
+
+/* Presentation and navigation settings are explicit layout variants, not aliases for grid/list. */
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .secao-cabecalho,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .secao-cabecalho {
+  width:min(100% - 2.5rem,1480px);
+  margin-inline:auto;
+}
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obras-lista {
+  width:100%;
+}
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global {
+  width:min(100% - 2rem,1600px);
 }
