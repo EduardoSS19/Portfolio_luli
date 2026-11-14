@@ -351,6 +351,7 @@ function getLayoutPreviewDemo(layout = {}) {
     frames: [],
     redes: social,
     sobre: {...profile, formulario:'#demo-contato'},
+    sectionExamples: extraSections,
     marca: '',
   }
 }
@@ -408,9 +409,9 @@ const PREVIEW_SECTION_EXAMPLES = {
   ],
 }
 
-function PortfolioCustomSections({ sections = [], preview = false }) {
+function PortfolioCustomSections({ sections = [], preview = false, examples = null }) {
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
-    const items = section.items.length ? section.items : (preview ? PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
+    const items = section.items.length ? section.items : (preview ? examples?.[section.type] || PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
     return (
       <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
         <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
@@ -512,7 +513,7 @@ export default function App() {
       setConteudo(current => {
         const nextLayout = { ...current.layout, ...safeSettings }
         const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
-        return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, marca: demo.marca } : {}), layout: nextLayout }
+        return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, previewSectionExamples: demo.sectionExamples, marca: demo.marca } : {}), layout: nextLayout }
       })
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
@@ -602,6 +603,7 @@ export default function App() {
           referencias: demoContent ? demoContent.referencias : Array.isArray(data.referencias) ? data.referencias : [],
           frames: demoContent ? demoContent.frames : Array.isArray(data.frames) ? data.frames : [],
           redes: demoContent ? demoContent.redes : Array.isArray(data.redes) ? data.redes : [],
+          previewSectionExamples: demoContent ? demoContent.sectionExamples : null,
           sobre: demoContent ? demoContent.sobre : data.sobre && typeof data.sobre.bio === 'string' ? data.sobre : null,
           marca: demoContent ? '' : data.marca || '',
           layout: { ...DEFAULT_LAYOUT_SETTINGS, ...(data.layout || {}), ...(layoutPreview || {}) },
@@ -868,7 +870,7 @@ export default function App() {
         ))
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
-      <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} />
+      <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} examples={conteudo.previewSectionExamples} />
       {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" hidden />}
       {layout.show_contact !== false && <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />}
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
