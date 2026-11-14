@@ -176,6 +176,7 @@ export function CmsLayoutManager(){
     }
   }
   const handlePreviewFrameLoad=event=>observePreviewDocument(event.currentTarget)
+  useEffect(()=>{setPreviewDocumentWidth(previewWidth);setPreviewDocumentHeight(previewHeight)},[previewDevice])
   useEffect(()=>()=>{previewDocumentObserversRef.current.forEach(observers=>{observers.resize?.disconnect();observers.mutation?.disconnect()});previewDocumentObserversRef.current.clear()},[])
   useLayoutEffect(()=>{
     const element=previewViewportRef.current
