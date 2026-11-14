@@ -195,6 +195,20 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Fundo')
 
+  const carouselOption = page.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
+  await carouselOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-presentation'))).toBe('carousel')
+  await expect(temporaryFrame).toBeVisible()
+
+  const sidebarOption = page.locator('.cms-layout-option').filter({ hasText: 'Painel lateral' })
+  await sidebarOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-nav')?.classList.contains('navigation-sidebar'))).toBe(true)
+
+  const hideReferencesOption = page.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
+  await hideReferencesOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-show-references'))).toBe('false')
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('#Referências')?.hidden)).toBe(true)
+
   const inlineFrame = page.locator('iframe[title^="Prévia completa do portfólio"]')
   await inlineFrame.scrollIntoViewIfNeeded()
   await expect.poll(() => inlineFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(500)
