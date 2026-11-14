@@ -97,6 +97,30 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-curtain/)
 })
 
+test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, {
+    default_gallery_view: 'grade',
+    custom_sections: [{
+      id: 'custom-processo',
+      type: 'process',
+      title: 'Processo criativo',
+      intro: 'Etapas e experimentações do trabalho.',
+      items: [],
+    }],
+  }, 'page', 'grade')
+
+  const customSection = page.locator('#custom-processo')
+  await expect(customSection).toBeVisible()
+  const initialScroll = await page.evaluate(() => window.scrollY)
+  await page.locator('.editorial-menu-trigger').click()
+  const customLink = page.locator('.nav-overlay-link').filter({ hasText: 'Processo criativo' })
+  await expect(customLink).toHaveCount(1)
+  await customLink.click()
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll)
+  await expect(customSection).toBeInViewport()
+})
+
 test('preview muda automaticamente entre grade e lista sem recarregar o iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
