@@ -509,7 +509,7 @@ export default function App() {
       if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'cms-layout-preview:update') return
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
       if (!safeSettings) return
-      const previewRoute = new URLSearchParams(window.location.search).has('layout_preview') && !new URLSearchParams(window.location.search).has('layout_preview_live')
+      const previewRoute = new URLSearchParams(window.location.search).has('layout_preview')
       setConteudo(current => {
         const nextLayout = { ...current.layout, ...safeSettings }
         const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
