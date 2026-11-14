@@ -164,9 +164,10 @@
   background:#061522;
 }
 .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+  align-items:flex-start;
+  justify-content:flex-start;
+  overflow-x:hidden;
+  overflow-y:auto;
 }
 .cms-layout-preview-panel.floating{
   padding:.8rem .8rem 1.15rem;
