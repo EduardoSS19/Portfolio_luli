@@ -361,7 +361,9 @@ export function CmsLayoutManager(){
   }
   const closeOptionPreview=()=>{
     cancelOptionPreviewHide()
-    suppressOptionPreviewRef.current=hoveredOption?{name:hoveredOption.name,value:hoveredOption.value}:null
+    const focusedOption=document.querySelector('.cms-layout-option:focus-within input[type="radio"]')
+    const dismissed=hoveredOption|| (focusedOption?{name:focusedOption.name,value:focusedOption.value}:null)
+    suppressOptionPreviewRef.current=dismissed
     setHoveredOption(null)
     setHoverPreviewMounted(false)
   }
