@@ -1,19 +1,8 @@
 import { ObraCard } from './ObraCard.jsx'
 import { useScrollReveal } from '../hooks/useScrollReveal.js'
 
-function tipoDeArte(titulo, chave) {
-  const nome = `${titulo} ${chave}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-  if (nome.includes('glitch')) return 'glitch'
-  if (nome.includes('ceram')) return 'ceramica'
-  if (nome.includes('gravura') || nome.includes('escultura')) return 'gravura'
-  if (nome.includes('desenho')) return 'desenho'
-  if (nome.includes('fotograf')) return 'fotografia'
-  if (nome.includes('video')) return 'videoarte'
-  return 'obra'
-}
-
-export function SecaoCategoria({ titulo, chave, obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0, animando = false }) {
-  const tipo = tipoDeArte(titulo, chave)
+export function SecaoCategoria({ titulo, chave, animacao = 'obra', obras, indice = 0, modoVisualizacao = 'lista', indiceInicial = 0, animando = false }) {
+  const tipo = animacao || 'obra'
   const [cabecalhoRef, cabecalhoVisivel] = useScrollReveal()
 
   return (
