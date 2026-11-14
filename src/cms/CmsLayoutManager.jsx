@@ -127,7 +127,7 @@ export function CmsLayoutManager(){
   // Mantém o viewport lógico do dispositivo e reduz a página inteira pela largura disponível.
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
-  const inlinePreviewStageHeight=previewDocumentHeight*inlinePreviewScale
+  const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
   const hoverPreviewScale=Math.min(1,(hoverPreviewSize.width||360)/previewWidth)
   const hoverPreviewStageWidth=previewWidth*hoverPreviewScale
