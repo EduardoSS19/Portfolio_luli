@@ -205,3 +205,33 @@
 .site-shell[data-layout-presentation="masonry"] .galeria-grade-global {
   width:min(100% - 2rem,1600px);
 }
+
+/* Section-specific layouts configured in the CMS section designer. */
+.portfolio-custom-section[data-columns="1"] .portfolio-custom-grid{grid-template-columns:minmax(0,1fr)}
+.portfolio-custom-section[data-columns="2"] .portfolio-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.portfolio-custom-section[data-columns="3"] .portfolio-custom-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.portfolio-custom-section[data-image-ratio="portrait"] .portfolio-custom-card>img{aspect-ratio:3/4}
+.portfolio-custom-section[data-image-ratio="square"] .portfolio-custom-card>img{aspect-ratio:1/1}
+.portfolio-custom-section[data-image-ratio="landscape"] .portfolio-custom-card>img{aspect-ratio:16/10}
+.portfolio-custom-section.section-density-compact .portfolio-custom-grid{gap:.65rem}
+.portfolio-custom-section.section-density-compact .portfolio-custom-card{padding:.7rem}
+.portfolio-custom-section.section-density-spacious .portfolio-custom-grid{gap:clamp(1.5rem,3vw,2.8rem)}
+.portfolio-custom-section.section-layout-timeline .portfolio-custom-grid,
+.portfolio-custom-section.section-layout-steps .portfolio-custom-grid,
+.portfolio-custom-section.section-layout-agenda .portfolio-custom-grid{grid-template-columns:minmax(0,1fr);max-width:900px;margin-inline:auto}
+.portfolio-custom-section.section-layout-timeline .portfolio-custom-card,
+.portfolio-custom-section.section-layout-steps .portfolio-custom-card,
+.portfolio-custom-section.section-layout-agenda .portfolio-custom-card{grid-template-columns:minmax(110px,.28fr) minmax(0,1fr);align-items:start;border:0;border-left:2px solid var(--azul-claro);border-radius:0;background:transparent}
+.portfolio-custom-section.section-layout-quotes .portfolio-custom-card{padding:clamp(1.2rem,3vw,2.4rem);border:0;background:color-mix(in srgb,currentColor 5%,transparent)}
+.portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child{grid-column:1/-1;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center}
+.portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child>img{max-height:520px}
+.portfolio-custom-section .portfolio-custom-meta{display:block}
+.portfolio-custom-section .portfolio-custom-meta strong{font-weight:600;color:var(--texto)}
+@media(max-width:760px){
+ .portfolio-custom-section[data-columns="2"] .portfolio-custom-grid,
+ .portfolio-custom-section[data-columns="3"] .portfolio-custom-grid{grid-template-columns:1fr}
+ .portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child,
+ .portfolio-custom-section.section-layout-timeline .portfolio-custom-card,
+ .portfolio-custom-section.section-layout-steps .portfolio-custom-card,
+ .portfolio-custom-section.section-layout-agenda .portfolio-custom-card{grid-template-columns:minmax(0,1fr)}
+}
