@@ -1174,7 +1174,7 @@ def cms_categories(request):
         return JsonResponse({"error": "staff_required"}, status=403)
     if request.method == "GET":
         items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
-        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
+        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "animation": x.animation, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
     if request.method == "PATCH":
         if not request.user.has_perm("portfolio.change_category"):
             return JsonResponse({"error": "category_edit_permission_required"}, status=403)
@@ -1194,7 +1194,7 @@ def cms_categories(request):
             for position, item_id in enumerate(ids):
                 Category.objects.filter(pk=item_id).update(position=position)
         items = Category.objects.annotate(work_count=Count("works")).order_by("position", "pk")
-        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
+        return JsonResponse({"results": [{"id": x.pk, "title": x.title, "key": x.key, "animation": x.animation, "position": x.position, "active": x.is_active, "workCount": x.work_count} for x in items]})
     if not request.user.has_perm("portfolio.add_category"):
         return JsonResponse({"error": "category_add_permission_required"}, status=403)
     if request.content_type != "application/json" or len(request.body) > 8192:
@@ -1203,9 +1203,12 @@ def cms_categories(request):
         data = json.loads(request.body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError):
         return JsonResponse({"error": "invalid_json"}, status=400)
-    if not isinstance(data, dict) or set(data) - {"title", "key"} or "title" not in data:
+    if not isinstance(data, dict) or set(data) - {"title", "key", "animation"} or "title" not in data:
         return JsonResponse({"error": "invalid_category_payload"}, status=400)
     title, key = data.get("title"), data.get("key", "")
+    animation = data.get("animation", "obra")
+    if not isinstance(animation, str) or animation not in dict(Category.ANIMATION_CHOICES):
+        return JsonResponse({"error": "invalid_category_animation"}, status=400)
     if not isinstance(title, str) or not title.strip() or len(title.strip()) > 100:
         return JsonResponse({"error": "invalid_category_title"}, status=400)
     if not isinstance(key, str) or len(key) > 50:
@@ -1216,8 +1219,8 @@ def cms_categories(request):
     if Category.objects.filter(key=key).exists():
         return JsonResponse({"error": "category_key_conflict"}, status=409)
     last = Category.objects.aggregate(value=Max("position"))["value"]
-    item = Category.objects.create(title=title.strip(), key=key, position=0 if last is None else last + 1)
-    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
+    item = Category.objects.create(title=title.strip(), key=key, animation=animation, position=0 if last is None else last + 1)
+    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "animation": item.animation, "position": item.position, "active": item.is_active, "workCount": 0}, status=201)
 
 
 @require_POST
@@ -1327,7 +1330,7 @@ def cms_category_update(request, category_id):
         data = json.loads(request.body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError):
         return JsonResponse({"error": "invalid_json"}, status=400)
-    allowed = {"title", "key", "active", "position"}
+    allowed = {"title", "key", "animation", "active", "position"}
     if not isinstance(data, dict) or not data or set(data) - allowed:
         return JsonResponse({"error": "invalid_category_payload"}, status=400)
     try:
@@ -1347,6 +1350,11 @@ def cms_category_update(request, category_id):
         if not value or Category.objects.filter(key=value).exclude(pk=item.pk).exists():
             return JsonResponse({"error": "category_key_conflict"}, status=409)
         item.key = value
+    if "animation" in data:
+        value = data["animation"]
+        if not isinstance(value, str) or value not in dict(Category.ANIMATION_CHOICES):
+            return JsonResponse({"error": "invalid_category_animation"}, status=400)
+        item.animation = value
     if "active" in data:
         if type(data["active"]) is not bool:
             return JsonResponse({"error": "invalid_category_active"}, status=400)
@@ -1355,5 +1363,5 @@ def cms_category_update(request, category_id):
         if type(data["position"]) is not int or data["position"] < 0:
             return JsonResponse({"error": "invalid_category_position"}, status=400)
         item.position = data["position"]
-    item.save(update_fields=["title", "key", "is_active", "position"])
-    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "position": item.position, "active": item.is_active, "workCount": item.works.count()})
+    item.save(update_fields=["title", "key", "animation", "is_active", "position"])
+    return JsonResponse({"id": item.pk, "title": item.title, "key": item.key, "animation": item.animation, "position": item.position, "active": item.is_active, "workCount": item.works.count()})
