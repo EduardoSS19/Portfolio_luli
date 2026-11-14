@@ -261,15 +261,14 @@ export function CmsLayoutManager(){
       const leftSpace=anchor.left-gap-minEdge
       const sideFits=rightSpace>=panelWidth||leftSpace>=panelWidth
       const placeRight=sideFits?rightSpace>=panelWidth:rightSpace>=leftSpace
-      // Nunca posiciona a prévia acima do controle: tenta uma das laterais
-      // e, quando ambas são estreitas, ancora abaixo do botão.
+      // Nunca desloca o painel para cima: usa a lateral do controle ou,
+      // se não houver largura lateral suficiente, ancora abaixo dele.
       const left=sideFits
         ?(placeRight?anchor.right+gap:anchor.left-panelWidth-gap)
         :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
-      const top=sideFits
-        ?Math.max(minEdge,Math.min(anchor.top,viewportHeight-minEdge-180))
-        :Math.min(anchor.bottom+gap,viewportHeight-minEdge-180)
-      setHoverPreviewPosition({left,top})
+      const top=sideFits?Math.max(minEdge,anchor.top):anchor.bottom+gap
+      const maxHeight=Math.max(80,viewportHeight-top-minEdge)
+      setHoverPreviewPosition({left,top,maxHeight})
     }else{
       setHoverPreviewPosition({
         left:Math.max(minEdge,(viewportWidth-panelWidth)/2),
@@ -353,7 +352,7 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{left:hoverPreviewPosition.left,top:hoverPreviewPosition.top}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
             <button type="button" aria-label="Fechar prévia temporária" onClick={hideOptionPreview}>×</button>
