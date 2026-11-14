@@ -144,7 +144,7 @@ const PREVIEW_SECTION_EXAMPLES = {
     { title: 'Da matriz à impressão', period: 'Processo · 2024', description: 'Registro das etapas de preparação, gravação e impressão manual.', image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1000&q=85' },
   ],
   services: [
-    { title: 'Projeto sob encomenda', period: 'Sob consulta', description: 'Criação de obras e imagens personalizadas, com briefing, estudo visual e acompanhamento das etapas.', image: 'https://images.unsplash.com/photo-151351 இருந்து' },
+    { title: 'Projeto sob encomenda', period: 'Sob consulta', description: 'Criação de obras e imagens personalizadas, com briefing, estudo visual e acompanhamento das etapas.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85' },
     { title: 'Oficinas e encontros', period: 'Individual ou em grupo', description: 'Experiências práticas de desenho, pintura e experimentação de materiais.', image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1000&q=85' },
   ],
   press: [
