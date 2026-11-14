@@ -799,6 +799,7 @@ export default function App() {
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: effectiveColors.color_background, color: readableText },
+    'data-layout-preview': isLayoutPreview ? 'true' : undefined,
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
