@@ -26,14 +26,17 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
 
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('layout_preview')) return
-    if (effectiveNavigationMode === 'sidebar') {
+    // A prop atualizada é a fonte de verdade para cada opção temporária.
+    // Não deixe um modo recebido por evento anterior mascarar a nova escolha.
+    setPreviewNavigationMode(navigationMode)
+    if (navigationMode === 'sidebar') {
       previewMenuAutoOpenRef.current = true
       setMenuAberto(true)
     } else if (previewMenuAutoOpenRef.current) {
       previewMenuAutoOpenRef.current = false
       setMenuAberto(false)
     }
-  }, [effectiveNavigationMode])
+  }, [navigationMode])
 
   useEffect(() => {
     const handlePreviewNavigation = event => {
