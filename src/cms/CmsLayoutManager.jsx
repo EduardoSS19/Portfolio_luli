@@ -133,9 +133,10 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
-  // O modal contextual usa um viewport móvel real, sem coordenadas distorcidas por transform.
+  // O modal contextual usa a largura móvel real e a altura visível do quadro, sem transform.
+  // Isso mantém menus fixos dentro da área visível e preserva o clique/scroll nativos do iframe.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewStageHeight=PREVIEW_DEVICES.mobile.height
+  const hoverPreviewStageHeight=hoverPreviewSize.height||260
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
