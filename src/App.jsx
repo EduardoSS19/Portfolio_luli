@@ -212,8 +212,23 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
 
-      // Atualizar a prévia não deve provocar rolagem automática.
-
+      // A navegação acontece somente no documento da prévia (iframe).
+      // Nunca envia foco/scroll para a página externa do CMS.
+      const focus = event.data.focus
+      const selector = focus === 'hero' ? '.hero'
+        : focus === 'gallery'
+          ? (previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
+          : focus === 'bio' ? '.sobre-secao'
+            : focus === 'references' ? '#Referências'
+              : focus === 'contact' ? '#Contato'
+                : null
+      if (selector) {
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+          })
+        })
+      }
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
