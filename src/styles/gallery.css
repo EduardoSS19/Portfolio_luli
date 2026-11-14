@@ -1368,3 +1368,121 @@
   color:var(--layout-grid-title,#fff)!important;
   text-shadow:0 1px 8px rgba(0,0,0,.55);
 }
+
+
+/* Presentation modes: these change the browsing experience, not just the card count. */
+.site-shell[data-layout-presentation="carousel"] .galeria-grade-global .obras-lista,
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="immersive"] .galeria-grade-global .obras-lista,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obras-lista {
+  display:flex;
+  align-items:stretch;
+  gap:clamp(1rem,2.4vw,2.25rem);
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:0 1.25rem 1.5rem;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:1.25rem;
+  overscroll-behavior-inline:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:var(--azul-claro) transparent;
+}
+.site-shell[data-layout-presentation="carousel"] .galeria-grade-global .obra.modo-grade {
+  flex:0 0 clamp(260px,32vw,470px);
+  min-width:0;
+  aspect-ratio:4/5;
+  scroll-snap-align:start;
+}
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obra:not(.modo-grade) {
+  flex:0 0 clamp(300px,68vw,820px);
+  min-width:0;
+  min-height:clamp(390px,58vh,680px);
+  scroll-snap-align:center;
+}
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-galeria {
+  min-height:0;
+}
+.site-shell[data-layout-presentation="immersive"] .galeria-grade-global .obra.modo-grade {
+  flex:0 0 min(84vw,1120px);
+  min-width:0;
+  aspect-ratio:16/10;
+  scroll-snap-align:center;
+}
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) {
+  position:relative;
+  display:block;
+  flex:0 0 min(88vw,1240px);
+  min-width:0;
+  min-height:min(72vh,780px);
+  overflow:hidden;
+  scroll-snap-align:center;
+  background:var(--azul-medio);
+}
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-galeria,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-imagem {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  min-height:0;
+}
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-imagem img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-texto {
+  position:absolute;
+  z-index:4;
+  inset:auto 0 0;
+  width:100%;
+  padding:clamp(1.25rem,4vw,3.5rem);
+  color:#fff!important;
+  background:linear-gradient(180deg,transparent,rgba(3,14,24,.9));
+}
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-texto h3,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-texto p,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) .obra-texto .categoria-legenda {
+  color:#fff!important;
+}
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obras-lista.modo-grade {
+  display:block;
+  columns:3 260px;
+  column-gap:clamp(.75rem,1.5vw,1.4rem);
+}
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade {
+  display:inline-block;
+  width:100%;
+  min-height:0;
+  margin:0 0 clamp(.75rem,1.5vw,1.4rem);
+  break-inside:avoid;
+  aspect-ratio:auto;
+}
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade:nth-child(4n+1) { aspect-ratio:4/5; }
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade:nth-child(4n+2) { aspect-ratio:1/1; }
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade:nth-child(4n+3) { aspect-ratio:3/4; }
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade:nth-child(4n) { aspect-ratio:5/4; }
+@media(max-width:760px) {
+  .site-shell[data-layout-presentation="carousel"] .galeria-grade-global .obras-lista,
+  .site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obras-lista,
+  .site-shell[data-layout-presentation="immersive"] .galeria-grade-global .obras-lista,
+  .site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obras-lista {
+    gap:.8rem;
+    padding-inline:.8rem;
+    scroll-padding-inline:.8rem;
+  }
+  .site-shell[data-layout-presentation="carousel"] .galeria-grade-global .obra.modo-grade { flex-basis:82vw; }
+  .site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obra:not(.modo-grade) { flex-basis:86vw; min-height:430px; }
+  .site-shell[data-layout-presentation="immersive"] .galeria-grade-global .obra.modo-grade { flex-basis:88vw; aspect-ratio:4/5; }
+  .site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obra:not(.modo-grade) { flex-basis:90vw; min-height:68vh; }
+  .site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obras-lista.modo-grade { columns:2 145px; column-gap:.55rem; }
+  .site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obra.modo-grade { margin-bottom:.55rem; }
+}
+@media(max-width:380px) {
+  .site-shell[data-layout-presentation="masonry"] .galeria-grade-global .obras-lista.modo-grade { columns:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .site-shell[data-layout-presentation="carousel"] .obras-lista,
+  .site-shell[data-layout-presentation="immersive"] .obras-lista { scroll-behavior:auto; }
+}
