@@ -736,6 +736,7 @@ export default function App() {
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
+  const isCompactLayoutPreview = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
   const palettePrefix = tema === 'claro' ? 'light' : 'dark'
   const effectiveColors = {
     color_background: layout[`${palettePrefix}_color_background`],
@@ -835,7 +836,7 @@ export default function App() {
 
   return (
     <div className="site-shell" {...layoutAttributes}>
-      {isLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
+      {isLayoutPreview && !isCompactLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho
