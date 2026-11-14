@@ -17,7 +17,7 @@ export function useSecaoAtiva(categorias, modoGaleria = 'lista') {
       : null
 
     categorias.forEach(categoria => {
-      const secao = document.getElementById(categoria.titulo)
+      const secao = document.getElementById(categoria.titulo) || (categoria.chave ? document.getElementById(categoria.chave) : null)
       if (secao) {
         elementos.set(secao, categoria.titulo)
         return
