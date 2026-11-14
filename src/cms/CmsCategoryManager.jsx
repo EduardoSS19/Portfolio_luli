@@ -2,14 +2,19 @@ import { useCallback, useEffect, useState } from 'react'
 import { useCmsConfirm } from './useCmsConfirm.jsx'
 
 const CATEGORY_ANIMATIONS = [
-  { value: 'obra', label: 'Editorial' },
-  { value: 'ceramica', label: 'Cerâmica' },
-  { value: 'gravura', label: 'Gravura' },
-  { value: 'desenho', label: 'Desenho' },
-  { value: 'glitch', label: 'Glitch' },
-  { value: 'fotografia', label: 'Fotografia' },
-  { value: 'videoarte', label: 'Videoarte' },
-  { value: 'nenhuma', label: 'Sem animação' },
+  { value: 'obra', label: 'Entrada editorial', detail: 'Imagem e conteúdo surgem com um movimento discreto.' },
+  { value: 'ceramica', label: 'Modelagem no torno', detail: 'A imagem ganha forma como uma peça moldada no torno.' },
+  { value: 'gravura', label: 'Impressão na prensa', detail: 'A composição é revelada verticalmente, como uma impressão.' },
+  { value: 'desenho', label: 'Traço revelado', detail: 'A imagem aparece da esquerda para a direita, como um desenho.' },
+  { value: 'glitch', label: 'Glitch', detail: 'Aparição digital fragmentada, com interferências.' },
+  { value: 'fotografia', label: 'Abertura de íris', detail: 'A imagem se revela do centro para as bordas, como uma lente.' },
+  { value: 'videoarte', label: 'Varredura de tela', detail: 'A imagem liga em faixas, como um monitor.' },
+  { value: 'suave', label: 'Dissolver', detail: 'A imagem aparece gradualmente, sem deslocamento.' },
+  { value: 'deslizar', label: 'Subir suavemente', detail: 'A imagem sobe um pouco até encontrar sua posição.' },
+  { value: 'zoom', label: 'Aproximar', detail: 'A imagem começa um pouco menor e chega ao tamanho natural.' },
+  { value: 'recorte', label: 'Abrir em cortina', detail: 'A imagem se abre do centro para os lados.' },
+  { value: 'flutuar', label: 'Flutuar', detail: 'A imagem chega com leveza, como se estivesse suspensa.' },
+  { value: 'nenhuma', label: 'Sem animação', detail: 'Conteúdo estático, sem efeitos de entrada.' },
 ]
 
 function readCsrf() {
@@ -72,6 +77,7 @@ export function CmsCategoryManager({
   const [draggingCategoryId, setDraggingCategoryId] = useState(null)
   const [dragOverCategoryId, setDragOverCategoryId] = useState(null)
   const [supportsDrag, setSupportsDrag] = useState(false)
+  const [previewHeaderVisible, setPreviewHeaderVisible] = useState(false)
   const WORKS_PER_PAGE = 10
 
   useEffect(() => {
@@ -215,6 +221,13 @@ export function CmsCategoryManager({
     setError('')
     setNotice('')
   }
+
+  useEffect(() => {
+    setPreviewHeaderVisible(false)
+    if (!animationCategory) return undefined
+    const frame = window.requestAnimationFrame(() => setPreviewHeaderVisible(true))
+    return () => window.cancelAnimationFrame(frame)
+  }, [animation, animationCategory?.id])
 
   const openAnimationEditor = item => {
     setAnimationCategory(item)
@@ -393,13 +406,15 @@ export function CmsCategoryManager({
               <div>
                 <div className="cms-category-title-line">
                   <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
+                </div>
+                <div className="cms-category-animation-meta">
+                  <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Entrada editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
                   {canEditCategory && <button type="button" className="cms-category-animation-trigger" aria-pressed={String(animationCategory?.id) === String(item.id)} onClick={() => openAnimationEditor(item)} disabled={saving}>
                     <span className="cms-category-animation-trigger-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 2.5 11.7 7l4.5 1.7-4.5 1.7L10 15l-1.7-4.6L3.8 8.7 8.3 7 10 2.5Z"/><path d="m15.8 12.8.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8.8-2.1Z"/></svg></span>
-                    <span>{String(animationCategory?.id) === String(item.id) ? 'Editando efeito' : 'Animação'}</span>
+                    <span>{String(animationCategory?.id) === String(item.id) ? 'Editar animação' : 'Personalizar animação'}</span>
                     <span className="cms-category-animation-trigger-arrow" aria-hidden="true">↗</span>
                   </button>}
                 </div>
-                <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
                 <small className="cms-category-address">/{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
@@ -432,11 +447,16 @@ export function CmsCategoryManager({
                   {CATEGORY_ANIMATIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
               </label>
-              <div className="cms-category-animation-live-preview" aria-live="polite">
+              <div className="cms-category-animation-live-preview" aria-live="polite" key={animation + '-' + animationCategory.id}>
                 <div className="cms-category-animation-preview-heading">
                   <strong>Prévia no formato real do portfólio</strong>
                   <small>{CATEGORY_ANIMATIONS.find(option => option.value === animation)?.detail || 'Veja a entrada da imagem, do título e da descrição.'}</small>
                 </div>
+                <header className={'secao-cabecalho arte-' + animation + (previewHeaderVisible ? ' visivel' : '')}>
+                  <span className="secao-indice">SÉRIE 01</span>
+                  <h2>{animationCategory.title}</h2>
+                  <span className="secao-contagem">{String(categoryWorks.length || 2).padStart(2, '0')} obras</span>
+                </header>
                 <article className={'cms-animation-live-card obra arte-' + animation + ' visivel'} key={animation + '-' + (animationPreviewWork?.id || 'sample')}>
                   <div className="cms-animation-live-image-wrap obra-imagem">
                     <div className="obra-zoom-trigger">
@@ -444,7 +464,7 @@ export function CmsCategoryManager({
                     </div>
                   </div>
                   <div className="cms-animation-live-copy obra-texto">
-                    <span>{animationCategory.title}</span>
+                    <span className="categoria-legenda">{animationCategory.title}</span>
                     <h3>{animationPreviewTitle}</h3>
                     <p>{animationPreviewDescription}</p>
                   </div>
