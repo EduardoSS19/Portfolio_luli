@@ -451,3 +451,27 @@
 .cms-layout-preset-art.nav-dropdown .cms-layout-preset-mock-nav:after{content:"";position:absolute;top:27px;right:12px;width:64px;height:66px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:linear-gradient(rgba(255,255,255,.2) 2px,transparent 2px) 8px 12px/35px 12px repeat-y,rgba(10,24,31,.94)}
 .cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-nav:after{content:"";position:absolute;inset:0 auto 0 0;width:31%;background:rgba(7,17,22,.88);border-right:1px solid rgba(255,255,255,.3)}
 .cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-content{margin-left:30%}
+
+/* A prévia contextual deve ficar acima dos cartões de opção e conter sua altura real. */
+.cms-layout-hover-preview-floating{
+  z-index:2147483000!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame .cms-layout-preview-stage-scaled{
+  min-height:0!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame iframe{
+  display:block!important;
+  max-height:100%!important;
+}
