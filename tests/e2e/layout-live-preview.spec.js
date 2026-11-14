@@ -230,6 +230,18 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
   await expect(contactForm.getByLabel('Mensagem')).toBeVisible()
 })
 
+test('seções centrais podem ser removidas do modelo sem deixar links órfãos', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { show_bio:false, show_references:false, show_contact:false }, 'page')
+  await expect(page.locator('.sobre-secao')).toHaveCount(0)
+  await expect(page.locator('#Referências')).toHaveCount(1)
+  await expect(page.locator('#Referências')).toBeHidden()
+  await expect(page.locator('#Contato')).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Início' })).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Referências' })).toHaveCount(0)
+  await expect(page.locator('.nav-overlay-link', { hasText:'Contato' })).toHaveCount(0)
+})
+
 test('modelos preenchem todas as seções preparadas com exemplos adequados ao tipo', async ({ page }) => {
   await openLiveLayoutPreview(page)
   const types = ['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team']
