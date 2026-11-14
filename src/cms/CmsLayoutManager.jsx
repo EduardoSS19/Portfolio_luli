@@ -331,14 +331,14 @@ export function CmsLayoutManager(){
   const addCustomSection=template=>{
     const id=template.type+'-'+Date.now().toString(36)
     setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,items:[]}]}))
-    setNotice('Seção adicionada. Inclua os conteúdos e salve para publicar.')
+    setNotice('Seção adicionada. Abra “Editar conteúdo” para preencher os detalhes.')
   }
   const moveCustomSection=(id,delta)=>setSettings(current=>{const sections=[...(current.custom_sections||[])];const index=sections.findIndex(section=>section.id===id);const target=index+delta;if(index<0||target<0||target>=sections.length)return current;[sections[index],sections[target]]=[sections[target],sections[index]];return {...current,custom_sections:sections}})
   const removeCustomSection=id=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).filter(section=>section.id!==id)}))
   const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
-  const applyLayoutPreset=preset=>{const stamp=Date.now().toString(36);setSettings(current=>{const existing=current.custom_sections||[];const additions=(preset.sections||[]).filter(type=>!existing.some(section=>section.type===type)).map((type,index)=>{const template=SECTION_TEMPLATES.find(item=>item.type===type);return template?{id:type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null}).filter(Boolean);return {...current,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}});setPreviewMode(preset.settings.default_gallery_view);setError('');setNotice('Modelo “'+preset.title+'” aplicado com suas seções sugeridas. Edite os conteúdos abaixo e salve quando estiver pronto.')}
+  const applyLayoutPreset=preset=>{const stamp=Date.now().toString(36);setSettings(current=>{const existing=(current.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'));const additions=(preset.sections||[]).map((type,index)=>{const template=SECTION_TEMPLATES.find(item=>item.type===type);return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null}).filter(Boolean);return {...current,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}});setPreviewMode(preset.settings.default_gallery_view);setError('');setNotice('Modelo “'+preset.title+'” aplicado com '+preset.sections.length+' seções específicas. Abra cada seção para preencher; tudo continua editável antes de salvar.')}
   const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
@@ -376,7 +376,11 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Escolha uma estrutura inicial para sua área artística. Depois, ajuste livremente cada opção, cores e conteúdo. Aplicar um modelo não publica nada até salvar.</p>
           <div className="cms-layout-preset-grid">
             {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
-              <div className={'cms-layout-preset-art preset-'+preset.id} aria-hidden="true"><span/><span/><span/><i/></div>
+              <div className={'cms-layout-preset-art preset-'+preset.id} aria-hidden="true">
+                <div className="cms-layout-preset-mock-nav"><i/><i/><i/><i/></div>
+                <div className="cms-layout-preset-mock-hero"><small>{preset.kind.split('·')[0].trim()}</small><b>{preset.title}</b><i/></div>
+                <div className="cms-layout-preset-mock-content"><div className="cms-layout-preset-mock-image"/><div className="cms-layout-preset-mock-copy"><i/><i/><i/></div><div className="cms-layout-preset-mock-sections">{preset.sections.slice(0,4).map(type=><i key={type}>{SECTION_TEMPLATES.find(item=>item.type===type)?.label}</i>)}</div></div>
+              </div>
               <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p></div>
               <button type="button" className="cms-layout-preset-apply" onClick={()=>applyLayoutPreset(preset)} disabled={!canChange||saving}>Usar este modelo <span>→</span></button>
             </article>)}
@@ -392,6 +396,9 @@ export function CmsLayoutManager(){
           </div>
           {(settings.custom_sections||[]).map((section,index)=><article className="cms-layout-custom-section" key={section.id}>
             <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
+            <details className="cms-layout-custom-section-editor">
+              <summary><span>Editar conteúdo</span><small>{(section.items||[]).length} itens cadastrados</small></summary>
+              <div className="cms-layout-custom-section-fields">
             <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
             <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
             <div className="cms-layout-custom-items">
@@ -407,6 +414,8 @@ export function CmsLayoutManager(){
               </div>)}
             </div>
             <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar conteúdo</button>
+              </div>
+            </details>
           </article>)}
         </section>
         <section className="cms-layout-color-panel">
