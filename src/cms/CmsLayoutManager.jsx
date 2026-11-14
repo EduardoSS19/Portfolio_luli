@@ -384,7 +384,7 @@ export function CmsLayoutManager(){
   // do iframe não chega a este listener e continua livre para explorar o site.
   useEffect(()=>{
     if(!hoverPreviewMounted)return
-    const handleWorkspaceScroll=event=>{
+    const dismissFromWorkspaceGesture=event=>{
       if(ignoreWorkspaceScrollRef.current)return
       const preview=document.querySelector('.cms-layout-hover-preview')
       if(preview&&(event.target===preview||preview.contains(event.target)))return
@@ -393,10 +393,20 @@ export function CmsLayoutManager(){
       setHoverPreviewMounted(false)
       setHoveredOption(null)
     }
-    window.addEventListener('scroll',handleWorkspaceScroll,true)
-    return()=>window.removeEventListener('scroll',handleWorkspaceScroll,true)
+    // O scrollIntoView do navegador/Playwright ao alcançar outra opção não é
+    // uma intenção de fechar a prévia. Fechamos apenas em gestos explícitos.
+    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    window.addEventListener('touchstart',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    return()=>{
+      window.removeEventListener('wheel',dismissFromWorkspaceGesture,true)
+      window.removeEventListener('touchstart',dismissFromWorkspaceGesture,true)
+    }
   },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
+    if(suppressOptionPreviewRef.current&&event?.type==='mouseleave'){
+      suppressOptionPreviewRef.current=null
+      return
+    }
     const preview=document.querySelector('.cms-layout-hover-preview')
     // Navegadores podem reportar relatedTarget=null ao atravessar a borda de um iframe.
     if(event&&(!event.relatedTarget||preview?.contains(event.relatedTarget)))return
@@ -413,10 +423,11 @@ export function CmsLayoutManager(){
     // Ignora apenas o evento sintético da mesma opção que acabou de ser fechada.
     // Uma opção diferente continua podendo abrir sua prévia sem esperar o timeout.
     const suppressedOption=suppressOptionPreviewRef.current
+    // Ao fechar o portal, o ponteiro pode revelar uma opção que estava atrás
+    // dele. Ignore esse mouseenter sintético até o ponteiro sair do controle.
+    if(suppressedOption&&event?.type==='mouseenter')return
     if(suppressedOption?.name===name&&suppressedOption?.value===value)return
-    if(suppressedOption){
-      suppressOptionPreviewRef.current=null
-    }
+    if(suppressedOption)suppressOptionPreviewRef.current=null
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
