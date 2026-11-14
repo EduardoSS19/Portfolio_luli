@@ -285,3 +285,24 @@
     width:calc(100% - 396px);
   }
 }
+
+
+/* A prévia contextual termina exatamente no fim do viewport escalado do iframe. */
+.cms-layout-hover-preview-frame{
+  height:auto;
+  min-height:0;
+  max-height:none;
+  flex:0 0 auto;
+  overflow:hidden;
+  background:#171914;
+}
+.cms-layout-hover-preview-frame .cms-layout-preview-stage-scaled{
+  flex:0 0 auto;
+  min-height:0;
+  overflow:hidden;
+}
+.cms-layout-hover-preview-frame iframe{
+  display:block;
+  flex:0 0 auto;
+  background:transparent;
+}
