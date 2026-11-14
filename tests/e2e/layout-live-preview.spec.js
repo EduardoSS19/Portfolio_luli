@@ -16,7 +16,7 @@ async function openLiveLayoutPreview(page) {
         { titulo: 'Obra de teste', imagem: image, descricao: 'Estudo de contraste.' },
       ] }],
       referencias: [{ titulo: 'Exposição coletiva', periodo: '2025', links: [{ texto: 'Instituição', url: 'https://example.com' }] }], frames: [], redes: [],
-      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: '', instagram: '', formulario: '' },
+      sobre: { nome: 'Luli', frase: 'Arte e experimentação', bio: 'Artista', email: 'contato@artista-demo.example', instagram: '', formulario: '' },
       layout: { default_gallery_view: 'lista', default_theme: 'escuro' },
     }),
   }))
@@ -37,12 +37,12 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
-  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(1)
+  await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(6)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
   await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
-  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(1)
+  await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(6)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
   expect(await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)).toBe(initialNavigation)
 })
@@ -57,7 +57,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
     dark_color_muted: '#858585',
     dark_color_accent: '#777777',
   }, 'page')
-  await expect(page.locator('.galeria-grade-global .obra-texto h3')).toBeVisible()
+  await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toBeVisible()
 
   const ratios = await page.locator('.site-shell').evaluate(shell => {
     const luminance = hex => {
@@ -83,7 +83,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
     ]
   })
   for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
-  await expect(page.locator('.galeria-grade-global .obra-texto h3')).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toHaveCSS('color', 'rgb(255, 255, 255)')
 
   await sendSettings(page, {
     default_gallery_view: 'lista',
@@ -170,4 +170,28 @@ test('configurações de visibilidade são preservadas ao alternar entre temas',
   await expect(page.locator('.nav-overlay-link', { hasText: 'Início' })).toHaveCount(0)
   await expect(page.locator('#Referências')).toHaveCount(0)
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'claro')
+})
+
+
+test('prévia de layout apresenta conteúdo demonstrativo em todas as seções', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.hero')).toBeVisible()
+  await expect(page.locator('.sobre-secao')).toBeVisible()
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Lorem ipsum')
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato)')).toHaveCount(4)
+  await expect(page.locator('.secao:not(.sobre-secao):not(.secao-contato) .obra')).toHaveCount(6)
+  await expect(page.locator('#Referências')).toBeVisible()
+  await expect(page.locator('#Referências')).toContainText('Exposição coletiva')
+  await expect(page.locator('#Contato')).toBeVisible()
+  await expect(page.locator('#Contato')).toContainText('contato@artista-demo.example')
+})
+
+test('prévia navega para referências e contato sem rearmar rolagens antigas', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { show_references: true }, 'references')
+  await expect(page.locator('#Referências')).toBeInViewport()
+  await sendSettings(page, { dark_color_accent: '#88aacc' }, 'page')
+  await expect(page.locator('#Referências')).toBeInViewport()
+  await sendSettings(page, { show_references: true }, 'contact')
+  await expect(page.locator('#Contato')).toBeInViewport()
 })
