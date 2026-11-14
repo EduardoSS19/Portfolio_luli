@@ -130,8 +130,8 @@ const perfilInicial = {
   formulario: '',
 }
 
-function PortfolioCustomSections({ sections = [] }) {
-  return sections.filter(section => section && section.title && Array.isArray(section.items) && section.items.length).map(section => (
+function PortfolioCustomSections({ sections = [], preview = false }) {
+  return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => (
     <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id}>
       <header className="secao-cabecalho visivel"><span className="secao-indice">PORTFÓLIO</span><h2>{section.title}</h2><span className="secao-contagem">{String(section.items.length).padStart(2,'0')} itens</span></header>
       {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
@@ -142,6 +142,7 @@ function PortfolioCustomSections({ sections = [] }) {
             {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
           </div>
         </article>)}
+        {!section.items.length && preview && <div className="portfolio-custom-empty-preview"><span>✳</span><strong>Seção preparada</strong><p>Adicione seus conteúdos pelo painel. Esta área ficará oculta no site até receber o primeiro item.</p></div>}
       </div>
     </section>
   ))
@@ -576,7 +577,7 @@ export default function App() {
         ))
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
-      <PortfolioCustomSections sections={layout.custom_sections || []} />
+      <PortfolioCustomSections sections={layout.custom_sections || []} preview={isLayoutPreview} />
       {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" />}
       <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
