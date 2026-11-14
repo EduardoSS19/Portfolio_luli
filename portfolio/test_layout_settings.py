@@ -115,6 +115,19 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertEqual(normalized["custom_sections"], sections)
         self.assertTrue(is_valid_layout_setting("custom_sections", sections))
 
+    def test_custom_section_normalizer_rejects_unhashable_schema_values_safely(self):
+        malformed_type = [{
+            "id": "bad-type", "type": [], "title": "Invalid",
+            "intro": "", "items": [],
+        }]
+        malformed_design = [{
+            "id": "bad-design", "type": "services", "title": "Services",
+            "intro": "", "design": {"layout": [], "columns": {}, "image_ratio": [], "density": {}},
+            "items": [{"title": "Consultoria"}],
+        }]
+        self.assertFalse(is_valid_layout_setting("custom_sections", malformed_type))
+        self.assertFalse(is_valid_layout_setting("custom_sections", malformed_design))
+
     def test_custom_section_design_and_type_specific_urls_are_allow_listed(self):
         unsafe_design = [{
             "id": "unsafe-design", "type": "tattoo-flash", "title": "Flash",
