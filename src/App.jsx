@@ -212,25 +212,22 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
 
-      // Só a simulação de hover solicita navegação. Alterações normais continuam
-      // preservando a posição atual da página enquanto a pessoa personaliza.
-      if (event.data.navigateToFocus === true) {
-        const focus = event.data.focus
-        const focusSelectors = {
-          hero: '.hero',
-          bio: '.sobre-secao',
-          gallery: previewMode === 'grade'
-            ? '.galeria-grade-global'
-            : '.secao:not(.sobre-secao):not(.secao-contato)',
-          references: '#Referências',
-          contact: '#Contato',
-        }
-        const selector = focusSelectors[focus]
-        if (selector) {
-          window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
-          }))
-        }
+      // O foco é aplicado dentro deste iframe. A página do painel nunca rola.
+      const focus = event.data.focus
+      const focusSelectors = {
+        hero: '.hero',
+        bio: '.sobre-secao',
+        gallery: previewMode === 'grade'
+          ? '.galeria-grade-global'
+          : '.secao:not(.sobre-secao):not(.secao-contato)',
+        references: '#Referências',
+        contact: '#Contato',
+      }
+      const selector = focusSelectors[focus]
+      if (selector) {
+        window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+          document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+        }))
       }
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
@@ -288,7 +285,7 @@ export default function App() {
         return response.json()
       })
       .then(data => {
-        const demoContent = params.has('layout_preview') ? LAYOUT_PREVIEW_DEMO : null
+        const demoContent = params.has('layout_preview') && !params.has('layout_preview_live') ? LAYOUT_PREVIEW_DEMO : null
         setConteudo(atual => ({
           categorias: demoContent ? demoContent.categorias : Array.isArray(data.categorias) ? data.categorias : [],
           referencias: demoContent ? demoContent.referencias : Array.isArray(data.referencias) ? data.referencias : [],
