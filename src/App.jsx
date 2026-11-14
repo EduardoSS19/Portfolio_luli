@@ -561,12 +561,15 @@ export default function App() {
               : focus === 'contact' ? '#Contato'
                 : null
       const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
-      const target = selector
-        ? document.querySelector(selector)
-        : null
-      const fallbackTarget = target || (focus === 'references' || focus === 'contact'
-        ? document.querySelector('#Contato, .rodape')
-        : null)
+      const target = selector ? document.querySelector(selector) : null
+      const targetIsVisible = Boolean(target && target.getClientRects().length)
+      const fallbackTarget = targetIsVisible
+        ? target
+        : focus === 'bio'
+          ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
+          : focus === 'references' || focus === 'contact'
+            ? document.querySelector('#Contato, .rodape')
+            : null
       if (fallbackTarget) {
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
