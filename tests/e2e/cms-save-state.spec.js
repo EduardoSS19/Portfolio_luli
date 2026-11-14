@@ -238,6 +238,39 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
 })
 
 
+test('prévia contextual permanece acessível e dentro da tela em celular', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ settings: { hero_alignment: 'center' }, permissions: { canChange: true } }),
+  }))
+  await page.route('**/api/portfolio/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: null, layout: {} }),
+  }))
+
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const option = page.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
+  await option.scrollIntoViewIfNeeded()
+  await option.locator('input').focus()
+
+  const preview = page.locator('.cms-layout-hover-preview')
+  await expect(preview).toBeVisible()
+  const bounds = await preview.boundingBox()
+  expect(bounds).not.toBeNull()
+  expect(bounds.x).toBeGreaterThanOrEqual(0)
+  expect(bounds.y).toBeGreaterThanOrEqual(0)
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390)
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(844)
+
+  await preview.getByRole('button', { name: 'Fechar prévia temporária' }).click()
+  await expect(preview).toBeHidden()
+  await option.locator('input').check()
+  await expect(option.locator('input')).toBeChecked()
+})
+
 test('modelos prontos e biblioteca de seções permitem configurar conteúdo especializado', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
