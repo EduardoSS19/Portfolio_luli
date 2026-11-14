@@ -476,3 +476,10 @@
   display:block!important;
   max-height:100%!important;
 }
+
+/* A moldura flutuante não deve bloquear opções do editor que ficam atrás dela.
+   Somente o iframe e o botão de fechar capturam interação; o restante deixa
+   o ponteiro atravessar para os controles do CMS. */
+.cms-layout-hover-preview-floating{pointer-events:none!important}
+.cms-layout-hover-preview-floating iframe,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{pointer-events:auto!important}
