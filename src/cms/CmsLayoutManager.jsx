@@ -62,6 +62,15 @@ const PALETTES = [
   {name:'Galeria clara',darkColors:['#1e2420','#303b34','#f4f2e9','#b7c0b5','#9db58a'],lightColors:['#f5f2eb','#ffffff','#24231f','#77746c','#657c62']},
 ]
 const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, tablet: { label:'Tablet', width:768, height:1024 }, mobile: { label:'Celular', width:390, height:844 } }
+function buildPresetSettings(base,preset){
+  const stamp=Date.now().toString(36)
+  const existing=(base.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'))
+  const additions=(preset.sections||[]).map((type,index)=>{
+    const template=SECTION_TEMPLATES.find(item=>item.type===type)
+    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null
+  }).filter(Boolean)
+  return {...base,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}
+}
 
 function readCookie(name){const prefix=name+'=';const item=document.cookie.split('; ').find(cookie=>cookie.startsWith(prefix));return item?decodeURIComponent(item.slice(prefix.length)):''}
 function luminance(hex){const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722}
@@ -79,6 +88,9 @@ export function CmsLayoutManager(){
   const [settings,setSettings]=useState(DEFAULTS),[saved,setSaved]=useState(DEFAULTS),[canChange,setCanChange]=useState(false)
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
   const [previewOpen,setPreviewOpen]=useState(false)
+  const [previewingPresetId,setPreviewingPresetId]=useState(null)
+  const presetSectionRef=useRef(null)
+  const inlinePreviewSectionRef=useRef(null)
   const [previewMaximized,setPreviewMaximized]=useState(false)
   const [previewPosition,setPreviewPosition]=useState({x:24,y:108})
   const [previewSize,setPreviewSize]=useState({width:820,height:720})
@@ -246,18 +258,48 @@ export function CmsLayoutManager(){
     const payload=override||{settings,focus:previewFocus,previewMode,animatePreview:false}
     target?.postMessage({type:'cms-layout-preview:update',...payload},window.location.origin)
   }
-  // A prévia final recebe somente as escolhas aplicadas no editor.
+  const previewingPreset=LAYOUT_PRESETS.find(preset=>preset.id===previewingPresetId)||null
+  const previewingPresetSettings=previewingPreset?buildPresetSettings(settings,previewingPreset):settings
+  const inlinePreviewPayload=previewingPreset?{settings:previewingPresetSettings,focus:'page',previewMode:previewingPreset.settings.default_gallery_view,animatePreview:true}:{settings,focus:previewFocus,previewMode,animatePreview:false}
+  const scrollToElement=(element)=>element?.scrollIntoView({behavior:'smooth',block:'start'})
+  const previewLayoutPreset=preset=>{
+    setPreviewingPresetId(preset.id)
+    setHoveredOption(null)
+    setNotice('Prévia de “'+preset.title+'”. Compare os modelos aqui embaixo e confirme quando decidir.')
+    window.setTimeout(()=>scrollToElement(inlinePreviewSectionRef.current),80)
+  }
+  const stepPreviewPreset=direction=>{
+    const currentIndex=Math.max(0,LAYOUT_PRESETS.findIndex(preset=>preset.id===previewingPresetId))
+    const nextIndex=(currentIndex+direction+LAYOUT_PRESETS.length)%LAYOUT_PRESETS.length
+    setPreviewingPresetId(LAYOUT_PRESETS[nextIndex].id)
+  }
+  const confirmPreviewPreset=()=>{
+    if(!previewingPreset)return
+    setSettings(previewingPresetSettings)
+    setPreviewMode(previewingPreset.settings.default_gallery_view)
+    setPreviewingPresetId(null)
+    setNotice('Modelo “'+previewingPreset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
+    window.setTimeout(()=>scrollToElement(presetSectionRef.current),80)
+  }
+  const cancelPreviewPreset=()=>{
+    setPreviewingPresetId(null)
+    setNotice('Escolha de modelo cancelada. Suas configurações anteriores foram mantidas.')
+    window.setTimeout(()=>scrollToElement(presetSectionRef.current),80)
+  }
+  // A prévia completa pode simular modelos sem alterar as configurações do editor.
   useEffect(()=>{
-    const allowedSources=[previewIframeRef.current?.contentWindow,inlinePreviewIframeRef.current?.contentWindow].filter(Boolean)
+    const floatingWindow=previewIframeRef.current?.contentWindow
+    const inlineWindow=inlinePreviewIframeRef.current?.contentWindow
     const handlePreviewReady=event=>{
-      if(event.origin!==window.location.origin||event.data?.type!=='cms-layout-preview:ready'||!allowedSources.includes(event.source))return
-      sendPreviewUpdate(event.source)
+      if(event.origin!==window.location.origin||event.data?.type!=='cms-layout-preview:ready')return
+      if(event.source===inlineWindow)sendPreviewUpdate(event.source,inlinePreviewPayload)
+      else if(event.source===floatingWindow)sendPreviewUpdate(event.source)
     }
     window.addEventListener('message',handlePreviewReady)
-    sendPreviewUpdate(previewIframeRef.current?.contentWindow)
-    sendPreviewUpdate(inlinePreviewIframeRef.current?.contentWindow)
+    sendPreviewUpdate(floatingWindow)
+    sendPreviewUpdate(inlineWindow,inlinePreviewPayload)
     return()=>window.removeEventListener('message',handlePreviewReady)
-  },[settings,previewFocus,previewMode,previewOpen])
+  },[settings,previewFocus,previewMode,previewOpen,previewingPresetId])
 
   // A simulação de hover é isolada do preview final e atualizada no máximo uma vez por frame.
   useEffect(()=>{
@@ -338,7 +380,7 @@ export function CmsLayoutManager(){
   const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
-  const applyLayoutPreset=preset=>{const stamp=Date.now().toString(36);setSettings(current=>{const existing=(current.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'));const additions=(preset.sections||[]).map((type,index)=>{const template=SECTION_TEMPLATES.find(item=>item.type===type);return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null}).filter(Boolean);return {...current,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}});setPreviewMode(preset.settings.default_gallery_view);setError('');setNotice('Modelo “'+preset.title+'” aplicado com '+preset.sections.length+' seções específicas. Abra cada seção para preencher; tudo continua editável antes de salvar.')}
+  const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.default_gallery_view);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
   const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
@@ -371,7 +413,7 @@ export function CmsLayoutManager(){
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
-        <section className="cms-layout-presets">
+        <section className="cms-layout-presets" ref={presetSectionRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">7 modelos</span></div>
           <p className="cms-layout-help">Escolha uma estrutura inicial para sua área artística. Depois, ajuste livremente cada opção, cores e conteúdo. Aplicar um modelo não publica nada até salvar.</p>
           <div className="cms-layout-preset-grid">
@@ -382,7 +424,7 @@ export function CmsLayoutManager(){
                 <div className="cms-layout-preset-mock-content"><div className="cms-layout-preset-mock-image"/><div className="cms-layout-preset-mock-copy"><i/><i/><i/></div><div className="cms-layout-preset-mock-sections">{preset.sections.slice(0,4).map(type=><i key={type}>{SECTION_TEMPLATES.find(item=>item.type===type)?.label}</i>)}</div></div>
               </div>
               <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p></div>
-              <button type="button" className="cms-layout-preset-apply" onClick={()=>applyLayoutPreset(preset)} disabled={!canChange||saving}>Usar este modelo <span>→</span></button>
+              <button type="button" className="cms-layout-preset-apply" onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
             </article>)}
           </div>
         </section>
@@ -448,8 +490,12 @@ export function CmsLayoutManager(){
       )}
       {previewOpen&&<aside className={'cms-layout-preview-panel floating'+(previewMaximized?' maximized':'')} aria-label="Janela flutuante de prévia" style={previewMaximized?undefined:{left:previewPosition.x,top:previewPosition.y,width:previewSize.width,height:previewSize.height}}><div className="cms-layout-preview-heading" onPointerDown={startPreviewDrag} onPointerMove={movePreviewDrag} onPointerUp={stopPreviewDrag} onPointerCancel={stopPreviewDrag}><div><p className="cms-eyebrow">PRÉVIA AO VIVO</p><strong>Seu portfólio</strong><small className="cms-layout-preview-drag-hint">Arraste para mover</small></div><div className="cms-layout-preview-window-actions"><span>Não publicado</span><button className="cms-preview-window-button" type="button" aria-label={previewMaximized?'Restaurar janela':'Maximizar janela'} title={previewMaximized?'Restaurar':'Maximizar'} onClick={()=>setPreviewMaximized(value=>!value)}><svg viewBox="0 0 20 20" aria-hidden="true">{previewMaximized?<path d="M7 3v2H5v10h10v-2h2v4H3V3h4zm3 0h7v7h-2V6.4l-6.3 6.3-1.4-1.4L13.6 5H10V3z"/>:<path d="M3 3h14v14H3V3zm2 2v10h10V5H5z"/>}</svg></button><button className="cms-preview-window-button close" type="button" aria-label="Fechar janela flutuante" title="Fechar" onClick={()=>setPreviewOpen(false)}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></div><div className="cms-layout-preview-devices" role="group" aria-label="Tamanho da prévia">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div><div className="cms-layout-preview-frame cms-layout-preview-frame-scaled" ref={previewViewportRef} data-device={previewDevice} data-preview-scale={previewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:previewStageWidth,height:previewStageHeight}}><iframe ref={previewIframeRef} title={`Prévia flutuante em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="eager" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${previewScale})`,transformOrigin:'top left'}}/></div></div><p className="cms-layout-preview-caption">A página é reduzida para caber inteira na largura do modal. Role verticalmente para percorrer o conteúdo; nada será publicado até salvar.</p>{!previewMaximized&&<button className="cms-preview-resize-handle" type="button" aria-label="Redimensionar janela de prévia" title="Arraste para redimensionar" onPointerDown={startPreviewResize} onPointerMove={movePreviewResize} onPointerUp={stopPreviewResize} onPointerCancel={stopPreviewResize}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M10 15l5-5"/></svg></button>}</aside>}
     </div>
-    <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
-      <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
+    <section className={'cms-layout-inline-preview'+(previewingPreset?' is-preset-preview':'')} ref={inlinePreviewSectionRef} aria-label="Prévia completa do portfólio">
+      <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">{previewingPreset?'EXPERIMENTANDO UM MODELO':'VISUALIZAÇÃO COMPLETA'}</p><strong>{previewingPreset?previewingPreset.title:'Portfólio em tamanho real'}</strong></div><span>Prévia privada</span></div>
+      {previewingPreset&&<div className="cms-layout-preset-preview-controls" aria-label="Navegar pelos modelos de portfólio">
+        <div className="cms-layout-preset-preview-nav"><button type="button" onClick={()=>stepPreviewPreset(-1)} aria-label="Modelo anterior">←</button><span>{LAYOUT_PRESETS.findIndex(preset=>preset.id===previewingPreset.id)+1} de {LAYOUT_PRESETS.length}</span><button type="button" onClick={()=>stepPreviewPreset(1)} aria-label="Próximo modelo">→</button></div>
+        <div className="cms-layout-preset-preview-actions"><button type="button" className="cms-editor-cancel" onClick={cancelPreviewPreset}>Voltar sem escolher</button><button type="button" className="cms-primary-button" onClick={confirmPreviewPreset}>Confirmar este layout <span>✓</span></button></div>
+      </div>}
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
       <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
       <p className="cms-layout-preview-caption">Largura ajustada automaticamente ({Math.round(inlinePreviewScale*100)}%). Role para cima e para baixo para percorrer todo o portfólio.</p>
