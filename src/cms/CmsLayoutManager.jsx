@@ -349,7 +349,8 @@ export function CmsLayoutManager(){
   }
   const hideOptionPreview=(event)=>{
     const preview=document.querySelector('.cms-layout-hover-preview')
-    if(event?.relatedTarget&&preview?.contains(event.relatedTarget))return
+    // Navegadores podem reportar relatedTarget=null ao atravessar a borda de um iframe.
+    if(event&&(!event.relatedTarget||preview?.contains(event.relatedTarget)))return
     if(suppressOptionPreviewRef.current)return
     cancelOptionPreviewHide()
     // Mantém a prévia viva ao atravessar para o iframe; fora dela, fecha com uma breve tolerância.
@@ -357,7 +358,7 @@ export function CmsLayoutManager(){
       setHoveredOption(null)
       setHoverPreviewMounted(false)
       hoverPreviewHideTimerRef.current=null
-    },240)
+    },320)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
     if(suppressOptionPreviewRef.current)return
