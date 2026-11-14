@@ -86,8 +86,10 @@ export function CmsLayoutManager(){
   const previewStageWidth=previewWidth*previewScale
   const previewStageHeight=previewDocumentHeight*previewScale
   // A prévia fixa reduz largura e altura juntas para mostrar a página inteira sem rolagem.
-  const inlinePreviewScale=inlinePreviewSize.width>0&&inlinePreviewSize.height>0&&previewDocumentHeight>0
-    ?Math.min(1,inlinePreviewSize.width/previewWidth,inlinePreviewSize.height/previewDocumentHeight):1
+  // A prévia completa usa a largura disponível, mas preserva a altura real da página.
+  // A rolagem acontece no quadro externo, em vez de reduzir tudo até ficar ilegível.
+  const inlinePreviewScale=inlinePreviewSize.width>0
+    ?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewDocumentHeight*inlinePreviewScale
   // Na prévia contextual, priorize a largura para manter o viewport de celular legível.
@@ -408,8 +410,8 @@ export function CmsLayoutManager(){
     <section className="cms-layout-inline-preview" aria-label="Prévia completa do portfólio">
       <div className="cms-layout-preview-heading"><div><p className="cms-eyebrow">VISUALIZAÇÃO COMPLETA</p><strong>Portfólio em tamanho real</strong></div><span>Prévia privada</span></div>
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
-      <p className="cms-layout-preview-caption">Página inteira: {Math.round(inlinePreviewScale*100)}% · visualização de {previewWidth} × {previewDocumentHeight}px ajustada automaticamente à área disponível.</p>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
+      <p className="cms-layout-preview-caption">Largura ajustada a {Math.round(inlinePreviewScale*100)}% · role dentro da prévia para percorrer toda a página ({previewWidth} × {previewDocumentHeight}px).</p>
     </section>
     
   </section>
