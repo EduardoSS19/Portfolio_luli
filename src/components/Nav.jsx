@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '', previewMenuOpen = false, previewMenuRequest = 0 }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -20,6 +20,10 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   const animacaoAtual = categoriaAtual && animando === categoriaAtual.chave
     ? `anim-${tipoDeAnimacao(categoriaAtual)}`
     : ''
+
+  useEffect(() => {
+    setMenuAberto(previewMenuOpen)
+  }, [previewMenuOpen, previewMenuRequest])
 
   useEffect(() => {
     if (!menuAberto) return undefined
