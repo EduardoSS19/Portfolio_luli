@@ -393,7 +393,7 @@ export function CmsCategoryManager({
                     {String(animationCategory?.id) === String(item.id) ? 'Configurando' : 'Configurar animação'} <span aria-hidden="true">↗</span>
                   </button>}
                 </div>
-                <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}
+                <small className="cms-category-animation-current">{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
                 <small className="cms-category-address">/{item.key}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
