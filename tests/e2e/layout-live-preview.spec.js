@@ -31,6 +31,34 @@ async function sendSettings(page, settings, focus = 'page', previewMode, animate
   }, { settings, focus, previewMode, animatePreview })
 }
 
+test('preview inicial é um portfólio completo com perfil, imagens, obras, trajetória e redes', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.hero h1')).toHaveText('Helena Duarte')
+  await expect(page.locator('.hero p')).toContainText('Artes visuais')
+  await expect(page.locator('.sobre-secao img')).toHaveAttribute('src', /images\\.unsplash\\.com/)
+  await expect(page.locator('.sobre-secao .biografia')).toContainText('Artista visual e pesquisadora independente')
+  await expect(page.locator('.obra')).toHaveCount(12)
+  await expect(page.locator('.obra img').first()).toHaveAttribute('src', /images\\.unsplash\\.com/)
+  await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
+  await expect(page.locator('.rodape-links a')).toHaveCount(3)
+  await expect(page.locator('#Contato form')).toBeVisible()
+})
+
+test('formulário do preview simula envio sem chamar nenhum serviço externo', async ({ page }) => {
+  let contactRequests = 0
+  await page.route('**/api/contact/**', route => {
+    contactRequests += 1
+    return route.fulfill({ status: 500, body: 'Preview must not send' })
+  })
+  await openLiveLayoutPreview(page)
+  await page.locator('#Contato input[name="nome"]').fill('Pessoa visitante')
+  await page.locator('#Contato input[name="email"]').fill('visitante@example.com')
+  await page.locator('#Contato textarea[name="mensagem"]').fill('Gostaria de saber mais sobre este trabalho.')
+  await page.locator('#Contato button[type="submit"]').click()
+  await expect(page.getByRole('status')).toContainText('nenhuma mensagem foi enviada')
+  expect(contactRequests).toBe(0)
+})
+
 test('a prévia navega até a seção editada dentro do iframe', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await page.evaluate(() => window.scrollTo(0, 0))
