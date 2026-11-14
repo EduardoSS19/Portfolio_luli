@@ -37,7 +37,7 @@ test('preview inicial é um portfólio completo com perfil, imagens, obras, traj
   await expect(page.locator('.hero p')).toContainText('Artes visuais')
   await expect(page.locator('.sobre-secao img')).toHaveAttribute('src', /images\\.unsplash\\.com/)
   await expect(page.locator('.sobre-secao .biografia')).toContainText('Artista visual e pesquisadora independente')
-  await expect(page.locator('.obra')).toHaveCount(12)
+  await expect(page.locator('.obras-lista .obra')).toHaveCount(8)
   await expect(page.locator('.obra img').first()).toHaveAttribute('src', /images\\.unsplash\\.com/)
   await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
   await expect(page.locator('.rodape-links a')).toHaveCount(3)
