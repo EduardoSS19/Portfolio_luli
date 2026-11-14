@@ -1,6 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useCmsConfirm } from './useCmsConfirm.jsx'
 
+const CATEGORY_ANIMATIONS = [
+  { value: 'obra', label: 'Editorial', detail: 'Entrada discreta e elegante.' },
+  { value: 'ceramica', label: 'Cerâmica', detail: 'A imagem ganha forma como no torno.' },
+  { value: 'gravura', label: 'Gravura', detail: 'Revelação vertical com passagem de rolo.' },
+  { value: 'desenho', label: 'Desenho', detail: 'Traço revelado da esquerda para a direita.' },
+  { value: 'glitch', label: 'Glitch', detail: 'Aparição digital fragmentada.' },
+  { value: 'fotografia', label: 'Fotografia', detail: 'Revelação gradual de uma imagem.' },
+  { value: 'videoarte', label: 'Videoarte', detail: 'Abertura cinematográfica.' },
+  { value: 'suave', label: 'Aparição suave', detail: 'Opacidade que cresce sem deslocamento.' },
+  { value: 'deslizar', label: 'Deslizar', detail: 'Movimento curto vindo de baixo.' },
+  { value: 'zoom', label: 'Zoom', detail: 'Aproximação sutil até o tamanho natural.' },
+  { value: 'recorte', label: 'Revelação por recorte', detail: 'A seção aparece como uma cortina.' },
+  { value: 'flutuar', label: 'Flutuação', detail: 'Entrada leve com movimento orgânico.' },
+  { value: 'nenhuma', label: 'Sem animação', detail: 'Conteúdo estático, sem efeitos de entrada.' },
+]
+
 function readCsrf() {
   const cookie = document.cookie.split('; ').find(item => item.startsWith('csrftoken='))
   return cookie ? decodeURIComponent(cookie.slice('csrftoken='.length)) : ''
@@ -24,6 +40,7 @@ async function categoryRequest(url, options = {}) {
       category_add_permission_required: 'Sua conta não tem permissão para criar categorias.',
       category_edit_permission_required: 'Sua conta não tem permissão para editar categorias.',
       category_key_conflict: 'Já existe uma categoria com essa chave.',
+      invalid_category_animation: 'Escolha uma animação disponível para esta categoria.',
     }
     throw new Error(messages[data.error] || 'Não foi possível salvar as categorias.')
   }
@@ -46,6 +63,7 @@ export function CmsCategoryManager({
   const [editing, setEditing] = useState(null)
   const [title, setTitle] = useState('')
   const [key, setKey] = useState('')
+  const [animation, setAnimation] = useState('obra')
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryWorks, setCategoryWorks] = useState([])
   const [savedCategoryWorks, setSavedCategoryWorks] = useState([])
@@ -186,6 +204,7 @@ export function CmsCategoryManager({
     setEditing(null)
     setTitle('')
     setKey('')
+    setAnimation('obra')
     setNotice('')
   }
 
@@ -193,6 +212,7 @@ export function CmsCategoryManager({
     setEditing(item)
     setTitle(item.title)
     setKey(item.key)
+    setAnimation(item.animation || 'obra')
     setError('')
     setNotice('')
   }
@@ -206,7 +226,7 @@ export function CmsCategoryManager({
       if (editing) {
         await categoryRequest('/api/cms/categories/' + editing.id + '/', {
           method: 'POST',
-          body: JSON.stringify({ title, key }),
+          body: JSON.stringify({ title, key, animation }),
         })
         setNotice('Categoria atualizada.')
       } else {
@@ -436,6 +456,29 @@ export function CmsCategoryManager({
             <input value={key} onChange={event => setKey(event.target.value)} maxLength={50} placeholder="Gerada automaticamente pelo nome" />
             <small className="cms-field-help">Identificador usado no endereço e nos filtros. Se não souber, deixe em branco para gerar automaticamente.</small>
           </label>
+          <fieldset className="cms-category-animation-field">
+            <legend>Animação desta categoria</legend>
+            <p className="cms-field-help">Escolha um efeito independente do nome e da chave. Selecione uma opção para ver sua prévia em movimento.</p>
+            <div className="cms-category-animation-grid">
+              {CATEGORY_ANIMATIONS.map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={'cms-category-animation-option' + (animation === option.value ? ' selected' : '')}
+                  onClick={() => setAnimation(option.value)}
+                  aria-pressed={animation === option.value}
+                  disabled={saving}
+                >
+                  <span className="cms-animation-demo" data-animation={option.value} aria-hidden="true">
+                    <i /><i /><i />
+                  </span>
+                  <strong>{option.label}</strong>
+                  <small>{option.detail}</small>
+                  {animation === option.value && <span className="cms-category-animation-selected">Selecionada</span>}
+                </button>
+              ))}
+            </div>
+          </fieldset>
           <div className="cms-category-form-actions">
             <button className="cms-primary-button" type="submit" disabled={saving || !title.trim() || (editing ? !canEditCategory : !canCreateCategory)}>{saving ? 'Salvando…' : editing ? 'Salvar categoria' : 'Criar categoria'}</button>
             {editing && <button className="cms-editor-cancel" type="button" onClick={reset} disabled={saving}>Cancelar</button>}
