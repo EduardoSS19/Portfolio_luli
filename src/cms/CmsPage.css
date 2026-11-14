@@ -1442,3 +1442,61 @@
 
 .cms-category-item.is-animation-selected{border-left:2px solid var(--cms-accent);padding-left:10px}
 .cms-category-animation-open[aria-pressed="true"]{border-color:color-mix(in srgb,var(--cms-accent) 55%,transparent)!important;background:color-mix(in srgb,var(--cms-accent) 10%,transparent)!important}
+
+
+/* Prévia fiel: a animação selecionada atua sobre uma obra e seu texto. */
+.cms-category-animation-live-preview{display:grid;gap:12px}
+.cms-animation-live-card{
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:0;
+  min-height:190px;overflow:hidden;border:1px solid var(--cms-line);border-radius:9px;
+  background:#171a16;isolation:isolate;
+}
+.cms-animation-live-image-wrap{position:relative;min-width:0;min-height:190px;overflow:hidden;background:#252a24}
+.cms-animation-live-image{
+  display:block;width:100%;height:100%;min-height:190px;object-fit:cover;
+  transform-origin:center;animation-duration:1.05s;animation-timing-function:cubic-bezier(.2,.7,.2,1);
+  animation-fill-mode:both;will-change:transform,opacity,filter,clip-path;
+}
+.cms-animation-live-image-placeholder{
+  display:grid;place-items:center;background:linear-gradient(135deg,#253b39,#8a9c82 55%,#c7b895);
+  color:#f4f0e4;font:600 12px 'DM Sans';
+}
+.cms-animation-live-copy{display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0;padding:18px}
+.cms-animation-live-copy>span{font:600 9px 'DM Sans';letter-spacing:.12em;color:var(--cms-accent)}
+.cms-animation-live-copy>strong{font:600 15px/1.25 'Manrope';color:#f1efe7}
+.cms-animation-live-copy>p{margin:0;color:#b7b9ad;font:400 11px/1.6 'DM Sans'}
+.cms-animation-live-card[data-animation="obra"] .cms-animation-live-image,
+.cms-animation-live-card[data-animation="suave"] .cms-animation-live-image{animation-name:cmsDemoFade}
+.cms-animation-live-card[data-animation="ceramica"] .cms-animation-live-image{animation-name:cmsDemoForm}
+.cms-animation-live-card[data-animation="gravura"] .cms-animation-live-image,
+.cms-animation-live-card[data-animation="recorte"] .cms-animation-live-image{animation-name:cmsDemoReveal}
+.cms-animation-live-card[data-animation="desenho"] .cms-animation-live-image,
+.cms-animation-live-card[data-animation="deslizar"] .cms-animation-live-image{animation-name:cmsDemoSlide}
+.cms-animation-live-card[data-animation="glitch"] .cms-animation-live-image{animation-name:cmsDemoGlitch}
+.cms-animation-live-card[data-animation="fotografia"] .cms-animation-live-image{animation-name:cmsDemoPhoto}
+.cms-animation-live-card[data-animation="videoarte"] .cms-animation-live-image{animation-name:cmsDemoCinema}
+.cms-animation-live-card[data-animation="zoom"] .cms-animation-live-image{animation-name:cmsDemoZoom}
+.cms-animation-live-card[data-animation="flutuar"] .cms-animation-live-image{animation-name:cmsDemoFloat}
+.cms-animation-live-card[data-animation="obra"] .cms-animation-live-copy,
+.cms-animation-live-card[data-animation="suave"] .cms-animation-live-copy{animation:cmsDemoFade 1.05s both}
+.cms-animation-live-card[data-animation="ceramica"] .cms-animation-live-copy{animation:cmsDemoForm 1.05s both}
+.cms-animation-live-card[data-animation="gravura"] .cms-animation-live-copy,
+.cms-animation-live-card[data-animation="recorte"] .cms-animation-live-copy{animation:cmsDemoReveal 1.05s both}
+.cms-animation-live-card[data-animation="desenho"] .cms-animation-live-copy,
+.cms-animation-live-card[data-animation="deslizar"] .cms-animation-live-copy{animation:cmsDemoSlide 1.05s both}
+.cms-animation-live-card[data-animation="glitch"] .cms-animation-live-copy{animation:cmsDemoGlitch 1.05s both}
+.cms-animation-live-card[data-animation="fotografia"] .cms-animation-live-copy{animation:cmsDemoPhoto 1.05s both}
+.cms-animation-live-card[data-animation="videoarte"] .cms-animation-live-copy{animation:cmsDemoCinema 1.05s both}
+.cms-animation-live-card[data-animation="zoom"] .cms-animation-live-copy{animation:cmsDemoZoom 1.05s both}
+.cms-animation-live-card[data-animation="flutuar"] .cms-animation-live-copy{animation:cmsDemoFloat 1.05s both}
+.cms-animation-live-card[data-animation="nenhuma"] .cms-animation-live-image,
+.cms-animation-live-card[data-animation="nenhuma"] .cms-animation-live-copy{animation:none}
+.cms-animation-live-loading{padding:26px;border:1px dashed var(--cms-line);border-radius:8px;color:var(--cms-muted);font:11px 'DM Sans'}
+@media(max-width:480px){
+ .cms-animation-live-card{grid-template-columns:1fr}
+ .cms-animation-live-image-wrap,.cms-animation-live-image{min-height:150px;max-height:190px}
+ .cms-animation-live-copy{padding:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ .cms-animation-live-image,.cms-animation-live-copy{animation:none!important;transform:none!important;filter:none!important;clip-path:none!important}
+}
