@@ -23,6 +23,17 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     : ''
 
   useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('layout_preview')) return
+    if (navigationMode === 'sidebar') {
+      previewMenuAutoOpenRef.current = true
+      setMenuAberto(true)
+    } else if (previewMenuAutoOpenRef.current) {
+      previewMenuAutoOpenRef.current = false
+      setMenuAberto(false)
+    }
+  }, [navigationMode])
+
+  useEffect(() => {
     const handlePreviewNavigation = event => {
       if (event.detail?.open) {
         previewMenuAutoOpenRef.current = true
