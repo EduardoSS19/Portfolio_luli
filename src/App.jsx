@@ -181,8 +181,8 @@ export default function App() {
   const secoesNav = useMemo(() => [
     ...(conteudo.layout?.show_bio ?? true ? [{ titulo: 'Início', chave: 'inicio' }] : []),
     ...categorias.map(c => ({ titulo: c.titulo, chave: c.chave })),
-    ...(conteudo.layout?.custom_sections || []).filter(section => section.title && section.items?.length).map(section => ({ titulo: section.title, chave: section.id })),
     ...(referencias.length && (conteudo.layout?.show_references ?? true) ? [{ titulo: 'Referências', chave: 'referencias' }] : []),
+    ...(conteudo.layout?.custom_sections || []).filter(section => section.title && section.items?.length).map(section => ({ titulo: section.title, chave: section.id })),
     { titulo: 'Contato', chave: 'contato' },
   ], [categorias, referencias.length, conteudo.layout?.show_references, conteudo.layout?.show_bio_image, conteudo.layout?.show_bio, conteudo.layout?.custom_sections])
   const [secaoAtiva, definirSecaoAtiva] = useSecaoAtiva(secoesNav, modoGaleria)
@@ -577,7 +577,7 @@ export default function App() {
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
       <PortfolioCustomSections sections={layout.custom_sections || []} />
-      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" />
+      {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" />}
       <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
