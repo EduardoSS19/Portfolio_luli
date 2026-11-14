@@ -372,7 +372,7 @@ export function CmsCategoryManager({
           <p>Selecione uma categoria para escolher e visualizar sua animação. Cada categoria pode usar qualquer efeito, independentemente do tipo de obra.</p>
           {loading ? <div className="cms-loading">Carregando categorias…</div> : items.length ? items.map(item => (
             <article
-              className={'cms-category-item' + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
+              className={'cms-category-item' + (String(animationCategory?.id) === String(item.id) ? ' is-animation-selected' : '') + (draggingCategoryId === item.id ? ' is-dragging' : '') + (dragOverCategoryId === item.id ? ' is-drop-target' : '')}
               key={item.id}
               draggable={supportsDrag && canEditCategory && !saving}
               onDragStart={event => {
@@ -391,7 +391,7 @@ export function CmsCategoryManager({
               onDragEnd={() => { setDraggingCategoryId(null); setDragOverCategoryId(null) }}
             >
               <div>
-                <button type="button" className="cms-category-animation-open" onClick={() => openAnimationEditor(item)} disabled={!canEditCategory || saving} aria-label={'Configurar animação da categoria ' + item.title}>
+                <button type="button" className="cms-category-animation-open" aria-pressed={String(animationCategory?.id) === String(item.id)} onClick={() => openAnimationEditor(item)} disabled={!canEditCategory || saving} aria-label={'Configurar animação da categoria ' + item.title}>
                   <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
                   <small>{CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'} · {item.workCount} {item.workCount === 1 ? 'obra' : 'obras'}</small>
                   <span>Configurar animação →</span>
