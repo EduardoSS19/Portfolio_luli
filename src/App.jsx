@@ -59,7 +59,7 @@ function parseLayoutPreview(raw) {
     LAYOUT_PREVIEW_COLORS.forEach(key => {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
     })
-    if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.slice(0, 10)
+    if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.filter(section => section && typeof section.id === 'string' && typeof section.title === 'string' && Array.isArray(section.items)).slice(0, 10)
     ;['show_bio_image','show_bio','show_references'].forEach(key => {
       if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
@@ -128,6 +128,23 @@ const perfilInicial = {
   instagram: '',
   email: '',
   formulario: '',
+}
+
+function PortfolioCustomSections({ sections = [] }) {
+  return sections.filter(section => section && section.title && Array.isArray(section.items) && section.items.length).map(section => (
+    <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id}>
+      <header className="secao-cabecalho visivel"><span className="secao-indice">PORTFÓLIO</span><h2>{section.title}</h2><span className="secao-contagem">{String(section.items.length).padStart(2,'0')} itens</span></header>
+      {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
+      <div className="portfolio-custom-grid">
+        {section.items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
+          {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
+          <div><h3>{item.title}</h3>{item.period && <small>{item.period}</small>}{item.description && <p>{item.description}</p>}
+            {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
+          </div>
+        </article>)}
+      </div>
+    </section>
+  ))
 }
 
 export default function App() {
@@ -558,6 +575,7 @@ export default function App() {
         ))
       )}
       {layout.show_references !== false && referencias.length > 0 && <Referencias referencias={referencias} />}
+      <PortfolioCustomSections sections={layout.custom_sections || []} />
       {isLayoutPreview && layout.show_references === false && <div id="Referências" className="layout-preview-hidden-anchor" aria-hidden="true" />
       <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
