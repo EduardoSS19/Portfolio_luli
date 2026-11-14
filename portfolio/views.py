@@ -157,7 +157,9 @@ def portfolio_data(request):
             return JsonResponse({"erro": "A obra desta prévia não existe mais."}, status=404)
 
     works_queryset = Work.objects.filter(is_active=True)
-    categories_queryset = Category.objects.filter(is_active=True, works__is_active=True).distinct()
+    # A categoria publicada continua visível mesmo quando todas as obras estão em rascunho.
+    # Isso evita que uma categoria desapareça do portfólio só porque suas obras foram despublicadas.
+    categories_queryset = Category.objects.filter(is_active=True)
     if preview_work:
         # A prévia do CMS é uma página isolada: não mistura a obra selecionada
         # com outras obras da categoria nem com o restante do portfólio.
