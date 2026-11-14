@@ -487,3 +487,9 @@
 /* No editor de layout, as ações pertencem ao fluxo do formulário.
    Não devem ficar fixas sobre as opções nem interceptar sua interação. */
 .cms-layout-page .cms-editor-actions{position:static!important;pointer-events:auto!important}
+
+
+/* A prévia de hover é um mini navegador: o ponteiro e a rolagem ficam dentro dela. */
+.cms-layout-hover-preview-floating{pointer-events:auto!important;}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{pointer-events:auto!important;overflow:hidden!important;}
+.cms-layout-hover-preview-floating iframe{pointer-events:auto!important;touch-action:pan-y;}
