@@ -210,13 +210,13 @@ export function CmsLayoutManager(){
     return()=>{active=false}
   },[])
   const hasChanges=JSON.stringify(settings)!==JSON.stringify(saved)
-  const previewUrl='/?layout_preview=1'
+  const previewUrl='/?layout_preview=1&layout_preview_live=1'
   const hoverPreviewState=()=>{
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode,navigateToFocus:true}
+    return {settings:nextSettings,focus,previewMode:nextMode}
   }
   const sendPreviewUpdate=(target,override)=>{
     const payload=override||{settings,focus:previewFocus,previewMode}
@@ -347,7 +347,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src={previewUrl} loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
             </div>
           </div>
           <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
