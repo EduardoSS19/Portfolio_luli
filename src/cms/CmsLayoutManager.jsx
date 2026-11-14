@@ -90,6 +90,7 @@ export function CmsLayoutManager(){
   const [previewOpen,setPreviewOpen]=useState(false)
   const [previewingPresetId,setPreviewingPresetId]=useState(null)
   const presetSectionRef=useRef(null)
+  const postPresetMenuRef=useRef(null)
   const inlinePreviewSectionRef=useRef(null)
   const [previewMaximized,setPreviewMaximized]=useState(false)
   const [previewPosition,setPreviewPosition]=useState({x:24,y:108})
@@ -279,7 +280,7 @@ export function CmsLayoutManager(){
     setPreviewMode(previewingPreset.settings.default_gallery_view)
     setPreviewingPresetId(null)
     setNotice('Modelo “'+previewingPreset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
-    window.setTimeout(()=>scrollToElement(presetSectionRef.current),80)
+    window.setTimeout(()=>scrollToElement(postPresetMenuRef.current),80)
   }
   const cancelPreviewPreset=()=>{
     setPreviewingPresetId(null)
@@ -428,7 +429,7 @@ export function CmsLayoutManager(){
             </article>)}
           </div>
         </section>
-        <section className="cms-layout-section-library">
+        <section className="cms-layout-section-library" ref={postPresetMenuRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">CONTEÚDO MODULAR</p><h2>Biblioteca de seções</h2></div><span className="cms-layout-preset-count">{(settings.custom_sections||[]).length} adicionadas</span></div>
           <p className="cms-layout-help">Adicione apenas o que faz sentido para seu trabalho. Cada seção pode ser editada e organizada; deixe sem itens para mantê-la como rascunho no editor.</p>
           <div className="cms-layout-section-template-grid">
