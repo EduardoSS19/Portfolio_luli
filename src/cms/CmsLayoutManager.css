@@ -341,7 +341,7 @@
 
 /* A prévia contextual permanece sobreposta também em telas estreitas. */
 @media(max-width:1100px){
-  .cms-layout-hover-preview-floating{max-height:min(440px,55vh)!important}
+  .cms-layout-hover-preview-floating{max-height:min(440px,55vh)}
 }
 
 /* A prévia contextual aceita rolagem, cliques e navegação dentro do iframe. */
