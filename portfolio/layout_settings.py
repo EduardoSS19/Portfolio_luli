@@ -81,9 +81,11 @@ def normalize_custom_sections(value):
         return []
     sections = []
     for section in value[:10]:
-        if not isinstance(section, dict) or section.get("type") not in CUSTOM_SECTION_TYPES:
+        if not isinstance(section, dict):
             continue
-        section_type = section["type"]
+        section_type = section.get("type")
+        if not isinstance(section_type, str) or section_type not in CUSTOM_SECTION_TYPES:
+            continue
         section_id = section.get("id")
         if not isinstance(section_id, str) or not re.fullmatch(r"[a-z0-9-]{1,48}", section_id):
             continue
@@ -120,10 +122,10 @@ def normalize_custom_sections(value):
             source_design = section.get("design") if isinstance(section.get("design"), dict) else {}
             layout = source_design.get("layout")
             normalized["design"] = {
-                "layout": layout if layout in CUSTOM_SECTION_DESIGNS[section_type] else CUSTOM_SECTION_DEFAULT_LAYOUTS[section_type],
-                "columns": source_design.get("columns") if source_design.get("columns") in {"1", "2", "3"} else "2",
-                "image_ratio": source_design.get("image_ratio") if source_design.get("image_ratio") in {"portrait", "square", "landscape"} else "landscape",
-                "density": source_design.get("density") if source_design.get("density") in {"compact", "comfortable", "spacious"} else "comfortable",
+                "layout": layout if isinstance(layout, str) and layout in CUSTOM_SECTION_DESIGNS[section_type] else CUSTOM_SECTION_DEFAULT_LAYOUTS[section_type],
+                "columns": source_design.get("columns") if isinstance(source_design.get("columns"), str) and source_design.get("columns") in {"1", "2", "3"} else "2",
+                "image_ratio": source_design.get("image_ratio") if isinstance(source_design.get("image_ratio"), str) and source_design.get("image_ratio") in {"portrait", "square", "landscape"} else "landscape",
+                "density": source_design.get("density") if isinstance(source_design.get("density"), str) and source_design.get("density") in {"compact", "comfortable", "spacious"} else "comfortable",
             }
         sections.append(normalized)
     return sections
