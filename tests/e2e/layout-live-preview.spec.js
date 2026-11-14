@@ -520,11 +520,22 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
     transform: getComputedStyle(frame).transform,
     zoom: getComputedStyle(frame).zoom,
     scrolling: frame.getAttribute('scrolling'),
-    frameHeight: frame.parentElement.clientHeight,
+    frameHeight: frame.closest('.cms-layout-hover-preview-frame').clientHeight,
   }))
   expect(behavior.pointerEvents).toBe('none')
   expect(behavior.transform).toBe('none')
   expect(behavior.zoom).toBe('1')
   expect(behavior.scrolling).toBe('no')
   expect(behavior.frameHeight).toBeLessThanOrEqual(260)
+})
+
+test('layouts espaçosos não deixam um vão exagerado depois do contato', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { section_spacing: 'spacious', show_contact: true }, 'page')
+  const gap = await page.evaluate(() => {
+    const contact = document.querySelector('.secao-contato')
+    const footer = document.querySelector('.rodape')
+    return footer && contact ? footer.getBoundingClientRect().top - contact.getBoundingClientRect().bottom : 0
+  })
+  expect(gap).toBeLessThan(80)
 })
