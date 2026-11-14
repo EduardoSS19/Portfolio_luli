@@ -259,13 +259,16 @@ export function CmsLayoutManager(){
     if(anchor){
       const rightSpace=viewportWidth-anchor.right-gap-minEdge
       const leftSpace=anchor.left-gap-minEdge
-      // Prioriza o lado que comporta o painel inteiro; se nenhum comportar,
-      // usa o lado com mais espaço e mantém o painel dentro do viewport.
-      const placeRight=rightSpace>=panelWidth || (leftSpace<panelWidth && rightSpace>=leftSpace)
-      let left=placeRight?anchor.right+gap:anchor.left-panelWidth-gap
-      left=Math.max(minEdge,Math.min(left,viewportWidth-panelWidth-minEdge))
-      const centeredTop=anchor.top+(anchor.height-panelHeight)/2
-      const top=Math.max(minEdge,Math.min(centeredTop,viewportHeight-panelHeight-minEdge))
+      const sideFits=rightSpace>=panelWidth||leftSpace>=panelWidth
+      const placeRight=sideFits?rightSpace>=panelWidth:rightSpace>=leftSpace
+      // Nunca posiciona a prévia acima do controle: tenta uma das laterais
+      // e, quando ambas são estreitas, ancora abaixo do botão.
+      const left=sideFits
+        ?(placeRight?anchor.right+gap:anchor.left-panelWidth-gap)
+        :Math.max(minEdge,Math.min(anchor.left,viewportWidth-panelWidth-minEdge))
+      const top=sideFits
+        ?Math.max(minEdge,Math.min(anchor.top,viewportHeight-minEdge-180))
+        :Math.min(anchor.bottom+gap,viewportHeight-minEdge-180)
       setHoverPreviewPosition({left,top})
     }else{
       setHoverPreviewPosition({
