@@ -426,12 +426,12 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
           <div className="cms-layout-preset-grid">
             {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
-              <div className={'cms-layout-preset-art preset-'+preset.id} aria-hidden="true">
+              <div className={'cms-layout-preset-art preset-'+preset.id+' mode-'+preset.settings.presentation_mode+' nav-'+preset.settings.navigation_mode} aria-hidden="true">
                 <div className="cms-layout-preset-mock-nav"><i/><i/><i/><i/></div>
                 <div className="cms-layout-preset-mock-hero"><small>{preset.kind.split('·')[0].trim()}</small><b>{preset.title}</b><i/></div>
                 <div className="cms-layout-preset-mock-content"><div className="cms-layout-preset-mock-image"/><div className="cms-layout-preset-mock-copy"><i/><i/><i/></div><div className="cms-layout-preset-mock-sections">{preset.sections.slice(0,4).map(type=><i key={type}>{SECTION_TEMPLATES.find(item=>item.type===type)?.label}</i>)}</div></div>
               </div>
-              <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p></div>
+              <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p><div className="cms-layout-preset-tags"><span>{({editorial:'Editorial',carousel:'Carrossel',immersive:'Imersivo',masonry:'Mosaico'})[preset.settings.presentation_mode]}</span><span>{({curtain:'Cortina',dropdown:'Dropdown',sidebar:'Lateral'})[preset.settings.navigation_mode]}</span></div></div>
               <button type="button" className="cms-layout-preset-apply" onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
             </article>)}
           </div>
