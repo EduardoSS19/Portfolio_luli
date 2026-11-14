@@ -579,3 +579,23 @@ nav button[class*="anim-video"],
   .obra.arte-recorte .obra-imagem .obra-zoom-trigger img,
   .obra.arte-flutuar .obra-imagem .obra-zoom-trigger img{animation:none!important}
 }
+
+
+/* Novas entradas visuais para a biblioteca de categorias. */
+.obra.arte-perspectiva.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPerspectiva 1s cubic-bezier(.2,.7,.2,1) both;transform-origin:center}
+@keyframes obraPerspectiva{0%{opacity:0;transform:perspective(900px) rotateY(-22deg) scale(.92)}70%{opacity:1;transform:perspective(900px) rotateY(3deg) scale(1.01)}100%{opacity:1;transform:perspective(900px) rotateY(0) scale(1)}}
+.obra.arte-foco.visivel .obra-imagem .obra-zoom-trigger img{animation:obraFoco 1.15s ease both}
+@keyframes obraFoco{0%{opacity:.35;filter:blur(16px);transform:scale(1.06)}100%{opacity:1;filter:blur(0);transform:scale(1)}}
+.obra.arte-cascata.visivel .obra-imagem .obra-zoom-trigger img{animation:obraCascata 1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes obraCascata{0%{opacity:0;clip-path:inset(0 0 100%);transform:translateY(-12px)}100%{opacity:1;clip-path:inset(0);transform:translateY(0)}}
+.obra.arte-pulso.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPulso .9s cubic-bezier(.18,.75,.25,1.25) both}
+@keyframes obraPulso{0%{opacity:0;transform:scale(.82)}65%{opacity:1;transform:scale(1.045)}82%{transform:scale(.985)}100%{opacity:1;transform:scale(1)}}
+.obra.arte-pincelada.visivel .obra-imagem .obra-zoom-trigger img{animation:obraPincelada 1s cubic-bezier(.65,0,.35,1) both}
+@keyframes obraPincelada{0%{opacity:.3;clip-path:polygon(0 100%,0 100%,0 100%,0 100%)}100%{opacity:1;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}}
+.secao-cabecalho.arte-perspectiva{opacity:0;transform:perspective(900px) rotateX(12deg) translateY(10px);transform-origin:center bottom}
+.secao-cabecalho.arte-foco{opacity:0;filter:blur(10px);transform:scale(1.025)}
+.secao-cabecalho.arte-cascata{opacity:0;clip-path:inset(0 0 100%);transform:translateY(-8px)}
+.secao-cabecalho.arte-pulso{opacity:0;transform:scale(.88)}
+.secao-cabecalho.arte-pincelada{opacity:0;clip-path:polygon(0 100%,0 100%,0 100%,0 100%)}
+.secao-cabecalho.arte-perspectiva.visivel,.secao-cabecalho.arte-foco.visivel,.secao-cabecalho.arte-cascata.visivel,.secao-cabecalho.arte-pulso.visivel,.secao-cabecalho.arte-pincelada.visivel{opacity:1;transform:none;filter:none;clip-path:inset(0);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1),filter 1s ease,clip-path 1s ease}
+@media(prefers-reduced-motion:reduce){.obra.arte-perspectiva .obra-imagem img,.obra.arte-foco .obra-imagem img,.obra.arte-cascata .obra-imagem img,.obra.arte-pulso .obra-imagem img,.obra.arte-pincelada .obra-imagem img{animation:none!important}}
