@@ -232,7 +232,7 @@ test('prévia de layout apresenta conteúdo demonstrativo em todas as seções',
 
 test('seções centrais podem ser removidas do modelo sem deixar links órfãos', async ({ page }) => {
   await openLiveLayoutPreview(page)
-  await sendSettings(page, { show_bio:false, show_references:false, show_contact:false }, 'page')
+  await sendSettings(page, { show_bio:false, show_bio_image:false, show_references:false, show_contact:false }, 'page')
   await expect(page.locator('.sobre-secao')).toHaveCount(0)
   await expect(page.locator('#Referências')).toHaveCount(1)
   await expect(page.locator('#Referências')).toBeHidden()
