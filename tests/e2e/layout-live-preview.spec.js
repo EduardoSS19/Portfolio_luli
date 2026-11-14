@@ -238,7 +238,10 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
   const viewport = preview.locator('.cms-layout-preview-frame-inline')
   const iframe = preview.locator('iframe')
   await expect(iframe).toBeVisible()
-  await expect.poll(() => viewport.getAttribute('data-preview-scale').then(Number)).toBeLessThan(1)
+  await expect.poll(() => viewport.evaluate(element => {
+    const expectedScale = Math.min(1, element.clientWidth / 1440)
+    return Math.abs(Number(element.dataset.previewScale) - expectedScale)
+  })).toBeLessThanOrEqual(0.002)
 
   const geometry = await preview.evaluate(root => {
     const frame = root.querySelector('.cms-layout-preview-frame-inline')
