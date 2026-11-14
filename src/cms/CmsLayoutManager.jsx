@@ -55,7 +55,7 @@ const SECTION_ITEM_FIELDS = {
  testimonials:[['author','Pessoa / cliente','Ex.: Marina Costa'],['role','Cargo / relação','Ex.: Curadora'],['project','Projeto relacionado','Ex.: Cartografias afetivas']],
  'tattoo-flash':[['size','Tamanho','Ex.: 8 cm'],['placement','Local sugerido','Ex.: Antebraço'],['price','Valor','Ex.: R$ 450'],['status','Disponibilidade','Ex.: Disponível · Peça única']],
  'tattoo-booking':[['step','Etapa','Ex.: 1 · Envie sua ideia'],['channel','Canal de contato','Ex.: Formulário ou Instagram'],['response_time','Prazo de retorno','Ex.: Até 3 dias úteis'],['policy','Orientação','Ex.: Envie referências e medidas']],
- 'healed-work':[['placement','Local tatuado','Ex.: Antebraço'],['healing_time','Tempo de cicatrização','Ex.: 6 meses'],['period','Data do registro','Ex.: Janeiro de 2026']],
+ 'healed-work':[['placement','Local tatuado','Ex.: Antebraço'],['healing_time','Tempo de cicatrização','Ex.: 6 meses'],['period','Data do registro','Ex.: Janeiro de 2026'],['image_before','Imagem antes (URL)','https://…'],['image_after','Imagem cicatrizada (URL)','https://…']],
  'guest-spots':[['city','Cidade','Ex.: São Paulo'],['studio','Estúdio anfitrião','Ex.: Casa Tinta'],['dates','Datas','Ex.: 12–16 de março'],['booking_url','Link para agendamento','https://…']],
  'studio-team':[['role','Função','Ex.: Artista residente'],['specialties','Especialidades','Ex.: Fine line · Botânica'],['instagram','Instagram','@artista']],
 }
@@ -95,7 +95,7 @@ function buildPresetSettings(base,preset){
   const existing=(base.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'))
   const additions=(preset.sections||[]).map((type,index)=>{
     const template=SECTION_TEMPLATES.find(item=>item.type===type)
-    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null
+    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,design:{layout:SECTION_DESIGNS[type]?.[0]?.[0]||'cards',columns:'2',image_ratio:'landscape',density:'comfortable'},items:[]}:null
   }).filter(Boolean)
   return {...base,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}
 }
@@ -651,7 +651,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
             <div className="cms-layout-preview-stage" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
         </aside>,
