@@ -123,6 +123,10 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Layout')
 
   const leftOption = page.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
+  const optionBeforeHover = await leftOption.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+  })
   await leftOption.hover()
   const hoverPreview = page.locator('.cms-layout-hover-preview')
   await expect(hoverPreview).toBeVisible()
@@ -132,16 +136,13 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
-  const overlapsControls = await page.evaluate(() => {
-    const preview = document.querySelector('.cms-layout-hover-preview').getBoundingClientRect()
-    return [...document.querySelectorAll('.cms-layout-option, .cms-editor-actions button')].some(element => {
-      const rect = element.getBoundingClientRect()
-      return rect.width > 0 && rect.height > 0 &&
-        rect.left < preview.right && rect.right > preview.left &&
-        rect.top < preview.bottom && rect.bottom > preview.top
-    })
+  const optionAfterHover = await leftOption.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
   })
-  expect(overlapsControls).toBe(false)
+  expect(optionAfterHover).toEqual(optionBeforeHover)
+  await expect(hoverPreview).toHaveCSS('position', 'fixed')
+  await expect(hoverPreview.getByRole('button', { name: 'Fechar prévia temporária' })).toBeEnabled()
 
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
