@@ -211,8 +211,27 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
-      // Atualiza a prévia sem deslocar a rolagem: quem está personalizando
-      // decide quando navegar pela página para conferir o resultado.
+
+      // Só a simulação de hover solicita navegação. Alterações normais continuam
+      // preservando a posição atual da página enquanto a pessoa personaliza.
+      if (event.data.navigateToFocus === true) {
+        const focus = event.data.focus
+        const focusSelectors = {
+          hero: '.hero',
+          bio: '.sobre-secao',
+          gallery: previewMode === 'grade'
+            ? '.galeria-grade-global'
+            : '.secao:not(.sobre-secao):not(.secao-contato)',
+          references: '#Referências',
+          contact: '#Contato',
+        }
+        const selector = focusSelectors[focus]
+        if (selector) {
+          window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+          }))
+        }
+      }
     }
     window.addEventListener('message', handleLayoutPreviewUpdate)
     window.parent.postMessage({ type: 'cms-layout-preview:ready' }, window.location.origin)
