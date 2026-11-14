@@ -64,13 +64,18 @@ class BackgroundFrame(models.Model):
 
 class Category(models.Model):
     ANIMATION_CHOICES = (
-        ("obra", "Editorial"),
-        ("ceramica", "Cerâmica"),
-        ("gravura", "Gravura"),
-        ("desenho", "Desenho"),
+        ("obra", "Entrada editorial"),
+        ("ceramica", "Modelagem no torno"),
+        ("gravura", "Impressão na prensa"),
+        ("desenho", "Traço revelado"),
         ("glitch", "Glitch"),
-        ("fotografia", "Fotografia"),
-        ("videoarte", "Videoarte"),
+        ("fotografia", "Abertura de íris"),
+        ("videoarte", "Varredura de tela"),
+        ("suave", "Dissolver"),
+        ("deslizar", "Subir suavemente"),
+        ("zoom", "Aproximar"),
+        ("recorte", "Abrir em cortina"),
+        ("flutuar", "Flutuar"),
         ("nenhuma", "Sem animação"),
     )
     title = models.CharField("título", max_length=100)
