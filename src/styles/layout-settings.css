@@ -189,3 +189,18 @@
 .section-testimonials .portfolio-custom-card h3:before{content:'“';margin-right:.15rem;font:2rem Georgia,serif}
 .section-tattoo-flash .portfolio-custom-card>img,.section-healed-work .portfolio-custom-card>img{aspect-ratio:1/1}
 @media(max-width:600px){.portfolio-custom-grid{grid-template-columns:1fr}.portfolio-custom-card{padding:.8rem}}
+
+
+/* Presentation and navigation settings are explicit layout variants, not aliases for grid/list. */
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .secao-cabecalho,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .secao-cabecalho {
+  width:min(100% - 2.5rem,1480px);
+  margin-inline:auto;
+}
+.site-shell[data-layout-presentation="carousel"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="immersive"] .secao:not(.sobre-secao) .obras-lista {
+  width:100%;
+}
+.site-shell[data-layout-presentation="masonry"] .galeria-grade-global {
+  width:min(100% - 2rem,1600px);
+}
