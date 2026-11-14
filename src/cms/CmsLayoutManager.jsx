@@ -335,7 +335,7 @@ export function CmsLayoutManager(){
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const hasBio=(hoveredOption.name==='show_bio'?hoveredOption.value:settings.show_bio)!==false||(hoveredOption.name==='show_bio_image'?hoveredOption.value:settings.show_bio_image)!==false
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):hoveredOption.name==='navigation_mode'?'navigation':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:false}
+    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
     const payload=override||{settings,focus:previewFocus,previewMode,animatePreview:false}
