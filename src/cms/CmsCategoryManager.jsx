@@ -364,7 +364,7 @@ export function CmsCategoryManager({
             >
               <div>
                 <strong>{supportsDrag && canEditCategory && <span className="cms-category-drag-handle" aria-hidden="true" title="Arraste para reorganizar">⠿ </span>}{item.title}</strong>
-                <small>{item.workCount} {item.workCount === 1 ? 'obra vinculada' : 'obras vinculadas'} · /{item.key}</small>
+                <small>{item.workCount} {item.workCount === 1 ? 'obra vinculada' : 'obras vinculadas'} · /{item.key} · Animação: {CATEGORY_ANIMATIONS.find(option => option.value === item.animation)?.label || 'Editorial'}</small>
                 <span className={'cms-category-status' + (item.active ? '' : ' inactive')}>{item.active ? 'Ativa' : 'Inativa'}</span>
               </div>
               <div className="cms-category-item-actions">
