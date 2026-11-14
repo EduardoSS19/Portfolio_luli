@@ -268,3 +268,7 @@
  .portfolio-custom-accordion-content{grid-template-columns:1fr}
  .portfolio-custom-section.section-layout-masonry .portfolio-custom-grid{columns:1}
 }
+
+/* Preview documents should end at their actual content, not an artificial viewport minimum. */
+.site-shell[data-layout-preview="true"]{min-height:0!important}
+.site-shell[data-layout-preview="true"] .rodape{margin-top:0!important}
