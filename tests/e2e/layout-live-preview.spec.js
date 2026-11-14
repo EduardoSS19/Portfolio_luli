@@ -437,15 +437,33 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
     const iframe = root.querySelector('iframe')
     return {
       availableWidth: frame.clientWidth,
+      availableHeight: frame.clientHeight,
       stageWidth: stage.getBoundingClientRect().width,
+      stageHeight: stage.getBoundingClientRect().height,
       iframeWidth: iframe.getBoundingClientRect().width,
       iframeLayoutWidth: iframe.clientWidth,
+      iframeLayoutHeight: iframe.clientHeight,
       overflowY: getComputedStyle(frame).overflowY,
     }
   })
   expect(Math.abs(geometry.stageWidth - geometry.availableWidth)).toBeLessThanOrEqual(3)
   expect(geometry.iframeLayoutWidth).toBe(1440)
-  expect(geometry.overflowY).toBe('auto')
+  expect(geometry.iframeLayoutHeight).toBe(900)
+  expect(Math.abs(geometry.stageHeight - 900 * geometry.availableWidth / 1440)).toBeLessThanOrEqual(3)
+  expect(geometry.overflowY).toBe('hidden')
+
+  const previewFrame = page.frameLocator('.cms-layout-inline-preview iframe')
+  await previewFrame.locator('.editorial-menu-trigger').click()
+  await expect(previewFrame.locator('.site-nav')).toHaveClass(/menu-aberto/)
+  const menuGeometry = await preview.locator('iframe').evaluate(iframe => {
+    const menu = iframe.contentDocument.querySelector('.editorial-menu-backdrop')
+    return { menuHeight: menu.getBoundingClientRect().height, viewportHeight: iframe.contentWindow.innerHeight, documentHeight: iframe.contentDocument.documentElement.scrollHeight }
+  })
+  expect(Math.abs(menuGeometry.menuHeight - menuGeometry.viewportHeight)).toBeLessThanOrEqual(2)
+  expect(menuGeometry.documentHeight).toBeGreaterThan(menuGeometry.viewportHeight)
+  await previewFrame.locator('.editorial-menu-trigger').press('Escape').catch(() => {})
+  await preview.locator('iframe').evaluate(iframe => iframe.contentWindow.scrollTo(0, 360))
+  await expect.poll(() => preview.locator('iframe').evaluate(iframe => iframe.contentWindow.scrollY)).toBeGreaterThan(0)
 })
 
 test('menu lateral permanece fechado na prévia até o visitante clicar para abrir', async ({ page }) => {
