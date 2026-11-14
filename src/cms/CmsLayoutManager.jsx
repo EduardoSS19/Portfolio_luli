@@ -288,7 +288,7 @@ export function CmsLayoutManager(){
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const hasBio=(hoveredOption.name==='show_bio'?hoveredOption.value:settings.show_bio)!==false||(hoveredOption.name==='show_bio_image'?hoveredOption.value:settings.show_bio_image)!==false
     const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):hoveredOption.name==='navigation_mode'?'navigation':'page'
-    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
+    return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:false}
   }
   const sendPreviewUpdate=(target,override)=>{
     const payload=override||{settings,focus:previewFocus,previewMode,animatePreview:false}
@@ -605,10 +605,9 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="yes" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
             </div>
           </div>
-          <p className="cms-layout-preview-caption">Prévia interativa em largura de celular: navegue pelo menu e role para explorar. Clique na opção para aplicá-la ao editor.</p>
         </aside>,
         document.body
       )}
