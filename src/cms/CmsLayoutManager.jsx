@@ -258,9 +258,10 @@ export function CmsLayoutManager(){
   const previewUrl='/?layout_preview=1&layout_preview_live=1'
   const hoverPreviewState=()=>{
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
-    const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value}
+    const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
-    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':'page'
+    const hasBio=(hoveredOption.name==='show_bio'?hoveredOption.value:settings.show_bio)!==false||(hoveredOption.name==='show_bio_image'?hoveredOption.value:settings.show_bio_image)!==false
+    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):'page'
     return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -324,42 +325,56 @@ export function CmsLayoutManager(){
     return()=>{window.cancelAnimationFrame(frame);window.removeEventListener('message',handlePreviewReady)}
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
-  const showOptionPreview=(name,value,label,detail,event)=>{
-    if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)
+  const cancelOptionPreviewHide=()=>{
+    if(hoverPreviewHideTimerRef.current){
+      window.clearTimeout(hoverPreviewHideTimerRef.current)
+      hoverPreviewHideTimerRef.current=null
+    }
+  }
+  const closeOptionPreview=()=>{
+    cancelOptionPreviewHide()
+    setHoveredOption(null)
+    setHoverPreviewMounted(false)
+  }
+  const hideOptionPreview=()=>{
+    cancelOptionPreviewHide()
+    // Pequena tolerância para o ponteiro atravessar o espaço entre a opção e a prévia.
+    hoverPreviewHideTimerRef.current=window.setTimeout(()=>{
+      setHoveredOption(null)
+      setHoverPreviewMounted(false)
+      hoverPreviewHideTimerRef.current=null
+    },240)
+  }
+  const showOptionPreview=(name,value,label,detail,event,patch={})=>{
+    cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
     const viewportWidth=window.innerWidth
     const viewportHeight=window.innerHeight
     const margin=16
     const gap=12
-    const panelWidth=Math.min(380,viewportWidth-margin*2)
-    const preferredHeight=Math.min(440,viewportHeight-margin*2)
+    const panelWidth=Math.min(380,Math.max(240,viewportWidth-margin*2))
+    const preferredHeight=Math.min(440,Math.max(180,viewportHeight-margin*2))
     const rightSpace=rect?viewportWidth-rect.right-gap-margin:0
     const leftSpace=rect?rect.left-gap-margin:0
-    const placeRight=rightSpace>=panelWidth||rightSpace>=leftSpace
-    const availableWidth=Math.max(240,Math.min(panelWidth,placeRight?rightSpace:leftSpace))
-    const left=rect
-      ?(placeRight?rect.right+gap:rect.left-gap-availableWidth)
-      :margin
-    const top=rect?Math.min(rect.bottom+gap,viewportHeight-margin-180):margin
-    const maxHeight=Math.max(180,Math.min(preferredHeight,viewportHeight-top-margin))
-    setHoverPreviewPosition({
-      left:Math.max(margin,Math.min(left,viewportWidth-availableWidth-margin)),
-      top:Math.max(margin,top),
-      width:availableWidth,
-      maxHeight,
-    })
-    setHoveredOption(current=>current?.name===name&&current?.value===value?current:{name,value,label,detail})
-    setHoverPreviewMounted(true)
-  }
-  const hideOptionPreview=()=>{
-    if(hoverPreviewHideTimerRef.current){
-      window.clearTimeout(hoverPreviewHideTimerRef.current)
-      hoverPreviewHideTimerRef.current=null
+    let availableWidth=panelWidth
+    let left=margin
+    if(rect&&rightSpace<260&&leftSpace<260){
+      left=Math.max(margin,(viewportWidth-panelWidth)/2)
+    }else if(rect){
+      const placeRight=rightSpace>=panelWidth||rightSpace>=leftSpace
+      availableWidth=Math.min(panelWidth,Math.max(240,placeRight?rightSpace:leftSpace))
+      left=placeRight?rect.right+gap:rect.left-gap-availableWidth
     }
-    // A prévia é estritamente contextual: saiu do campo, desmonta o iframe
-    // imediatamente para impedir mensagens/foco de uma opção anterior.
-    setHoveredOption(null)
-    setHoverPreviewMounted(false)
+    const belowSpace=rect?viewportHeight-rect.bottom-gap-margin:viewportHeight-margin*2
+    const aboveSpace=rect?rect.top-gap-margin:0
+    const placeBelow=!rect||belowSpace>=Math.min(220,preferredHeight)||belowSpace>=aboveSpace
+    const verticalSpace=placeBelow?belowSpace:aboveSpace
+    const maxHeight=Math.max(160,Math.min(preferredHeight,verticalSpace||preferredHeight))
+    const preferredTop=rect?(placeBelow?rect.bottom+gap:rect.top-gap-maxHeight):margin
+    const top=Math.max(margin,Math.min(preferredTop,viewportHeight-maxHeight-margin))
+    setHoverPreviewPosition({left:Math.max(margin,Math.min(left,viewportWidth-availableWidth-margin)),top,width:availableWidth,maxHeight})
+    setHoveredOption(current=>current?.name===name&&current?.value===value?{...current,patch}:{name,value,label,detail,patch})
+    setHoverPreviewMounted(true)
   }
   const colorKey=name=>`${editingTheme}_${name}`
   const contrastMetrics=useMemo(()=>{
@@ -390,16 +405,34 @@ export function CmsLayoutManager(){
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
   const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.default_gallery_view);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
-  const change=(name,value)=>{const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name;setSettings(current=>({...current,[key]:value}));setHoveredOption(null);if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current);if(name==='default_gallery_view')setPreviewMode(value);else if(name==='gallery_columns')setPreviewMode('grade');setPreviewFocus(['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?'bio':name==='show_references'?'references':'page');setError('');setNotice('')}
+  const change=(name,value)=>{
+    const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name
+    setSettings(current=>({...current,[key]:value}))
+    closeOptionPreview()
+    if(name==='default_gallery_view')setPreviewMode(value)
+    else if(name==='gallery_columns')setPreviewMode('grade')
+    const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
+    const focus=['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):'page'
+    setPreviewFocus(focus)
+    setError('');setNotice('')
+  }
   const paletteIsActive=palette=>{
     const keys=['color_background','color_surface','color_text','color_muted','color_accent']
     return palette.darkColors.every((value,index)=>settings[`dark_${keys[index]}`]===value)
       && palette.lightColors.every((value,index)=>settings[`light_${keys[index]}`]===value)
   }
+  const paletteSettingsPatch=palette=>{
+    const keys=['color_background','color_surface','color_text','color_muted','color_accent']
+    return Object.fromEntries([
+      ...palette.darkColors.map((value,index)=>['dark_'+keys[index],value]),
+      ...palette.lightColors.map((value,index)=>['light_'+keys[index],value]),
+    ])
+  }
+  const previewPalette=(palette,event)=>showOptionPreview('palette',palette.name,palette.name,'Prévia das duas variações desta paleta',event,paletteSettingsPatch(palette))
   const applyPalette=palette=>{
-    const [darkBackground,darkSurface,darkText,darkMuted,darkAccent]=palette.darkColors
-    const [lightBackground,lightSurface,lightText,lightMuted,lightAccent]=palette.lightColors
-    setSettings(current=>({...current,dark_color_background:darkBackground,dark_color_surface:darkSurface,dark_color_text:darkText,dark_color_muted:darkMuted,dark_color_accent:darkAccent,light_color_background:lightBackground,light_color_surface:lightSurface,light_color_text:lightText,light_color_muted:lightMuted,light_color_accent:lightAccent}));setPreviewFocus('page')
+    closeOptionPreview()
+    setSettings(current=>({...current,...paletteSettingsPatch(palette)}))
+    setPreviewFocus('page')
     setError('');setNotice('')
   }
   const save=async event=>{
@@ -474,8 +507,8 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
-          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onMouseEnter={event=>previewPalette(palette,event)} onMouseLeave={hideOptionPreview} onFocus={event=>previewPalette(palette,event)} onBlur={hideOptionPreview} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onBlur={hideOptionPreview}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
         <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>showOptionPreview(field.name,value,label,detail,event)} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
@@ -484,16 +517,16 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onMouseEnter={cancelOptionPreviewHide} onMouseLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
           <header className="cms-layout-hover-preview-heading">
-            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
+            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
               <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left'}}/>
             </div>
           </div>
-          <p className="cms-layout-preview-caption">Simulação temporária. Clique na opção para aplicá-la ao editor.</p>
+          <p className="cms-layout-preview-caption">Prévia interativa: navegue pelo menu e role para explorar. Clique na opção para aplicá-la ao editor.</p>
         </aside>,
         document.body
       )}
