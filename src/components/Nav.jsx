@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const botaoMenuRef = useRef(null)
   const primeiroLinkRef = useRef(null)
@@ -140,8 +140,8 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
             </button>
           </div>
           <div className="editorial-menu-footer">
-            <span>ARTE · PESQUISA · EXPERIMENTAÇÃO</span>
-            <span>PORTO ALEGRE, BRASIL</span>
+            <span>{fraseArtista || 'PORTFÓLIO AUTORAL'}</span>
+            <span>{nomeArtista || 'PORTFÓLIO'}</span>
           </div>
         </div>
       </div>
