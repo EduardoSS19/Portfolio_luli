@@ -1396,3 +1396,46 @@
 .cms-category-animation-preview .cms-animation-demo{height:74px;min-width:0}
 .cms-category-animation-preview .cms-animation-demo i{animation-play-state:running}
 @media(max-width:480px){.cms-category-animation-preview{grid-template-columns:1fr}.cms-category-animation-preview .cms-animation-demo{height:66px}}
+
+
+/* Fluxo direto: categoria clicável > escolha > prévia > salvar. */
+.cms-category-animation-open{
+  display:grid;gap:5px;width:100%;min-width:0;padding:10px 12px!important;text-align:left;
+  border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;
+  color:var(--cms-text)!important;box-shadow:none!important;cursor:pointer;
+}
+.cms-category-animation-open:hover:not(:disabled),
+.cms-category-animation-open:focus-visible{
+  border-color:var(--cms-accent)!important;background:color-mix(in srgb,var(--cms-accent) 8%,transparent)!important;
+}
+.cms-category-animation-open strong{font:600 13px 'Manrope'!important;color:var(--cms-text)!important}
+.cms-category-animation-open small{font:400 10px 'DM Sans'!important;color:var(--cms-muted)!important}
+.cms-category-animation-open>span{font:600 10px 'DM Sans';color:var(--cms-accent)}
+.cms-category-animation-open:disabled{opacity:.55;cursor:not-allowed}
+.cms-category-address{padding-left:12px;color:var(--cms-muted);font-size:9px}
+.cms-category-animation-editor{
+  grid-column:1/-1;display:grid;gap:16px;min-width:0;padding:22px;
+  border:1px solid color-mix(in srgb,var(--cms-accent) 32%,var(--cms-line));
+  border-radius:10px;background:var(--cms-panel);
+}
+.cms-category-animation-editor-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.cms-category-animation-editor-heading .cms-eyebrow{margin:0 0 5px}
+.cms-category-animation-editor-heading h2{margin:0 0 5px;font:650 19px 'Manrope';color:var(--cms-text)}
+.cms-category-animation-editor-heading p:last-child{margin:0;color:var(--cms-muted);font:400 11px/1.5 'DM Sans'}
+.cms-category-animation-editor .cms-category-animation-select{max-width:560px}
+.cms-category-animation-editor .cms-category-animation-select select{min-height:46px;font-size:13px}
+.cms-category-animation-editor .cms-category-animation-preview{grid-template-columns:minmax(0,1fr) minmax(180px,32%);min-height:116px;padding:16px}
+.cms-category-animation-editor .cms-category-animation-preview .cms-animation-demo{height:88px}
+.cms-category-animation-editor-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:13px;border-top:1px solid var(--cms-line)}
+.cms-category-animation-editor-actions>span{font:400 10px 'DM Sans';color:var(--cms-muted)}
+.cms-category-animation-empty{padding:20px 0}
+.cms-category-animation-empty strong{font:600 14px 'Manrope';color:var(--cms-text)}
+.cms-category-animation-empty p{margin:6px 0 0;color:var(--cms-muted);font:400 11px/1.5 'DM Sans'}
+@media(max-width:700px){
+ .cms-category-animation-editor{padding:16px}
+ .cms-category-animation-editor-heading{align-items:center}
+ .cms-category-animation-editor .cms-category-animation-preview{grid-template-columns:1fr}
+ .cms-category-animation-editor .cms-category-animation-preview .cms-animation-demo{height:72px}
+ .cms-category-animation-editor-actions{align-items:stretch;flex-direction:column}
+ .cms-category-animation-editor-actions button{width:100%}
+}
