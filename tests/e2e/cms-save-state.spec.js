@@ -230,7 +230,7 @@ test('modelos prontos e biblioteca de seções permitem configurar conteúdo esp
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
   await inlinePreview.getByRole('button', { name: 'Próximo modelo' }).click()
-  await expect(inlinePreview).toContainText('5 de 7')
+  await expect(inlinePreview).toContainText('7 de 7')
   await inlinePreview.getByRole('button', { name: 'Modelo anterior' }).click()
   await expect(inlinePreview).toContainText('Tatuador(a)')
   await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
