@@ -559,7 +559,7 @@ test('prévia de hover foca automaticamente a seção alterada sem permitir nave
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
   const contentGroup = page.locator('.cms-layout-field-group').nth(1)
   await contentGroup.locator('summary').click()
-  const contactField = contentGroup.locator('fieldset').filter({ has: page.getByText('Seção de contato') })
+  const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
   await contactField.locator('.cms-layout-option').first().hover()
   const modal = page.locator('.cms-layout-hover-preview-floating')
   await expect(modal).toBeVisible()
