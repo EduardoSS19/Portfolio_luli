@@ -229,6 +229,12 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
   const preview = page.locator('.cms-layout-inline-preview')
   await expect(preview).toBeVisible()
+  // Controla a largura do contêiner para garantir que o teste exercite a redução
+  // do viewport lógico, independentemente da largura mínima do painel no layout.
+  await preview.evaluate(element => {
+    element.style.width = '700px'
+    element.style.maxWidth = '700px'
+  })
   const viewport = preview.locator('.cms-layout-preview-frame-inline')
   const iframe = preview.locator('iframe')
   await expect(iframe).toBeVisible()
