@@ -183,6 +183,13 @@ export function CmsLayoutManager(){
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
   const [hoveredOption,setHoveredOption]=useState(null)
   const hoverPreviewIframeRef=useRef(null)
+  // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
+  // nunca o viewport CSS do site dentro do iframe.
+  const hoverDevice=window.innerWidth>=900?PREVIEW_DEVICES.desktop:window.innerWidth>=600?PREVIEW_DEVICES.tablet:PREVIEW_DEVICES.mobile
+  const hoverModalWidth=Math.min(920,Math.max(220,window.innerWidth-32))
+  const hoverPreviewScale=Math.min(1,Math.max(.2,(hoverModalWidth-24)/hoverDevice.width))
+  const hoverStageWidth=hoverDevice.width*hoverPreviewScale
+  const hoverStageHeight=hoverDevice.height*hoverPreviewScale
   const hoverFloating=useFloating({
     open:hoverPreviewMounted,
     onOpenChange:setHoverPreviewMounted,
@@ -602,14 +609,18 @@ export function CmsLayoutManager(){
         <aside ref={hoverFloating.refs.setFloating} {...getFloatingProps({onBlur:hideOptionPreview})}
           className="cms-layout-hover-preview cms-layout-hover-preview-floating"
           aria-label="Prévia temporária da opção"
-          style={{...hoverFloating.floatingStyles,width:'min(380px, calc(100vw - 32px))',boxSizing:'border-box',zIndex:2147483000}}>
+          data-device={hoverDevice.label.toLowerCase()}
+          style={{...hoverFloating.floatingStyles,width:`min(920px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
           <header className="cms-layout-hover-preview-heading">
-            <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
+            <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO · {hoverDevice.label.toUpperCase()}</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
             <button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" data-device="mobile">
-            <iframe ref={hoverPreviewIframeRef} title="Prévia interativa do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="auto" tabIndex={0} style={{width:'100%',height:'430px',display:'block',border:0,pointerEvents:'auto'}}/>
+          <div className="cms-layout-hover-preview-frame" style={{height:Math.min(640,hoverStageHeight),maxHeight:'calc(100vh - 110px)'}}>
+            <div className="cms-layout-hover-preview-stage" style={{width:hoverStageWidth,height:hoverStageHeight}}>
+              <iframe ref={hoverPreviewIframeRef} title={`Prévia interativa do portfólio em ${hoverDevice.label}`} src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="auto" tabIndex={0} style={{width:hoverDevice.width,height:hoverDevice.height,display:'block',border:0,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'auto'}}/>
+            </div>
           </div>
+          <p className="cms-layout-preview-caption">Viewport real de {hoverDevice.width}px · escala visual {Math.round(hoverPreviewScale*100)}%. A navegação e a rolagem acontecem dentro da prévia.</p>
         </aside>,
         document.body
       )}
