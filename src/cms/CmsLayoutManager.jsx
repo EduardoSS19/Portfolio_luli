@@ -551,7 +551,7 @@ export function CmsLayoutManager(){
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         <section className="cms-layout-presets" ref={presetSectionRef}>
-          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 4 apresentações</span></div>
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 9 linguagens visuais · 6 navegações</span></div>
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
           <div className="cms-layout-preset-grid">
             {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
