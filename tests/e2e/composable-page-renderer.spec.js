@@ -5,7 +5,7 @@ const pageSchema = {
   pages: [
     { id: 'home', slug: 'inicio', title: 'Início', published: true, sections: [
       { id: 'opening', type: 'hero', settings: { title: 'Luli Becker', eyebrow: 'ARTISTA VISUAL', body: 'Arte, pesquisa e experimentação.' } },
-      { id: 'works', type: 'gallery', settings: { title: 'Trabalhos selecionados', width: 'wide' } },
+      { id: 'works', type: 'gallery', settings: { title: 'Trabalhos selecionados', width: 'wide' } },\n      { id: 'flash', type: 'tattoo-flash', settings: { title: 'Flash disponíveis' }, items: [{ title: 'Lua crescente', description: 'Blackwork autoral', image_url: 'https://example.com/lua.jpg', price: 'R$ 450', status: 'Disponível' }] },\n      { id: 'references', type: 'references', settings: { title: 'Trajetória' }, items: [{ title: 'Exposição coletiva', period: '2025', venue: 'Museu de Arte', location: 'Porto Alegre' }] },
     ] },
     { id: 'about', slug: 'sobre', title: 'Sobre', published: true, sections: [
       { id: 'about-copy', type: 'rich-text', settings: { title: 'Sobre a artista', body: 'Pesquisa visual e processos.' } },
@@ -115,4 +115,16 @@ test('layout rail e dock mantêm links visíveis e responsivos', async ({ page }
     await page.setViewportSize({ width: 390, height: 844 })
     await expect(nav.locator('.composer-navigation-links')).toBeVisible()
   }
+})
+
+test('conteúdo de flash e referências é preenchido e exibido a partir da própria sessão', async ({ page }) => {
+  await openComposablePortfolio(page, 'editorial', 'curtain')
+  const flash = page.locator('#flash')
+  await expect(flash).toContainText('Lua crescente')
+  await expect(flash).toContainText('R$ 450')
+  await expect(flash).toContainText('Disponível')
+  const references = page.locator('#references')
+  await expect(references).toContainText('Exposição coletiva')
+  await expect(references).toContainText('Museu de Arte')
+  await expect(references).toContainText('Porto Alegre')
 })
