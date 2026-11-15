@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', presentationMode = 'editorial', nomeArtista = '', fraseArtista = '' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
   const effectiveNavigationMode = previewNavigationMode || navigationMode
