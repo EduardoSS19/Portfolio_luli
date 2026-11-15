@@ -204,6 +204,7 @@ export function CmsLayoutManager(){
   // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
   // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
+  const hoverPreviewScale=hoverPreviewStageWidth/390
   const hoverPreviewStageHeight=260
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
