@@ -414,7 +414,7 @@ function PortfolioCustomSections({ sections = [], preview = false, examples = nu
     exhibitions:['venue','location','format'],process:['stage','technique','materials'],services:['format','price','duration'],
     press:['publication','author','period'],testimonials:['author','role','project'],'tattoo-flash':['size','placement','price','status'],
     'tattoo-booking':['step','channel','response_time','policy'],'healed-work':['placement','healing_time','period'],
-    'guest-spots':['city','studio','dates'],'studio-team':['role','specialties','instagram'],
+    'guest-spots':['city','studio','dates'],'studio-team':['role','specialties','instagram','period'],
   }
   const labels = {venue:'Espaço',location:'Local',format:'Formato',stage:'Etapa',technique:'Técnica',materials:'Materiais',price:'Investimento',duration:'Prazo',publication:'Publicação',author:'Autoria',role:'Função',project:'Projeto',size:'Tamanho',placement:'Local',status:'Disponibilidade',step:'Etapa',channel:'Contato',response_time:'Retorno',policy:'Orientação',healing_time:'Cicatrização',city:'Cidade',studio:'Estúdio',dates:'Datas',specialties:'Especialidades',instagram:'Instagram',period:'Período'}
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
@@ -526,6 +526,28 @@ export default function App() {
     }
     trocaModoPendenteRef.current = null
   }, [modoGaleria])
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('layout_preview_compact') !== '1') return undefined
+    // The hover snapshot is passive: allow programmatic focus changes but block
+    // wheel, touch and keyboard scrolling initiated by the visitor.
+    const preventManualScroll = event => {
+      if (event.cancelable) event.preventDefault()
+    }
+    const preventScrollKeys = event => {
+      if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'].includes(event.key)) {
+        event.preventDefault()
+      }
+    }
+    window.addEventListener('wheel', preventManualScroll, { passive: false })
+    window.addEventListener('touchmove', preventManualScroll, { passive: false })
+    window.addEventListener('keydown', preventScrollKeys)
+    return () => {
+      window.removeEventListener('wheel', preventManualScroll)
+      window.removeEventListener('touchmove', preventManualScroll)
+      window.removeEventListener('keydown', preventScrollKeys)
+    }
+  }, [])
 
   useEffect(() => {
     if (carregando || !new URLSearchParams(window.location.search).has('layout_preview')) return undefined
