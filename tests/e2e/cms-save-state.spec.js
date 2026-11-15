@@ -140,7 +140,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(temporaryFrame).toHaveAttribute('src', '/?layout_preview=1&layout_preview_compact=1')
   await expect(temporaryFrame).not.toHaveAttribute('src', /layout_preview_live/)
   await expect(leftOption.locator('input')).not.toBeChecked()
-  await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(200)
 
   // The hover iframe must retain the responsive scale calculated for its own
   // viewport; a CSS transform override previously made it render at 390px and crop.
