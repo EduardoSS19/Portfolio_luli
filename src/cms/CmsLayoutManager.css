@@ -615,3 +615,25 @@
   min-height:0!important;
   max-height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
 }
+
+
+/* One interaction contract for the contextual snapshot:
+   the card itself never intercepts the editor; only its close control is interactive.
+   The iframe remains a passive image of the mobile viewport. */
+.cms-layout-hover-preview-floating{
+  pointer-events:none!important;
+  user-select:none;
+  touch-action:none;
+  overscroll-behavior:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled,
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+  touch-action:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+  touch-action:manipulation;
+}
