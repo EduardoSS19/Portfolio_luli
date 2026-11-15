@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { autoUpdate, flip, offset, shift, size, useFloating, useHover, useInteractions } from '@floating-ui/react'
 import './CmsLayoutManager.css'
+import { CmsPageComposer } from './CmsPageComposer.jsx'
 
 const DEFAULTS = {
   content_width:'standard', hero_alignment:'center', hero_size:'large',
@@ -545,6 +546,7 @@ export function CmsLayoutManager(){
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
+        <CmsPageComposer value={settings.page_schema} onChange={page_schema=>setSettings(current=>({...current,page_schema}))}/>
         <section className="cms-layout-presets" ref={presetSectionRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 4 apresentações</span></div>
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>

@@ -10,11 +10,11 @@ from .layout_settings import (
 class LayoutSettingsTests(SimpleTestCase):
     def test_composable_page_schema_accepts_independent_pages_and_sections(self):
         schema = {"version": 1, "pages": [
-            {"id": "home", "slug": "inicio", "title": "Início", "sections": [
+            {"id": "home", "slug": "inicio", "title": "Início", "published": True, "sections": [
                 {"id": "opening", "type": "hero", "settings": {"title": "Ateliê", "align": "left", "width": "wide"}},
                 {"id": "flash", "type": "tattoo-flash", "settings": {"title": "Flash disponíveis"}},
             ]},
-            {"id": "about", "slug": "sobre", "title": "Sobre", "sections": [
+            {"id": "about", "slug": "sobre", "title": "Sobre", "published": True, "sections": [
                 {"id": "bio", "type": "about", "settings": {"show_image": True}},
             ]},
         ]}

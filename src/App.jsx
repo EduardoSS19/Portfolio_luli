@@ -73,6 +73,7 @@ function parseLayoutPreview(raw) {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
     })
     if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.filter(section => section && typeof section.id === 'string' && typeof section.title === 'string' && Array.isArray(section.items)).slice(0, 10)
+    if (candidate.page_schema?.version === 1 && Array.isArray(candidate.page_schema.pages) && candidate.page_schema.pages.length <= 12) safe.page_schema = candidate.page_schema
     ;['show_bio_image','show_bio','show_references','show_contact'].forEach(key => {
       if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
