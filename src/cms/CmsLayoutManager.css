@@ -644,23 +644,42 @@
   touch-action:manipulation;
 }
 
-/* The passive hover snapshot catches wheel input at its card boundary, never inside the iframe. */
-.cms-layout-hover-preview-floating,
+/* Floating UI positions the hover panel; keep the iframe's logical device viewport
+   from its inline width/height/scale. Never force it to the panel's CSS width. */
+.cms-layout-hover-preview-floating{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0;
+  min-height:0!important;
+  overflow:hidden!important;
+  pointer-events:auto!important;
+  user-select:auto!important;
+  touch-action:auto!important;
+  overscroll-behavior:contain!important;
+}
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
-.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
-.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
   pointer-events:auto!important;
 }
-.cms-layout-hover-preview-floating iframe{
-  pointer-events:none!important;
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  display:block!important;
+  width:100%!important;
+  min-width:0;
+  min-height:0!important;
+  flex:0 0 auto!important;
+  overflow:hidden!important;
+  pointer-events:auto!important;
+  overscroll-behavior:contain!important;
+  contain:layout paint;
 }
-
-
-/* Floating UI controls placement; the hover preview is a responsive, interactive iframe viewport. */
-.cms-layout-hover-preview-floating{display:flex!important;flex-direction:column!important;min-width:0;min-height:0!important;overflow:hidden!important;pointer-events:auto!important;user-select:auto!important;touch-action:auto!important;overscroll-behavior:contain!important}
-.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{pointer-events:auto!important}
-.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{display:block!important;width:100%!important;height:430px!important;min-height:240px!important;max-height:calc(100vh - 110px)!important;flex:1 1 auto!important;overflow:hidden!important;pointer-events:auto!important;overscroll-behavior:contain!important;contain:layout paint}
-.cms-layout-hover-preview-floating iframe{position:static!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;transform:none!important;zoom:1!important;pointer-events:auto!important;overflow:auto!important;border:0!important}
+.cms-layout-hover-preview-floating iframe{
+  position:absolute!important;
+  max-width:none!important;
+  max-height:none!important;
+  pointer-events:auto!important;
+  overflow:auto!important;
+  border:0!important;
+}
 
 /* Hover: viewport real do dispositivo, reduzido apenas na apresentação do modal. */
 .cms-layout-hover-preview-floating{
