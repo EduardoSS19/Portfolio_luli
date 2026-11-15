@@ -303,7 +303,7 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await expect(option.locator('input')).toBeChecked()
 })
 
-test('modelos prontos e biblioteca de seções permitem configurar conteúdo especializado', async ({ page }) => {
+test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
   await page.route('**/api/cms/layout/', async route => {
@@ -331,22 +331,11 @@ test('modelos prontos e biblioteca de seções permitem configurar conteúdo esp
   await expect(inlinePreview).toContainText('Tatuador(a)')
   await expect(inlinePreview.getByRole('button', { name: 'Confirmar este layout' })).toBeVisible()
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
+  await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
-  await inlinePreview.getByRole('button', { name: 'Próximo modelo' }).click()
-  await expect(inlinePreview).toContainText('7 de 20')
-  await inlinePreview.getByRole('button', { name: 'Modelo anterior' }).click()
-  await expect(inlinePreview).toContainText('Tatuador(a)')
   await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
   await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
-  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(4)
-  const flashSection = page.locator('.cms-layout-custom-section').filter({ hasText: 'Flash disponíveis' }).first()
-  const flashEditor = flashSection.locator('details.cms-layout-custom-section-editor').first()
-  await expect(flashEditor).not.toHaveAttribute('open', '')
-  await flashEditor.locator('summary').click()
-  await flashSection.getByRole('button', { name: '+ Adicionar flash' }).click()
-  await flashSection.locator('.cms-layout-custom-item summary').click()
-  await flashSection.locator('.cms-layout-custom-item input').first().fill('Lua crescente')
-  await flashSection.locator('.cms-layout-custom-item textarea').fill('Flash blackwork disponível')
   await page.getByRole('button',{name:'Salvar personalização'}).click()
-  await expect.poll(()=>savedSettings?.custom_sections?.[0]?.items?.[0]?.title).toBe('Lua crescente')
+  await expect.poll(()=>savedSettings?.presentation_mode).toBe('carousel')
+  expect(savedSettings.custom_sections).toEqual([])
 })
