@@ -136,7 +136,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(hoverPreview).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(panelScrollBeforeHover)
   await expect(hoverPreview.getByText('À esquerda', { exact: true })).toBeVisible()
-  const temporaryFrame = hoverPreview.locator('iframe[title="Prévia temporária do portfólio"]')
+  const temporaryFrame = hoverPreview.locator('iframe')
   await expect(temporaryFrame).toHaveAttribute('src', '/?layout_preview=1&layout_preview_compact=1')
   await expect(temporaryFrame).not.toHaveAttribute('src', /layout_preview_live/)
   await expect(leftOption.locator('input')).not.toBeChecked()
@@ -176,7 +176,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(temporaryFrame).toHaveAttribute('scrolling', 'no')
   await expect(temporaryFrame).toHaveCSS('pointer-events', 'none')
   await expect(hoverPreview).toBeVisible()
-  const previewDocument = page.frameLocator('iframe[title="Prévia temporária do portfólio"]')
+  const previewDocument = page.frameLocator('.cms-layout-hover-preview iframe')
   await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'true')
 
   const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
