@@ -143,7 +143,8 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   const viewport = await temporaryFrame.evaluate(frame => ({
     width: frame.contentWindow.innerWidth,
     documentWidth: frame.contentDocument.documentElement.clientWidth,
-    height: frame.getBoundingClientRect().height,
+    height: frame.contentWindow.innerHeight,
+    renderedHeight: frame.getBoundingClientRect().height,
     transform: getComputedStyle(frame).transform,
     scrolling: frame.getAttribute('scrolling'),
     pointerEvents: getComputedStyle(frame).pointerEvents,
@@ -154,6 +155,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   expect(viewport.width).toBe(1440)
   expect(viewport.documentWidth).toBe(1440)
   expect(viewport.height).toBe(900)
+  expect(viewport.renderedHeight).toBeCloseTo(viewport.height * viewport.scale, 0)
   expect(viewport.transform).not.toBe('none')
   expect(viewport.scrolling).toBe('auto')
   expect(viewport.pointerEvents).toBe('auto')
