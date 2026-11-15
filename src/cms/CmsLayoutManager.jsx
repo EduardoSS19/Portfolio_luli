@@ -186,7 +186,7 @@ export function CmsLayoutManager(){
   // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
   // nunca o viewport CSS do site dentro do iframe.
   const hoverDevice=PREVIEW_DEVICES[previewDevice]
-  const hoverModalWidth=Math.min(920,Math.max(220,window.innerWidth-32))
+  const hoverModalWidth=Math.min(760,Math.max(220,window.innerWidth-32))
   const hoverPreviewScale=Math.min(1,Math.max(.2,(hoverModalWidth-24)/hoverDevice.width))
   const hoverStageWidth=hoverDevice.width*hoverPreviewScale
   const hoverStageHeight=hoverDevice.height*hoverPreviewScale
@@ -479,7 +479,7 @@ export function CmsLayoutManager(){
     if(name==='default_gallery_view')setPreviewMode(value)
     else if(name==='gallery_columns')setPreviewMode('grade')
     const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
+    const focus=['gallery_columns','default_gallery_view','presentation_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
     setPreviewFocus(focus)
     setError('');setNotice('')
   }
@@ -610,7 +610,7 @@ export function CmsLayoutManager(){
           className="cms-layout-hover-preview cms-layout-hover-preview-floating"
           aria-label="Prévia temporária da opção"
           data-device={hoverDevice.label.toLowerCase()}
-          style={{...hoverFloating.floatingStyles,width:`min(920px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
+          style={{...hoverFloating.floatingStyles,width:`min(760px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO · {hoverDevice.label.toUpperCase()}</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
             <button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
