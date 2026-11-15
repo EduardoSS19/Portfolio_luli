@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { autoUpdate, flip, offset, safePolygon, shift, size, useFloating, useHover, useInteractions } from '@floating-ui/react'
+import { autoUpdate, flip, offset, shift, size, useFloating, useHover, useInteractions } from '@floating-ui/react'
 import './CmsLayoutManager.css'
 
 const DEFAULTS = {
