@@ -515,7 +515,7 @@ test('biblioteca de seções mantém os submenus recolhidos e oferece campos e d
   await menus.nth(0).locator('summary').click()
   await section.getByRole('button', { name: '+ Adicionar flash' }).click()
   await section.locator('.cms-layout-custom-item summary').click()
-  await expect(section.getByLabel('Disponibilidade')).toBeVisible()
+  await expect(section.locator('.cms-layout-custom-item').getByPlaceholder('Ex.: Disponível · Peça única')).toBeVisible()
 })
 
 test('modal de hover usa viewport nativo e não recebe interação ou rolagem', async ({ page }) => {
