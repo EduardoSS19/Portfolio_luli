@@ -161,7 +161,8 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   expect(hoverScaleGeometry.scaleX).toBeGreaterThan(0)
   expect(hoverScaleGeometry.scaleX).toBeLessThan(1)
   expect(Math.abs(hoverScaleGeometry.renderedWidth - hoverScaleGeometry.stageWidth)).toBeLessThan(1)
-  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(hoverScaleGeometry.stageHeight)
+  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(0)
+  expect(hoverScaleGeometry.renderedHeight).toBeLessThanOrEqual(hoverScaleGeometry.stageHeight + 1)
 
   const optionAfterHover = await leftOption.evaluate(element => {
     const rect = element.getBoundingClientRect()
