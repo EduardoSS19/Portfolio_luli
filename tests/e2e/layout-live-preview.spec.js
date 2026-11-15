@@ -518,7 +518,7 @@ test('biblioteca de seções mantém os submenus recolhidos e oferece campos e d
   await expect(section.locator('.cms-layout-custom-item').getByPlaceholder('Ex.: Disponível · Peça única')).toBeVisible()
 })
 
-test('modal de hover usa viewport nativo e não recebe interação ou rolagem', async ({ page }) => {
+test('modal de hover representa o viewport desktop e mantém interação', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
@@ -543,25 +543,23 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
   const behavior = await modal.locator('iframe').evaluate(frame => ({
     pointerEvents: getComputedStyle(frame).pointerEvents,
     transform: getComputedStyle(frame).transform,
-    zoom: getComputedStyle(frame).zoom,
     scrolling: frame.getAttribute('scrolling'),
-    frameHeight: frame.closest('.cms-layout-hover-preview-frame').getBoundingClientRect().height,
     logicalWidth: frame.contentWindow.innerWidth,
-    scale: Number(frame.closest('.cms-layout-preview-stage-scaled').dataset.previewScale),
+    logicalHeight: frame.contentWindow.innerHeight,
     renderedWidth: frame.getBoundingClientRect().width,
-    stageWidth: frame.closest('.cms-layout-preview-stage-scaled').getBoundingClientRect().width,
-    modalOverflow: getComputedStyle(frame.closest('.cms-layout-hover-preview-floating')).overflow,
+    stageWidth: frame.parentElement.getBoundingClientRect().width,
+    modalWidth: frame.closest('.cms-layout-hover-preview-floating').getBoundingClientRect().width,
+    device: frame.closest('.cms-layout-hover-preview-floating').dataset.device,
   }))
-  expect(behavior.pointerEvents).toBe('none')
+  expect(behavior.pointerEvents).toBe('auto')
   expect(behavior.transform).not.toBe('none')
-  expect(Math.abs(behavior.renderedWidth - behavior.stageWidth)).toBeLessThan(1)
-  expect(behavior.zoom).toBe('1')
-  expect(behavior.scrolling).toBe('no')
-  expect(behavior.logicalWidth).toBe(390)
-  expect(behavior.scale).toBeGreaterThan(0)
-  expect(behavior.scale).toBeLessThanOrEqual(1)
-  expect(behavior.frameHeight).toBeGreaterThanOrEqual(250)
-  expect(behavior.modalOverflow).toBe('hidden')
+  expect(behavior.logicalWidth).toBe(1440)
+  expect(behavior.logicalHeight).toBe(900)
+  expect(behavior.renderedWidth).toBeGreaterThan(700)
+  expect(behavior.stageWidth).toBeGreaterThan(700)
+  expect(behavior.modalWidth).toBeGreaterThan(700)
+  expect(behavior.device).toBe('desktop')
+  expect(behavior.scrolling).toBe('auto')
 })
 
 test('iframe completo mantém o menu limitado ao viewport do dispositivo', async ({ page }) => {
@@ -653,7 +651,7 @@ test('layouts espaçosos não deixam um vão exagerado depois do contato', async
   expect(gap).toBeLessThan(80)
 })
 
-test('prévia de hover foca automaticamente a seção alterada sem permitir navegação manual', async ({ page }) => {
+test('prévia de hover foca a seção alterada e permite navegação no viewport simulado', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
@@ -678,5 +676,5 @@ test('prévia de hover foca automaticamente a seção alterada sem permitir nave
   await expect(modal).toBeVisible()
   const frame = modal.locator('iframe')
   await expect.poll(() => frame.evaluate(element => element.contentWindow.scrollY)).toBeGreaterThan(0)
-  await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('none')
+  await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('auto')
 })
