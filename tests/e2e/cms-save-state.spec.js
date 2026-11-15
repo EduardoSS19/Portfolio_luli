@@ -142,8 +142,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
-  // The hover iframe must retain the responsive scale calculated for its own
-  // viewport; a CSS transform override previously made it render at 390px and crop.
+  // The hover iframe uses the card's real viewport width without a transform.
   const hoverScaleGeometry = await page.evaluate(() => {
     const frame = document.querySelector('.cms-layout-hover-preview iframe')
     const stage = document.querySelector('.cms-layout-hover-preview .cms-layout-preview-stage-scaled')
@@ -158,8 +157,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
       stageHeight: stageRect.height,
     }
   })
-  expect(hoverScaleGeometry.scaleX).toBeGreaterThan(0)
-  expect(hoverScaleGeometry.scaleX).toBeLessThan(1)
+  expect(hoverScaleGeometry.scaleX).toBe(1)
   expect(Math.abs(hoverScaleGeometry.renderedWidth - hoverScaleGeometry.stageWidth)).toBeLessThan(1)
   expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(0)
   expect(hoverScaleGeometry.renderedHeight).toBeLessThanOrEqual(hoverScaleGeometry.stageHeight + 1)
