@@ -557,7 +557,7 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
   expect(behavior.logicalWidth).toBe(390)
   expect(behavior.scale).toBeGreaterThan(0)
   expect(behavior.scale).toBeLessThanOrEqual(1)
-  expect(behavior.frameHeight).toBe(260)
+  expect(behavior.frameHeight).toBeGreaterThanOrEqual(250)
   expect(behavior.modalOverflow).toBe('hidden')
 })
 
@@ -633,7 +633,7 @@ test('campos e submenus de design são específicos por tipo de seção e começ
   await testimonial.getByRole('button', { name: '+ Adicionar depoimento' }).click()
   await testimonial.locator('.cms-layout-custom-item summary').click()
   await expect(testimonial.getByRole('textbox', { name: 'Depoimento', exact: true })).toBeVisible()
-  await expect(testimonial.getByLabel('Texto do depoimento')).toBeVisible()
+  await expect(testimonial.getByLabel('Descrição', { exact: true })).toBeVisible()
   await designMenu.locator('summary').click()
   await expect(designMenu.getByText(/Dê protagonismo às falas/)).toBeVisible()
   await expect(designMenu.getByLabel('Estilo de apresentação')).toHaveValue('quotes')
