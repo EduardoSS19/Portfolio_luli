@@ -319,7 +319,7 @@
   overflow:hidden;
   border-radius:9px;
   background:#171914;
-  pointer-events:none;
+  pointer-events:auto;
 }
 .cms-layout-hover-preview-frame .cms-layout-preview-stage-scaled{
   position:relative;
@@ -337,7 +337,7 @@
   max-height:none;
   border:0;
   background:transparent;
-  pointer-events:none;
+  pointer-events:auto;
 }
 .cms-layout-hover-preview .cms-layout-preview-caption{margin:8px 2px 1px;font-size:9px}
 .cms-layout-hover-preview-placeholder{
