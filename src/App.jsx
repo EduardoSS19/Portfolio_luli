@@ -75,7 +75,7 @@ function parseLayoutPreview(raw) {
     if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.filter(section => section && typeof section.id === 'string' && typeof section.title === 'string' && Array.isArray(section.items)).slice(0, 10)
     if (candidate.page_schema?.version === 1 && Array.isArray(candidate.page_schema.pages) && candidate.page_schema.pages.length <= 12) {
       const allowedBlocks = ['hero','about','gallery','featured-work','rich-text','image','references','contact','tattoo-flash','custom']
-      const safeUrl = value => typeof value === 'string' && (!value || /^(https?:\\/\\/|\\/|#)/i.test(value))
+      const safeUrl = value => typeof value === 'string' && (!value || /^(https?:\/\/|\/|#)/i.test(value))
       const pages = candidate.page_schema.pages.filter(page => page && typeof page.id === 'string' && /^[a-z0-9-]{1,48}$/.test(page.id) && typeof page.slug === 'string' && /^[a-z0-9-]{1,48}$/.test(page.slug) && typeof page.title === 'string' && Array.isArray(page.sections)).slice(0, 12).map(page => ({
         id: page.id, slug: page.slug, title: page.title.slice(0, 100), published: page.published !== false,
         sections: page.sections.filter(section => section && typeof section.id === 'string' && /^[a-z0-9-]{1,48}$/.test(section.id) && allowedBlocks.includes(section.type)).slice(0, 40).map(section => {
