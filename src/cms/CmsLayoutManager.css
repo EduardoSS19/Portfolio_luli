@@ -802,3 +802,36 @@
 /* A prévia completa centraliza o viewport reduzido e acompanha o tema ativo do iframe. */
 .cms-layout-inline-preview .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{display:flex!important;align-items:flex-start!important;justify-content:center!important}
 .cms-layout-inline-preview .cms-layout-preview-stage-inline{margin-inline:auto!important;flex:0 0 auto!important}
+
+
+/* Miniaturas dos novos modelos: cada linguagem tem sua própria composição. */
+.cms-layout-preset-art.preset-museum-rail{background:#eee9df;color:#28241f}
+.cms-layout-preset-art.preset-museum-rail .cms-layout-preset-mock-nav:after{content:"";position:absolute;inset:0 auto 0 0;width:22%;border-right:1px solid #c7bdae;background:linear-gradient(#5e675e 0 2px,transparent 2px) 50% 16px/18px 13px repeat-y}
+.cms-layout-preset-art.preset-museum-rail .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left;margin-left:24%}
+.cms-layout-preset-art.preset-museum-rail .cms-layout-preset-mock-content{margin-left:24%;grid-template-columns:1fr}
+.cms-layout-preset-art.preset-museum-rail .cms-layout-preset-mock-image{min-height:76px;border-radius:0;background:linear-gradient(135deg,#a58a70,#ded0b7 50%,#6f7a70)}
+.cms-layout-preset-art.preset-museum-rail .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-photo-filmstrip{background:#111719}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-content{display:flex;gap:4px;overflow:hidden}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-image{flex:0 0 70%;min-height:70px;border-radius:0;background:linear-gradient(110deg,#394b4d,#c0a78b 50%,#58635e)}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-editorial-index{background:#f2eee6;color:#292722}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-nav{border-color:#b9b2a7}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-hero b{font:500 19px/.95 Georgia,serif}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-content{grid-template-columns:repeat(2,1fr)}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-image{min-height:48px;border-radius:0;background:linear-gradient(135deg,#9b8772,#d5c4a6 55%,#65756c)}
+.cms-layout-preset-art.preset-editorial-index .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-brutalist-stack{background:#deded7;color:#111}
+.cms-layout-preset-art.preset-brutalist-stack .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.preset-brutalist-stack .cms-layout-preset-mock-hero b{font:900 22px/.82 Arial,sans-serif;letter-spacing:-1.5px;text-transform:uppercase}
+.cms-layout-preset-art.preset-brutalist-stack .cms-layout-preset-mock-content{display:block;position:relative;min-height:72px}
+.cms-layout-preset-art.preset-brutalist-stack .cms-layout-preset-mock-image{position:absolute;inset:0 18px 8px 0;min-height:60px;border-radius:0;background:linear-gradient(135deg,#d74b35,#e8bd50 52%,#344f68);box-shadow:12px 8px 0 #151515}
+.cms-layout-preset-art.preset-brutalist-stack .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-tattoo-index{background:#171311}
+.cms-layout-preset-art.preset-tattoo-index .cms-layout-preset-mock-nav:after{content:"";position:absolute;inset:0 auto 0 0;width:20%;border-right:1px solid rgba(230,211,180,.3);background:linear-gradient(rgba(230,211,180,.45) 1px,transparent 1px) 50% 12px/14px 11px repeat-y}
+.cms-layout-preset-art.preset-tattoo-index .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left;margin-left:22%}
+.cms-layout-preset-art.preset-tattoo-index .cms-layout-preset-mock-content{margin-left:22%;display:flex;gap:4px;overflow:hidden}
+.cms-layout-preset-art.preset-tattoo-index .cms-layout-preset-mock-image{flex:0 0 46%;min-height:65px;border-radius:50% 50% 2px 2px;background:linear-gradient(135deg,#d5c5a5,#75604d 55%,#bca17d)}
+.cms-layout-preset-art.preset-tattoo-index .cms-layout-preset-mock-copy{display:none}
