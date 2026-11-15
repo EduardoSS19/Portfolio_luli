@@ -418,7 +418,12 @@ export function CmsLayoutManager(){
 
   const cancelOptionPreviewHide=()=>{}
   const closeOptionPreview=()=>{setHoverPreviewMounted(false);setHoveredOption(null)}
-  const hideOptionPreview=()=>{setHoverPreviewMounted(false);setHoveredOption(null)}
+  const hideOptionPreview=(event)=>{
+    const floating=document.querySelector('.cms-layout-hover-preview')
+    if(event?.relatedTarget&&(event.currentTarget?.contains?.(event.relatedTarget)||floating?.contains(event.relatedTarget)))return
+    setHoverPreviewMounted(false)
+    setHoveredOption(null)
+  }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
     if(event?.currentTarget)hoverFloating.refs.setReference(event.currentTarget)
     setHoveredOption({name,value,label,detail,patch})
