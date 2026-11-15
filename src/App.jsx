@@ -22,6 +22,9 @@ const DEFAULT_LAYOUT_SETTINGS = {
   default_gallery_view: 'lista',
   presentation_mode: 'editorial',
   navigation_mode: 'curtain',
+  heading_font: 'fraunces',
+  body_font: 'dm-sans',
+  navigation_font: 'space-grotesk',
   default_theme: 'escuro',
   dark_color_background: '#061522',
   dark_color_surface: '#0b2943',
@@ -47,8 +50,11 @@ const LAYOUT_PREVIEW_CHOICES = {
   section_spacing: ['compact', 'comfortable', 'spacious'],
   gallery_columns: ['2', '3', '4'],
   default_gallery_view: ['lista', 'grade'],
-  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry'],
-  navigation_mode: ['curtain', 'dropdown', 'sidebar'],
+  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight'],
+  navigation_mode: ['curtain', 'dropdown', 'sidebar', 'rail', 'dock', 'index'],
+  heading_font: ['fraunces', 'playfair', 'space-grotesk', 'cormorant', 'archivo-black'],
+  body_font: ['dm-sans', 'manrope', 'ibm-plex', 'lora', 'source-sans'],
+  navigation_font: ['dm-sans', 'space-grotesk', 'ibm-plex-mono', 'manrope'],
   default_theme: ['escuro', 'claro'],
 }
 const LAYOUT_PREVIEW_COLORS = ['dark_color_background','dark_color_surface','dark_color_text','dark_color_muted','dark_color_accent','light_color_background','light_color_surface','light_color_text','light_color_muted','light_color_accent']
@@ -795,6 +801,11 @@ export default function App() {
   const readableAccentOnOverlay = accessibleColor(effectiveColors.color_accent, '#051421')
   const readableNavMuted = accessibleColor(effectiveColors.color_muted, effectiveColors.color_surface)
   const readableTextOnAccent = accessibleColor(readableText, readableAccent)
+  const fontStacks = {
+    heading_font: {fraunces:'Fraunces, Georgia, serif',playfair:'"Playfair Display", Georgia, serif','space-grotesk':'"Space Grotesk", sans-serif',cormorant:'"Cormorant Garamond", Georgia, serif','archivo-black':'"Archivo Black", Impact, sans-serif'},
+    body_font: {'dm-sans':'"DM Sans", sans-serif',manrope:'Manrope, sans-serif','ibm-plex':'"IBM Plex Sans", sans-serif',lora:'Lora, Georgia, serif','source-sans':'"Source Sans 3", sans-serif'},
+    navigation_font: {'dm-sans':'"DM Sans", sans-serif','space-grotesk':'"Space Grotesk", sans-serif','ibm-plex-mono':'"IBM Plex Mono", monospace',manrope:'Manrope, sans-serif'},
+  }
   const layoutColors = {
     '--azul-escuro': effectiveColors.color_background,
     '--azul-medio': effectiveColors.color_surface,
@@ -813,6 +824,9 @@ export default function App() {
     '--rodape-fundo': effectiveColors.color_background,
     '--rodape-texto': readableText,
     '--rodape-muted': readableMuted,
+    '--portfolio-heading-font': fontStacks.heading_font[layout.heading_font] || fontStacks.heading_font.fraunces,
+    '--portfolio-body-font': fontStacks.body_font[layout.body_font] || fontStacks.body_font['dm-sans'],
+    '--portfolio-navigation-font': fontStacks.navigation_font[layout.navigation_font] || fontStacks.navigation_font['space-grotesk'],
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: effectiveColors.color_background, color: readableText },
@@ -896,6 +910,7 @@ export default function App() {
         tema={tema}
         aoTrocarTema={() => setTema(atual => { const next=atual === 'escuro' ? 'claro' : 'escuro'; const prefix=next==='claro'?'light':'dark'; const background=layout[`${prefix}_color_background`]|| (next==='claro'?'#f5f2eb':'#061522'); window.parent.postMessage({type:'cms-layout-preview:theme',theme:next,background},window.location.origin); return next })}
         navigationMode={layout.navigation_mode || 'curtain'}
+        presentationMode={layout.presentation_mode || 'editorial'}
         nomeArtista={sobre.nome}
         fraseArtista={sobre.frase}
       />

@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', presentationMode = 'editorial', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
   const effectiveNavigationMode = previewNavigationMode || navigationMode
@@ -27,11 +27,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   useEffect(() => {
     const handlePreviewNavigation = event => {
       const requestedMode = event.detail?.mode
-      setPreviewNavigationMode(requestedMode === 'sidebar' ? 'sidebar' : null)
-      if (event.detail?.open) {
+      setPreviewNavigationMode(['curtain','dropdown','sidebar','rail','dock','index'].includes(requestedMode) ? requestedMode : null)
+      if (event.detail?.open && !['rail','dock'].includes(requestedMode)) {
         previewMenuAutoOpenRef.current = true
         setMenuAberto(true)
-      } else if (previewMenuAutoOpenRef.current) {
+      } else if (previewMenuAutoOpenRef.current || ['rail','dock'].includes(requestedMode)) {
         previewMenuAutoOpenRef.current = false
         setMenuAberto(false)
       }
@@ -100,8 +100,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     setMenuAberto(false)
   }
 
+  const navigationItems = categorias.map((cat,indice)=><button type="button" key={cat.titulo} className={'nav-persistent-link'+(cat.titulo===categoriaAtiva?' ativo':'')} aria-current={cat.titulo===categoriaAtiva?'location':undefined} title={cat.titulo} onClick={()=>selecionar(cat.titulo)}><span>{String(indice+1).padStart(2,'0')}</span><strong>{cat.titulo}</strong></button>)
   return (
     <nav className={`site-nav editorial-nav navigation-${effectiveNavigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
+      {effectiveNavigationMode==='rail'&&<div className="nav-persistent-rail" aria-label="Índice de seções">{navigationItems}<button type="button" className="nav-persistent-theme" onClick={aoTrocarTema} aria-label={tema==='escuro'?'Ativar tema claro':'Ativar tema escuro'}>{tema==='escuro'?'☼':'☾'}</button></div>}
+      {effectiveNavigationMode==='dock'&&<div className="nav-persistent-dock" aria-label="Navegação por seções">{navigationItems}<button type="button" className="nav-persistent-theme" onClick={aoTrocarTema} aria-label={tema==='escuro'?'Ativar tema claro':'Ativar tema escuro'}>{tema==='escuro'?'☼':'☾'}</button></div>}
       <button
         ref={botaoMenuRef}
         type="button"
@@ -110,7 +113,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
         aria-controls="editorial-navigation"
         onClick={() => { previewMenuAutoOpenRef.current = false; setMenuAberto(aberto => !aberto) }}
       >
-        <span className="editorial-menu-trigger-label">{menuAberto ? 'FECHAR' : 'MENU'}</span>
+        <span className="editorial-menu-trigger-label">{menuAberto ? 'FECHAR' : effectiveNavigationMode==='index'?'ÍNDICE':'MENU'}</span>
         <span className={`editorial-menu-mark ${menuAberto ? 'aberto' : ''}`} aria-hidden="true">
           <i /><i />
         </span>
@@ -128,8 +131,8 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
       >
         <div className="editorial-menu-panel">
           <div className="editorial-menu-heading">
-            <span>NAVEGAÇÃO</span>
-            <p>Explore o portfólio</p>
+            <span>{effectiveNavigationMode==='index'?'ÍNDICE DO PORTFÓLIO':'NAVEGAÇÃO'}</span>
+            <p>{effectiveNavigationMode==='index'?'Capítulos, séries e caminhos para explorar.':'Explore o portfólio'}</p>
           </div>
           <div className="editorial-menu-links">
             {categorias.map((cat, indice) => (

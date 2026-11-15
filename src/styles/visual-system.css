@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 /* Direção visual: azul profundo, molduras editoriais e movimento discreto. */
 :root{
   --azul-escuro:#061522;
@@ -1444,3 +1445,37 @@ html {
   .editorial-nav.navigation-dropdown .editorial-menu-panel,
   .editorial-nav.navigation-sidebar .editorial-menu-panel { transition:none; }
 }
+
+
+/* Tipografia configurável: o editor define as três famílias via CSS custom properties. */
+.site-shell{font-family:var(--portfolio-body-font,inherit)}
+.site-shell .hero h1,.site-shell .secao-cabecalho h2,.site-shell .editorial-menu-heading p,.site-shell .editorial-menu-title,.site-shell .portfolio-custom-section h3{font-family:var(--portfolio-heading-font,Georgia,serif)}
+.site-shell .editorial-nav,.site-shell .editorial-nav button,.site-shell .editorial-menu-heading>span,.site-shell .editorial-menu-number{font-family:var(--portfolio-navigation-font,inherit)}
+
+/* Novos sistemas de navegação persistente: o índice passa a fazer parte da composição. */
+.editorial-nav.navigation-rail .editorial-menu-trigger,.editorial-nav.navigation-dock .editorial-menu-trigger,
+.editorial-nav.navigation-rail .editorial-menu-backdrop,.editorial-nav.navigation-dock .editorial-menu-backdrop{display:none!important}
+.nav-persistent-rail{position:fixed;z-index:65;left:clamp(12px,2vw,30px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:5px;max-height:78vh;overflow:auto;padding:9px;border:1px solid color-mix(in srgb,var(--texto) 18%,transparent);border-radius:999px;background:color-mix(in srgb,var(--azul-medio) 90%,transparent);backdrop-filter:blur(18px);box-shadow:0 18px 55px #0002}
+.nav-persistent-link{display:flex;align-items:center;gap:10px;min-width:40px;min-height:38px;padding:7px 11px;border:0;border-radius:999px;background:transparent;color:var(--texto);cursor:pointer;text-align:left;transition:background .2s ease,color .2s ease,transform .2s ease}
+.nav-persistent-link>span{font:500 10px/1 var(--portfolio-navigation-font,monospace);opacity:.65}
+.nav-persistent-link strong{display:none;font:500 11px/1.2 var(--portfolio-navigation-font,sans-serif);white-space:nowrap}
+.nav-persistent-link:hover,.nav-persistent-link.ativo{background:var(--azul-claro);color:var(--azul-escuro);transform:translateX(2px)}
+.nav-persistent-link.ativo strong,.nav-persistent-link:hover strong{display:block}
+.nav-persistent-theme{width:38px;height:38px;margin-top:5px;border:1px solid color-mix(in srgb,var(--texto) 18%,transparent);border-radius:50%;background:transparent;color:var(--texto);font-size:18px;cursor:pointer}
+.nav-persistent-dock{position:fixed;z-index:65;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;padding:8px;border:1px solid color-mix(in srgb,var(--texto) 20%,transparent);border-radius:999px;background:color-mix(in srgb,var(--azul-medio) 88%,transparent);backdrop-filter:blur(20px);box-shadow:0 14px 50px #0003;scrollbar-width:none}
+.nav-persistent-dock .nav-persistent-link{min-width:42px;min-height:40px;justify-content:center;padding:8px 12px}
+.nav-persistent-dock .nav-persistent-link strong{display:block;font-size:11px}
+.nav-persistent-dock .nav-persistent-link>span{display:none}
+.nav-persistent-dock .nav-persistent-theme{flex:none;margin:0 0 0 4px}
+.editorial-nav.navigation-index .editorial-menu-backdrop{padding:clamp(22px,6vw,88px);background:var(--azul-escuro)}
+.editorial-nav.navigation-index .editorial-menu-panel{width:min(1500px,100%);display:grid;grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr);grid-template-rows:auto 1fr auto;column-gap:clamp(32px,8vw,120px);align-content:center}
+.editorial-nav.navigation-index .editorial-menu-heading{grid-column:1;grid-row:1 / span 2;align-self:start;position:sticky;top:0}
+.editorial-nav.navigation-index .editorial-menu-heading>span{font:500 11px var(--portfolio-navigation-font,monospace);letter-spacing:.22em}
+.editorial-nav.navigation-index .editorial-menu-heading p{font:400 clamp(2.5rem,6vw,6rem)/.95 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.055em}
+.editorial-nav.navigation-index .editorial-menu-links{grid-column:2;grid-row:1 / span 2}
+.editorial-nav.navigation-index .nav-overlay-link{grid-template-columns:4.5rem minmax(0,1fr) 2rem;min-height:clamp(58px,10vh,108px);border-top:1px solid color-mix(in srgb,var(--texto) 22%,transparent)}
+.editorial-nav.navigation-index .editorial-menu-number{font:400 clamp(15px,2vw,24px) var(--portfolio-navigation-font,monospace);opacity:.6}
+.editorial-nav.navigation-index .editorial-menu-title{font:400 clamp(1.8rem,4.5vw,5.5rem)/.95 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.045em}
+.editorial-nav.navigation-index .editorial-menu-controls,.editorial-nav.navigation-index .editorial-menu-footer{grid-column:1/-1}
+@media(max-width:760px){.nav-persistent-rail{left:5px;padding:5px;gap:2px}.nav-persistent-rail .nav-persistent-link{min-height:34px;padding:6px 8px}.nav-persistent-rail .nav-persistent-link strong{display:none!important}.nav-persistent-dock{bottom:calc(8px + env(safe-area-inset-bottom));max-width:calc(100vw - 12px)}.nav-persistent-dock .nav-persistent-link{padding:8px 10px}.editorial-nav.navigation-index .editorial-menu-panel{display:flex;gap:0}.editorial-nav.navigation-index .editorial-menu-heading{position:static;margin-bottom:1.5rem}.editorial-nav.navigation-index .editorial-menu-heading p{font-size:clamp(2.3rem,12vw,4rem)}.editorial-nav.navigation-index .nav-overlay-link{grid-template-columns:2.4rem minmax(0,1fr) 1.5rem;min-height:64px}.editorial-nav.navigation-index .editorial-menu-title{font-size:clamp(1.5rem,7vw,2.5rem)}}
+@media(prefers-reduced-motion:reduce){.nav-persistent-link{transition:none}}
