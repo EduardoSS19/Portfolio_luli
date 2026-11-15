@@ -603,3 +603,10 @@
   font-size:.75rem;
   line-height:1.5;
 }
+
+/* Keep the passive hover card fully inside short mobile viewports. */
+.cms-layout-hover-preview-floating{
+  min-height:0!important;
+  max-height:min(440px,calc(100vh - 32px))!important;
+  overflow:hidden!important;
+}
