@@ -205,7 +205,7 @@ export function CmsLayoutManager(){
   // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
   const hoverPreviewScale=hoverPreviewStageWidth/390
-  const hoverPreviewStageHeight=260
+  const hoverPreviewStageHeight=160
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -516,17 +516,17 @@ export function CmsLayoutManager(){
     const viewportHeight=window.innerHeight
     const margin=16
     const gap=12
-    const panelWidth=Math.min(380,Math.max(240,viewportWidth-margin*2))
+    const panelWidth=Math.min(280,Math.max(220,viewportWidth-margin*2))
     const preferredHeight=Math.min(440,Math.max(180,viewportHeight-margin*2))
     const rightSpace=rect?viewportWidth-rect.right-gap-margin:0
     const leftSpace=rect?rect.left-gap-margin:0
     let availableWidth=panelWidth
     let left=margin
-    if(rect&&rightSpace<260&&leftSpace<260){
+    if(rect&&rightSpace<220&&leftSpace<220){
       left=Math.max(margin,(viewportWidth-panelWidth)/2)
     }else if(rect){
       const placeRight=rightSpace>=panelWidth||rightSpace>=leftSpace
-      availableWidth=Math.min(panelWidth,Math.max(240,placeRight?rightSpace:leftSpace))
+      availableWidth=Math.min(panelWidth,Math.max(220,placeRight?rightSpace:leftSpace))
       left=placeRight?rect.right+gap:rect.left-gap-availableWidth
     }
     const belowSpace=rect?viewportHeight-rect.bottom-gap-margin:viewportHeight-margin*2
@@ -714,7 +714,7 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(280px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
