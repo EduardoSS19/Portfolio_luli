@@ -32,10 +32,11 @@ function Section({ section, data, preview }) {
 
 export function PageRenderer({ pages = [], data, preview = false }) {
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
-  const activePage = pages.find(page => page.slug === path) || pages.find(page => page.slug === 'inicio') || pages[0]
-  if (!activePage) return null
+  const publishedPages = pages.filter(page => page.published !== false)
+  const activePage = publishedPages.find(page => page.slug === path) || (!path ? publishedPages.find(page => page.slug === 'inicio') || publishedPages[0] : null)
+  if (!activePage) return <main className="composer-site composer-not-found"><h1>Esta página não existe.</h1><a href="/">Voltar ao início</a></main>
   const profile = data.sobre || {}
-  const navigation = pages.filter(page => page.published !== false)
+  const navigation = publishedPages
   return <main className="composer-site" id="topo">
     <nav className="composer-navigation" aria-label="Navegação do portfólio"><a className="composer-brand" href="/">{profile.nome || 'Portfólio'}</a><div>{navigation.map(page=><a key={page.id} href={page.slug === 'inicio' ? '/' : `/${page.slug}`} aria-current={page.id === activePage.id ? 'page' : undefined}>{page.title}</a>)}</div></nav>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview}/>)}
