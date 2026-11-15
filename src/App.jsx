@@ -566,19 +566,21 @@ export default function App() {
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
                 : null
-      const target = selector ? document.querySelector(selector) : null
-      const targetIsVisible = Boolean(target && target.getClientRects().length)
-      const fallbackTarget = targetIsVisible
-        ? target
-        : focus === 'bio'
-          ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
-          : focus === 'references' || focus === 'contact'
-            ? document.querySelector('#Contato, .rodape')
-            : null
-      if (fallbackTarget) {
+      // Wait for React to commit the temporary settings before resolving the target.
+      // Querying before the commit can capture a stale/hidden section and make the
+      // contextual preview appear to ignore the selected option.
+      if (selector || focus === 'bio' || focus === 'references' || focus === 'contact') {
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
-            fallbackTarget.scrollIntoView({ block: 'start', behavior: hoverSnapshot ? 'instant' : 'smooth' })
+            const target = selector ? document.querySelector(selector) : null
+            const visibleTarget = target && target.getClientRects().length ? target : null
+            const fallbackTarget = visibleTarget
+              || (focus === 'bio'
+                ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
+                : focus === 'references' || focus === 'contact'
+                  ? document.querySelector('#Contato, .rodape')
+                  : null)
+            fallbackTarget?.scrollIntoView({ block: 'start', behavior: hoverSnapshot ? 'instant' : 'smooth' })
           })
         })
       }
