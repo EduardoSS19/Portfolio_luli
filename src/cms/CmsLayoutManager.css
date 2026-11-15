@@ -747,3 +747,10 @@
   overflow:auto!important;
   transform-origin:top left!important;
 }
+
+/* The hover iframe must keep its full logical device height.
+   Its parent stage is visually scaled; clipping the iframe's CSS height to that
+   scaled stage changes window.innerHeight and creates an accidental second zoom. */
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame .cms-layout-preview-stage iframe{
+  max-height:none!important;
+}
