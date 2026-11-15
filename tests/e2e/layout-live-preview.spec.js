@@ -561,6 +561,46 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
   expect(behavior.modalOverflow).toBe('hidden')
 })
 
+test('iframe completo mantém o menu limitado ao viewport do dispositivo', async ({ page }) => {
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const inlineFrame = page.locator('.cms-layout-inline-preview iframe')
+  await inlineFrame.scrollIntoViewIfNeeded()
+  await expect.poll(() => inlineFrame.evaluate(frame => Boolean(frame.contentDocument?.querySelector('.site-shell')))).toBe(true)
+  const portfolio = page.frameLocator('.cms-layout-inline-preview iframe')
+  await portfolio.locator('.editorial-menu-trigger').click()
+  await expect(portfolio.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'false')
+  const bounds = await inlineFrame.evaluate(frame => {
+    const view = frame.contentWindow
+    const backdrop = frame.contentDocument.querySelector('.editorial-menu-backdrop')
+    const panel = frame.contentDocument.querySelector('.editorial-menu-panel')
+    const backdropRect = backdrop.getBoundingClientRect()
+    const panelRect = panel.getBoundingClientRect()
+    return {
+      width: view.innerWidth, height: view.innerHeight,
+      backdropWidth: backdropRect.width, backdropHeight: backdropRect.height,
+      panelWidth: panelRect.width, panelHeight: panelRect.height,
+    }
+  })
+  expect(bounds.backdropWidth).toBeLessThanOrEqual(bounds.width + 1)
+  expect(bounds.backdropHeight).toBeLessThanOrEqual(bounds.height + 1)
+  expect(bounds.panelWidth).toBeLessThanOrEqual(bounds.width + 1)
+  expect(bounds.panelHeight).toBeLessThanOrEqual(bounds.height + 1)
+})
+
 test('campos e submenus de design são específicos por tipo de seção e começam recolhidos', async ({ page }) => {
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
