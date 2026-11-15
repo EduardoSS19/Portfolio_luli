@@ -67,7 +67,7 @@ test('os modos de galeria alteram a composição real dos cards', async ({ page 
     ['immersive', 'grid', ''],
     ['brutalist', 'grid', ''],
     ['stack', 'grid', ''],
-    ['spotlight', 'grid', ''],
+    ['spotlight', 'grid', ''],\n    ['museum', 'grid', ''],\n    ['cinematic', 'flex', 'x'],\n    ['swiss', 'grid', ''],\n    ['tattoo-book', 'grid', ''],
   ]
   for (const [mode, display, snap] of cases) {
     await openComposablePortfolio(page, mode, 'dock')
