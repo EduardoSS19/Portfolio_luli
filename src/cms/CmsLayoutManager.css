@@ -714,3 +714,36 @@
 @media(max-width:600px){
   .cms-layout-hover-preview-floating{padding:9px}
 }
+
+
+/* Final hover-preview geometry: the desktop card is narrower and taller,
+   while the iframe keeps its full logical device viewport and computed scale. */
+.cms-layout-hover-preview-floating{
+  width:min(760px,calc(100vw - 32px))!important;
+  max-width:calc(100vw - 32px)!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  height:auto!important;
+  min-height:0!important;
+  max-height:calc(100vh - 110px)!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-stage{
+  position:relative!important;
+  display:block!important;
+  flex:none!important;
+  min-width:0!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-stage iframe{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  width:var(--hover-preview-logical-width,1440px);
+  max-width:none!important;
+  max-height:none!important;
+  pointer-events:auto!important;
+  overflow:auto!important;
+  transform-origin:top left!important;
+}
