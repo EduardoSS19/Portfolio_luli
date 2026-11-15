@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sobre } from '../components/Sobre.jsx'
 import { SecaoCategoria } from '../components/SecaoCategoria.jsx'
 import { GaleriaGrade } from '../components/GaleriaGrade.jsx'
@@ -33,6 +33,7 @@ function Section({ section, data, preview }) {
 function PortfolioNavigation({ pages, activePage, profile, mode }) {
   const [open,setOpen]=useState(false)
   const expandable=['curtain','dropdown','sidebar','index'].includes(mode)
+  useEffect(()=>{if(!open)return undefined;const closeOnEscape=event=>{if(event.key==='Escape')setOpen(false)};window.addEventListener('keydown',closeOnEscape);return()=>window.removeEventListener('keydown',closeOnEscape)},[open])
   const label=mode==='curtain'?'Abrir navegação':mode==='sidebar'?'Abrir índice lateral':mode==='index'?'Abrir índice de capítulos':'Abrir menu'
   return <nav className={"composer-navigation nav-style-"+mode+(open?' is-open':'')} aria-label="Navegação do portfólio">
     <div className="composer-navigation-bar">
