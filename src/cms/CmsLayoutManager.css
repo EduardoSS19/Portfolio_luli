@@ -661,3 +661,37 @@
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{pointer-events:auto!important}
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{display:block!important;width:100%!important;height:430px!important;min-height:240px!important;max-height:calc(100vh - 110px)!important;flex:1 1 auto!important;overflow:hidden!important;pointer-events:auto!important;overscroll-behavior:contain!important;contain:layout paint}
 .cms-layout-hover-preview-floating iframe{position:static!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;transform:none!important;zoom:1!important;pointer-events:auto!important;overflow:auto!important;border:0!important}
+
+/* Hover: viewport real do dispositivo, reduzido apenas na apresentação do modal. */
+.cms-layout-hover-preview-floating{
+  width:min(920px,calc(100vw - 32px));
+  max-width:calc(100vw - 32px);
+  max-height:calc(100vh - 32px);
+  overflow:hidden;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:calc(100vh - 110px);
+  min-height:0;
+  overflow:auto;
+  border-radius:10px;
+  background:#171914;
+  overscroll-behavior:contain;
+}
+.cms-layout-hover-preview-stage{
+  position:relative;
+  flex:none;
+  overflow:hidden;
+}
+.cms-layout-hover-preview-stage iframe{
+  position:absolute;
+  inset:0 auto auto 0;
+  max-width:none;
+  max-height:none;
+  flex:none;
+}
+@media(max-width:600px){
+  .cms-layout-hover-preview-floating{padding:9px}
+}
