@@ -201,12 +201,10 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
-  // O modal contextual usa um viewport móvel real (390 × 844), reduzido
-  // proporcionalmente para caber no cartão sem alterar o viewport CSS do site.
-  // Assim, media queries e menus continuam com comportamento mobile real.
-  const hoverPreviewScale=hoverPreviewSize.width>0?Math.min(1,hoverPreviewSize.width/390):1
-  const hoverPreviewStageWidth=390*hoverPreviewScale
-  const hoverPreviewStageHeight=844*hoverPreviewScale
+  // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
+  // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
+  const hoverPreviewStageWidth=hoverPreviewSize.width||358
+  const hoverPreviewStageHeight=260
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
