@@ -260,106 +260,245 @@
 
 
 
-/* Prévia temporária de hover: camada visual isolada, sem alterar o fluxo do editor. */
-.cms-layout-hover-preview-floating{
-  position:fixed;
-  z-index:2147483000;
-  display:flex;
-  flex-direction:column;
-  box-sizing:border-box;
-  width:min(380px,calc(100vw - 32px));
-  min-width:0;
-  min-height:0;
-  max-height:calc(100vh - 32px);
-  padding:12px;
-  overflow:hidden;
-  overscroll-behavior:none;
-  touch-action:none;
-  border:1px solid rgba(201,211,154,.52);
-  border-radius:16px;
-  color:#f0eee6;
-  background:#171914;
-  box-shadow:0 18px 54px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.035);
-  pointer-events:none;
-  user-select:none;
-}
-.cms-layout-hover-preview-heading{
-  display:flex;
-  flex:0 0 auto;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  padding:2px 2px 10px;
-}
+/* A prévia contextual tem uma coluna própria e não cobre opções ou botões. */
+.cms-layout-fields{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:1.2rem;min-width:0}
+.cms-layout-field-group{grid-column:1;min-width:0}
+/* A prévia contextual acompanha a opção ativa, sem ocupar uma coluna fixa. */
+.cms-layout-hover-preview-floating{position:fixed;pointer-events:auto!important;transform:none;opacity:1!important;visibility:visible!important;transition:none!important;filter:none!important;background-color:#171914!important;z-index:1000;box-sizing:border-box;width:min(380px,calc(100vw - 32px));min-width:0;max-height:calc(100vh - 32px);padding:12px;border:1px solid rgba(201,211,154,.52);border-radius:16px;color:#f0eee6;background-color:#171914;backdrop-filter:none;box-shadow:0 18px 54px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.035);overflow:auto;overscroll-behavior:contain}
+.cms-layout-hover-preview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:2px 2px 10px}
 .cms-layout-hover-preview-heading>div{display:grid;gap:3px;min-width:0}
 .cms-layout-hover-preview-heading .cms-eyebrow{margin:0;font-size:8px}
 .cms-layout-hover-preview-heading strong{color:#f0eee6;font-size:13px}
 .cms-layout-hover-preview-heading small{color:#aaa99f;font-size:10px;line-height:1.4}
-.cms-layout-hover-preview-heading button{
-  display:grid;
-  place-items:center;
-  flex:0 0 30px;
-  width:30px;
-  height:30px;
-  padding:0;
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:8px;
-  color:#e9eadf;
-  background:rgba(255,255,255,.05);
-  font-size:20px;
-  cursor:pointer;
-  pointer-events:auto;
-}
+.cms-layout-hover-preview-heading button{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:8px;color:#e9eadf;background:rgba(255,255,255,.05);font-size:20px;cursor:pointer}
+.cms-layout-hover-preview-frame{height:260px;min-height:0;max-height:260px;overflow:hidden;border-radius:9px}
+.cms-layout-hover-preview .cms-layout-preview-caption{margin:8px 2px 1px;font-size:9px}
+.cms-layout-hover-preview-placeholder{display:grid;place-items:center;gap:8px;min-height:260px;padding:20px;border:1px dashed rgba(201,211,154,.22);border-radius:9px;background:rgba(255,255,255,.02);text-align:center}
+.cms-layout-hover-preview-placeholder span{color:#c9d39a;font-size:26px}
+.cms-layout-hover-preview-placeholder p{max-width:220px;margin:0;color:#aaa99f;font-size:11px;line-height:1.5}
+@media(max-width:1100px){.cms-layout-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.cms-layout-hover-preview-floating{padding:9px}.cms-layout-hover-preview-frame{height:220px;min-height:220px;max-height:220px}}
+
+
+/* A prévia contextual é renderizada em portal e fica sobreposta à página.
+   Ela não participa do fluxo nem altera a largura do formulário. */
+
+/* A prévia contextual termina exatamente no fim do viewport escalado do iframe. */
 .cms-layout-hover-preview-frame{
-  flex:0 0 260px;
-  width:100%;
-  height:260px;
+  height:auto;
   min-height:0;
-  max-height:260px;
+  max-height:none;
+  flex:0 0 auto;
   overflow:hidden;
-  border-radius:9px;
   background:#171914;
-  pointer-events:auto;
 }
 .cms-layout-hover-preview-frame .cms-layout-preview-stage-scaled{
-  position:relative;
-  display:block;
   flex:0 0 auto;
-  min-width:0;
   min-height:0;
-  max-height:100%;
   overflow:hidden;
 }
 .cms-layout-hover-preview-frame iframe{
   display:block;
-  flex:none;
-  max-width:none;
-  max-height:none;
-  border:0;
+  flex:0 0 auto;
   background:transparent;
-  pointer-events:auto;
-}
-.cms-layout-hover-preview .cms-layout-preview-caption{margin:8px 2px 1px;font-size:9px}
-.cms-layout-hover-preview-placeholder{
-  display:grid;
-  place-items:center;
-  gap:8px;
-  min-height:260px;
-  padding:20px;
-  border:1px dashed rgba(201,211,154,.22);
-  border-radius:9px;
-  background:rgba(255,255,255,.02);
-  text-align:center;
-}
-.cms-layout-hover-preview-placeholder span{color:#c9d39a;font-size:26px}
-.cms-layout-hover-preview-placeholder p{max-width:220px;margin:0;color:#aaa99f;font-size:11px;line-height:1.5}
-.cms-layout-hover-preview-heading button:focus-visible{outline:2px solid #c9d39a;outline-offset:2px}
-@media(max-width:1100px){.cms-layout-hover-preview-floating{max-height:min(440px,55vh)}}
-@media(max-width:600px){
-  .cms-layout-hover-preview-floating{padding:9px}
-  .cms-layout-hover-preview-frame{flex-basis:220px;height:220px;max-height:220px}
 }
 
+
+/* A prévia de hover não deve revelar a cor de fundo da página no espaço vazio do iframe. */
+.cms-layout-hover-preview-frame{background:#171914!important}
+.cms-layout-hover-preview-frame iframe{background:transparent!important}
+
+
+/* A prévia completa preserva a escala legível e rola verticalmente dentro do próprio quadro. */
+.cms-layout-preview-frame-inline{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+}
+.cms-layout-preview-stage-inline{
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  min-height:0!important;
+  flex:0 0 auto;
+}
+.cms-layout-preview-frame-inline iframe{
+  flex:0 0 auto;
+  display:block;
+}
+
+
+/* A prévia fixa escala o documento pela largura e rola verticalmente no viewport externo. */
+.cms-layout-inline-preview .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
+  align-items:flex-start;
+  justify-content:flex-start;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+
+
+/* A prévia contextual permanece sobreposta também em telas estreitas. */
+@media(max-width:1100px){
+  .cms-layout-hover-preview-floating{max-height:min(440px,55vh)}
+}
+
+/* A prévia contextual aceita rolagem, cliques e navegação dentro do iframe. */
+.cms-layout-hover-preview-floating,.cms-layout-hover-preview-floating *{opacity:1!important;}
+ .cms-layout-hover-preview-floating{background:#171914!important;pointer-events:auto!important;}
+.cms-layout-hover-preview-floating iframe{pointer-events:auto!important;}
+.cms-layout-hover-preview-heading button:focus-visible{outline:2px solid #c9d39a;outline-offset:2px;}
+
+
+/* Modelos: miniaturas editoriais com hierarquia e conteúdo distintos por perfil. */
+.cms-layout-preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:.8rem}
+.cms-layout-preset-card{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.cms-layout-preset-art{position:relative;display:flex;flex-direction:column;gap:0;min-height:174px;padding:12px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#172027;color:#f3f0e7}
+.cms-layout-preset-mock-nav{display:flex;gap:5px;align-items:center;height:13px;border-bottom:1px solid rgba(255,255,255,.12)}
+.cms-layout-preset-mock-nav i{display:block;width:22px;height:2px;border-radius:2px;background:rgba(255,255,255,.45)}
+.cms-layout-preset-mock-nav i:first-child{width:35px;margin-right:auto;background:var(--cms-accent,#c9d39a)}
+.cms-layout-preset-mock-hero{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-align:center}
+.cms-layout-preset-mock-hero small{font-size:6px;letter-spacing:1.2px;text-transform:uppercase;opacity:.7}
+.cms-layout-preset-mock-hero b{max-width:90%;font:500 17px/1.05 Georgia,serif}
+.cms-layout-preset-mock-hero i{width:28px;height:1px;margin-top:3px;background:var(--cms-accent,#c9d39a)}
+.cms-layout-preset-mock-content{display:grid;grid-template-columns:1.1fr .9fr;gap:8px;align-items:center}
+.cms-layout-preset-mock-image{min-height:57px;border-radius:4px;background:linear-gradient(135deg,#8c9a83,#d2c3a6 48%,#6b7770)}
+.cms-layout-preset-mock-copy{display:grid;gap:5px}
+.cms-layout-preset-mock-copy i{height:3px;border-radius:3px;background:rgba(255,255,255,.5)}
+.cms-layout-preset-mock-copy i:nth-child(2){width:78%}.cms-layout-preset-mock-copy i:nth-child(3){width:56%}
+.cms-layout-preset-mock-sections{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.cms-layout-preset-mock-sections i{padding:3px 5px;border:1px solid rgba(255,255,255,.22);border-radius:3px;font-size:5px;font-style:normal;letter-spacing:.2px}
+.cms-layout-preset-art.preset-visual-artist{background:#20231f}
+.cms-layout-preset-art.preset-visual-artist .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.preset-visual-artist .cms-layout-preset-mock-content{grid-template-columns:1.5fr .7fr}
+.cms-layout-preset-art.preset-illustrator{background:#f0e9dd;color:#29251f}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left;padding:8px 4px}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-content{grid-template-columns:repeat(3,1fr)}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-image{min-height:42px}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-sections{grid-column:1/-1}
+.cms-layout-preset-art.preset-photographer{background:#111}
+.cms-layout-preset-art.preset-photographer .cms-layout-preset-mock-hero{padding:7px 4px}
+.cms-layout-preset-art.preset-photographer .cms-layout-preset-mock-content{grid-template-columns:1fr}
+.cms-layout-preset-art.preset-photographer .cms-layout-preset-mock-image{min-height:72px;background:linear-gradient(90deg,#303c43,#b8a58b 50%,#45545a)}
+.cms-layout-preset-art.preset-photographer .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-designer{background:#e7e3d9;color:#252522}
+.cms-layout-preset-art.preset-designer .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.preset-designer .cms-layout-preset-mock-content{grid-template-columns:.7fr 1.3fr}
+.cms-layout-preset-art.preset-designer .cms-layout-preset-mock-image{min-height:58px;background:linear-gradient(135deg,#b86e50,#e0c5a4 55%,#596a68)}
+.cms-layout-preset-art.preset-tattoo-artist{background:#171413}
+.cms-layout-preset-art.preset-tattoo-artist .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left;padding:8px 4px}
+.cms-layout-preset-art.preset-tattoo-artist .cms-layout-preset-mock-content{grid-template-columns:repeat(3,1fr)}
+.cms-layout-preset-art.preset-tattoo-artist .cms-layout-preset-mock-image{min-height:47px;background:linear-gradient(135deg,#d2c5b2,#49413c 55%,#a58b70)}
+.cms-layout-preset-art.preset-tattoo-artist .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.preset-tattoo-studio{background:#26201e}
+.cms-layout-preset-art.preset-tattoo-studio .cms-layout-preset-mock-hero{align-items:center;text-align:center;padding:15px 4px}
+.cms-layout-preset-art.preset-tattoo-studio .cms-layout-preset-mock-content{grid-template-columns:.8fr 1.2fr}
+.cms-layout-preset-art.preset-tattoo-studio .cms-layout-preset-mock-image{min-height:48px;background:linear-gradient(135deg,#a58b70,#3c302b 55%,#d1bda5)}
+.cms-layout-preset-copy{padding:.8rem .85rem .35rem}
+.cms-layout-preset-copy p{min-height:2.7em}
+.cms-layout-custom-section{padding:.9rem;border:1px solid var(--cms-border,rgba(255,255,255,.1));border-radius:12px;background:rgba(255,255,255,.018)}
+.cms-layout-custom-section>header{display:flex;align-items:center;justify-content:space-between;gap:.8rem}
+.cms-layout-custom-section>header>div:first-child{display:grid;gap:.2rem;min-width:0}
+.cms-layout-custom-section>header>div:first-child strong{font-size:.88rem}
+.cms-layout-custom-section-actions{display:flex;gap:.35rem;flex-wrap:wrap}
+.cms-layout-custom-section-editor{margin-top:.65rem;border-top:1px solid var(--cms-border,rgba(255,255,255,.09))}
+.cms-layout-custom-section-editor>summary{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.7rem .1rem;color:var(--cms-text,#f2f0e8);font-size:.76rem;font-weight:600;cursor:pointer;list-style:none}
+.cms-layout-custom-section-editor>summary::-webkit-details-marker{display:none}
+.cms-layout-custom-section-editor>summary:after{content:'＋';color:var(--cms-accent,#c9d39a);font-size:1rem}
+.cms-layout-custom-section-editor[open]>summary:after{content:'−'}
+.cms-layout-custom-section-editor>summary small{margin-left:auto;color:var(--cms-muted,#aaa99f);font-size:.68rem;font-weight:400}
+.cms-layout-custom-section-fields{display:grid;gap:.7rem;padding:.2rem 0 .3rem}
+.cms-layout-custom-section-fields label,.cms-layout-custom-item-fields label{display:grid;gap:.3rem;color:var(--cms-text,#f2f0e8);font-size:.72rem;font-weight:600}
+@media(max-width:560px){.cms-layout-preset-grid{grid-template-columns:1fr}.cms-layout-custom-section>header{align-items:flex-start;flex-direction:column}.cms-layout-custom-section-actions{width:100%}.cms-layout-custom-section-actions button{flex:1}}
+
+
+/* Fluxo de escolha de modelo: preview no iframe antes de aplicar ao editor. */
+.cms-layout-presets{scroll-margin-top:28px}
+.cms-layout-section-library{scroll-margin-top:28px}
+.cms-layout-inline-preview{scroll-margin-top:20px}
+.cms-layout-inline-preview.is-preset-preview{border:1px solid color-mix(in srgb,var(--cms-accent) 48%,var(--cms-line));border-radius:14px;padding:clamp(14px,2vw,22px);background:color-mix(in srgb,var(--cms-accent) 4%,var(--cms-panel))}
+.cms-layout-preset-preview-controls{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0 16px;padding:12px;border:1px solid var(--cms-line);border-radius:10px;background:var(--cms-panel)}
+.cms-layout-preset-preview-nav{display:flex;align-items:center;gap:10px}
+.cms-layout-preset-preview-nav button{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--cms-line);border-radius:9px;background:var(--cms-panel-2);color:var(--cms-text);font-size:20px;cursor:pointer}
+.cms-layout-preset-preview-nav button:hover{border-color:var(--cms-accent);background:color-mix(in srgb,var(--cms-accent) 12%,var(--cms-panel-2))}
+.cms-layout-preset-preview-nav span{min-width:46px;text-align:center;color:var(--cms-muted);font:600 11px 'DM Sans';font-variant-numeric:tabular-nums}
+.cms-layout-preset-preview-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.cms-layout-preset-preview-actions button{min-height:38px}
+.cms-layout-preset-apply{white-space:nowrap}
+@media(max-width:620px){
+ .cms-layout-preset-preview-controls{align-items:stretch;flex-direction:column}
+ .cms-layout-preset-preview-nav{justify-content:space-between}
+ .cms-layout-preset-preview-actions{display:grid;grid-template-columns:1fr}
+ .cms-layout-preset-preview-actions button{width:100%}
+}
+
+
+.cms-layout-preset-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.55rem}
+.cms-layout-preset-tags span{display:inline-flex;align-items:center;min-height:1.45rem;padding:.2rem .48rem;border:1px solid var(--cms-border,rgba(255,255,255,.16));border-radius:999px;color:var(--cms-muted,#aab5b9);font-size:.62rem;font-weight:700;letter-spacing:.035em}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-content{display:flex;gap:5px;overflow:hidden}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-image{flex:0 0 56%;min-height:72px}
+.cms-layout-preset-art.mode-carousel .cms-layout-preset-mock-copy{flex:0 0 38%;align-self:center}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-hero{align-items:flex-start;text-align:left}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-content{display:block;position:relative;min-height:72px}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-image{position:absolute;inset:0;min-height:72px}
+.cms-layout-preset-art.mode-immersive .cms-layout-preset-mock-copy{position:absolute;left:8px;right:8px;bottom:8px;z-index:1}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-content{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:start}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-image{min-height:38px}
+.cms-layout-preset-art.mode-masonry .cms-layout-preset-mock-copy{display:none}
+.cms-layout-preset-art.nav-dropdown .cms-layout-preset-mock-nav{border:0;justify-content:flex-end}
+.cms-layout-preset-art.nav-dropdown .cms-layout-preset-mock-nav:after{content:"";position:absolute;top:27px;right:12px;width:64px;height:66px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:linear-gradient(rgba(255,255,255,.2) 2px,transparent 2px) 8px 12px/35px 12px repeat-y,rgba(10,24,31,.94)}
+.cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-nav:after{content:"";position:absolute;inset:0 auto 0 0;width:31%;background:rgba(7,17,22,.88);border-right:1px solid rgba(255,255,255,.3)}
+.cms-layout-preset-art.nav-sidebar .cms-layout-preset-mock-content{margin-left:30%}
+
+/* A prévia contextual deve ficar acima dos cartões de opção e conter sua altura real. */
+.cms-layout-hover-preview-floating{
+  z-index:2147483000!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame .cms-layout-preview-stage-scaled{
+  min-height:0!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame iframe{
+  display:block!important;
+  max-height:100%!important;
+}
+
+/* A moldura flutuante não deve bloquear opções do editor que ficam atrás dela.
+   Somente o iframe e o botão de fechar capturam interação; o restante deixa
+   o ponteiro atravessar para os controles do CMS. */
+.cms-layout-hover-preview-floating{pointer-events:none!important}
+.cms-layout-hover-preview-floating iframe,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{pointer-events:auto!important}
+
+/* No editor de layout, as ações pertencem ao fluxo do formulário.
+   Não devem ficar fixas sobre as opções nem interceptar sua interação. */
+.cms-layout-page .cms-editor-actions{position:static!important;pointer-events:auto!important}
+
+
+/* A prévia de hover é somente visual: não captura mouse, clique ou rolagem.
+   Toda interação continua no editor; a prévia apenas reflete as mudanças em tempo real. */
+.cms-layout-hover-preview-floating{pointer-events:auto!important;user-select:none;}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{pointer-events:auto!important;cursor:default;}
+.cms-layout-hover-preview-floating iframe{pointer-events:none!important;}
+
+/* The contextual hover card is a passive visual snapshot, never a nested browser. */
+.cms-layout-hover-preview-floating{overflow:hidden!important;overscroll-behavior:none!important;touch-action:none;pointer-events:auto!important}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{overflow:hidden!important;pointer-events:none!important;touch-action:none}
+.cms-layout-hover-preview-floating iframe{pointer-events:none!important;overflow:hidden!important;touch-action:none!important}
 .cms-layout-library-add,
 .cms-layout-custom-section-editor,
 .cms-layout-custom-item,
@@ -398,6 +537,16 @@
 .cms-layout-field-group .cms-layout-group-fields{padding-top:.8rem}
 @media(max-width:560px){.cms-layout-custom-item-fields{grid-template-columns:1fr}.cms-layout-custom-item-fields label:first-child,.cms-layout-custom-item-fields label:nth-child(2){grid-column:auto}}
 
+.cms-layout-hover-preview-floating{width:min(380px,calc(100vw - 32px));overflow:hidden!important}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{height:260px!important;max-height:260px!important;overflow:hidden!important}
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+  /* Preserve the scale computed from the actual card viewport in CmsLayoutManager.jsx.
+     Forcing transform:none here cancels that scale and makes the 390px iframe overflow. */
+  transform-origin:top left!important;
+  zoom:1!important;
+}
+
 /* The full preview is a true device viewport. Scroll happens inside this iframe,
    keeping fixed navigation overlays bounded to the simulated screen height. */
 .cms-layout-inline-preview .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
@@ -417,10 +566,91 @@
 }
 
 
+/* Contextual hover preview: a fixed, cropped visual snapshot, never a second browser. */
+.cms-layout-hover-preview-floating{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  max-height:calc(100vh - 32px)!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  display:block;
+  width:100%;
+  height:260px!important;
+  min-height:260px!important;
+  max-height:260px!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  contain:layout paint;
+}
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  position:relative;
+  display:block;
+  min-height:0!important;
+  overflow:hidden!important;
+  transform-origin:top left;
+}
+.cms-layout-hover-preview-floating iframe{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  display:block!important;
+  pointer-events:none!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+}
 .cms-layout-design-help{
   grid-column:1/-1;
   margin:0;
   color:var(--cms-muted,#aaa99f);
   font-size:.75rem;
   line-height:1.5;
+}
+
+/* Keep the passive hover card fully inside short mobile viewports. */
+.cms-layout-hover-preview-floating{
+  min-height:0!important;
+  max-height:var(--hover-preview-max-height,min(440px,calc(100vh - 32px)))!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
+  min-height:0!important;
+  max-height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
+}
+
+
+/* One interaction contract for the contextual snapshot:
+   the card itself never intercepts the editor; only its close control is interactive.
+   The iframe remains a passive image of the mobile viewport. */
+.cms-layout-hover-preview-floating{
+  pointer-events:none!important;
+  user-select:none;
+  touch-action:none;
+  overscroll-behavior:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled,
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+  touch-action:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+  touch-action:manipulation;
+}
+
+/* The passive hover snapshot catches wheel input at its card boundary, never inside the iframe. */
+.cms-layout-hover-preview-floating,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  pointer-events:auto!important;
+}
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
 }
