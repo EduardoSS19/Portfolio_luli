@@ -637,3 +637,14 @@
   pointer-events:auto!important;
   touch-action:manipulation;
 }
+
+/* The passive hover snapshot catches wheel input at its card boundary, never inside the iframe. */
+.cms-layout-hover-preview-floating,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  pointer-events:auto!important;
+}
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+}
