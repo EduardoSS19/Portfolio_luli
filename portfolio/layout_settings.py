@@ -9,6 +9,9 @@ DEFAULT_LAYOUT_SETTINGS = {
     "gallery_columns": "3",
     "default_gallery_view": "lista",
     "presentation_mode": "editorial",
+    "heading_font": "fraunces",
+    "body_font": "dm-sans",
+    "navigation_font": "space-grotesk",
     "navigation_mode": "curtain",
     "default_theme": "escuro",
     "dark_color_background": "#061522",
@@ -34,8 +37,11 @@ LAYOUT_SETTING_CHOICES = {
     "section_spacing": {"compact", "comfortable", "spacious"},
     "gallery_columns": {"2", "3", "4"},
     "default_gallery_view": {"lista", "grade"},
-    "presentation_mode": {"editorial", "carousel", "immersive", "masonry"},
-    "navigation_mode": {"curtain", "dropdown", "sidebar"},
+    "presentation_mode": {"editorial", "carousel", "immersive", "masonry", "filmstrip", "timeline", "stack", "spotlight"},
+    "navigation_mode": {"curtain", "dropdown", "sidebar", "rail", "dock", "index"},
+    "heading_font": {"fraunces", "playfair", "space-grotesk", "cormorant", "archivo-black"},
+    "body_font": {"dm-sans", "manrope", "ibm-plex", "lora", "source-sans"},
+    "navigation_font": {"dm-sans", "space-grotesk", "ibm-plex-mono", "manrope"},
     "default_theme": {"escuro", "claro"},
 }
 COLOR_SETTING_KEYS = {f"{theme}_{key}" for theme in ("dark", "light") for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent")}

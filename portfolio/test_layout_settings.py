@@ -71,10 +71,24 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(is_valid_layout_setting("presentation_mode", "carousel"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "immersive"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "masonry"))
+        for mode in ("filmstrip", "timeline", "stack", "spotlight"):
+            self.assertTrue(is_valid_layout_setting("presentation_mode", mode))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "dropdown"))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "sidebar"))
+        for mode in ("rail", "dock", "index"):
+            self.assertTrue(is_valid_layout_setting("navigation_mode", mode))
         self.assertFalse(is_valid_layout_setting("presentation_mode", "random"))
         self.assertFalse(is_valid_layout_setting("navigation_mode", "random"))
+
+    def test_typography_choices_are_allow_listed_and_defaulted(self):
+        defaults = normalize_layout_settings({})
+        self.assertEqual(defaults["heading_font"], "fraunces")
+        self.assertEqual(defaults["body_font"], "dm-sans")
+        self.assertEqual(defaults["navigation_font"], "space-grotesk")
+        self.assertTrue(is_valid_layout_setting("heading_font", "playfair"))
+        self.assertTrue(is_valid_layout_setting("body_font", "lora"))
+        self.assertTrue(is_valid_layout_setting("navigation_font", "ibm-plex-mono"))
+        self.assertFalse(is_valid_layout_setting("heading_font", "remote-font-url"))
 
     def test_custom_artist_sections_are_normalized_and_allow_listed(self):
         sections = [{

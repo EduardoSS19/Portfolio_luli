@@ -316,3 +316,55 @@
   height:100%;
   max-height:100%;
 }
+
+
+/* Experiências de galeria que não dependem da alternância grade/lista. */
+.site-shell[data-layout-presentation="filmstrip"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obras-lista{display:flex;gap:clamp(14px,2vw,30px);width:100%;padding:1rem max(5vw,24px) 2rem;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:5vw;scrollbar-width:thin}
+.site-shell[data-layout-presentation="filmstrip"] .obra{flex:0 0 clamp(280px,68vw,920px);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(180px,.8fr);align-items:center;gap:clamp(16px,3vw,42px);scroll-snap-align:center}
+.site-shell[data-layout-presentation="filmstrip"] .obra-galeria{height:clamp(300px,62vh,760px);overflow:hidden}
+.site-shell[data-layout-presentation="filmstrip"] .obra-imagem,.site-shell[data-layout-presentation="filmstrip"] .obra-imagem img{height:100%;object-fit:cover}
+.site-shell[data-layout-presentation="timeline"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obras-lista{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(270px,34vw);gap:clamp(16px,3vw,42px);padding:2.5rem max(5vw,24px) 4rem;overflow-x:auto;scroll-snap-type:x mandatory;position:relative}
+.site-shell[data-layout-presentation="timeline"] .obras-lista:before{content:"";position:absolute;left:0;right:0;top:1.2rem;height:1px;background:color-mix(in srgb,var(--layout-accent,var(--azul-claro)) 65%,transparent)}
+.site-shell[data-layout-presentation="timeline"] .obra{position:relative;scroll-snap-align:start;display:flex;flex-direction:column;gap:1rem;min-width:0}
+.site-shell[data-layout-presentation="timeline"] .obra:before{content:"";position:absolute;top:-1.68rem;left:0;width:12px;height:12px;border:2px solid var(--layout-accent,var(--azul-claro));border-radius:50%;background:var(--layout-page-background,var(--azul-escuro))}
+.site-shell[data-layout-presentation="timeline"] .obra-galeria{height:clamp(220px,36vw,470px);overflow:hidden}
+.site-shell[data-layout-presentation="timeline"] .obra-imagem,.site-shell[data-layout-presentation="timeline"] .obra-imagem img{height:100%;object-fit:cover}
+.site-shell[data-layout-presentation="stack"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obras-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:12vh;padding:3vh max(5vw,24px) 15vh}
+.site-shell[data-layout-presentation="stack"] .obra{position:sticky;top:12vh;min-height:74vh;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(220px,.85fr);align-items:center;gap:clamp(20px,5vw,80px);padding:clamp(14px,3vw,40px);border:1px solid color-mix(in srgb,var(--layout-text,var(--texto)) 16%,transparent);background:var(--layout-surface,var(--azul-medio));box-shadow:0 22px 80px #0003}
+.site-shell[data-layout-presentation="stack"] .obra:nth-child(2n){top:15vh}
+.site-shell[data-layout-presentation="stack"] .obra:nth-child(3n){top:18vh}
+.site-shell[data-layout-presentation="stack"] .obra-galeria{height:65vh;overflow:hidden}
+.site-shell[data-layout-presentation="stack"] .obra-imagem,.site-shell[data-layout-presentation="stack"] .obra-imagem img{height:100%;object-fit:cover}
+.site-shell[data-layout-presentation="spotlight"] .secao:not(.sobre-secao) .obras-lista,
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obras-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:16vh;padding:4vh max(3vw,16px) 12vh}
+.site-shell[data-layout-presentation="spotlight"] .obra{min-height:82vh;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.55fr);align-items:end;gap:clamp(16px,3vw,48px)}
+.site-shell[data-layout-presentation="spotlight"] .obra-galeria{height:78vh;overflow:hidden}
+.site-shell[data-layout-presentation="spotlight"] .obra-imagem,.site-shell[data-layout-presentation="spotlight"] .obra-imagem img{height:100%;object-fit:cover}
+.site-shell[data-layout-presentation="spotlight"] .obra-texto{padding:clamp(12px,2vw,30px) 0}
+@media(max-width:760px){
+ .site-shell[data-layout-presentation="filmstrip"] .obra{flex-basis:84vw;grid-template-columns:1fr;gap:12px}
+ .site-shell[data-layout-presentation="filmstrip"] .obra-galeria{height:52vh}
+ .site-shell[data-layout-presentation="timeline"] .secao:not(.sobre-secao) .obras-lista,.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obras-lista{grid-auto-columns:82vw}
+ .site-shell[data-layout-presentation="stack"] .obra,.site-shell[data-layout-presentation="spotlight"] .obra{position:relative;top:auto;min-height:0;grid-template-columns:1fr}
+ .site-shell[data-layout-presentation="stack"] .obra-galeria,.site-shell[data-layout-presentation="spotlight"] .obra-galeria{height:58vh}
+ .site-shell[data-layout-presentation="stack"] .secao:not(.sobre-secao) .obras-lista,.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obras-lista{gap:3rem}
+ .site-shell[data-layout-presentation="spotlight"] .secao:not(.sobre-secao) .obras-lista,.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obras-lista{gap:5rem}
+}
+
+
+/* Device-grade cards need explicit intrinsic sizing in the new non-grid layouts. */
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade{aspect-ratio:auto;min-height:0}
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade{display:grid;position:relative}
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade{display:flex;position:relative}
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade{display:grid;position:sticky}
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade{display:grid;position:relative}
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade .obra-imagem{aspect-ratio:auto}
