@@ -558,3 +558,48 @@
   pointer-events:auto!important;
   overflow:auto!important;
 }
+
+
+/* Contextual hover preview: a fixed, cropped visual snapshot, never a second browser. */
+.cms-layout-hover-preview-floating{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  max-height:calc(100vh - 32px)!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  display:block;
+  width:100%;
+  height:260px!important;
+  min-height:260px!important;
+  max-height:260px!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  contain:layout paint;
+}
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  position:relative;
+  display:block;
+  min-height:0!important;
+  overflow:hidden!important;
+  transform-origin:top left;
+}
+.cms-layout-hover-preview-floating iframe{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  display:block!important;
+  pointer-events:none!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+}
+.cms-layout-design-help{
+  grid-column:1/-1;
+  margin:0;
+  color:var(--cms-muted,#aaa99f);
+  font-size:.75rem;
+  line-height:1.5;
+}
