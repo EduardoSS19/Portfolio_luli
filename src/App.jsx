@@ -539,13 +539,29 @@ export default function App() {
         event.preventDefault()
       }
     }
+    const root = document.documentElement
+    const body = document.body
+    const previousRootOverflow = root.style.overflow
+    const previousBodyOverflow = body.style.overflow
+    root.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    root.style.overscrollBehavior = 'none'
+    body.style.overscrollBehavior = 'none'
+    document.addEventListener('wheel', preventManualScroll, { capture: true, passive: false })
+    document.addEventListener('touchmove', preventManualScroll, { capture: true, passive: false })
     window.addEventListener('wheel', preventManualScroll, { passive: false })
     window.addEventListener('touchmove', preventManualScroll, { passive: false })
     window.addEventListener('keydown', preventScrollKeys)
     return () => {
+      document.removeEventListener('wheel', preventManualScroll, true)
+      document.removeEventListener('touchmove', preventManualScroll, true)
       window.removeEventListener('wheel', preventManualScroll)
       window.removeEventListener('touchmove', preventManualScroll)
       window.removeEventListener('keydown', preventScrollKeys)
+      root.style.overflow = previousRootOverflow
+      body.style.overflow = previousBodyOverflow
+      root.style.overscrollBehavior = ''
+      body.style.overscrollBehavior = ''
     }
   }, [])
 
