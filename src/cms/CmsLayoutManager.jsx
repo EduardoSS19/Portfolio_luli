@@ -183,7 +183,6 @@ export function CmsLayoutManager(){
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
   const [hoveredOption,setHoveredOption]=useState(null)
   const hoverPreviewIframeRef=useRef(null)
-  const hoverPreviewViewportRef=useRef(null)
   const hoverFloating=useFloating({
     open:hoverPreviewMounted,
     onOpenChange:setHoverPreviewMounted,
@@ -215,8 +214,6 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
-  const hoverPreviewStageWidth=390
-  const hoverPreviewStageHeight=430
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -416,7 +413,6 @@ export function CmsLayoutManager(){
     }
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
-  const cancelOptionPreviewHide=()=>{}
   const closeOptionPreview=()=>{setHoverPreviewMounted(false);setHoveredOption(null)}
   const hideOptionPreview=(event)=>{
     const floating=document.querySelector('.cms-layout-hover-preview')
@@ -611,7 +607,7 @@ export function CmsLayoutManager(){
             <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
             <button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
+          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" data-device="mobile">
             <iframe ref={hoverPreviewIframeRef} title="Prévia interativa do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="auto" tabIndex={0} style={{width:'100%',height:'430px',display:'block',border:0,pointerEvents:'auto'}}/>
           </div>
         </aside>,
