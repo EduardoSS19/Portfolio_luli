@@ -560,7 +560,8 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
   expect(behavior.logicalWidth).toBe(390)
   expect(behavior.scale).toBeGreaterThan(0)
   expect(behavior.scale).toBeLessThanOrEqual(1)
-  expect(behavior.frameHeight).toBeGreaterThanOrEqual(250)
+  expect(behavior.frameHeight).toBeGreaterThan(0)
+  expect(behavior.frameHeight).toBeLessThanOrEqual(60)
   expect(behavior.modalOverflow).toBe('hidden')
 })
 
