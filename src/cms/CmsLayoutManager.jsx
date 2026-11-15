@@ -141,13 +141,9 @@ const PALETTES = [
 ]
 const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, tablet: { label:'Tablet', width:768, height:1024 }, mobile: { label:'Celular', width:390, height:844 } }
 function buildPresetSettings(base,preset){
-  const stamp=Date.now().toString(36)
-  const existing=(base.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'))
-  const additions=(preset.sections||[]).map((type,index)=>{
-    const template=SECTION_TEMPLATES.find(item=>item.type===type)
-    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,design:{layout:SECTION_DESIGNS[type]?.[0]?.[0]||'cards',columns:'2',image_ratio:'landscape',density:'comfortable'},items:[]}:null
-  }).filter(Boolean)
-  return {...base,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}
+  // Modelos definem somente a direção visual. Conteúdo e sessões são criados
+  // exclusivamente na área Páginas, nunca como exemplos injetados pelo Layout.
+  return {...base,...preset.settings}
 }
 
 function normalizeLayoutSettings(raw={}) {
@@ -568,60 +564,6 @@ export function CmsLayoutManager(){
               <button type="button" className="cms-layout-preset-apply" onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
             </article>)}
           </div>
-        </section>
-        <section className="cms-layout-section-library" ref={postPresetMenuRef}>
-          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">CONTEÚDO MODULAR</p><h2>Biblioteca de seções</h2></div><span className="cms-layout-preset-count">{(settings.custom_sections||[]).length} adicionadas</span></div>
-          <p className="cms-layout-help">Adicione apenas o que faz sentido para seu trabalho. Cada seção pode ser editada e organizada; deixe sem itens para mantê-la como rascunho no editor.</p>
-          <details className="cms-layout-library-add">
-            <summary><span>Adicionar uma seção</span><small>Escolha um formato específico para seu trabalho</small></summary>
-            <div className="cms-layout-section-template-grid">
-              {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
-                <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
-              </button>)}
-            </div>
-          </details>
-          {(settings.custom_sections||[]).map((section,index)=>{
-            const itemFields=SECTION_ITEM_FIELDS[section.type]||[]
-            const designOptions=SECTION_DESIGNS[section.type]||[['cards','Cartões'],['list','Lista']]
-            const design=section.design||{}
-            const itemCopy=SECTION_ITEM_COPY[section.type]||SECTION_ITEM_COPY.default
-            const layoutUsesColumns=!['timeline','steps','agenda','list','editorial','accordion'].includes(design.layout||designOptions[0][0])
-            const layoutUsesImages=['process','services','press','tattoo-flash','healed-work','studio-team'].includes(section.type)
-            return <article className="cms-layout-custom-section" key={section.id}>
-              <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
-              <details className="cms-layout-custom-section-editor">
-                <summary><span>Conteúdo</span><small>{(section.items||[]).length} itens</small></summary>
-                <div className="cms-layout-custom-section-fields">
-                  <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
-                  <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
-                  <div className="cms-layout-custom-items">
-                    {(section.items||[]).map((item,itemIndex)=><details className="cms-layout-custom-item" key={itemIndex}>
-                      <summary><strong>{item.title||'Novo item '+(itemIndex+1)}</strong><small>Editar informações</small></summary>
-                      <div className="cms-layout-custom-item-fields">
-                        <label>{itemCopy.title}<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
-                        <label>{itemCopy.description}<textarea rows="3" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
-                        {itemFields.map(([key,label,placeholder])=><label key={key}>{label}<input value={item[key]||''} maxLength={300} placeholder={placeholder} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{[key]:event.target.value})} disabled={!canChange||saving}/></label>)}
-                        {['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.image}<input type="url" value={item.image||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving}/></label>}
-                        {['exhibitions','press','testimonials','services','tattoo-flash','tattoo-booking','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.action}<input type="url" value={item.url||item.booking_url||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving}/></label>}
-                        <button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button>
-                      </div>
-                    </details>)}
-                  </div>
-                  <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar {section.type==='testimonials'?'depoimento':section.type==='studio-team'?'integrante':section.type==='tattoo-flash'?'flash':section.type==='guest-spots'?'data':section.type==='press'?'publicação':'item'}</button>
-                </div>
-              </details>
-              <details className="cms-layout-custom-section-editor cms-layout-custom-section-design">
-                <summary><span>Design da seção</span><small>Layout e apresentação</small></summary>
-                <div className="cms-layout-custom-section-fields">
-                  <p className="cms-layout-design-help">{SECTION_DESIGN_HELP[section.type]}</p>
-                  <label>Estilo de apresentação<select value={design.layout||designOptions[0][0]} onChange={event=>updateCustomSection(section.id,{design:{...design,layout:event.target.value}})} disabled={!canChange||saving}>{designOptions.map(([value,label])=><option value={value} key={value}>{label}</option>)}</select></label>
-                  {layoutUsesColumns&&<label>Organização em colunas<select value={design.columns||'2'} onChange={event=>updateCustomSection(section.id,{design:{...design,columns:event.target.value}})} disabled={!canChange||saving}><option value="1">Uma coluna</option><option value="2">Duas colunas</option><option value="3">Três colunas</option></select></label>}
-                  {layoutUsesImages&&<label>Proporção das imagens<select value={design.image_ratio||'landscape'} onChange={event=>updateCustomSection(section.id,{design:{...design,image_ratio:event.target.value}})} disabled={!canChange||saving}><option value="portrait">Vertical</option><option value="square">Quadrada</option><option value="landscape">Horizontal</option></select></label>}
-                  <label>Ritmo e espaçamento<select value={design.density||'comfortable'} onChange={event=>updateCustomSection(section.id,{design:{...design,density:event.target.value}})} disabled={!canChange||saving}><option value="compact">Compacto</option><option value="comfortable">Confortável</option><option value="spacious">Amplo</option></select></label>
-                </div>
-              </details>
-            </article>
-          })}
         </section>
         <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
