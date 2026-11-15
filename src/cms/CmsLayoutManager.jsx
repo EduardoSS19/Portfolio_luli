@@ -669,8 +669,8 @@ export function CmsLayoutManager(){
                         <label>{itemCopy.title}<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
                         <label>Descrição<textarea rows="3" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
                         {itemFields.map(([key,label,placeholder])=><label key={key}>{label}<input value={item[key]||''} maxLength={300} placeholder={placeholder} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{[key]:event.target.value})} disabled={!canChange||saving}/></label>)}
-                        {['exhibitions','process','services','tattoo-flash','healed-work','studio-team'].includes(section.type)&&<label>{itemCopy.image}<input type="url" value={item.image||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving}/></label>}
-                        {['press','services','tattoo-flash','tattoo-booking','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.action}<input type="url" value={item.url||item.booking_url||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving}/></label>}
+                        {['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.image}<input type="url" value={item.image||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving}/></label>}
+                        {['exhibitions','press','testimonials','services','tattoo-flash','tattoo-booking','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.action}<input type="url" value={item.url||item.booking_url||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving}/></label>}
                         <button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button>
                       </div>
                     </details>)}
@@ -711,7 +711,7 @@ export function CmsLayoutManager(){
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
-            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
+            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
               <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:390,height:844,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
