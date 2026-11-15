@@ -31,7 +31,7 @@ function Section({ section, data, preview }) {
 }
 
 export function PageRenderer({ pages = [], data, preview = false }) {
-  const path = window.location.pathname.replace(/^\\/+|\\/+$/g, '')
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
   const activePage = pages.find(page => page.slug === path) || pages.find(page => page.slug === 'inicio') || pages[0]
   if (!activePage) return null
   const profile = data.sobre || {}
