@@ -125,7 +125,7 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(is_valid_layout_setting("presentation_mode", "carousel"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "immersive"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "masonry"))
-        for mode in ("filmstrip", "timeline", "stack", "spotlight", "brutalist"):
+        for mode in ("filmstrip", "timeline", "stack", "spotlight", "brutalist", "museum", "cinematic", "swiss", "tattoo-book"):
             self.assertTrue(is_valid_layout_setting("presentation_mode", mode))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "dropdown"))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "sidebar"))
