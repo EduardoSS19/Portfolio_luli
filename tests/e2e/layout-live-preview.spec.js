@@ -418,7 +418,7 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
   }))
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   const preview = page.locator('.cms-layout-inline-preview')
   await expect(preview).toBeVisible()
   // Mantém a área de teste dentro do viewport de cada projeto (desktop e iPhone),
@@ -483,7 +483,7 @@ test('menu lateral permanece fechado na prévia até o visitante clicar para abr
   await expect(nav).toHaveClass(/menu-aberto/)
 })
 
-test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async ({ page }) => {
+test('Design do site não contém cadastro de conteúdo ou sessões de exemplo', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
@@ -499,9 +499,15 @@ test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async (
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  const workspaces = page.getByRole('navigation', { name: 'Seções de aparência' })
   await expect(page.locator('.cms-layout-presets')).toBeVisible()
+  await expect(page.locator('.cms-layout-color-panel')).toHaveCount(0)
+  await workspaces.getByRole('button', { name: /Identidade/ }).click()
   await expect(page.locator('.cms-layout-color-panel')).toBeVisible()
+  await expect(page.locator('.cms-layout-presets')).toHaveCount(0)
+  await workspaces.getByRole('button', { name: /Modelos/ }).click()
+  await expect(page.locator('.cms-layout-presets')).toBeVisible()
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
   await expect(page.locator('.cms-nav').getByRole('button', { name: /Páginas/ })).toBeVisible()
@@ -523,7 +529,8 @@ test('modal de hover representa o viewport desktop e mantém interação', async
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
   const composition = page.locator('.cms-layout-field-group').first()
   await composition.locator('summary').click()
   await composition.locator('.cms-layout-option').first().hover()
@@ -567,7 +574,7 @@ test('iframe completo mantém o menu limitado ao viewport do dispositivo', async
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   const inlineFrame = page.locator('.cms-layout-inline-preview iframe')
   await page.getByRole('group', { name: 'Dispositivo da prévia completa' }).getByRole('button', { name: 'Celular' }).click()
   await inlineFrame.scrollIntoViewIfNeeded()
@@ -611,7 +618,7 @@ test('o editor de conteúdo fica na área Páginas, separado do Layout', async (
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await page.locator('.cms-nav').getByRole('button', { name: /Páginas/ }).click()
   await expect(page.locator('.cms-pages-workspace')).toBeVisible()
@@ -646,8 +653,9 @@ test('prévia de hover foca a seção alterada e permite navegação no viewport
     body: JSON.stringify({ categorias: [], referencias: [{ titulo: 'Referência', links: [] }], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
-  const contentGroup = page.locator('.cms-layout-field-group').nth(2)
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /^Conteúdo/ }).click()
+  const contentGroup = page.locator('.cms-layout-field-group').first()
   await contentGroup.locator('summary').click()
   const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
   await contactField.locator('.cms-layout-option').first().hover()
