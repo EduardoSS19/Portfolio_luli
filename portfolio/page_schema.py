@@ -3,6 +3,35 @@ import re
 
 PAGE_SECTION_TYPES = {"hero", "about", "gallery", "featured-work", "rich-text", "image", "references", "contact", "tattoo-flash", "custom"}
 PAGE_SETTING_LIMITS = {"title":180,"eyebrow":100,"body":5000,"align":20,"width":20,"layout":30,"category_key":50,"work_title":150,"show_description":None,"show_image":None,"show_bio":None,"cta_label":80,"cta_url":500,"image_url":500,"alt":180,"caption":300,"ratio":20,"custom_section_id":48}
+PAGE_ITEM_FIELDS = {
+    "tattoo-flash": {"size":80,"placement":120,"price":100,"status":120},
+    "references": {"period":100,"venue":180,"location":180},
+}
+PAGE_ITEM_TYPES = {"tattoo-flash","references"}
+
+
+def normalize_page_items(section_type, value):
+    if section_type not in PAGE_ITEM_TYPES or not isinstance(value, list):
+        return []
+    items = []
+    for item in value[:30]:
+        if not isinstance(item, dict):
+            continue
+        title = item.get("title")
+        if not isinstance(title, str) or not title.strip():
+            continue
+        clean = {"title": title.strip()[:120]}
+        for key, limit in {"description":1200,"image_url":500,"link_url":500,**PAGE_ITEM_FIELDS[section_type]}.items():
+            candidate = item.get(key)
+            if not isinstance(candidate, str):
+                continue
+            candidate = candidate.strip()
+            if key in {"image_url","link_url"} and candidate and not candidate.startswith(("https://","http://")):
+                continue
+            clean[key] = candidate[:limit]
+        items.append(clean)
+    return items
+
 PAGE_ALIGNMENTS = {"left","center","right"}
 PAGE_WIDTHS = {"narrow","standard","wide"}
 PAGE_RATIOS = {"landscape","portrait","square"}
@@ -58,6 +87,9 @@ def normalize_page_schema(value):
                 if key in {"cta_url", "image_url"} and candidate and not candidate.startswith(("https://", "http://", "/", "#")):
                     continue
                 settings[key] = candidate[:limit]
-            sections.append({"id":section_id,"type":section_type,"settings":settings})
+            normalized_section = {"id":section_id,"type":section_type,"settings":settings}
+            if section_type in PAGE_ITEM_TYPES and isinstance(section.get("items"), list):
+                normalized_section["items"] = normalize_page_items(section_type, section.get("items"))
+            sections.append(normalized_section)
         pages.append({"id":page_id,"slug":slug,"title":title.strip()[:100],"published":page.get("published") is not False,"sections":sections})
     return {"version":1,"pages":pages} if pages else None
