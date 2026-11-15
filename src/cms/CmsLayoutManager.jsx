@@ -185,7 +185,7 @@ export function CmsLayoutManager(){
   const hoverPreviewIframeRef=useRef(null)
   // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
   // nunca o viewport CSS do site dentro do iframe.
-  const hoverDevice=window.innerWidth>=900?PREVIEW_DEVICES.desktop:window.innerWidth>=600?PREVIEW_DEVICES.tablet:PREVIEW_DEVICES.mobile
+  const hoverDevice=PREVIEW_DEVICES[previewDevice]
   const hoverModalWidth=Math.min(920,Math.max(220,window.innerWidth-32))
   const hoverPreviewScale=Math.min(1,Math.max(.2,(hoverModalWidth-24)/hoverDevice.width))
   const hoverStageWidth=hoverDevice.width*hoverPreviewScale
@@ -198,7 +198,7 @@ export function CmsLayoutManager(){
     middleware:[
       offset(12),
       flip({padding:16,fallbackPlacements:['left-start','bottom-start','top-start']}),
-      shift({padding:16}),
+      shift({padding:16,crossAxis:true}),
       size({padding:16,apply({availableWidth,availableHeight,elements}){
         Object.assign(elements.floating.style,{maxWidth:`${Math.max(220,availableWidth)}px`,maxHeight:`${Math.max(180,availableHeight)}px`})
       }})
