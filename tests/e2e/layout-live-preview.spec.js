@@ -669,7 +669,7 @@ test('prévia de hover foca a seção alterada e permite navegação no viewport
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
-  const contentGroup = page.locator('.cms-layout-field-group').nth(1)
+  const contentGroup = page.locator('.cms-layout-field-group').nth(2)
   await contentGroup.locator('summary').click()
   const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
   await contactField.locator('.cms-layout-option').first().hover()
