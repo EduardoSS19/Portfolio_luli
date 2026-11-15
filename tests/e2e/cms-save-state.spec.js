@@ -96,7 +96,7 @@ test('painel oferece retorno ao topo depois de rolar uma seção longa', async (
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(40)
 })
 
-test('prévia contextual usa Floating UI, navega e permanece interativa enquanto o ponteiro está sobre ela', async ({ page }) => {
+test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao sair da opção', async ({ page }) => {
   await mockDashboard(page)
   await page.route('**/api/cms/layout/', route => route.fulfill({
     status: 200, contentType: 'application/json',
@@ -195,17 +195,11 @@ test('prévia contextual usa Floating UI, navega e permanece interativa enquanto
     return grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0
   })
   expect(visibleColumns).toBe(4)
+  // O painel é apenas uma prévia contextual: passar o ponteiro para ele não deve
+  // mantê-lo aberto indefinidamente. Ao sair da opção, ele fecha mesmo sobre o painel.
   await leftOption.hover()
   const frameBox = await temporaryFrame.boundingBox()
   await page.mouse.move(frameBox.x + frameBox.width / 2, frameBox.y + frameBox.height / 2)
-  await expect(hoverPreview).toBeVisible()
-  const scrollBefore = await temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)
-  await page.mouse.wheel(0, 560)
-  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)).toBeGreaterThan(scrollBefore)
-  await expect(hoverPreview).toBeVisible()
-
-  // Sair da região combinada (controle + painel) fecha sem o antigo timeout de 320ms.
-  await page.mouse.move(4, 4)
   await expect(hoverPreview).toBeHidden()
 
   await leftOption.hover()
