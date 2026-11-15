@@ -30,6 +30,7 @@ DEFAULT_LAYOUT_SETTINGS = {
     "show_references": True,
     "show_contact": True,
     "custom_sections": [],
+    "page_schema": None,
 }
 LAYOUT_SETTING_CHOICES = {
     "content_width": {"compact", "standard", "wide"},
