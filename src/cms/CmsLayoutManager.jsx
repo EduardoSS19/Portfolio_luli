@@ -186,6 +186,8 @@ export function CmsLayoutManager(){
   const hoverPreviewIframeRef=useRef(null)
   const hoverPreviewViewportRef=useRef(null)
   const hoverPreviewHideTimerRef=useRef(null)
+  // Modo temporário de inspeção: mantém somente o primeiro hover aberto.
+  const hoverPreviewPinnedRef=useRef(false)
   const suppressOptionPreviewRef=useRef(null)
   const ignoreWorkspaceScrollRef=useRef(false)
   const optionScrollBeforeInteractionRef=useRef(null)
@@ -451,6 +453,7 @@ export function CmsLayoutManager(){
     }
   }
   const closeOptionPreview=()=>{
+    hoverPreviewPinnedRef.current=false
     cancelOptionPreviewHide()
     const focusedOption=document.querySelector('.cms-layout-option:focus-within input[type="radio"]')
     const dismissed=hoveredOption|| (focusedOption?{name:focusedOption.name,value:focusedOption.value}:null)
@@ -463,6 +466,7 @@ export function CmsLayoutManager(){
   useEffect(()=>{
     if(!hoverPreviewMounted)return
     const dismissFromWorkspaceGesture=event=>{
+      if(hoverPreviewPinnedRef.current)return
       if(ignoreWorkspaceScrollRef.current)return
       const preview=document.querySelector('.cms-layout-hover-preview')
       if(preview&&(event.target===preview||preview.contains(event.target))){
@@ -487,6 +491,7 @@ export function CmsLayoutManager(){
     }
   },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
+    if(hoverPreviewPinnedRef.current)return
     if(suppressOptionPreviewRef.current&&event?.type==='pointerleave'){
       suppressOptionPreviewRef.current=null
       return
@@ -504,6 +509,9 @@ export function CmsLayoutManager(){
     },320)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
+    // Congela a primeira opção exibida para inspeção manual; outros hovers não a substituem.
+    if(hoverPreviewPinnedRef.current)return
+    hoverPreviewPinnedRef.current=true
     // Ignora apenas o evento sintético da mesma opção que acabou de ser fechada.
     // Uma opção diferente continua podendo abrir sua prévia sem esperar o timeout.
     const suppressedOption=suppressOptionPreviewRef.current
