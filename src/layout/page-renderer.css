@@ -1,0 +1,19 @@
+.composer-site{min-height:100vh;overflow:hidden;background:var(--azul-escuro);color:var(--texto);font-family:var(--portfolio-body-font,inherit)}
+.composer-navigation{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:1.2rem clamp(1rem,5vw,5rem);border-bottom:1px solid var(--linha)}
+.composer-brand{color:inherit;text-decoration:none;font:600 1.1rem var(--portfolio-heading-font,Georgia,serif)}
+.composer-navigation>div{display:flex;flex-wrap:wrap;gap:clamp(.7rem,2vw,2rem)}
+.composer-navigation a{color:inherit;text-decoration:none;font-size:.82rem;opacity:.78}.composer-navigation a:hover,.composer-navigation a[aria-current=page]{opacity:1}
+.composer-section{width:var(--section-width,min(100% - 3rem,1180px));margin-inline:auto;padding-block:clamp(3.5rem,9vw,9rem);text-align:var(--section-align,left)}
+.composer-section h1,.composer-section h2{font-family:var(--portfolio-heading-font,Georgia,serif);font-weight:400;letter-spacing:-.045em}
+.composer-hero{min-height:min(88svh,1000px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.composer-hero h1{max-width:13ch;margin:.5rem 0;font-size:clamp(3.5rem,11vw,10rem);line-height:.88}
+.composer-hero p,.composer-rich-text p,.composer-section>p{max-width:60ch;color:var(--layout-muted);font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.8}
+.composer-cta{display:inline-flex;margin-top:1.5rem;padding:.9rem 1.2rem;border:1px solid currentColor;color:inherit;text-decoration:none}
+.composer-gallery header{margin-bottom:2rem}.composer-gallery header h2,.composer-featured h2,.composer-rich-text h2,.composer-custom h2{font-size:clamp(2.5rem,7vw,6rem);margin:.5rem 0}
+.composer-featured-image{height:min(78svh,900px);overflow:hidden}.composer-featured-image img,.composer-image img{width:100%;height:100%;object-fit:cover}
+.composer-image{padding-block:1rem}.composer-image-landscape{height:min(75svh,850px)}.composer-image-portrait{height:min(100svh,1100px);max-width:900px}.composer-image-square{aspect-ratio:1;max-width:1000px}.composer-image figcaption{padding-top:.7rem;color:var(--layout-muted);font-size:.8rem}
+.composer-rich-text>div{max-width:65ch;margin-inline:auto}.composer-rich-text p{margin:0 0 1.2rem}
+.composer-custom-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1.2rem}.composer-custom-grid article{min-width:0}.composer-custom-grid img{width:100%;aspect-ratio:4/5;object-fit:cover}.composer-custom-grid h3{font:500 1.1rem var(--portfolio-heading-font,Georgia,serif)}
+.composer-footer{display:flex;justify-content:space-between;gap:1rem;padding:2rem clamp(1rem,5vw,5rem);border-top:1px solid var(--linha)}.composer-footer a{color:inherit}
+@media(max-width:700px){.composer-navigation{align-items:flex-start;flex-direction:column}.composer-navigation>div{gap:.8rem 1.1rem}.composer-section{padding-block:3rem}.composer-hero{min-height:76svh}.composer-hero h1{font-size:clamp(3rem,16vw,6rem)}.composer-image-landscape{height:55svh}.composer-footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.composer-site *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}

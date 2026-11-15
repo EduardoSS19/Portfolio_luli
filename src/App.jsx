@@ -12,6 +12,8 @@ import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
 import { trackAnalyticsEvent } from './utils/analytics.js'
 import { CmsPage } from './cms/CmsPage.jsx'
+import { PageRenderer } from './layout/PageRenderer.jsx'
+import './layout/page-renderer.css'
 
 const DEFAULT_LAYOUT_SETTINGS = {
   content_width: 'standard',
@@ -887,6 +889,16 @@ export default function App() {
         </header>
         {categoria ? <SecaoCategoria titulo={categoria.titulo} chave={categoria.chave} animacao={categoria.animacao} obras={categoria.obras} indice={0} /> : <p className="preview-only-empty">Não foi possível carregar esta categoria. Gere outra prévia pelo painel.</p>}
       </main>
+    )
+  }
+
+  if (layout.page_schema?.version === 1 && Array.isArray(layout.page_schema.pages) && layout.page_schema.pages.length) {
+    return (
+      <div className="site-shell composer-shell" {...layoutAttributes}>
+        {isLayoutPreview && !isCompactLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE COMPOSIÇÃO · alterações ainda não salvas</div>}
+        <FundoFantasma frames={conteudo.frames} />
+        <PageRenderer pages={layout.page_schema.pages} data={{...conteudo, sobre, layout}} preview={isLayoutPreview} />
+      </div>
     )
   }
 

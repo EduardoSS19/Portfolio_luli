@@ -8,6 +8,30 @@ from .layout_settings import (
 
 
 class LayoutSettingsTests(SimpleTestCase):
+    def test_composable_page_schema_accepts_independent_pages_and_sections(self):
+        schema = {"version": 1, "pages": [
+            {"id": "home", "slug": "inicio", "title": "Início", "sections": [
+                {"id": "opening", "type": "hero", "settings": {"title": "Ateliê", "align": "left", "width": "wide"}},
+                {"id": "flash", "type": "tattoo-flash", "settings": {"title": "Flash disponíveis"}},
+            ]},
+            {"id": "about", "slug": "sobre", "title": "Sobre", "sections": [
+                {"id": "bio", "type": "about", "settings": {"show_image": True}},
+            ]},
+        ]}
+        normalized = normalize_layout_settings({"page_schema": schema})
+        self.assertEqual(normalized["page_schema"], schema)
+        self.assertTrue(is_valid_layout_setting("page_schema", schema))
+
+    def test_composable_page_schema_rejects_unknown_blocks_and_unsafe_urls(self):
+        schema = {"version": 1, "pages": [{"id": "home", "slug": "inicio", "title": "Início", "sections": [
+            {"id": "bad", "type": "script", "settings": {}},
+            {"id": "unsafe", "type": "image", "settings": {"image_url": "javascript:alert(1)"}},
+        ]}]}
+        normalized = normalize_layout_settings({"page_schema": schema})
+        self.assertEqual([item["type"] for item in normalized["page_schema"]["pages"][0]["sections"]], ["image"])
+        self.assertNotIn("image_url", normalized["page_schema"]["pages"][0]["sections"][0]["settings"])
+        self.assertFalse(is_valid_layout_setting("page_schema", schema))
+
     def test_legacy_palette_is_preserved_as_dark_and_light_is_initialized(self):
         legacy = {
             "color_background": "#211815",

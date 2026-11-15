@@ -1,4 +1,5 @@
 """Safe, allow-listed visual settings for the public portfolio."""
+from .page_schema import normalize_page_schema
 import re
 
 DEFAULT_LAYOUT_SETTINGS = {
@@ -149,6 +150,7 @@ def normalize_layout_settings(value):
     for key in BOOLEAN_SETTING_KEYS:
         normalized[key] = source.get(key) if isinstance(source.get(key), bool) else DEFAULT_LAYOUT_SETTINGS[key]
     normalized["custom_sections"] = normalize_custom_sections(source.get("custom_sections", []))
+    normalized["page_schema"] = normalize_page_schema(source.get("page_schema"))
     for theme in ("dark", "light"):
         for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent"):
             setting_key = f"{theme}_{key}"
@@ -168,6 +170,8 @@ def is_valid_layout_setting(key, value):
         return isinstance(value, str) and bool(HEX_COLOR_RE.fullmatch(value))
     if key in BOOLEAN_SETTING_KEYS:
         return isinstance(value, bool)
+    if key == "page_schema":
+        return isinstance(value, dict) and normalize_page_schema(value) == value
     if key == "custom_sections":
         return isinstance(value, list) and len(value) <= 10 and normalize_custom_sections(value) == value
     return False
