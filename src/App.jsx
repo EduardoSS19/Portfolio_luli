@@ -580,8 +580,11 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
+      const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
-        detail: { open: false, mode: safeSettings.navigation_mode || 'curtain' },
+        // Só a miniatura passiva abre o menu automaticamente ao comparar estilos.
+        // A prévia completa continua navegável pelo próprio usuário.
+        detail: { open: hoverSnapshot && event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
       }))
 
       // A navegação acontece somente no documento da prévia (iframe).
@@ -598,7 +601,6 @@ export default function App() {
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
                 : null
-      const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       const target = selector ? document.querySelector(selector) : null
       const targetIsVisible = Boolean(target && target.getClientRects().length)
       const fallbackTarget = targetIsVisible
