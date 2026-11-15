@@ -546,12 +546,54 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
     zoom: getComputedStyle(frame).zoom,
     scrolling: frame.getAttribute('scrolling'),
     frameHeight: frame.closest('.cms-layout-hover-preview-frame').clientHeight,
+    logicalWidth: frame.contentWindow.innerWidth,
+    scale: Number(frame.closest('.cms-layout-preview-stage-scaled').dataset.previewScale),
+    modalOverflow: getComputedStyle(frame.closest('.cms-layout-hover-preview-floating')).overflow,
   }))
   expect(behavior.pointerEvents).toBe('none')
-  expect(behavior.transform).toBe('none')
+  expect(behavior.transform).not.toBe('none')
   expect(behavior.zoom).toBe('1')
   expect(behavior.scrolling).toBe('no')
-  expect(behavior.frameHeight).toBeLessThanOrEqual(260)
+  expect(behavior.logicalWidth).toBe(390)
+  expect(behavior.scale).toBeGreaterThan(0)
+  expect(behavior.scale).toBeLessThanOrEqual(1)
+  expect(behavior.frameHeight).toBe(260)
+  expect(behavior.modalOverflow).toBe('hidden')
+})
+
+test('campos e submenus de design são específicos por tipo de seção e começam recolhidos', async ({ page }) => {
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const library = page.locator('.cms-layout-section-library')
+  const addMenu = library.locator('.cms-layout-library-add')
+  await addMenu.locator('summary').click()
+  await library.getByRole('button', { name: /Depoimentos/ }).click()
+  const testimonial = library.locator('.cms-layout-custom-section').last()
+  const contentMenu = testimonial.locator('details.cms-layout-custom-section-editor').first()
+  const designMenu = testimonial.locator('details.cms-layout-custom-section-editor').nth(1)
+  await expect(contentMenu).not.toHaveAttribute('open', '')
+  await expect(designMenu).not.toHaveAttribute('open', '')
+  await contentMenu.locator('summary').click()
+  await testimonial.getByRole('button', { name: '+ Adicionar depoimento' }).click()
+  await testimonial.locator('.cms-layout-custom-item summary').click()
+  await expect(testimonial.getByLabel('Depoimento')).toBeVisible()
+  await expect(testimonial.getByLabel('Texto do depoimento')).toBeVisible()
+  await designMenu.locator('summary').click()
+  await expect(designMenu.getByText(/Dê protagonismo às falas/)).toBeVisible()
+  await expect(designMenu.getByLabel('Estilo de apresentação')).toHaveValue('quotes')
 })
 
 test('layouts espaçosos não deixam um vão exagerado depois do contato', async ({ page }) => {
