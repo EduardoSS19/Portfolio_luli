@@ -377,7 +377,7 @@ export function CmsLayoutManager(){
     setPreviewingPresetId(preset.id)
     setHoveredOption(null)
     setNotice('Prévia de “'+preset.title+'”. Compare os modelos aqui embaixo e confirme quando decidir.')
-    window.setTimeout(()=>scrollToElement(inlinePreviewSectionRef.current),80)
+    window.requestAnimationFrame(()=>{const target=inlinePreviewSectionRef.current;if(target){const top=target.getBoundingClientRect().top+window.scrollY;window.scrollTo({top,behavior:'instant'})}})
   }
   const stepPreviewPreset=direction=>{
     const currentIndex=Math.max(0,LAYOUT_PRESETS.findIndex(preset=>preset.id===previewingPresetId))
