@@ -353,3 +353,18 @@
  .site-shell[data-layout-presentation="stack"] .secao:not(.sobre-secao) .obras-lista,.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obras-lista{gap:3rem}
  .site-shell[data-layout-presentation="spotlight"] .secao:not(.sobre-secao) .obras-lista,.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obras-lista{gap:5rem}
 }
+
+
+/* Device-grade cards need explicit intrinsic sizing in the new non-grid layouts. */
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade,
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade{aspect-ratio:auto;min-height:0}
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade{display:grid;position:relative}
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade{display:flex;position:relative}
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade{display:grid;position:sticky}
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade{display:grid;position:relative}
+.site-shell[data-layout-presentation="filmstrip"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="timeline"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="stack"] .galeria-grade-global .obra.modo-grade .obra-imagem,
+.site-shell[data-layout-presentation="spotlight"] .galeria-grade-global .obra.modo-grade .obra-imagem{aspect-ratio:auto}

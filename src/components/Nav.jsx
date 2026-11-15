@@ -100,7 +100,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
     setMenuAberto(false)
   }
 
-  const navigationItems = categorias.map((cat,indice)=><button type="button" key={cat.titulo} className={'nav-persistent-link'+(cat.titulo===categoriaAtiva?' ativo':'')} aria-current={cat.titulo===categoriaAtiva?'location':undefined} title={cat.titulo} onClick={()=>selecionar(cat.titulo)}><span>{String(indice+1).padStart(2,'0')}</span><strong>{cat.titulo}</strong></button>)
+  const navigationItems = categorias.map((cat,indice)=><button type="button" key={cat.titulo} className={'nav-persistent-link'+(cat.titulo===categoriaAtiva?' ativo':'')} aria-current={cat.titulo===categoriaAtiva?'location':undefined} title={cat.titulo} aria-label={cat.titulo} onClick={()=>selecionar(cat.titulo)}><span>{String(indice+1).padStart(2,'0')}</span><strong>{cat.titulo}</strong></button>)
   return (
     <nav className={`site-nav editorial-nav navigation-${effectiveNavigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
       {effectiveNavigationMode==='rail'&&<div className="nav-persistent-rail" aria-label="Índice de seções">{navigationItems}<button type="button" className="nav-persistent-theme" onClick={aoTrocarTema} aria-label={tema==='escuro'?'Ativar tema claro':'Ativar tema escuro'}>{tema==='escuro'?'☼':'☾'}</button></div>}
