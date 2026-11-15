@@ -272,3 +272,26 @@
 /* Preview documents should end at their actual content, not an artificial viewport minimum. */
 .site-shell[data-layout-preview="true"]{min-height:0!important}
 .site-shell[data-layout-preview="true"] .rodape{margin-top:0!important}
+
+
+/* A prévia deve terminar no conteúdo real, sem altura residual após Contato. */
+.site-shell[data-layout-preview="true"]{
+  display:flow-root;
+  min-height:0!important;
+  height:auto!important;
+  padding-bottom:0!important;
+}
+.site-shell[data-layout-preview="true"] #Contato,
+.site-shell[data-layout-preview="true"] .secao-contato{
+  min-height:0!important;
+  height:auto!important;
+  margin-block:clamp(1.5rem,2.5vw,2.5rem) 0!important;
+  padding-block:clamp(1.5rem,3vw,3rem)!important;
+}
+.site-shell[data-layout-preview="true"] .rodape{
+  min-height:0!important;
+  margin-block:0!important;
+}
+.site-shell[data-layout-preview="true"] .controles-flutuantes{
+  position:fixed;
+}
