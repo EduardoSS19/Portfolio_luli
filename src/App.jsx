@@ -12,6 +12,8 @@ import { useSecaoAtiva } from './hooks/useSecaoAtiva.js'
 import { Contato } from './components/Contato.jsx'
 import { trackAnalyticsEvent } from './utils/analytics.js'
 import { CmsPage } from './cms/CmsPage.jsx'
+import { PageRenderer } from './layout/PageRenderer.jsx'
+import './layout/page-renderer.css'
 
 const DEFAULT_LAYOUT_SETTINGS = {
   content_width: 'standard',
@@ -50,7 +52,7 @@ const LAYOUT_PREVIEW_CHOICES = {
   section_spacing: ['compact', 'comfortable', 'spacious'],
   gallery_columns: ['2', '3', '4'],
   default_gallery_view: ['lista', 'grade'],
-  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight'],
+  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
   navigation_mode: ['curtain', 'dropdown', 'sidebar', 'rail', 'dock', 'index'],
   heading_font: ['fraunces', 'playfair', 'space-grotesk', 'cormorant', 'archivo-black'],
   body_font: ['dm-sans', 'manrope', 'ibm-plex', 'lora', 'source-sans'],
@@ -71,6 +73,23 @@ function parseLayoutPreview(raw) {
       if (typeof candidate[key] === 'string' && /^#[0-9a-fA-F]{6}$/.test(candidate[key])) safe[key] = candidate[key].toLowerCase()
     })
     if (Array.isArray(candidate.custom_sections)) safe.custom_sections = candidate.custom_sections.filter(section => section && typeof section.id === 'string' && typeof section.title === 'string' && Array.isArray(section.items)).slice(0, 10)
+    if (candidate.page_schema?.version === 1 && Array.isArray(candidate.page_schema.pages) && candidate.page_schema.pages.length <= 12) {
+      const allowedBlocks = ['hero','about','gallery','featured-work','rich-text','image','references','contact','tattoo-flash','custom']
+      const safeUrl = value => typeof value === 'string' && (!value || /^(https?:\/\/|\/|#)/i.test(value))
+      const pages = candidate.page_schema.pages.filter(page => page && typeof page.id === 'string' && /^[a-z0-9-]{1,48}$/.test(page.id) && typeof page.slug === 'string' && /^[a-z0-9-]{1,48}$/.test(page.slug) && typeof page.title === 'string' && Array.isArray(page.sections)).slice(0, 12).map(page => ({
+        id: page.id, slug: page.slug, title: page.title.slice(0, 100), published: page.published !== false,
+        sections: page.sections.filter(section => section && typeof section.id === 'string' && /^[a-z0-9-]{1,48}$/.test(section.id) && allowedBlocks.includes(section.type)).slice(0, 40).map(section => {
+          const source = section.settings && typeof section.settings === 'object' && !Array.isArray(section.settings) ? section.settings : {}
+          const settings = {}
+          ;['title','eyebrow','body','align','width','layout','category_key','work_title','cta_label','cta_url','image_url','alt','caption','ratio','custom_section_id'].forEach(key => {
+            if (typeof source[key] === 'string' && source[key].length <= 5000 && (!['cta_url','image_url'].includes(key) || safeUrl(source[key]))) settings[key] = source[key]
+          })
+          ;['show_description','show_image','show_bio'].forEach(key => { if (typeof source[key] === 'boolean') settings[key] = source[key] })
+          return {id:section.id,type:section.type,settings}
+        })
+      }))
+      if (pages.length) safe.page_schema = {version:1,pages}
+    }
     ;['show_bio_image','show_bio','show_references','show_contact'].forEach(key => {
       if (typeof candidate[key] === 'boolean') safe[key] = candidate[key]
     })
@@ -887,6 +906,16 @@ export default function App() {
         </header>
         {categoria ? <SecaoCategoria titulo={categoria.titulo} chave={categoria.chave} animacao={categoria.animacao} obras={categoria.obras} indice={0} /> : <p className="preview-only-empty">Não foi possível carregar esta categoria. Gere outra prévia pelo painel.</p>}
       </main>
+    )
+  }
+
+  if (layout.page_schema?.version === 1 && Array.isArray(layout.page_schema.pages) && layout.page_schema.pages.length) {
+    return (
+      <div className="site-shell composer-shell" {...layoutAttributes}>
+        {isLayoutPreview && !isCompactLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE COMPOSIÇÃO · alterações ainda não salvas</div>}
+        <FundoFantasma frames={conteudo.frames} />
+        <PageRenderer pages={layout.page_schema.pages} data={{...conteudo, sobre, layout}} preview={isLayoutPreview} />
+      </div>
     )
   }
 

@@ -8,6 +8,60 @@ from .layout_settings import (
 
 
 class LayoutSettingsTests(SimpleTestCase):
+    def test_composable_page_schema_accepts_independent_pages_and_sections(self):
+        schema = {"version": 1, "pages": [
+            {"id": "home", "slug": "inicio", "title": "Início", "published": True, "sections": [
+                {"id": "opening", "type": "hero", "settings": {"title": "Ateliê", "align": "left", "width": "wide"}},
+                {"id": "flash", "type": "tattoo-flash", "settings": {"title": "Flash disponíveis"}},
+            ]},
+            {"id": "about", "slug": "sobre", "title": "Sobre", "published": True, "sections": [
+                {"id": "bio", "type": "about", "settings": {"show_image": True}},
+            ]},
+        ]}
+        normalized = normalize_layout_settings({"page_schema": schema})
+        self.assertEqual(normalized["page_schema"], schema)
+        self.assertTrue(is_valid_layout_setting("page_schema", schema))
+
+    def test_composable_page_schema_rejects_unknown_blocks_and_unsafe_urls(self):
+        schema = {"version": 1, "pages": [{"id": "home", "slug": "inicio", "title": "Início", "sections": [
+            {"id": "bad", "type": "script", "settings": {}},
+            {"id": "unsafe", "type": "image", "settings": {"image_url": "javascript:alert(1)"}},
+        ]}]}
+        normalized = normalize_layout_settings({"page_schema": schema})
+        self.assertEqual([item["type"] for item in normalized["page_schema"]["pages"][0]["sections"]], ["image"])
+        self.assertNotIn("image_url", normalized["page_schema"]["pages"][0]["sections"][0]["settings"])
+        self.assertFalse(is_valid_layout_setting("page_schema", schema))
+
+    def test_composable_page_schema_rejects_duplicate_page_and_section_ids(self):
+        schema = {"version": 1, "pages": [
+            {"id": "home", "slug": "inicio", "title": "Início", "published": True, "sections": [
+                {"id": "opening", "type": "hero", "settings": {}},
+                {"id": "opening", "type": "image", "settings": {}},
+            ]},
+            {"id": "other", "slug": "inicio", "title": "Duplicada", "published": True, "sections": []},
+        ]}
+        normalized = normalize_layout_settings({"page_schema": schema})["page_schema"]
+        self.assertEqual(len(normalized["pages"]), 1)
+        self.assertEqual(len(normalized["pages"][0]["sections"]), 1)
+
+    def test_page_sections_keep_safe_flash_and_reference_items(self):
+        schema = {"version": 1, "pages": [{"id": "home", "slug": "inicio", "title": "Início", "sections": [
+            {"id": "flash", "type": "tattoo-flash", "settings": {"title": "Flash disponíveis"}, "items": [
+                {"title": "Lua crescente", "description": "Blackwork autoral", "image_url": "https://example.com/lua.jpg", "price": "R$ 450", "status": "Disponível", "link_url": "https://example.com/reservar"},
+                {"title": "Script inseguro", "image_url": "javascript:alert(1)", "link_url": "data:text/html,bad"},
+            ]},
+            {"id": "refs", "type": "references", "settings": {"title": "Trajetória"}, "items": [
+                {"title": "Exposição coletiva", "period": "2025", "venue": "Museu de Arte", "location": "Porto Alegre"},
+            ]},
+        ]}]}
+        normalized = normalize_layout_settings({"page_schema": schema})["page_schema"]
+        flash = normalized["pages"][0]["sections"][0]["items"]
+        self.assertEqual(len(flash), 2)
+        self.assertEqual(flash[0]["price"], "R$ 450")
+        self.assertNotIn("image_url", flash[1])
+        self.assertNotIn("link_url", flash[1])
+        self.assertTrue(is_valid_layout_setting("page_schema", normalized))
+
     def test_legacy_palette_is_preserved_as_dark_and_light_is_initialized(self):
         legacy = {
             "color_background": "#211815",
@@ -71,7 +125,7 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertTrue(is_valid_layout_setting("presentation_mode", "carousel"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "immersive"))
         self.assertTrue(is_valid_layout_setting("presentation_mode", "masonry"))
-        for mode in ("filmstrip", "timeline", "stack", "spotlight"):
+        for mode in ("filmstrip", "timeline", "stack", "spotlight", "brutalist", "museum", "cinematic", "swiss", "tattoo-book"):
             self.assertTrue(is_valid_layout_setting("presentation_mode", mode))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "dropdown"))
         self.assertTrue(is_valid_layout_setting("navigation_mode", "sidebar"))

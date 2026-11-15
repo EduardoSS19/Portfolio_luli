@@ -1,4 +1,5 @@
 """Safe, allow-listed visual settings for the public portfolio."""
+from .page_schema import normalize_page_schema
 import re
 
 DEFAULT_LAYOUT_SETTINGS = {
@@ -29,6 +30,7 @@ DEFAULT_LAYOUT_SETTINGS = {
     "show_references": True,
     "show_contact": True,
     "custom_sections": [],
+    "page_schema": None,
 }
 LAYOUT_SETTING_CHOICES = {
     "content_width": {"compact", "standard", "wide"},
@@ -37,7 +39,7 @@ LAYOUT_SETTING_CHOICES = {
     "section_spacing": {"compact", "comfortable", "spacious"},
     "gallery_columns": {"2", "3", "4"},
     "default_gallery_view": {"lista", "grade"},
-    "presentation_mode": {"editorial", "carousel", "immersive", "masonry", "filmstrip", "timeline", "stack", "spotlight"},
+    "presentation_mode": {"editorial", "carousel", "immersive", "masonry", "filmstrip", "timeline", "stack", "spotlight", "brutalist", "museum", "cinematic", "swiss", "tattoo-book"},
     "navigation_mode": {"curtain", "dropdown", "sidebar", "rail", "dock", "index"},
     "heading_font": {"fraunces", "playfair", "space-grotesk", "cormorant", "archivo-black"},
     "body_font": {"dm-sans", "manrope", "ibm-plex", "lora", "source-sans"},
@@ -149,6 +151,7 @@ def normalize_layout_settings(value):
     for key in BOOLEAN_SETTING_KEYS:
         normalized[key] = source.get(key) if isinstance(source.get(key), bool) else DEFAULT_LAYOUT_SETTINGS[key]
     normalized["custom_sections"] = normalize_custom_sections(source.get("custom_sections", []))
+    normalized["page_schema"] = normalize_page_schema(source.get("page_schema"))
     for theme in ("dark", "light"):
         for key in ("color_background", "color_surface", "color_text", "color_muted", "color_accent"):
             setting_key = f"{theme}_{key}"
@@ -168,6 +171,8 @@ def is_valid_layout_setting(key, value):
         return isinstance(value, str) and bool(HEX_COLOR_RE.fullmatch(value))
     if key in BOOLEAN_SETTING_KEYS:
         return isinstance(value, bool)
+    if key == "page_schema":
+        return isinstance(value, dict) and normalize_page_schema(value) == value
     if key == "custom_sections":
         return isinstance(value, list) and len(value) <= 10 and normalize_custom_sections(value) == value
     return False

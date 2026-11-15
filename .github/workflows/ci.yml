@@ -66,6 +66,9 @@ jobs:
               - 'src/cms/CmsPage.css'
               - 'src/cms/CmsLayoutManager.jsx'
               - 'src/cms/CmsLayoutManager.css'
+              - 'src/layout/PageRenderer.jsx'
+              - 'src/layout/page-renderer.css'
+              - 'tests/e2e/composable-page-renderer.spec.js'
               - 'src/styles/layout-settings.css'
               - 'tests/e2e/cms-content.spec.js'
               - 'tests/e2e/cms-save-state.spec.js'
@@ -203,7 +206,7 @@ jobs:
           mkdir -p test-results
           PLAYWRIGHT_CLI="$(find "$HOME/.npm/_npx" -path '*/node_modules/playwright/cli.js' -print -quit)"
           test -n "$PLAYWRIGHT_CLI"
-          node "$PLAYWRIGHT_CLI" test tests/e2e/cms-content.spec.js tests/e2e/cms-save-state.spec.js tests/e2e/layout-live-preview.spec.js --project=chromium-desktop --workers=1 --retries=0 --reporter=list,junit
+          node "$PLAYWRIGHT_CLI" test tests/e2e/cms-content.spec.js tests/e2e/cms-save-state.spec.js tests/e2e/layout-live-preview.spec.js tests/e2e/composable-page-renderer.spec.js --project=chromium-desktop --workers=1 --retries=0 --reporter=list,junit
 
       - name: Run navigation desktop and mobile tests
         if: needs.changes.outputs.navigation == 'true' || github.event_name == 'workflow_dispatch'

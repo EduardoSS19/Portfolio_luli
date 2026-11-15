@@ -220,7 +220,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Fundo')
 
-  const experienceGroup = page.locator('.cms-layout-field-group').nth(2)
+  const experienceGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Experiência do visitante' }) })
   await experienceGroup.locator('summary').click()
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
   await carouselOption.hover()
@@ -231,7 +231,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.editorial-menu-backdrop')?.getAttribute('aria-hidden'))).toBe('false')
   await expect(sidebarOption.locator('input')).not.toBeChecked()
 
-  const contentGroup = page.locator('.cms-layout-field-group').nth(1)
+  const contentGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Conteúdo e seções' }) })
   await contentGroup.locator('summary').click()
   const hideReferencesOption = contentGroup.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
   await hideReferencesOption.hover()
@@ -303,7 +303,7 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await expect(option.locator('input')).toBeChecked()
 })
 
-test('modelos prontos e biblioteca de seções permitem configurar conteúdo especializado', async ({ page }) => {
+test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
   await page.route('**/api/cms/layout/', async route => {
@@ -331,22 +331,11 @@ test('modelos prontos e biblioteca de seções permitem configurar conteúdo esp
   await expect(inlinePreview).toContainText('Tatuador(a)')
   await expect(inlinePreview.getByRole('button', { name: 'Confirmar este layout' })).toBeVisible()
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
+  await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
-  await inlinePreview.getByRole('button', { name: 'Próximo modelo' }).click()
-  await expect(inlinePreview).toContainText('7 de 7')
-  await inlinePreview.getByRole('button', { name: 'Modelo anterior' }).click()
-  await expect(inlinePreview).toContainText('Tatuador(a)')
   await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
   await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
-  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(4)
-  const flashSection = page.locator('.cms-layout-custom-section').filter({ hasText: 'Flash disponíveis' }).first()
-  const flashEditor = flashSection.locator('details.cms-layout-custom-section-editor').first()
-  await expect(flashEditor).not.toHaveAttribute('open', '')
-  await flashEditor.locator('summary').click()
-  await flashSection.getByRole('button', { name: '+ Adicionar flash' }).click()
-  await flashSection.locator('.cms-layout-custom-item summary').click()
-  await flashSection.locator('.cms-layout-custom-item input').first().fill('Lua crescente')
-  await flashSection.locator('.cms-layout-custom-item textarea').fill('Flash blackwork disponível')
   await page.getByRole('button',{name:'Salvar personalização'}).click()
-  await expect.poll(()=>savedSettings?.custom_sections?.[0]?.items?.[0]?.title).toBe('Lua crescente')
+  await expect.poll(()=>savedSettings?.presentation_mode).toBe('carousel')
+  expect(savedSettings.custom_sections).toEqual([])
 })

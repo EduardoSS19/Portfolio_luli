@@ -1,0 +1,179 @@
+.composer-site{min-height:100vh;overflow:hidden;background:var(--azul-escuro);color:var(--texto);font-family:var(--portfolio-body-font,inherit)}
+.composer-navigation{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:1.2rem clamp(1rem,5vw,5rem);border-bottom:1px solid var(--linha)}
+.composer-brand{color:inherit;text-decoration:none;font:600 1.1rem var(--portfolio-heading-font,Georgia,serif)}
+.composer-navigation>div{display:flex;flex-wrap:wrap;gap:clamp(.7rem,2vw,2rem)}
+.composer-navigation a{color:inherit;text-decoration:none;font-size:.82rem;opacity:.78}.composer-navigation a:hover,.composer-navigation a[aria-current=page]{opacity:1}
+.composer-section{width:var(--section-width,min(100% - 3rem,1180px));margin-inline:auto;padding-block:clamp(3.5rem,9vw,9rem);text-align:var(--section-align,left)}
+.composer-section h1,.composer-section h2{font-family:var(--portfolio-heading-font,Georgia,serif);font-weight:400;letter-spacing:-.045em}
+.composer-hero{min-height:min(88svh,1000px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.composer-hero h1{max-width:13ch;margin:.5rem 0;font-size:clamp(3.5rem,11vw,10rem);line-height:.88}
+.composer-hero p,.composer-rich-text p,.composer-section>p{max-width:60ch;color:var(--layout-muted);font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.8}
+.composer-cta{display:inline-flex;margin-top:1.5rem;padding:.9rem 1.2rem;border:1px solid currentColor;color:inherit;text-decoration:none}
+.composer-gallery header{margin-bottom:2rem}.composer-gallery header h2,.composer-featured h2,.composer-rich-text h2,.composer-custom h2{font-size:clamp(2.5rem,7vw,6rem);margin:.5rem 0}
+.composer-featured-image{height:min(78svh,900px);overflow:hidden}.composer-featured-image img,.composer-image img{width:100%;height:100%;object-fit:cover}
+.composer-image{padding-block:1rem}.composer-image-landscape{height:min(75svh,850px)}.composer-image-portrait{height:min(100svh,1100px);max-width:900px}.composer-image-square{aspect-ratio:1;max-width:1000px}.composer-image figcaption{padding-top:.7rem;color:var(--layout-muted);font-size:.8rem}
+.composer-rich-text>div{max-width:65ch;margin-inline:auto}.composer-rich-text p{margin:0 0 1.2rem}
+.composer-custom-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1.2rem}.composer-custom-grid article{min-width:0}.composer-custom-grid img{width:100%;aspect-ratio:4/5;object-fit:cover}.composer-custom-grid h3{font:500 1.1rem var(--portfolio-heading-font,Georgia,serif)}
+.composer-footer{display:flex;justify-content:space-between;gap:1rem;padding:2rem clamp(1rem,5vw,5rem);border-top:1px solid var(--linha)}.composer-footer a{color:inherit}
+@media(max-width:700px){.composer-navigation{align-items:flex-start;flex-direction:column}.composer-navigation>div{gap:.8rem 1.1rem}.composer-section{padding-block:3rem}.composer-hero{min-height:76svh}.composer-hero h1{font-size:clamp(3rem,16vw,6rem)}.composer-image-landscape{height:55svh}.composer-footer{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.composer-site *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* Modos de composição com gramáticas visuais distintas. */
+.composer-site{background:var(--azul-escuro);color:var(--texto);font-family:var(--portfolio-body-font,inherit)}
+.composer-navigation{background:var(--azul-escuro);color:var(--texto)}
+.composer-navigation a:focus-visible,.composer-brand:focus-visible,.composer-cta:focus-visible{outline:2px solid var(--cor-destaque,var(--texto));outline-offset:4px}
+.composer-navigation.nav-style-rail{position:fixed;inset:0 auto 0 0;width:76px;padding:1.5rem .7rem;flex-direction:column;justify-content:center;border:0;border-right:1px solid var(--linha);backdrop-filter:blur(18px)}
+.composer-navigation.nav-style-rail>div{flex-direction:column;align-items:center;gap:1.4rem}
+.composer-navigation.nav-style-rail>div a{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.68rem;letter-spacing:.12em}
+.nav-rail .composer-section,.nav-rail .composer-footer{margin-left:clamp(76px,8vw,120px)}
+.composer-navigation.nav-style-dock{position:fixed;z-index:20;left:50%;bottom:1.2rem;transform:translateX(-50%);width:max-content;max-width:calc(100% - 2rem);padding:.65rem 1rem;border:1px solid var(--linha);border-radius:999px;background:rgba(6,21,34,.88);backdrop-filter:blur(20px);box-shadow:0 12px 40px rgba(0,0,0,.22)}
+.composer-navigation.nav-style-dock>div{gap:1rem}
+.composer-navigation.nav-style-sidebar{position:fixed;inset:0 auto 0 0;width:min(300px,82vw);padding:2rem;align-items:flex-start;justify-content:center;flex-direction:column;border:0;border-right:1px solid var(--linha)}
+.composer-navigation.nav-style-sidebar>div{flex-direction:column;align-items:flex-start;gap:1.2rem}
+.nav-sidebar .composer-section,.nav-sidebar .composer-footer{margin-left:clamp(300px,25vw,360px)}
+.mode-masonry .composer-gallery .galeria-grade-global .obras-lista{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;align-items:start;gap:clamp(.7rem,1.8vw,1.6rem)}
+.mode-masonry .composer-gallery .obras-lista>*:nth-child(5n+2){margin-top:3.5rem}.mode-masonry .composer-gallery .obras-lista>*:nth-child(7n+4){margin-top:6rem}
+.mode-immersive .composer-gallery .galeria-grade-global .obras-lista{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}.mode-immersive .composer-gallery .obras-lista>*{min-height:min(72vh,760px)}
+.mode-filmstrip .composer-gallery .galeria-grade-global{overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory}.mode-filmstrip .composer-gallery .obras-lista{display:flex!important;width:max-content;gap:1.2rem}.mode-filmstrip .composer-gallery .obras-lista>*{width:min(72vw,720px);flex:0 0 auto;scroll-snap-align:center}
+.mode-timeline .composer-gallery .galeria-grade-global{overflow-x:auto;padding:3rem 0}.mode-timeline .composer-gallery .obras-lista{display:flex!important;align-items:center;width:max-content;gap:2rem;padding:2rem 1rem;border-top:1px solid var(--linha)}.mode-timeline .composer-gallery .obras-lista>*{width:min(36vw,420px);flex:0 0 auto;position:relative}.mode-timeline .composer-gallery .obras-lista>*:before{content:'';position:absolute;top:-2.45rem;left:1rem;width:.7rem;height:.7rem;border-radius:50%;background:var(--texto);box-shadow:0 0 0 6px var(--azul-escuro),0 0 0 7px var(--linha)}
+.mode-stack .composer-gallery .galeria-grade-global .obras-lista{display:grid!important;grid-template-columns:minmax(0,1fr);gap:0}.mode-stack .composer-gallery .obras-lista>*{position:sticky;top:12vh;min-height:68vh;margin-bottom:8vh;box-shadow:0 24px 80px rgba(0,0,0,.2)}
+.mode-spotlight .composer-gallery .galeria-grade-global .obras-lista{display:grid!important;grid-template-columns:minmax(0,1fr);gap:12vh}.mode-spotlight .composer-gallery .obras-lista>*{min-height:82vh}.mode-spotlight .composer-gallery header{max-width:58rem;margin:0 auto 4rem}
+.mode-brutalist .composer-section h1,.mode-brutalist .composer-section h2{font-family:var(--portfolio-heading-font,Arial,sans-serif);font-weight:900;letter-spacing:-.08em;text-transform:uppercase}.mode-brutalist .composer-hero h1{font-size:clamp(4rem,16vw,14rem);line-height:.78}
+@media(max-width:760px){.mode-masonry .composer-gallery .galeria-grade-global .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.mode-masonry .composer-gallery .obras-lista>*{margin-top:0}.mode-immersive .composer-gallery .galeria-grade-global .obras-lista{grid-template-columns:1fr}.mode-filmstrip .composer-gallery .obras-lista>*{width:84vw}.mode-timeline .composer-gallery .obras-lista>*{width:76vw}.mode-stack .composer-gallery .obras-lista>*{top:8vh;min-height:58vh}.composer-navigation.nav-style-rail{position:relative;inset:auto;width:100%;padding:1rem;flex-direction:row;border:0;border-bottom:1px solid var(--linha)}.composer-navigation.nav-style-rail>div{flex-direction:row;flex-wrap:wrap;align-items:center}.composer-navigation.nav-style-rail>div a{writing-mode:initial;transform:none}.nav-rail .composer-section,.nav-rail .composer-footer,.nav-sidebar .composer-section,.nav-sidebar .composer-footer{margin-left:auto}.composer-navigation.nav-style-sidebar{position:relative;inset:auto;width:100%;padding:1.2rem;flex-direction:column;border:0;border-bottom:1px solid var(--linha)}.composer-navigation.nav-style-sidebar>div{flex-direction:row;flex-wrap:wrap}.composer-navigation.nav-style-dock{bottom:.55rem}}
+
+/* Navigation systems: real expandable controls, not static menu decoration. */
+.composer-navigation{isolation:isolate}
+.composer-navigation-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%}
+.composer-navigation-toggle{display:inline-flex;align-items:center;gap:.7rem;padding:.65rem .9rem;border:1px solid var(--linha);border-radius:999px;background:transparent;color:inherit;font:inherit;font-size:.75rem;cursor:pointer}
+.composer-navigation-toggle i{font-style:normal;font-size:1.1rem;line-height:1}
+.composer-navigation-links{display:flex;align-items:center;gap:clamp(.7rem,2vw,2rem)}
+.composer-navigation-number{display:none;color:var(--layout-muted);font:.68rem var(--portfolio-navigation-font,monospace);margin-right:.55rem}
+.composer-navigation.nav-style-curtain .composer-navigation-links,.composer-navigation.nav-style-index .composer-navigation-links,.composer-navigation.nav-style-sidebar .composer-navigation-links,.composer-navigation.nav-style-dropdown .composer-navigation-links{display:none}
+.composer-navigation.nav-style-curtain.is-open .composer-navigation-links{position:fixed;z-index:50;inset:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:clamp(.7rem,2vh,1.6rem);padding:clamp(2rem,9vw,9rem);background:var(--azul-escuro);border:0}
+.composer-navigation.nav-style-curtain.is-open .composer-navigation-links a{font:400 clamp(2.2rem,7vw,6.5rem)/.95 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.05em}
+.composer-navigation.nav-style-curtain.is-open .composer-navigation-toggle{position:fixed;z-index:60;top:1.3rem;right:clamp(1rem,5vw,5rem)}
+.composer-navigation.nav-style-dropdown{align-items:center}
+.composer-navigation.nav-style-dropdown.is-open .composer-navigation-links{position:absolute;z-index:40;top:calc(100% + .5rem);right:clamp(1rem,5vw,5rem);display:grid;min-width:min(320px,calc(100vw - 2rem));gap:0;padding:.6rem;border:1px solid var(--linha);border-radius:12px;background:var(--azul-escuro);box-shadow:0 20px 60px rgba(0,0,0,.24)}
+.composer-navigation.nav-style-dropdown.is-open .composer-navigation-links a{padding:.85rem;border-radius:7px}
+.composer-navigation.nav-style-dropdown.is-open .composer-navigation-links a:hover{background:var(--azul-medio)}
+.composer-navigation.nav-style-sidebar{align-items:flex-start}
+.composer-navigation.nav-style-sidebar.is-open .composer-navigation-links{position:fixed;z-index:45;inset:0 auto 0 0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;width:min(340px,86vw);padding:2rem;gap:1.25rem;border-right:1px solid var(--linha);background:var(--azul-escuro);box-shadow:20px 0 70px rgba(0,0,0,.22)}
+.composer-navigation.nav-style-sidebar.is-open .composer-navigation-links a{font:400 1.35rem var(--portfolio-heading-font,Georgia,serif)}
+.composer-navigation.nav-style-sidebar.is-open .composer-navigation-toggle{position:fixed;z-index:55;top:1rem;left:min(270px,72vw)}
+.composer-navigation.nav-style-index.is-open .composer-navigation-links{position:fixed;z-index:50;inset:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;gap:1rem 3rem;padding:clamp(2rem,10vw,10rem);background:var(--azul-escuro)}
+.composer-navigation.nav-style-index.is-open .composer-navigation-links a{display:flex;align-items:baseline;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--linha);font:400 clamp(1.5rem,4vw,4rem)/1 var(--portfolio-heading-font,Georgia,serif)}
+.composer-navigation.nav-style-index.is-open .composer-navigation-number{display:inline}
+.composer-navigation.nav-style-index.is-open .composer-navigation-toggle{position:fixed;z-index:60;top:1.3rem;right:clamp(1rem,5vw,5rem)}
+.composer-navigation.nav-style-rail{display:flex;align-items:center;justify-content:center}
+.composer-navigation.nav-style-rail .composer-navigation-bar{position:relative;z-index:2;justify-content:center}
+.composer-navigation.nav-style-rail .composer-brand{display:none}
+.composer-navigation.nav-style-rail .composer-navigation-toggle{writing-mode:vertical-rl;border-radius:999px}
+.composer-navigation.nav-style-rail .composer-navigation-links{display:flex;flex-direction:column;align-items:center;gap:1.5rem}
+.composer-navigation.nav-style-rail .composer-navigation-links a{writing-mode:vertical-rl;transform:rotate(180deg)}
+.composer-navigation.nav-style-rail .composer-navigation-number{display:inline}
+.composer-navigation.nav-style-dock{display:flex;align-items:center}
+.composer-navigation.nav-style-dock .composer-navigation-bar{display:none}
+.composer-navigation.nav-style-dock .composer-navigation-links{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:calc(100vw - 2rem)}
+.composer-navigation.nav-style-dock .composer-navigation-links a{white-space:nowrap}
+.composer-navigation.nav-style-dock .composer-navigation-number{display:none}
+/* Gallery grammars target the actual ObraCard/article structure. */
+.mode-carousel .composer-gallery .obras-lista{display:flex!important;gap:clamp(1rem,3vw,2.5rem);width:100%;overflow-x:auto;overflow-y:hidden;padding:1rem 0 2.5rem;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;scrollbar-width:thin}
+.mode-carousel .composer-gallery .obras-lista>.obra{flex:0 0 min(76vw,760px);max-width:min(76vw,760px);scroll-snap-align:center}
+.mode-carousel .composer-gallery .obras-lista>.obra .obra-galeria{min-height:min(62vh,680px)}
+.mode-masonry .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;align-items:start;gap:clamp(.8rem,2vw,1.8rem)}
+.mode-masonry .composer-gallery .obras-lista>.obra:nth-child(5n+2){transform:translateY(3.5rem)}.mode-masonry .composer-gallery .obras-lista>.obra:nth-child(7n+4){transform:translateY(6rem)}
+.mode-masonry .composer-gallery .obras-lista>.obra .obra-galeria{aspect-ratio:4/5;min-height:0}
+.mode-immersive .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.mode-immersive .composer-gallery .obras-lista>.obra{min-width:0}.mode-immersive .composer-gallery .obras-lista>.obra .obra-galeria{height:min(72vh,760px);min-height:360px}.mode-immersive .composer-gallery .obras-lista>.obra .obra-texto{padding:1rem 0}
+.mode-filmstrip .composer-gallery .obras-lista{display:flex!important;gap:.7rem;width:100%;overflow-x:auto;padding:1rem 0 2rem;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain}
+.mode-filmstrip .composer-gallery .obras-lista>.obra{flex:0 0 min(68vw,680px);scroll-snap-align:start}.mode-filmstrip .composer-gallery .obras-lista>.obra .obra-galeria{height:min(64vh,680px);min-height:320px}
+.mode-timeline .composer-gallery .obras-lista{display:flex!important;align-items:flex-start;gap:2rem;width:100%;overflow-x:auto;padding:3rem 1rem 2rem;border-top:1px solid var(--linha);scroll-snap-type:x mandatory}
+.mode-timeline .composer-gallery .obras-lista>.obra{position:relative;flex:0 0 min(34vw,420px);scroll-snap-align:start}
+.mode-timeline .composer-gallery .obras-lista>.obra:before{content:'';position:absolute;top:-3.45rem;left:1rem;width:.8rem;height:.8rem;border:3px solid var(--azul-escuro);border-radius:50%;background:var(--azul-claro);box-shadow:0 0 0 1px var(--linha)}
+.mode-timeline .composer-gallery .obras-lista>.obra .obra-galeria{height:360px}
+.mode-stack .composer-gallery .obras-lista{display:grid!important;grid-template-columns:minmax(0,1fr);gap:0}
+.mode-stack .composer-gallery .obras-lista>.obra{position:sticky;top:12vh;min-height:68vh;margin-bottom:8vh;box-shadow:0 24px 80px rgba(0,0,0,.2)}.mode-stack .composer-gallery .obras-lista>.obra .obra-galeria{height:min(68vh,760px)}
+.mode-spotlight .composer-gallery .obras-lista{display:grid!important;grid-template-columns:minmax(0,1fr);gap:12vh}
+.mode-spotlight .composer-gallery .obras-lista>.obra{min-height:82vh}.mode-spotlight .composer-gallery .obras-lista>.obra .obra-galeria{height:min(78vh,900px)}.mode-spotlight .composer-gallery header{max-width:58rem;margin:0 auto 4rem}
+.mode-brutalist .composer-hero{min-height:96svh;border-bottom:2px solid currentColor}
+.mode-brutalist .composer-hero h1{max-width:9ch;font:900 clamp(4rem,17vw,15rem)/.76 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.095em;text-transform:uppercase}
+.mode-brutalist .composer-hero>span{font:700 .72rem var(--portfolio-navigation-font,monospace);letter-spacing:.2em}
+.mode-brutalist .composer-section h2{font:900 clamp(2.8rem,9vw,8rem)/.82 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.085em;text-transform:uppercase}
+.mode-brutalist .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.mode-brutalist .composer-gallery .obras-lista>.obra:nth-child(odd){transform:translateY(3rem)}.mode-brutalist .composer-gallery .obras-lista>.obra .obra-galeria{border:2px solid currentColor}
+@media(max-width:760px){
+ .composer-navigation.nav-style-curtain.is-open .composer-navigation-links{padding:5rem 1.5rem}.composer-navigation.nav-style-index.is-open .composer-navigation-links{grid-template-columns:1fr;gap:.25rem;padding:5rem 1.5rem}
+ .composer-navigation.nav-style-sidebar.is-open .composer-navigation-links{width:min(300px,84vw)}
+ .composer-navigation.nav-style-rail{position:relative;inset:auto;width:100%;min-height:54px;padding:.7rem 1rem;flex-direction:row;border:0;border-bottom:1px solid var(--linha)}
+ .composer-navigation.nav-style-rail .composer-navigation-bar{display:none}.composer-navigation.nav-style-rail .composer-navigation-links{flex-direction:row;flex-wrap:wrap}.composer-navigation.nav-style-rail .composer-navigation-links a{writing-mode:initial;transform:none}
+ .composer-navigation.nav-style-dock{left:50%;bottom:.55rem;transform:translateX(-50%);width:max-content;max-width:calc(100% - 1rem)}.composer-navigation.nav-style-dock .composer-navigation-links{gap:.9rem}
+ .mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.mode-masonry .composer-gallery .obras-lista>.obra:nth-child(n){transform:none}
+ .mode-immersive .composer-gallery .obras-lista{grid-template-columns:1fr}.mode-immersive .composer-gallery .obras-lista>.obra .obra-galeria{height:62vh;min-height:300px}
+ .mode-carousel .composer-gallery .obras-lista>.obra,.mode-filmstrip .composer-gallery .obras-lista>.obra{flex-basis:84vw;max-width:84vw}.mode-timeline .composer-gallery .obras-lista>.obra{flex-basis:76vw}
+ .mode-stack .composer-gallery .obras-lista>.obra{top:8vh;min-height:58vh}.mode-stack .composer-gallery .obras-lista>.obra .obra-galeria{height:54vh}
+ .mode-spotlight .composer-gallery .obras-lista>.obra .obra-galeria{height:64vh}
+ .mode-brutalist .composer-gallery .obras-lista{grid-template-columns:1fr}.mode-brutalist .composer-gallery .obras-lista>.obra:nth-child(n){transform:none}
+}
+
+/* Global layout controls consistently cascade through every composed page and section. */
+.composer-site.spacing-compact .composer-section{padding-block:clamp(2rem,5vw,5rem)}
+.composer-site.spacing-comfortable .composer-section{padding-block:clamp(3.5rem,8vw,8rem)}
+.composer-site.spacing-spacious .composer-section{padding-block:clamp(5rem,12vw,12rem)}
+.composer-site.width-compact .composer-section{--section-width:min(100% - 3rem,760px)}
+.composer-site.width-standard .composer-section{--section-width:min(100% - 3rem,1180px)}
+.composer-site.width-wide .composer-section{--section-width:min(100% - 3rem,1600px)}
+.composer-hero.hero-size-compact{min-height:62svh}
+.composer-hero.hero-size-large{min-height:min(88svh,1000px)}
+.mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,3),minmax(0,1fr))}
+.mode-brutalist .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,2),minmax(0,1fr))}
+@media(max-width:760px){.mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.mode-brutalist .composer-gallery .obras-lista{grid-template-columns:1fr}}
+
+/* Bespoke art directions for the new specialist templates. */
+.mode-museum .composer-hero{min-height:68svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid var(--linha)}
+.mode-museum .composer-hero h1{max-width:10ch;font:400 clamp(4rem,12vw,11rem)/.82 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.07em}
+.mode-museum .composer-gallery header{display:grid;grid-template-columns:1fr auto;align-items:end;gap:1rem 2rem;padding-bottom:1rem;border-bottom:1px solid var(--linha)}
+.mode-museum .composer-gallery header>span{grid-column:1/-1;font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.18em}
+.mode-museum .composer-gallery header h2{max-width:12ch;font-size:clamp(3rem,7vw,7rem)}
+.mode-museum .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(1rem,2vw,2rem);align-items:start}
+.mode-museum .composer-gallery .obras-lista>.obra{grid-column:span 5}
+.mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:span 7}
+.mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:min(66vh,740px);min-height:300px}
+.mode-museum .composer-gallery .obras-lista>.obra:nth-child(even) .obra-galeria{height:min(48vh,560px)}
+.mode-museum .composer-gallery .obras-lista>.obra .obra-texto{padding:.9rem 0}
+.mode-cinematic .composer-hero{position:relative;min-height:100svh;justify-content:flex-end;padding-bottom:clamp(4rem,12vh,10rem);background:radial-gradient(ellipse at 72% 38%,rgba(190,155,112,.22),transparent 42%),linear-gradient(120deg,rgba(2,10,15,.15),rgba(2,10,15,.8))}
+.mode-cinematic .composer-hero h1{max-width:9ch;font-size:clamp(4rem,14vw,13rem);line-height:.78}
+.mode-cinematic .composer-hero p{max-width:38ch}
+.mode-cinematic .composer-gallery .obras-lista{display:flex!important;gap:1rem;overflow-x:auto;padding:1rem 0 3rem;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain}
+.mode-cinematic .composer-gallery .obras-lista>.obra{flex:0 0 min(82vw,1000px);scroll-snap-align:center}
+.mode-cinematic .composer-gallery .obras-lista>.obra .obra-galeria{height:min(82vh,900px);min-height:380px}
+.mode-cinematic .composer-gallery .obras-lista>.obra .obra-texto{display:flex;align-items:baseline;justify-content:space-between;gap:2rem;padding:1rem 0}
+.mode-swiss .composer-hero{min-height:72svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid var(--linha)}
+.mode-swiss .composer-hero h1{max-width:11ch;font:700 clamp(4rem,12vw,10rem)/.82 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.09em}
+.mode-swiss .composer-section{position:relative}
+.mode-swiss .composer-gallery header{display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,.4fr);align-items:end;gap:1rem;padding-bottom:1.2rem;border-bottom:2px solid currentColor}
+.mode-swiss .composer-gallery header>span{grid-column:1/-1;font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.14em}
+.mode-swiss .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));gap:1px;background:var(--linha);border:1px solid var(--linha)}
+.mode-swiss .composer-gallery .obras-lista>.obra{grid-column:span 4;background:var(--azul-escuro);padding:.7rem}
+.mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:span 8}
+.mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(220px,34vw,520px)}
+.mode-swiss .composer-gallery .obras-lista>.obra .obra-texto h3{font:600 .9rem var(--portfolio-body-font,sans-serif);letter-spacing:-.02em}
+.mode-tattoo-book .composer-hero{min-height:64svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid rgba(216,196,164,.25)}
+.mode-tattoo-book .composer-hero h1{max-width:10ch;font:600 clamp(3.5rem,10vw,9rem)/.84 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.065em}
+.mode-tattoo-book .composer-gallery .obras-lista,.mode-tattoo-book .composer-custom-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.8rem,2vw,1.5rem)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra,.mode-tattoo-book .composer-custom-grid article{padding:.65rem;border:1px solid rgba(216,196,164,.32);background:rgba(216,196,164,.035)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-galeria{height:auto;aspect-ratio:1;min-height:0}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-texto{padding:.8rem .25rem}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-texto h3,.mode-tattoo-book .composer-custom-grid h3{font:500 1rem var(--portfolio-heading-font,Georgia,serif)}
+.mode-tattoo-book .composer-custom-grid img{aspect-ratio:1;object-fit:cover}
+.mode-tattoo-book .composer-custom-grid small{display:block;margin-top:.3rem;color:var(--layout-muted);font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.04em}
+@media(max-width:760px){
+ .mode-museum .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mode-museum .composer-gallery .obras-lista>.obra,.mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:span 1}
+ .mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:48vh;min-height:260px}
+ .mode-cinematic .composer-gallery .obras-lista>.obra{flex-basis:88vw}
+ .mode-cinematic .composer-gallery .obras-lista>.obra .obra-galeria{height:68vh;min-height:300px}
+ .mode-swiss .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mode-swiss .composer-gallery .obras-lista>.obra,.mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:span 1}
+ .mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:42vh}
+ .mode-tattoo-book .composer-gallery .obras-lista,.mode-tattoo-book .composer-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
