@@ -220,7 +220,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Fundo')
 
-  const experienceGroup = page.locator('.cms-layout-field-group').nth(2)
+  const experienceGroup = page.locator('.cms-layout-field-group').nth(3)
   await experienceGroup.locator('summary').click()
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
   await carouselOption.hover()
