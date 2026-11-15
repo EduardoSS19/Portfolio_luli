@@ -607,6 +607,11 @@
 /* Keep the passive hover card fully inside short mobile viewports. */
 .cms-layout-hover-preview-floating{
   min-height:0!important;
-  max-height:min(440px,calc(100vh - 32px))!important;
+  max-height:var(--hover-preview-max-height,min(440px,calc(100vh - 32px)))!important;
   overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
+  min-height:0!important;
+  max-height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
 }
