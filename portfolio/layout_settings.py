@@ -39,7 +39,7 @@ LAYOUT_SETTING_CHOICES = {
     "section_spacing": {"compact", "comfortable", "spacious"},
     "gallery_columns": {"2", "3", "4"},
     "default_gallery_view": {"lista", "grade"},
-    "presentation_mode": {"editorial", "carousel", "immersive", "masonry", "filmstrip", "timeline", "stack", "spotlight"},
+    "presentation_mode": {"editorial", "carousel", "immersive", "masonry", "filmstrip", "timeline", "stack", "spotlight", "brutalist"},
     "navigation_mode": {"curtain", "dropdown", "sidebar", "rail", "dock", "index"},
     "heading_font": {"fraunces", "playfair", "space-grotesk", "cormorant", "archivo-black"},
     "body_font": {"dm-sans", "manrope", "ibm-plex", "lora", "source-sans"},
