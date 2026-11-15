@@ -158,7 +158,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   expect(viewport.scrolling).toBe('auto')
   expect(viewport.pointerEvents).toBe('auto')
   expect(viewport.modalWidth).toBeGreaterThan(600)
-  expect(viewport.modalWidth).toBeLessThanOrEqual(920)
+  expect(viewport.modalWidth).toBeLessThanOrEqual(680)
   expect(viewport.stageWidth).toBeLessThanOrEqual(viewport.modalWidth)
   expect(viewport.scale).toBeGreaterThan(0)
   expect(viewport.scale).toBeLessThan(1)
