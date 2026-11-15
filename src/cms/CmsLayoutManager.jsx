@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { autoUpdate, flip, offset, shift, size, useFloating, useHover, useInteractions } from '@floating-ui/react'
 import './CmsLayoutManager.css'
 
 const DEFAULTS = {
@@ -181,12 +182,31 @@ export function CmsLayoutManager(){
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
   const [hoveredOption,setHoveredOption]=useState(null)
-  const [hoverPreviewSize,setHoverPreviewSize]=useState({width:0,height:0})
-  const [hoverPreviewPosition,setHoverPreviewPosition]=useState({left:16,top:16})
   const hoverPreviewIframeRef=useRef(null)
-  const hoverPreviewViewportRef=useRef(null)
-  const hoverPreviewHideTimerRef=useRef(null)
-  const suppressOptionPreviewRef=useRef(null)
+  // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
+  // nunca o viewport CSS do site dentro do iframe.
+  const hoverDevice=PREVIEW_DEVICES[previewDevice]
+  const hoverModalWidth=Math.min(600,Math.max(220,window.innerWidth-32))
+  const hoverPreviewScale=Math.min(1,Math.max(.2,(hoverModalWidth-24)/hoverDevice.width))
+  const hoverStageWidth=hoverDevice.width*hoverPreviewScale
+  const hoverStageHeight=hoverDevice.height*hoverPreviewScale
+  const hoverFloating=useFloating({
+    open:hoverPreviewMounted,
+    onOpenChange:setHoverPreviewMounted,
+    placement:'right-start',
+    strategy:'fixed',
+    middleware:[
+      offset(12),
+      flip({padding:16,fallbackPlacements:['left-start','bottom-start','top-start']}),
+      shift({padding:16,crossAxis:true}),
+      size({padding:16,apply({availableWidth,availableHeight,elements}){
+        Object.assign(elements.floating.style,{maxWidth:`${Math.max(220,availableWidth)}px`,maxHeight:`${Math.max(180,availableHeight)}px`})
+      }})
+    ],
+    whileElementsMounted:autoUpdate
+  })
+  const hoverInteraction=useHover(hoverFloating.context,{delay:{open:0,close:120}})
+  const {getReferenceProps,getFloatingProps}=useInteractions([hoverInteraction])
   const ignoreWorkspaceScrollRef=useRef(false)
   const optionScrollBeforeInteractionRef=useRef(null)
   const previewViewportRef=useRef(null)
@@ -201,11 +221,6 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
-  // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
-  // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
-  const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewScale=hoverPreviewStageWidth/390
-  const hoverPreviewStageHeight=60
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -303,42 +318,6 @@ export function CmsLayoutManager(){
     observer.observe(element)
     return()=>observer.disconnect()
   },[previewOpen])
-  useLayoutEffect(()=>{
-    if(!hoverPreviewMounted)return
-    const element=hoverPreviewViewportRef.current
-    if(!element)return
-    const update=()=>setHoverPreviewSize({width:element.clientWidth,height:element.clientHeight})
-    update()
-    if(typeof ResizeObserver==='undefined'){window.addEventListener('resize',update);return()=>window.removeEventListener('resize',update)}
-    const observer=new ResizeObserver(update)
-    observer.observe(element)
-    return()=>observer.disconnect()
-  },[hoverPreviewMounted])
-  useEffect(()=>()=>{if(hoverPreviewHideTimerRef.current)window.clearTimeout(hoverPreviewHideTimerRef.current)},[])
-  useEffect(()=>{
-    if(!hoverPreviewMounted)return
-    const iframe=hoverPreviewIframeRef.current
-    if(!iframe)return
-    let frameWindow=null
-    let frameRoot=null
-    const keepPreviewOpen=()=>cancelOptionPreviewHide()
-    const leavePreview=()=>hideOptionPreview()
-    const attachFrameListeners=()=>{
-      frameWindow=iframe.contentWindow
-      frameRoot=frameWindow?.document?.documentElement||null
-      frameWindow?.addEventListener('mousemove',keepPreviewOpen)
-      frameWindow?.addEventListener('pointermove',keepPreviewOpen)
-      frameRoot?.addEventListener('mouseleave',leavePreview)
-    }
-    iframe.addEventListener('load',attachFrameListeners)
-    attachFrameListeners()
-    return()=>{
-      iframe.removeEventListener('load',attachFrameListeners)
-      frameWindow?.removeEventListener('mousemove',keepPreviewOpen)
-      frameWindow?.removeEventListener('pointermove',keepPreviewOpen)
-      frameRoot?.removeEventListener('mouseleave',leavePreview)
-    }
-  },[hoverPreviewMounted])
   useLayoutEffect(()=>{
     const element=inlinePreviewViewportRef.current
     if(!element)return
@@ -441,103 +420,16 @@ export function CmsLayoutManager(){
     }
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
-  const cancelOptionPreviewHide=()=>{
-    if(hoverPreviewHideTimerRef.current){
-      window.clearTimeout(hoverPreviewHideTimerRef.current)
-      hoverPreviewHideTimerRef.current=null
-    }
-  }
-  const closeOptionPreview=()=>{
-    cancelOptionPreviewHide()
-    const focusedOption=document.querySelector('.cms-layout-option:focus-within input[type="radio"]')
-    const dismissed=hoveredOption|| (focusedOption?{name:focusedOption.name,value:focusedOption.value}:null)
-    suppressOptionPreviewRef.current=dismissed
+  const closeOptionPreview=()=>{setHoverPreviewMounted(false);setHoveredOption(null)}
+  const hideOptionPreview=(event)=>{
+    const floating=document.querySelector('.cms-layout-hover-preview')
+    if(event?.relatedTarget&&(event.currentTarget?.contains?.(event.relatedTarget)||floating?.contains(event.relatedTarget)))return
     setHoverPreviewMounted(false)
     setHoveredOption(null)
   }
-  // A prévia de hover é apenas visual e não recebe navegação. A exploração
-  // interativa do portfólio fica restrita à prévia completa no fim da página.
-  useEffect(()=>{
-    if(!hoverPreviewMounted)return
-    const dismissFromWorkspaceGesture=event=>{
-      if(ignoreWorkspaceScrollRef.current)return
-      const preview=document.querySelector('.cms-layout-hover-preview')
-      if(preview&&(event.target===preview||preview.contains(event.target))){
-        // Wheel/touch over the passive snapshot must not scroll the CMS behind it.
-        if((event.type==='wheel'||event.type==='touchmove')&&event.cancelable)event.preventDefault()
-        return
-      }
-      cancelOptionPreviewHide()
-      suppressOptionPreviewRef.current=hoveredOption
-      setHoverPreviewMounted(false)
-      setHoveredOption(null)
-    }
-    // O scrollIntoView do navegador/Playwright ao alcançar outra opção não é
-    // uma intenção de fechar a prévia. Fechamos apenas em gestos explícitos.
-    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:false})
-    window.addEventListener('touchstart',dismissFromWorkspaceGesture,{capture:true,passive:true})
-    window.addEventListener('touchmove',dismissFromWorkspaceGesture,{capture:true,passive:false})
-    return()=>{
-      window.removeEventListener('wheel',dismissFromWorkspaceGesture,true)
-      window.removeEventListener('touchstart',dismissFromWorkspaceGesture,true)
-      window.removeEventListener('touchmove',dismissFromWorkspaceGesture,true)
-    }
-  },[hoverPreviewMounted,hoveredOption])
-  const hideOptionPreview=(event)=>{
-    if(suppressOptionPreviewRef.current&&event?.type==='pointerleave'){
-      suppressOptionPreviewRef.current=null
-      return
-    }
-    const preview=document.querySelector('.cms-layout-hover-preview')
-    // Navegadores podem reportar relatedTarget=null ao atravessar a borda de um iframe.
-    if(event&&(!event.relatedTarget||preview?.contains(event.relatedTarget)))return
-    if(suppressOptionPreviewRef.current)return
-    cancelOptionPreviewHide()
-    // Mantém a prévia viva ao atravessar para o iframe; fora dela, fecha com uma breve tolerância.
-    hoverPreviewHideTimerRef.current=window.setTimeout(()=>{
-      setHoveredOption(null)
-      setHoverPreviewMounted(false)
-      hoverPreviewHideTimerRef.current=null
-    },320)
-  }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
-    // Ignora apenas o evento sintético da mesma opção que acabou de ser fechada.
-    // Uma opção diferente continua podendo abrir sua prévia sem esperar o timeout.
-    const suppressedOption=suppressOptionPreviewRef.current
-    // Ao fechar o portal, o ponteiro pode revelar uma opção que estava atrás
-    // dele. Ignore esse mouseenter sintético até o ponteiro sair do controle.
-    if(suppressedOption?.name===name&&suppressedOption?.value===value&&event?.type==='pointerenter')return
-    // A nova opção representa uma intenção explícita do usuário; não deixe
-    // uma dispensa anterior bloquear a abertura de outra prévia.
-    if(suppressedOption)suppressOptionPreviewRef.current=null
-    cancelOptionPreviewHide()
-    const rect=event?.currentTarget?.getBoundingClientRect?.()
-    const viewportWidth=window.innerWidth
-    const viewportHeight=window.innerHeight
-    const margin=16
-    const gap=12
-    const panelWidth=Math.min(180,Math.max(160,viewportWidth-margin*2))
-    const preferredHeight=Math.min(440,Math.max(180,viewportHeight-margin*2))
-    const rightSpace=rect?viewportWidth-rect.right-gap-margin:0
-    const leftSpace=rect?rect.left-gap-margin:0
-    let availableWidth=panelWidth
-    let left=margin
-    if(rect&&rightSpace<160&&leftSpace<160){
-      left=Math.max(margin,(viewportWidth-panelWidth)/2)
-    }else if(rect){
-      const placeRight=rightSpace>=panelWidth||rightSpace>=leftSpace
-      availableWidth=Math.min(panelWidth,Math.max(160,placeRight?rightSpace:leftSpace))
-      left=placeRight?rect.right+gap:rect.left-gap-availableWidth
-    }
-    const belowSpace=rect?viewportHeight-rect.bottom-gap-margin:viewportHeight-margin*2
-    const aboveSpace=rect?rect.top-gap-margin:0
-    const placeBelow=!rect||belowSpace>=Math.min(220,preferredHeight)||belowSpace>=aboveSpace
-    const verticalSpace=placeBelow?belowSpace:aboveSpace
-    const maxHeight=Math.max(160,Math.min(preferredHeight,verticalSpace||preferredHeight))
-    const preferredTop=rect?(placeBelow?rect.bottom+gap:rect.top-gap-maxHeight):margin
-    const top=Math.max(margin,Math.min(preferredTop,viewportHeight-maxHeight-margin))
-    setHoverPreviewPosition({left:Math.max(margin,Math.min(left,viewportWidth-availableWidth-margin)),top,width:availableWidth,maxHeight})
-    setHoveredOption(current=>current?.name===name&&current?.value===value?{...current,patch}:{name,value,label,detail,patch})
+    if(event?.currentTarget)hoverFloating.refs.setReference(event.currentTarget)
+    setHoveredOption({name,value,label,detail,patch})
     setHoverPreviewMounted(true)
   }
   const colorKey=name=>`${editingTheme}_${name}`
@@ -587,7 +479,7 @@ export function CmsLayoutManager(){
     if(name==='default_gallery_view')setPreviewMode(value)
     else if(name==='gallery_columns')setPreviewMode('grade')
     const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
+    const focus=['gallery_columns','default_gallery_view','presentation_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
     setPreviewFocus(focus)
     setError('');setNotice('')
   }
@@ -704,25 +596,31 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onPointerEnter={event=>previewPalette(palette,event)} onPointerLeave={hideOptionPreview} onFocus={event=>previewPalette(palette,event)} onBlur={hideOptionPreview} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
-          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onPointerEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onPointerLeave={hideOptionPreview} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onBlur={hideOptionPreview}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} {...getReferenceProps({onPointerEnter:event=>previewPalette(palette,event),onFocus:event=>previewPalette(palette,event),onBlur:hideOptionPreview})} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} {...getReferenceProps({onPointerEnter:event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event),onFocus:event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event),onBlur:hideOptionPreview})}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onPointerLeave={hideOptionPreview} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} {...getReferenceProps({onPointerEnter:event=>showOptionPreview(field.name,value,label,detail,event),onFocus:event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)},onBlur:hideOptionPreview})} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:180,minWidth:180,maxWidth:180,flex:'0 0 180px',boxSizing:'border-box',zIndex:2147483000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
+        <aside ref={hoverFloating.refs.setFloating} {...getFloatingProps({onBlur:hideOptionPreview})}
+          className="cms-layout-hover-preview cms-layout-hover-preview-floating"
+          aria-label="Prévia temporária da opção"
+          data-device={hoverDevice.label.toLowerCase()}
+          style={{...hoverFloating.floatingStyles,width:`min(600px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
           <header className="cms-layout-hover-preview-heading">
-            <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
+            <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO · {hoverDevice.label.toUpperCase()}</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
+            <button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
-            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:390,height:844,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
+          <div className="cms-layout-hover-preview-frame" style={{height:Math.min(640,hoverStageHeight),maxHeight:'calc(100vh - 110px)'}}>
+            <div className="cms-layout-hover-preview-stage" style={{width:hoverStageWidth,height:hoverStageHeight}}>
+              <iframe ref={hoverPreviewIframeRef} title={`Prévia interativa do portfólio em ${hoverDevice.label}`} src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="auto" tabIndex={0} style={{width:hoverDevice.width,height:hoverDevice.height,display:'block',border:0,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'auto'}}/>
             </div>
           </div>
+          <p className="cms-layout-preview-caption">Viewport real de {hoverDevice.width}px · escala visual {Math.round(hoverPreviewScale*100)}%. A navegação e a rolagem acontecem dentro da prévia.</p>
         </aside>,
         document.body
       )}
