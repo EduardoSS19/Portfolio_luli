@@ -15,10 +15,12 @@ function Section({ section, data, preview }) {
   const works = categories.flatMap(category => (category.obras || []).map(work => ({ ...work, categoria: category })))
   const category = categories.find(item => item.chave === settings.category_key)
   const custom = (data.layout?.custom_sections || []).find(item => item.id === settings.custom_section_id) || (section.type === 'tattoo-flash' ? (data.layout?.custom_sections || []).find(item => item.type === 'tattoo-flash') : null)
-  const style = { '--section-width': settings.width === 'wide' ? 'min(100% - 3rem, 1600px)' : settings.width === 'narrow' ? 'min(100% - 3rem, 760px)' : 'min(100% - 3rem, 1180px)', '--section-align': settings.align === 'center' ? 'center' : settings.align === 'right' ? 'right' : 'left' }
+  const contentWidth=settings.width||data.layout?.content_width||'standard'
+  const sectionAlignment=settings.align||data.layout?.hero_alignment||'left'
+  const style = { '--section-width': contentWidth === 'wide' ? 'min(100% - 3rem, 1600px)' : contentWidth === 'compact' || contentWidth === 'narrow' ? 'min(100% - 3rem, 760px)' : 'min(100% - 3rem, 1180px)', '--section-align': sectionAlignment === 'center' ? 'center' : sectionAlignment === 'right' ? 'right' : 'left' }
   const title = text(settings.title, section.type === 'gallery' ? category?.titulo || 'Trabalhos' : '')
   if (!SECTION_TYPES.has(section.type)) return null
-  if (section.type === 'hero') return <section id={section.id} className="composer-section composer-hero" style={style}><span>{text(settings.eyebrow, data.sobre?.frase)}</span><h1>{text(settings.title, data.sobre?.nome)}</h1>{settings.show_description !== false && <p>{text(settings.body, data.sobre?.bio)}</p>}{settings.cta_label && <a className="composer-cta" href={text(settings.cta_url, '#contato')}>{settings.cta_label}</a>}</section>
+  if (section.type === 'hero') return <section id={section.id} className={"composer-section composer-hero hero-size-" + (data.layout?.hero_size || "large")} style={style}><span>{text(settings.eyebrow, data.sobre?.frase)}</span><h1>{text(settings.title, data.sobre?.nome)}</h1>{settings.show_description !== false && <p>{text(settings.body, data.sobre?.bio)}</p>}{settings.cta_label && <a className="composer-cta" href={text(settings.cta_url, '#contato')}>{settings.cta_label}</a>}</section>
   if (section.type === 'about') return <section id={section.id} className="composer-section" style={style}><Sobre perfil={data.sobre || {}} mostrarImagem={settings.show_image !== false} mostrarBio={settings.show_bio !== false}/></section>
   if (section.type === 'gallery') return <section id={section.id} className={`composer-section composer-gallery composer-gallery-${settings.layout || 'editorial'}`} style={style}><header><span>{text(settings.eyebrow, 'PORTFÓLIO')}</span><h2>{title}</h2>{settings.body && <p>{settings.body}</p>}</header>{category ? <SecaoCategoria titulo={category.titulo} chave={category.chave} animacao={category.animacao} obras={category.obras || []}/> : <GaleriaGrade categorias={categories}/>}</section>
   if (section.type === 'featured-work') { const work = works.find(item => item.titulo === settings.work_title) || works[0]; if (!work) return null; return <section id={section.id} className="composer-section composer-featured" style={style}><span>{text(settings.eyebrow, 'EM DESTAQUE')}</span><h2>{text(settings.title, work.titulo)}</h2><p>{text(settings.body, work.descricao)}</p><div className="composer-featured-image">{work.imagem && <img src={work.imagem} alt={work.titulo}/>}</div></section> }
@@ -54,7 +56,7 @@ export function PageRenderer({ pages = [], data, preview = false }) {
   const profile = data.sobre || {}
   const mode=data.layout?.presentation_mode||'editorial'
   const navigationMode=data.layout?.navigation_mode||'curtain'
-  return <main className={"composer-site mode-"+mode+" nav-"+navigationMode} id="topo">
+  return <main className={"composer-site mode-"+mode+" nav-"+navigationMode+" spacing-"+(data.layout?.section_spacing||"comfortable")+" width-"+(data.layout?.content_width||"standard")} style={{"--composer-gallery-columns":data.layout?.gallery_columns||"3"}} id="topo">
     <PortfolioNavigation pages={publishedPages} activePage={activePage} profile={profile} mode={navigationMode}/>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview}/>)}
     <Footer nome={profile.nome} instagram={profile.instagram} email={profile.email} redes={data.redes || []}/>
