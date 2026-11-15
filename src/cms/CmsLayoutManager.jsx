@@ -568,7 +568,8 @@ export function CmsLayoutManager(){
   const addCustomSectionItem=id=>{
     const section=(settings.custom_sections||[]).find(item=>item.id===id)
     const defaults=Object.fromEntries((SECTION_ITEM_FIELDS[section?.type]||[]).map(([key])=>[key,'']))
-    updateCustomSection(id,{items:[...(section?.items||[]),{title:'Novo item',description:'',url:'',image:'',...defaults}]})
+    const defaultTitles={exhibitions:'Nova exposição',process:'Nova etapa do processo',services:'Novo serviço',press:'Nova publicação',testimonials:'Novo depoimento','tattoo-flash':'Novo flash','tattoo-booking':'Nova etapa do agendamento','healed-work':'Novo trabalho cicatrizado','guest-spots':'Nova data / guest spot','studio-team':'Novo integrante'}
+    updateCustomSection(id,{items:[...(section?.items||[]),{title:defaultTitles[section?.type]||'Novo item',description:'',url:'',image:'',...defaults}]})
   }
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
