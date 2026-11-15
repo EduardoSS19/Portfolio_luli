@@ -204,7 +204,10 @@ export function CmsLayoutManager(){
   // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
   // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewScale=hoverPreviewStageWidth/390
+  // Render the hover snapshot at the card's real CSS viewport width. Scaling a
+  // fixed 390px iframe made the frame geometry look correct while its page
+  // typography/media-query layout still appeared magnified in the narrow card.
+  const hoverPreviewScale=1
   const hoverPreviewStageHeight=260
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
@@ -720,7 +723,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:390,height:844,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:'100%',height:844,transform:'none',transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
         </aside>,
