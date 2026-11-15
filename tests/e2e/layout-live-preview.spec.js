@@ -505,7 +505,7 @@ test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async (
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
   await expect(page.locator('.cms-nav').getByRole('button', { name: /Páginas/ })).toBeVisible()
-}
+})
 
 test('modal de hover representa o viewport desktop e mantém interação', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
@@ -617,7 +617,7 @@ test('o editor de conteúdo fica na área Páginas, separado do Layout', async (
   await expect(page.locator('.cms-pages-workspace')).toBeVisible()
   await expect(page.locator('.cms-pages-tree-sections')).toContainText('Abertura')
   await expect(page.locator('.cms-pages-editor-fields')).toBeVisible()
-}
+})
 
 test('layouts espaçosos não deixam um vão exagerado depois do contato', async ({ page }) => {
   await openLiveLayoutPreview(page)
