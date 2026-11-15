@@ -37,8 +37,8 @@ export function PageRenderer({ pages = [], data, preview = false }) {
   if (!activePage) return <main className="composer-site composer-not-found"><h1>Esta página não existe.</h1><a href="/">Voltar ao início</a></main>
   const profile = data.sobre || {}
   const navigation = publishedPages
-  return <main className="composer-site" id="topo">
-    <nav className="composer-navigation" aria-label="Navegação do portfólio"><a className="composer-brand" href="/">{profile.nome || 'Portfólio'}</a><div>{navigation.map(page=><a key={page.id} href={page.slug === 'inicio' ? '/' : `/${page.slug}`} aria-current={page.id === activePage.id ? 'page' : undefined}>{page.title}</a>)}</div></nav>
+  return <main className={"composer-site mode-" + (data.layout?.presentation_mode || "editorial") + " nav-" + (data.layout?.navigation_mode || "curtain")} id="topo">
+    <nav className={"composer-navigation nav-style-" + (data.layout?.navigation_mode || "curtain")} aria-label="Navegação do portfólio"><a className="composer-brand" href="/">{profile.nome || 'Portfólio'}</a><div>{navigation.map(page=><a key={page.id} href={page.slug === 'inicio' ? '/' : `/${page.slug}`} aria-current={page.id === activePage.id ? 'page' : undefined}>{page.title}</a>)}</div></nav>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview}/>)}
     <Footer nome={profile.nome} instagram={profile.instagram} email={profile.email} redes={data.redes || []}/>
   </main>
