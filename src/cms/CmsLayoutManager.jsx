@@ -186,8 +186,6 @@ export function CmsLayoutManager(){
   const hoverPreviewIframeRef=useRef(null)
   const hoverPreviewViewportRef=useRef(null)
   const hoverPreviewHideTimerRef=useRef(null)
-  // Modo temporário de inspeção: mantém somente o primeiro hover aberto.
-  const hoverPreviewPinnedRef=useRef(false)
   const suppressOptionPreviewRef=useRef(null)
   const ignoreWorkspaceScrollRef=useRef(false)
   const optionScrollBeforeInteractionRef=useRef(null)
@@ -203,14 +201,11 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
-  // Mantém o viewport lógico mobile em 390px e reduz a pintura para a
-  // largura útil do cartão. Assim media queries e medidas em vw são calculadas
-  // como num telefone, sem deixar o iframe ultrapassar horizontalmente o modal.
+  // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
+  // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewScale=Math.min(1,hoverPreviewStageWidth/390)
+  const hoverPreviewScale=hoverPreviewStageWidth/390
   const hoverPreviewStageHeight=260
-  const hoverPreviewDocumentWidth=390
-  const hoverPreviewDocumentHeight=844
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -453,7 +448,6 @@ export function CmsLayoutManager(){
     }
   }
   const closeOptionPreview=()=>{
-    hoverPreviewPinnedRef.current=false
     cancelOptionPreviewHide()
     const focusedOption=document.querySelector('.cms-layout-option:focus-within input[type="radio"]')
     const dismissed=hoveredOption|| (focusedOption?{name:focusedOption.name,value:focusedOption.value}:null)
@@ -466,7 +460,6 @@ export function CmsLayoutManager(){
   useEffect(()=>{
     if(!hoverPreviewMounted)return
     const dismissFromWorkspaceGesture=event=>{
-      if(hoverPreviewPinnedRef.current)return
       if(ignoreWorkspaceScrollRef.current)return
       const preview=document.querySelector('.cms-layout-hover-preview')
       if(preview&&(event.target===preview||preview.contains(event.target))){
@@ -491,7 +484,6 @@ export function CmsLayoutManager(){
     }
   },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
-    if(hoverPreviewPinnedRef.current)return
     if(suppressOptionPreviewRef.current&&event?.type==='pointerleave'){
       suppressOptionPreviewRef.current=null
       return
@@ -509,9 +501,6 @@ export function CmsLayoutManager(){
     },320)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
-    // Congela a primeira opção exibida para inspeção manual; outros hovers não a substituem.
-    if(hoverPreviewPinnedRef.current)return
-    hoverPreviewPinnedRef.current=true
     // Ignora apenas o evento sintético da mesma opção que acabou de ser fechada.
     // Uma opção diferente continua podendo abrir sua prévia sem esperar o timeout.
     const suppressedOption=suppressOptionPreviewRef.current
@@ -725,13 +714,13 @@ export function CmsLayoutManager(){
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:2147483000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:hoverPreviewDocumentWidth,height:hoverPreviewDocumentHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:390,height:844,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
         </aside>,
