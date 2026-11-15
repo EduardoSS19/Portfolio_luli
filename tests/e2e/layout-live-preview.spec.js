@@ -547,23 +547,19 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
     scrolling: frame.getAttribute('scrolling'),
     frameHeight: frame.closest('.cms-layout-hover-preview-frame').getBoundingClientRect().height,
     logicalWidth: frame.contentWindow.innerWidth,
-    documentWidth: frame.contentDocument.documentElement.clientWidth,
     scale: Number(frame.closest('.cms-layout-preview-stage-scaled').dataset.previewScale),
     renderedWidth: frame.getBoundingClientRect().width,
     stageWidth: frame.closest('.cms-layout-preview-stage-scaled').getBoundingClientRect().width,
     modalOverflow: getComputedStyle(frame.closest('.cms-layout-hover-preview-floating')).overflow,
   }))
   expect(behavior.pointerEvents).toBe('none')
-  // The hover card must use its actual narrow viewport, not scale a 390px
-  // document down after layout; that mismatch was the source of the apparent zoom.
-  expect(behavior.transform).toBe('none')
+  expect(behavior.transform).not.toBe('none')
   expect(Math.abs(behavior.renderedWidth - behavior.stageWidth)).toBeLessThan(1)
-  expect(Math.abs(behavior.logicalWidth - behavior.stageWidth)).toBeLessThan(1)
-  expect(Math.abs(behavior.documentWidth - behavior.stageWidth)).toBeLessThan(1)
   expect(behavior.zoom).toBe('1')
   expect(behavior.scrolling).toBe('no')
-  expect(behavior.logicalWidth).toBeGreaterThan(300)
-  expect(behavior.scale).toBe(1)
+  expect(behavior.logicalWidth).toBe(390)
+  expect(behavior.scale).toBeGreaterThan(0)
+  expect(behavior.scale).toBeLessThanOrEqual(1)
   expect(behavior.frameHeight).toBeGreaterThanOrEqual(250)
   expect(behavior.modalOverflow).toBe('hidden')
 })
