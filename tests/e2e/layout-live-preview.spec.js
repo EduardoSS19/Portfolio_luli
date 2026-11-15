@@ -376,7 +376,7 @@ test('modelos preenchem todas as seções preparadas com exemplos adequados ao t
   await expect(page.locator('[data-preview-example="true"]')).toHaveCount(types.length)
   await expect(page.locator('.portfolio-custom-empty-preview')).toHaveCount(0)
   await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(22)
-  await expect(page.locator('.section-tattoo-flash')).toContainText('Flash disponível')
+  await expect(page.locator('.section-tattoo-flash')).toContainText('Flash disponíveis')
   await expect(page.locator('.section-tattoo-booking')).toContainText('orçamento')
   await expect(page.locator('.section-healed-work')).toContainText('cicatrizada')
   await expect(page.locator('.section-studio-team')).toContainText('Artista residente')
@@ -515,7 +515,7 @@ test('biblioteca de seções mantém os submenus recolhidos e oferece campos e d
   await menus.nth(0).locator('summary').click()
   await section.getByRole('button', { name: '+ Adicionar flash' }).click()
   await section.locator('.cms-layout-custom-item summary').click()
-  await expect(section.getByText('Disponibilidade')).toBeVisible()
+  await expect(section.getByLabel('Disponibilidade')).toBeVisible()
 })
 
 test('modal de hover usa viewport nativo e não recebe interação ou rolagem', async ({ page }) => {
