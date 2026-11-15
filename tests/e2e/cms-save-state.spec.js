@@ -147,14 +147,21 @@ test('prévia contextual usa Floating UI, navega e permanece interativa enquanto
     transform: getComputedStyle(frame).transform,
     scrolling: frame.getAttribute('scrolling'),
     pointerEvents: getComputedStyle(frame).pointerEvents,
+    scale: Number(frame.style.transform.match(/[0-9.]+/)?.[0] || 1),
+    stageWidth: frame.parentElement.getBoundingClientRect().width,
+    modalWidth: frame.closest('.cms-layout-hover-preview-floating').getBoundingClientRect().width,
   }))
-  expect(viewport.width).toBeGreaterThanOrEqual(360)
-  expect(viewport.width).toBeLessThanOrEqual(390)
-  expect(viewport.documentWidth).toBe(viewport.width)
-  expect(viewport.height).toBeGreaterThanOrEqual(400)
-  expect(viewport.transform).toBe('none')
+  expect(viewport.width).toBe(1440)
+  expect(viewport.documentWidth).toBe(1440)
+  expect(viewport.height).toBe(900)
+  expect(viewport.transform).not.toBe('none')
   expect(viewport.scrolling).toBe('auto')
   expect(viewport.pointerEvents).toBe('auto')
+  expect(viewport.modalWidth).toBeGreaterThan(600)
+  expect(viewport.modalWidth).toBeLessThanOrEqual(920)
+  expect(viewport.stageWidth).toBeLessThanOrEqual(viewport.modalWidth)
+  expect(viewport.scale).toBeGreaterThan(0)
+  expect(viewport.scale).toBeLessThan(1)
 
   const optionAfterHover = await leftOption.boundingBox()
   expect(optionAfterHover).toEqual(optionBeforeHover)
