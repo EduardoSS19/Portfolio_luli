@@ -505,8 +505,9 @@ export function CmsLayoutManager(){
     const suppressedOption=suppressOptionPreviewRef.current
     // Ao fechar o portal, o ponteiro pode revelar uma opção que estava atrás
     // dele. Ignore esse mouseenter sintético até o ponteiro sair do controle.
-    if(suppressedOption&&event?.type==='mouseenter')return
-    if(suppressedOption?.name===name&&suppressedOption?.value===value)return
+    if(suppressedOption?.name===name&&suppressedOption?.value===value&&event?.type==='mouseenter')return
+    // A nova opção representa uma intenção explícita do usuário; não deixe
+    // uma dispensa anterior bloquear a abertura de outra prévia.
     if(suppressedOption)suppressOptionPreviewRef.current=null
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
