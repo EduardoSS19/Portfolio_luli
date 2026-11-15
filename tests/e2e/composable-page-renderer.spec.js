@@ -6,7 +6,8 @@ const pageSchema = {
     { id: 'home', slug: 'inicio', title: 'Início', published: true, sections: [
       { id: 'opening', type: 'hero', settings: { title: 'Luli Becker', eyebrow: 'ARTISTA VISUAL', body: 'Arte, pesquisa e experimentação.' } },
       { id: 'works', type: 'gallery', settings: { title: 'Trabalhos selecionados', width: 'wide' } },
-      { id: 'flash', type: 'tattoo-flash', settings: { title: 'Flash disponíveis' }, items: [{ title: 'Lua crescente', description: 'Blackwork autoral', image_url: 'https://example.com/lua.jpg', price: 'R$ 450', status: 'Disponível' }] },\n      { id: 'references', type: 'references', settings: { title: 'Trajetória' }, items: [{ title: 'Exposição coletiva', period: '2025', venue: 'Museu de Arte', location: 'Porto Alegre' }] },
+      { id: 'flash', type: 'tattoo-flash', settings: { title: 'Flash disponíveis' }, items: [{ title: 'Lua crescente', description: 'Blackwork autoral', image_url: 'https://example.com/lua.jpg', price: 'R$ 450', status: 'Disponível' }] },
+      { id: 'references', type: 'references', settings: { title: 'Trajetória' }, items: [{ title: 'Exposição coletiva', period: '2025', venue: 'Museu de Arte', location: 'Porto Alegre' }] },
     ] },
     { id: 'about', slug: 'sobre', title: 'Sobre', published: true, sections: [
       { id: 'about-copy', type: 'rich-text', settings: { title: 'Sobre a artista', body: 'Pesquisa visual e processos.' } },
@@ -68,7 +69,11 @@ test('os modos de galeria alteram a composição real dos cards', async ({ page 
     ['immersive', 'grid', ''],
     ['brutalist', 'grid', ''],
     ['stack', 'grid', ''],
-    ['spotlight', 'grid', ''],\n    ['museum', 'grid', ''],\n    ['cinematic', 'flex', 'x'],\n    ['swiss', 'grid', ''],\n    ['tattoo-book', 'grid', ''],
+    ['spotlight', 'grid', ''],
+    ['museum', 'grid', ''],
+    ['cinematic', 'flex', 'x'],
+    ['swiss', 'grid', ''],
+    ['tattoo-book', 'grid', ''],
   ]
   for (const [mode, display, snap] of cases) {
     await openComposablePortfolio(page, mode, 'dock')
