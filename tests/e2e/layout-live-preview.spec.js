@@ -483,7 +483,7 @@ test('menu lateral permanece fechado na prévia até o visitante clicar para abr
   await expect(nav).toHaveClass(/menu-aberto/)
 })
 
-test('biblioteca de seções mantém os submenus recolhidos e oferece campos e design específicos', async ({ page }) => {
+test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
@@ -500,23 +500,12 @@ test('biblioteca de seções mantém os submenus recolhidos e oferece campos e d
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
-  const library = page.locator('.cms-layout-section-library')
-  const addMenu = library.locator('.cms-layout-library-add')
-  await expect(addMenu).not.toHaveAttribute('open', '')
-  await addMenu.locator('summary').click()
-  await library.getByRole('button', { name: /Flash tattoo/ }).click()
-  const section = library.locator('.cms-layout-custom-section').last()
-  const menus = section.locator('details.cms-layout-custom-section-editor')
-  await expect(menus).toHaveCount(2)
-  await expect(menus.nth(0)).not.toHaveAttribute('open', '')
-  await expect(menus.nth(1)).not.toHaveAttribute('open', '')
-  await menus.nth(1).locator('summary').click()
-  await expect(menus.nth(1).getByLabel('Estilo de apresentação')).toHaveValue('flash-grid')
-  await menus.nth(0).locator('summary').click()
-  await section.getByRole('button', { name: '+ Adicionar flash' }).click()
-  await section.locator('.cms-layout-custom-item summary').click()
-  await expect(section.locator('.cms-layout-custom-item').getByPlaceholder('Ex.: Disponível · Peça única')).toBeVisible()
-})
+  await expect(page.locator('.cms-layout-presets')).toBeVisible()
+  await expect(page.locator('.cms-layout-color-panel')).toBeVisible()
+  await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
+  await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
+  await expect(page.locator('.cms-nav').getByRole('button', { name: /Páginas/ })).toBeVisible()
+}
 
 test('modal de hover representa o viewport desktop e mantém interação', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
@@ -606,12 +595,13 @@ test('iframe completo mantém o menu limitado ao viewport do dispositivo', async
   expect(bounds.panelHeight).toBeLessThanOrEqual(bounds.height + 1)
 })
 
-test('campos e submenus de design são específicos por tipo de seção e começam recolhidos', async ({ page }) => {
+test('o editor de conteúdo fica na área Páginas, separado do Layout', async ({ page }) => {
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
     if (url.pathname.endsWith('/api/cms/layout/')) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
-        settings: {}, permissions: { canView: true, canChange: true },
+        settings: { page_schema: { version: 1, pages: [{ id: 'home', slug: 'inicio', title: 'Início', published: true, sections: [{ id: 'opening', type: 'hero', settings: { title: 'Meu portfólio' } }] }] } },
+        permissions: { canView: true, canChange: true },
       }) })
     }
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
@@ -622,24 +612,12 @@ test('campos e submenus de design são específicos por tipo de seção e começ
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
-  const library = page.locator('.cms-layout-section-library')
-  const addMenu = library.locator('.cms-layout-library-add')
-  await addMenu.locator('summary').click()
-  await library.getByRole('button', { name: /Depoimentos/ }).click()
-  const testimonial = library.locator('.cms-layout-custom-section').last()
-  const contentMenu = testimonial.locator('details.cms-layout-custom-section-editor').first()
-  const designMenu = testimonial.locator('details.cms-layout-custom-section-editor').nth(1)
-  await expect(contentMenu).not.toHaveAttribute('open', '')
-  await expect(designMenu).not.toHaveAttribute('open', '')
-  await contentMenu.locator('summary').click()
-  await testimonial.getByRole('button', { name: '+ Adicionar depoimento' }).click()
-  await testimonial.locator('.cms-layout-custom-item summary').click()
-  await expect(testimonial.getByRole('textbox', { name: 'Depoimento', exact: true })).toBeVisible()
-  await expect(testimonial.getByLabel('Texto do depoimento', { exact: true })).toBeVisible()
-  await designMenu.locator('summary').click()
-  await expect(designMenu.getByText(/Dê protagonismo às falas/)).toBeVisible()
-  await expect(designMenu.getByLabel('Estilo de apresentação')).toHaveValue('quotes')
-})
+  await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
+  await page.locator('.cms-nav').getByRole('button', { name: /Páginas/ }).click()
+  await expect(page.locator('.cms-pages-workspace')).toBeVisible()
+  await expect(page.locator('.cms-pages-tree-sections')).toContainText('Abertura')
+  await expect(page.locator('.cms-pages-editor-fields')).toBeVisible()
+}
 
 test('layouts espaçosos não deixam um vão exagerado depois do contato', async ({ page }) => {
   await openLiveLayoutPreview(page)
