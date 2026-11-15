@@ -114,3 +114,16 @@
  .mode-spotlight .composer-gallery .obras-lista>.obra .obra-galeria{height:64vh}
  .mode-brutalist .composer-gallery .obras-lista{grid-template-columns:1fr}.mode-brutalist .composer-gallery .obras-lista>.obra:nth-child(n){transform:none}
 }
+
+/* Global layout controls consistently cascade through every composed page and section. */
+.composer-site.spacing-compact .composer-section{padding-block:clamp(2rem,5vw,5rem)}
+.composer-site.spacing-comfortable .composer-section{padding-block:clamp(3.5rem,8vw,8rem)}
+.composer-site.spacing-spacious .composer-section{padding-block:clamp(5rem,12vw,12rem)}
+.composer-site.width-compact .composer-section{--section-width:min(100% - 3rem,760px)}
+.composer-site.width-standard .composer-section{--section-width:min(100% - 3rem,1180px)}
+.composer-site.width-wide .composer-section{--section-width:min(100% - 3rem,1600px)}
+.composer-hero.hero-size-compact{min-height:62svh}
+.composer-hero.hero-size-large{min-height:min(88svh,1000px)}
+.mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,3),minmax(0,1fr))}
+.mode-brutalist .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,2),minmax(0,1fr))}
+@media(max-width:760px){.mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.mode-brutalist .composer-gallery .obras-lista{grid-template-columns:1fr}}
