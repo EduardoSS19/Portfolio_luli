@@ -894,7 +894,7 @@ export default function App() {
         modoGaleria={modoGaleria}
         aoTrocarModo={trocarModoGaleria}
         tema={tema}
-        aoTrocarTema={() => setTema(atual => atual === 'escuro' ? 'claro' : 'escuro')}
+        aoTrocarTema={() => setTema(atual => { const next=atual === 'escuro' ? 'claro' : 'escuro'; const prefix=next==='claro'?'light':'dark'; const background=layout[`${prefix}_color_background`]|| (next==='claro'?'#f5f2eb':'#061522'); window.parent.postMessage({type:'cms-layout-preview:theme',theme:next,background},window.location.origin); return next })}
         navigationMode={layout.navigation_mode || 'curtain'}
         nomeArtista={sobre.nome}
         fraseArtista={sobre.frase}
