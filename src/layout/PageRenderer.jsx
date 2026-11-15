@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Sobre } from '../components/Sobre.jsx'
 import { SecaoCategoria } from '../components/SecaoCategoria.jsx'
 import { GaleriaGrade } from '../components/GaleriaGrade.jsx'
@@ -30,15 +30,31 @@ function Section({ section, data, preview }) {
   return null
 }
 
+function PortfolioNavigation({ pages, activePage, profile, mode }) {
+  const [open,setOpen]=useState(false)
+  const expandable=['curtain','dropdown','sidebar','index'].includes(mode)
+  const label=mode==='curtain'?'Abrir navegação':mode==='sidebar'?'Abrir índice lateral':mode==='index'?'Abrir índice de capítulos':'Abrir menu'
+  return <nav className={"composer-navigation nav-style-"+mode+(open?' is-open':'')} aria-label="Navegação do portfólio">
+    <div className="composer-navigation-bar">
+      <a className="composer-brand" href="/">{profile.nome||'Portfólio'}</a>
+      {expandable&&<button type="button" className="composer-navigation-toggle" aria-expanded={open} aria-label={open?'Fechar navegação':label} onClick={()=>setOpen(value=>!value)}><span>{open?'Fechar':'Explorar'}</span><i aria-hidden="true">{open?'×':'＋'}</i></button>}
+    </div>
+    <div className="composer-navigation-links" aria-hidden={expandable&&!open}>
+      {pages.map((page,index)=><a key={page.id} href={page.slug==='inicio'?'/':`/${page.slug}`} aria-current={page.id===activePage.id?'page':undefined} onClick={()=>setOpen(false)}><span className="composer-navigation-number">{String(index+1).padStart(2,'0')}</span>{page.title}</a>)}
+    </div>
+  </nav>
+}
+
 export function PageRenderer({ pages = [], data, preview = false }) {
-  const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
+  const path = window.location.pathname.replace(/^\\/+|\\/+$/g, '')
   const publishedPages = pages.filter(page => page.published !== false)
   const activePage = publishedPages.find(page => page.slug === path) || (!path ? publishedPages.find(page => page.slug === 'inicio') || publishedPages[0] : null)
   if (!activePage) return <main className="composer-site composer-not-found"><h1>Esta página não existe.</h1><a href="/">Voltar ao início</a></main>
   const profile = data.sobre || {}
-  const navigation = publishedPages
-  return <main className={"composer-site mode-" + (data.layout?.presentation_mode || "editorial") + " nav-" + (data.layout?.navigation_mode || "curtain")} id="topo">
-    <nav className={"composer-navigation nav-style-" + (data.layout?.navigation_mode || "curtain")} aria-label="Navegação do portfólio"><a className="composer-brand" href="/">{profile.nome || 'Portfólio'}</a><div>{navigation.map(page=><a key={page.id} href={page.slug === 'inicio' ? '/' : `/${page.slug}`} aria-current={page.id === activePage.id ? 'page' : undefined}>{page.title}</a>)}</div></nav>
+  const mode=data.layout?.presentation_mode||'editorial'
+  const navigationMode=data.layout?.navigation_mode||'curtain'
+  return <main className={"composer-site mode-"+mode+" nav-"+navigationMode} id="topo">
+    <PortfolioNavigation pages={publishedPages} activePage={activePage} profile={profile} mode={navigationMode}/>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview}/>)}
     <Footer nome={profile.nome} instagram={profile.instagram} email={profile.email} redes={data.redes || []}/>
   </main>
