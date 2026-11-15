@@ -364,7 +364,7 @@ export function CmsLayoutManager(){
   const inlinePreviewTheme=previewingPreset?.settings.default_theme||settings.default_theme||'escuro'
   const inlinePreviewThemeBackground=settings[`${inlinePreviewTheme==='claro'?'light':'dark'}_color_background`]||DEFAULTS.dark_color_background
   useEffect(()=>{setPreviewCanvasBackground(inlinePreviewThemeBackground)},[inlinePreviewThemeBackground,inlinePreviewTheme,previewingPresetId])
-  useEffect(()=>{const receiveTheme=event=>{if(event.origin!==window.location.origin||event.data?.type!=='cms-layout-preview:theme'||typeof event.data.background!=='string')return;setPreviewCanvasBackground(event.data.background)};window.addEventListener('message',receiveTheme);return()=>window.removeEventListener('message',receiveTheme)},[])
+  useEffect(()=>{const receiveTheme=event=>{if(event.origin!==window.location.origin||event.data?.type!=='cms-layout-preview:theme'||event.source!==inlinePreviewIframeRef.current?.contentWindow||typeof event.data.background!=='string')return;setPreviewCanvasBackground(event.data.background)};window.addEventListener('message',receiveTheme);return()=>window.removeEventListener('message',receiveTheme)},[])
   const scrollToElement=(element)=>element?.scrollIntoView({behavior:'smooth',block:'start'})
   const previewLayoutPreset=preset=>{
     setPreviewingPresetId(preset.id)
