@@ -295,3 +295,24 @@
 .site-shell[data-layout-preview="true"] .controles-flutuantes{
   position:fixed;
 }
+
+
+/* Keep the preview navigation overlay bounded to the iframe's actual viewport. */
+.site-shell[data-layout-preview="true"] .editorial-menu-backdrop{
+  inset:0!important;
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  box-sizing:border-box;
+}
+.site-shell[data-layout-preview="true"] .editorial-menu-panel{
+  min-height:0;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.site-shell[data-layout-preview="true"] .editorial-nav.navigation-sidebar .editorial-menu-panel{
+  height:100%;
+  max-height:100%;
+}
