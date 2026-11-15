@@ -719,7 +719,7 @@
 /* Final hover-preview geometry: the desktop card is narrower and taller,
    while the iframe keeps its full logical device viewport and computed scale. */
 .cms-layout-hover-preview-floating{
-  width:min(760px,calc(100vw - 32px))!important;
+  width:min(680px,calc(100vw - 32px))!important;
   max-width:calc(100vw - 32px)!important;
 }
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
