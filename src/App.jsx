@@ -527,43 +527,8 @@ export default function App() {
     trocaModoPendenteRef.current = null
   }, [modoGaleria])
 
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('layout_preview_compact') !== '1') return undefined
-    // The hover snapshot is passive: allow programmatic focus changes but block
-    // wheel, touch and keyboard scrolling initiated by the visitor.
-    const preventManualScroll = event => {
-      if (event.cancelable) event.preventDefault()
-    }
-    const preventScrollKeys = event => {
-      if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'].includes(event.key)) {
-        event.preventDefault()
-      }
-    }
-    const root = document.documentElement
-    const body = document.body
-    const previousRootOverflow = root.style.overflow
-    const previousBodyOverflow = body.style.overflow
-    root.style.overflow = 'hidden'
-    body.style.overflow = 'hidden'
-    root.style.overscrollBehavior = 'none'
-    body.style.overscrollBehavior = 'none'
-    document.addEventListener('wheel', preventManualScroll, { capture: true, passive: false })
-    document.addEventListener('touchmove', preventManualScroll, { capture: true, passive: false })
-    window.addEventListener('wheel', preventManualScroll, { passive: false })
-    window.addEventListener('touchmove', preventManualScroll, { passive: false })
-    window.addEventListener('keydown', preventScrollKeys)
-    return () => {
-      document.removeEventListener('wheel', preventManualScroll, true)
-      document.removeEventListener('touchmove', preventManualScroll, true)
-      window.removeEventListener('wheel', preventManualScroll)
-      window.removeEventListener('touchmove', preventManualScroll)
-      window.removeEventListener('keydown', preventScrollKeys)
-      root.style.overflow = previousRootOverflow
-      body.style.overflow = previousBodyOverflow
-      root.style.overscrollBehavior = ''
-      body.style.overscrollBehavior = ''
-    }
-  }, [])
+  // O hover preview usa um iframe interativo; a rolagem fica contida nele
+  // e nunca é propagada para a página externa do CMS.
 
   useEffect(() => {
     if (carregando || !new URLSearchParams(window.location.search).has('layout_preview')) return undefined
@@ -582,7 +547,7 @@ export default function App() {
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
-        // Só a miniatura passiva abre o menu automaticamente ao comparar estilos.
+        // O hover preview abre o menu no próprio iframe ao comparar a navegação.
         // A prévia completa continua navegável pelo próprio usuário.
         detail: { open: hoverSnapshot && event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
       }))
