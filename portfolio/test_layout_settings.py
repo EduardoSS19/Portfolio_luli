@@ -94,6 +94,53 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertEqual(normalized["custom_sections"], sections)
         self.assertTrue(is_valid_layout_setting("custom_sections", sections))
 
+
+    def test_custom_sections_preserve_type_specific_fields_and_design(self):
+        sections = [{
+            "id": "healed-work-demo",
+            "type": "healed-work",
+            "title": "Trabalhos cicatrizados",
+            "intro": "Resultados após a cicatrização.",
+            "design": {"layout": "before-after", "columns": "2", "image_ratio": "square", "density": "compact"},
+            "items": [{
+                "title": "Botânica",
+                "description": "Registro após seis meses.",
+                "placement": "Antebraço",
+                "healing_time": "6 meses",
+                "image_before": "https://example.com/before.jpg",
+                "image_after": "https://example.com/after.jpg",
+            }],
+        }]
+        normalized = normalize_layout_settings({"custom_sections": sections})
+        self.assertEqual(normalized["custom_sections"], sections)
+        self.assertTrue(is_valid_layout_setting("custom_sections", sections))
+
+    def test_custom_section_normalizer_rejects_unhashable_schema_values_safely(self):
+        malformed_type = [{
+            "id": "bad-type", "type": [], "title": "Invalid",
+            "intro": "", "items": [],
+        }]
+        malformed_design = [{
+            "id": "bad-design", "type": "services", "title": "Services",
+            "intro": "", "design": {"layout": [], "columns": {}, "image_ratio": [], "density": {}},
+            "items": [{"title": "Consultoria"}],
+        }]
+        self.assertFalse(is_valid_layout_setting("custom_sections", malformed_type))
+        self.assertFalse(is_valid_layout_setting("custom_sections", malformed_design))
+
+    def test_custom_section_design_and_type_specific_urls_are_allow_listed(self):
+        unsafe_design = [{
+            "id": "unsafe-design", "type": "tattoo-flash", "title": "Flash",
+            "intro": "", "design": {"layout": "script-injection", "columns": "2", "image_ratio": "square", "density": "compact"},
+            "items": [{"title": "Lua"}],
+        }]
+        unsafe_image = [{
+            "id": "unsafe-image", "type": "healed-work", "title": "Cicatrizados",
+            "intro": "", "items": [{"title": "Flor", "image_after": "javascript:alert(1)"}],
+        }]
+        self.assertFalse(is_valid_layout_setting("custom_sections", unsafe_design))
+        self.assertFalse(is_valid_layout_setting("custom_sections", unsafe_image))
+
     def test_custom_sections_reject_unsafe_urls_and_unknown_types(self):
         unsafe = [{
             "id": "bad-section", "type": "process", "title": "Processo",

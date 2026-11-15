@@ -47,6 +47,62 @@ const SECTION_TEMPLATES = [
   {type:'guest-spots',title:'Agenda e guest spots',label:'Agenda',intro:'Datas, cidades e estúdios onde o artista estará atendendo.'},
   {type:'studio-team',title:'Estúdio e equipe',label:'Equipe',intro:'Apresentação do estúdio e dos artistas que fazem parte dele.'},
 ]
+const SECTION_ITEM_FIELDS = {
+ exhibitions:[['period','Ano / período','Ex.: 2025'],['venue','Instituição / espaço','Ex.: Museu de Arte'],['location','Cidade / local','Ex.: Porto Alegre, Brasil'],['format','Participação','Ex.: Individual · Coletiva']],
+ process:[['stage','Etapa do processo','Ex.: Pesquisa inicial'],['technique','Técnica','Ex.: Aquarela e colagem'],['materials','Materiais','Ex.: Papel, pigmento, madeira']],
+ services:[['format','Formato do serviço','Ex.: Projeto personalizado'],['price','Investimento','Ex.: A partir de R$ 800'],['duration','Prazo / duração','Ex.: 3 encontros']],
+ press:[['publication','Veículo / publicação','Ex.: Revista Traço'],['author','Autoria','Ex.: Texto de Ana Lima'],['period','Data da publicação','Ex.: Outubro de 2025']],
+ testimonials:[['author','Pessoa / cliente','Ex.: Marina Costa'],['role','Cargo / relação','Ex.: Curadora'],['project','Projeto relacionado','Ex.: Cartografias afetivas']],
+ 'tattoo-flash':[['size','Tamanho','Ex.: 8 cm'],['placement','Local sugerido','Ex.: Antebraço'],['price','Valor','Ex.: R$ 450'],['status','Disponibilidade','Ex.: Disponível · Peça única']],
+ 'tattoo-booking':[['step','Etapa','Ex.: 1 · Envie sua ideia'],['channel','Canal de contato','Ex.: Formulário ou Instagram'],['response_time','Prazo de retorno','Ex.: Até 3 dias úteis'],['policy','Orientação','Ex.: Envie referências e medidas']],
+ 'healed-work':[['placement','Local tatuado','Ex.: Antebraço'],['healing_time','Tempo de cicatrização','Ex.: 6 meses'],['period','Data do registro','Ex.: Janeiro de 2026'],['image_before','Imagem antes (URL)','https://…'],['image_after','Imagem cicatrizada (URL)','https://…']],
+ 'guest-spots':[['city','Cidade','Ex.: São Paulo'],['studio','Estúdio anfitrião','Ex.: Casa Tinta'],['dates','Datas','Ex.: 12–16 de março'],['booking_url','Link para agendamento','https://…']],
+ 'studio-team':[['role','Função','Ex.: Artista residente'],['specialties','Especialidades','Ex.: Fine line · Botânica'],['instagram','Instagram','@artista']],
+}
+const SECTION_DESIGNS = {
+ exhibitions:[['timeline','Linha do tempo'],['cards','Cartões'],['list','Lista editorial']],
+ process:[['steps','Etapas numeradas'],['gallery','Galeria visual'],['editorial','Texto e imagem']],
+ services:[['cards','Serviços em cartões'],['list','Lista de serviços'],['featured','Serviço em destaque']],
+ press:[['list','Lista de publicações'],['cards','Capas em cartões']],
+ testimonials:[['quotes','Depoimentos em destaque'],['cards','Cartões']],
+ 'tattoo-flash':[['flash-grid','Grade de flash'],['masonry','Mosaico irregular'],['cards','Cartões']],
+ 'tattoo-booking':[['steps','Passo a passo'],['accordion','Perguntas e orientações'],['cards','Cartões']],
+ 'healed-work':[['gallery','Galeria de resultados'],['before-after','Comparação visual'],['cards','Cartões']],
+ 'guest-spots':[['agenda','Agenda'],['cards','Cartões']],
+ 'studio-team':[['team-grid','Grade da equipe'],['list','Lista da equipe']],
+}
+
+
+const SECTION_DESIGN_HELP = {
+  exhibitions:'Escolha entre uma linha do tempo para trajetória, cartões para eventos ou uma lista editorial para instituições e participações.',
+  process:'Defina se o processo será contado em etapas, por imagens em galeria ou em uma composição editorial de texto e imagem.',
+  services:'Destaque um serviço principal, apresente opções em cartões ou mantenha uma lista objetiva de modalidades.',
+  press:'Organize matérias como lista de leitura ou cartões com capas de publicações.',
+  testimonials:'Dê protagonismo às falas em citações ou distribua os depoimentos em cartões.',
+  'tattoo-flash':'Escolha uma grade direta de flashes, um mosaico irregular ou cartões com mais informações de reserva.',
+  'tattoo-booking':'Mostre o agendamento como passo a passo, perguntas expansíveis ou cartões de orientação.',
+  'healed-work':'Compare antes e depois, use uma galeria de resultados ou cartões com detalhes de cicatrização.',
+  'guest-spots':'Organize as datas como agenda ou cartões por cidade e estúdio.',
+  'studio-team':'Destaque a equipe em uma grade de retratos ou em uma lista de artistas e especialidades.',
+}
+
+
+
+const SECTION_ITEM_COPY = {
+  default:{title:'Nome / título',description:'Descrição',image:'Imagem do conteúdo (URL)',action:'Link / ação (URL)',intro:'Texto de apresentação'},
+  exhibitions:{title:'Nome da exposição / evento',description:'Sobre a participação',image:'Imagem da exposição (URL)',action:'Link da instituição ou evento (URL)',intro:'Contexto da trajetória'},
+  process:{title:'Etapa / estudo do processo',description:'O que acontece nesta etapa',image:'Imagem do processo (URL)',action:'Link complementar (URL)',intro:'Apresente sua pesquisa e processo de criação'},
+  services:{title:'Nome do serviço / modalidade',description:'O que está incluído',image:'Imagem ou exemplo do serviço (URL)',action:'Link para solicitar orçamento (URL)',intro:'Explique como funcionam seus serviços e encomendas'},
+  press:{title:'Título da matéria / publicação',description:'Resumo ou chamada da publicação',image:'Capa da publicação (URL)',action:'Abrir matéria ou publicação (URL)',intro:'Selecione entrevistas, matérias e publicações relevantes'},
+  testimonials:{title:'Depoimento',description:'Texto do depoimento',image:'Retrato ou imagem relacionada (URL)',action:'Link do projeto (URL)',intro:'Relatos de clientes, parceiros e instituições'},
+  'tattoo-flash':{title:'Nome do flash / desenho',description:'Detalhes do desenho e condições',image:'Imagem do flash (URL)',action:'Link para reservar este flash (URL)',intro:'Mostre os desenhos disponíveis e suas condições de reserva'},
+  'tattoo-booking':{title:'Etapa do agendamento',description:'Orientação para esta etapa',image:'Imagem de referência (URL)',action:'Link para iniciar o agendamento (URL)',intro:'Explique como a pessoa deve se preparar e solicitar um horário'},
+  'healed-work':{title:'Identificação do trabalho cicatrizado',description:'Contexto do resultado após a cicatrização',image:'Imagem complementar (URL)',action:'Link para mais informações (URL)',intro:'Mostre resultados cicatrizados com transparência sobre o tempo'},
+  'guest-spots':{title:'Cidade / participação',description:'Informações sobre datas e disponibilidade',image:'Imagem do estúdio ou cidade (URL)',action:'Link de agendamento (URL)',intro:'Divulgue próximas datas, cidades e estúdios anfitriões'},
+  'studio-team':{title:'Nome do artista / integrante',description:'Apresentação e estilo de trabalho',image:'Retrato do artista (URL)',action:'Portfólio ou contato do artista (URL)',intro:'Apresente as pessoas e especialidades que fazem parte do estúdio'},
+}
+
+
 
 const FIELD_GROUPS = [
   {id:'composition',title:'Composição',description:'Defina a estrutura visual e o ritmo de leitura do portfólio.'},
@@ -70,11 +126,24 @@ function buildPresetSettings(base,preset){
   const existing=(base.custom_sections||[]).filter(section=>!String(section.id).startsWith('preset-'))
   const additions=(preset.sections||[]).map((type,index)=>{
     const template=SECTION_TEMPLATES.find(item=>item.type===type)
-    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,items:[]}:null
+    return template?{id:'preset-'+preset.id+'-'+type+'-'+stamp+'-'+index,type,title:template.title,intro:template.intro,design:{layout:SECTION_DESIGNS[type]?.[0]?.[0]||'cards',columns:'2',image_ratio:'landscape',density:'comfortable'},items:[]}:null
   }).filter(Boolean)
   return {...base,...preset.settings,custom_sections:[...existing,...additions].slice(0,10)}
 }
 
+function normalizeLayoutSettings(raw={}) {
+  const next={...DEFAULTS,...raw}
+  next.custom_sections=(Array.isArray(next.custom_sections)?next.custom_sections:[]).map(section=>({
+    ...section,
+    design:{
+      layout:section.design?.layout||SECTION_DESIGNS[section.type]?.[0]?.[0]||'cards',
+      columns:section.design?.columns||'2',
+      image_ratio:section.design?.image_ratio||'landscape',
+      density:section.design?.density||'comfortable',
+    },
+  }))
+  return next
+}
 function readCookie(name){const prefix=name+'=';const item=document.cookie.split('; ').find(cookie=>cookie.startsWith(prefix));return item?decodeURIComponent(item.slice(prefix.length)):''}
 function luminance(hex){const channels=hex.replace('#','').match(/.{2}/g).map(value=>parseInt(value,16)/255).map(value=>value<=.04045?value/12.92:((value+.055)/1.055)**2.4);return channels[0]*.2126+channels[1]*.7152+channels[2]*.0722}
 function contrastRatio(a,b){const values=[luminance(a),luminance(b)].sort((x,y)=>y-x);return(values[0]+.05)/(values[1]+.05)}
@@ -107,9 +176,7 @@ export function CmsLayoutManager(){
   const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
-  const [previewDocumentHeights,setPreviewDocumentHeights]=useState({floating:PREVIEW_DEVICES.desktop.height,inline:PREVIEW_DEVICES.desktop.height})
-  const previewDocumentHeight=previewDocumentHeights.floating
-  const inlinePreviewDocumentHeight=previewDocumentHeights.inline
+  const [previewDocumentHeight,setPreviewDocumentHeight]=useState(PREVIEW_DEVICES.desktop.height)
   const previewDocumentObserversRef=useRef(new Map())
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
@@ -121,6 +188,7 @@ export function CmsLayoutManager(){
   const hoverPreviewHideTimerRef=useRef(null)
   const suppressOptionPreviewRef=useRef(null)
   const ignoreWorkspaceScrollRef=useRef(false)
+  const optionScrollBeforeInteractionRef=useRef(null)
   const previewViewportRef=useRef(null)
   const previewIframeRef=useRef(null)
   const previewWidth=PREVIEW_DEVICES[previewDevice].width
@@ -132,11 +200,12 @@ export function CmsLayoutManager(){
   // Mantém o viewport lógico do dispositivo e reduz a página inteira pela largura disponível.
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
-  const inlinePreviewStageHeight=inlinePreviewDocumentHeight*inlinePreviewScale
-  // O modal contextual usa a largura móvel real e a altura visível do quadro, sem transform.
-  // Isso mantém menus fixos dentro da área visível e preserva o clique/scroll nativos do iframe.
+  const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
+  // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
+  // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  const hoverPreviewStageHeight=hoverPreviewSize.height||260
+  const hoverPreviewScale=hoverPreviewStageWidth/390
+  const hoverPreviewStageHeight=260
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -186,18 +255,26 @@ export function CmsLayoutManager(){
   },[previewOpen,previewMaximized,previewPosition.x,previewPosition.y,previewSize.width,previewSize.height])
 
   const observePreviewDocument=frame=>{
-    if(!frame?.contentDocument)return
+    if(!frame?.contentDocument||frame===inlinePreviewIframeRef.current)return
     const doc=frame.contentDocument
     const update=()=>{
-      const height=Math.ceil(Math.max(
-        doc.documentElement?.scrollHeight||0,
-        doc.documentElement?.offsetHeight||0,
-        doc.body?.scrollHeight||0,
-        doc.body?.offsetHeight||0
-      ))
+      const footer=doc.querySelector('.rodape, footer')
+      const shell=doc.querySelector('.site-shell')
+      const footerBottom=footer
+        ? Math.ceil(footer.getBoundingClientRect().bottom+(doc.defaultView?.scrollY||0))
+        : 0
+      const shellBottom=shell
+        ? Math.ceil(shell.getBoundingClientRect().bottom+(doc.defaultView?.scrollY||0))
+        : 0
+      // Prefer the actual end of portfolio content. Root/body offsetHeight can
+      // include min-height and leave a large empty tail after the contact section.
+      const contentBottom=footerBottom||shellBottom
+      const height=Math.ceil(contentBottom>0
+        ? contentBottom+12
+        : Math.max(doc.documentElement?.scrollHeight||0,doc.body?.scrollHeight||0,PREVIEW_DEVICES[previewDevice]?.height||0)
+      )
       if(height>0){
-        const key=frame===inlinePreviewIframeRef.current?'inline':'floating'
-        setPreviewDocumentHeights(current=>current[key]===height?current:{...current,[key]:height})
+        setPreviewDocumentHeight(current=>current===height?current:height)
       }
     }
     const previous=previewDocumentObserversRef.current.get(frame)
@@ -214,7 +291,7 @@ export function CmsLayoutManager(){
     }
   }
   const handlePreviewFrameLoad=event=>observePreviewDocument(event.currentTarget)
-  useEffect(()=>{setPreviewDocumentHeights({floating:previewHeight,inline:previewHeight})},[previewDevice])
+  useEffect(()=>{setPreviewDocumentHeight(previewHeight)},[previewDevice])
   useEffect(()=>()=>{previewDocumentObserversRef.current.forEach(observers=>{observers.resize?.disconnect();observers.mutation?.disconnect()});previewDocumentObserversRef.current.clear()},[])
   useLayoutEffect(()=>{
     const element=previewViewportRef.current
@@ -276,7 +353,7 @@ export function CmsLayoutManager(){
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
       .then(async response=>{const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(response.status===403?'Sua conta não tem permissão para acessar o layout.':'Não foi possível carregar as opções de layout.');return data})
-      .then(data=>{if(!active)return;const next={...DEFAULTS,...(data.settings||{})};setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
+      .then(data=>{if(!active)return;const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
       .catch(err=>{if(active)setError(err.message)}).finally(()=>{if(active)setLoading(false)})
     return()=>{active=false}
   },[])
@@ -286,8 +363,7 @@ export function CmsLayoutManager(){
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
-    const hasBio=(hoveredOption.name==='show_bio'?hoveredOption.value:settings.show_bio)!==false||(hoveredOption.name==='show_bio_image'?hoveredOption.value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?(hasBio?'bio':'page'):hoveredOption.name==='show_references'?(hoveredOption.value?'references':'page'):hoveredOption.name==='show_contact'?(hoveredOption.value?'contact':'page'):hoveredOption.name==='navigation_mode'?'navigation':'page'
+    const focus=['gallery_columns','default_gallery_view','presentation_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
     return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -302,7 +378,7 @@ export function CmsLayoutManager(){
     setPreviewingPresetId(preset.id)
     setHoveredOption(null)
     setNotice('Prévia de “'+preset.title+'”. Compare os modelos aqui embaixo e confirme quando decidir.')
-    window.setTimeout(()=>scrollToElement(inlinePreviewSectionRef.current),80)
+    window.requestAnimationFrame(()=>{const target=inlinePreviewSectionRef.current;if(target){const top=target.getBoundingClientRect().top+window.scrollY;window.scrollTo({top,behavior:'instant'})}})
   }
   const stepPreviewPreset=direction=>{
     const currentIndex=Math.max(0,LAYOUT_PRESETS.findIndex(preset=>preset.id===previewingPresetId))
@@ -318,12 +394,12 @@ export function CmsLayoutManager(){
     setPreviewFocus('page')
     setPreviewingPresetId(null)
     setNotice('Modelo “'+preset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
-    window.setTimeout(()=>scrollToElement(postPresetMenuRef.current),80)
+    window.requestAnimationFrame(()=>{const target=postPresetMenuRef.current;if(target){const top=target.getBoundingClientRect().top+window.scrollY;window.scrollTo({top,behavior:'instant'})}})
   }
   const cancelPreviewPreset=()=>{
     setPreviewingPresetId(null)
     setNotice('Escolha de modelo cancelada. Suas configurações anteriores foram mantidas.')
-    window.setTimeout(()=>scrollToElement(presetSectionRef.current),80)
+    window.requestAnimationFrame(()=>{const target=presetSectionRef.current;if(target){const top=target.getBoundingClientRect().top+window.scrollY;window.scrollTo({top,behavior:'instant'})}})
   }
   // A prévia completa pode simular modelos sem alterar as configurações do editor.
   useEffect(()=>{
@@ -379,15 +455,18 @@ export function CmsLayoutManager(){
     setHoverPreviewMounted(false)
     setHoveredOption(null)
   }
-  // A prévia é fixa no viewport; ao rolar o painel externo, ela deixaria de
-  // acompanhar a opção e poderia cobrir os próximos controles. O scroll dentro
-  // do iframe não chega a este listener e continua livre para explorar o site.
+  // A prévia de hover é apenas visual e não recebe navegação. A exploração
+  // interativa do portfólio fica restrita à prévia completa no fim da página.
   useEffect(()=>{
     if(!hoverPreviewMounted)return
     const dismissFromWorkspaceGesture=event=>{
       if(ignoreWorkspaceScrollRef.current)return
       const preview=document.querySelector('.cms-layout-hover-preview')
-      if(preview&&(event.target===preview||preview.contains(event.target)))return
+      if(preview&&(event.target===preview||preview.contains(event.target))){
+        // Wheel/touch over the passive snapshot must not scroll the CMS behind it.
+        if((event.type==='wheel'||event.type==='touchmove')&&event.cancelable)event.preventDefault()
+        return
+      }
       cancelOptionPreviewHide()
       suppressOptionPreviewRef.current=hoveredOption
       setHoverPreviewMounted(false)
@@ -395,15 +474,17 @@ export function CmsLayoutManager(){
     }
     // O scrollIntoView do navegador/Playwright ao alcançar outra opção não é
     // uma intenção de fechar a prévia. Fechamos apenas em gestos explícitos.
-    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:false})
     window.addEventListener('touchstart',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    window.addEventListener('touchmove',dismissFromWorkspaceGesture,{capture:true,passive:false})
     return()=>{
       window.removeEventListener('wheel',dismissFromWorkspaceGesture,true)
       window.removeEventListener('touchstart',dismissFromWorkspaceGesture,true)
+      window.removeEventListener('touchmove',dismissFromWorkspaceGesture,true)
     }
   },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
-    if(suppressOptionPreviewRef.current&&event?.type==='mouseleave'){
+    if(suppressOptionPreviewRef.current&&event?.type==='pointerleave'){
       suppressOptionPreviewRef.current=null
       return
     }
@@ -425,8 +506,9 @@ export function CmsLayoutManager(){
     const suppressedOption=suppressOptionPreviewRef.current
     // Ao fechar o portal, o ponteiro pode revelar uma opção que estava atrás
     // dele. Ignore esse mouseenter sintético até o ponteiro sair do controle.
-    if(suppressedOption&&event?.type==='mouseenter')return
-    if(suppressedOption?.name===name&&suppressedOption?.value===value)return
+    if(suppressedOption?.name===name&&suppressedOption?.value===value&&event?.type==='pointerenter')return
+    // A nova opção representa uma intenção explícita do usuário; não deixe
+    // uma dispensa anterior bloquear a abertura de outra prévia.
     if(suppressedOption)suppressOptionPreviewRef.current=null
     cancelOptionPreviewHide()
     const rect=event?.currentTarget?.getBoundingClientRect?.()
@@ -478,18 +560,29 @@ export function CmsLayoutManager(){
   const updateCustomSection=(id,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===id?{...section,...patch}:section)}))
   const addCustomSection=template=>{
     const id=template.type+'-'+Date.now().toString(36)
-    setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,items:[]}]}))
-    setNotice('Seção adicionada. Abra “Editar conteúdo” para preencher os detalhes.')
+    setSettings(current=>({...current,custom_sections:[...(current.custom_sections||[]),{id,type:template.type,title:template.title,intro:template.intro,design:{layout:SECTION_DESIGNS[template.type]?.[0]?.[0]||'cards',columns:'2',image_ratio:'landscape',density:'comfortable'},items:[]}]}))
+    setNotice('Seção adicionada. Abra “Conteúdo” para preencher os campos específicos e “Design” para escolher sua apresentação.')
   }
   const moveCustomSection=(id,delta)=>setSettings(current=>{const sections=[...(current.custom_sections||[])];const index=sections.findIndex(section=>section.id===id);const target=index+delta;if(index<0||target<0||target>=sections.length)return current;[sections[index],sections[target]]=[sections[target],sections[index]];return {...current,custom_sections:sections}})
   const removeCustomSection=id=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).filter(section=>section.id!==id)}))
-  const addCustomSectionItem=id=>updateCustomSection(id,{items:[...(settings.custom_sections||[]).find(section=>section.id===id)?.items||[],{title:'Novo item',description:'',url:'',image:'',period:''}]})
+  const addCustomSectionItem=id=>{
+    const section=(settings.custom_sections||[]).find(item=>item.id===id)
+    const defaults=Object.fromEntries((SECTION_ITEM_FIELDS[section?.type]||[]).map(([key])=>[key,'']))
+    const defaultTitles={exhibitions:'Nova exposição',process:'Nova etapa do processo',services:'Novo serviço',press:'Nova publicação',testimonials:'Novo depoimento','tattoo-flash':'Novo flash','tattoo-booking':'Nova etapa do agendamento','healed-work':'Novo trabalho cicatrizado','guest-spots':'Nova data / guest spot','studio-team':'Novo integrante'}
+    updateCustomSection(id,{items:[...(section?.items||[]),{title:defaultTitles[section?.type]||'Novo item',description:'',url:'',image:'',...defaults}]})
+  }
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
   const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.default_gallery_view);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
   const change=(name,value)=>{
+    const scrollBeforeInteraction=optionScrollBeforeInteractionRef.current
+    optionScrollBeforeInteractionRef.current=null
     const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name
     setSettings(current=>({...current,[key]:value}))
+    // Selecting an already-visible radio must not jump the whole CMS page.
+    if(scrollBeforeInteraction!==null){
+      window.requestAnimationFrame(()=>window.scrollTo({top:scrollBeforeInteraction,behavior:'instant'}))
+    }
     closeOptionPreview()
     if(name==='default_gallery_view')setPreviewMode(value)
     else if(name==='gallery_columns')setPreviewMode('grade')
@@ -523,7 +616,7 @@ export function CmsLayoutManager(){
       const response=await fetch('/api/cms/layout/',{method:'PATCH',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json','Content-Type':'application/json','X-CSRFToken':readCookie('csrftoken')},body:JSON.stringify(settings)})
       const data=await response.json().catch(()=>({}))
       if(!response.ok)throw new Error(data.error==='layout_edit_permission_required'?'Sua conta não tem permissão para alterar o layout.':'Não foi possível salvar. Tente novamente.')
-      const next={...DEFAULTS,...data.settings};setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
+      const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
     }catch(err){setError(err.message||'Não foi possível salvar.')}finally{setSaving(false)}
   }
   const discard=()=>{setSettings(saved);setPreviewMode(saved.default_gallery_view);setError('');setNotice('Alterações descartadas.')}
@@ -555,60 +648,81 @@ export function CmsLayoutManager(){
         <section className="cms-layout-section-library" ref={postPresetMenuRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">CONTEÚDO MODULAR</p><h2>Biblioteca de seções</h2></div><span className="cms-layout-preset-count">{(settings.custom_sections||[]).length} adicionadas</span></div>
           <p className="cms-layout-help">Adicione apenas o que faz sentido para seu trabalho. Cada seção pode ser editada e organizada; deixe sem itens para mantê-la como rascunho no editor.</p>
-          <div className="cms-layout-section-template-grid">
-            {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
-              <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
-            </button>)}
-          </div>
-          {(settings.custom_sections||[]).map((section,index)=><article className="cms-layout-custom-section" key={section.id}>
-            <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
-            <details className="cms-layout-custom-section-editor">
-              <summary><span>Editar conteúdo</span><small>{(section.items||[]).length} itens cadastrados</small></summary>
-              <div className="cms-layout-custom-section-fields">
-            <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
-            <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
-            <div className="cms-layout-custom-items">
-              {(section.items||[]).map((item,itemIndex)=><div className="cms-layout-custom-item" key={itemIndex}>
-                <div className="cms-layout-custom-item-heading"><strong>Item {itemIndex+1}</strong><button type="button" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button></div>
-                <label>Nome<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
-                <label>Descrição<textarea rows="2" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
-                <div className="cms-layout-custom-item-fields">
-                  <label>Período<input value={item.period||''} maxLength={100} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{period:event.target.value})} disabled={!canChange||saving} placeholder="Ex.: 2025 · Porto Alegre"/></label>
-                  <label>Link externo<input type="url" value={item.url||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
-                  <label>Imagem (URL)<input type="url" value={item.image||''} maxLength={500} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving} placeholder="https://…"/></label>
-                </div>
-              </div>)}
+          <details className="cms-layout-library-add">
+            <summary><span>Adicionar uma seção</span><small>Escolha um formato específico para seu trabalho</small></summary>
+            <div className="cms-layout-section-template-grid">
+              {SECTION_TEMPLATES.map(template=><button type="button" key={template.type} onClick={()=>addCustomSection(template)} disabled={!canChange||saving||(settings.custom_sections||[]).length>=10}>
+                <strong>{template.label}</strong><small>{template.intro}</small><span>+ Adicionar seção</span>
+              </button>)}
             </div>
-            <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar conteúdo</button>
-              </div>
-            </details>
-          </article>)}
+          </details>
+          {(settings.custom_sections||[]).map((section,index)=>{
+            const itemFields=SECTION_ITEM_FIELDS[section.type]||[]
+            const designOptions=SECTION_DESIGNS[section.type]||[['cards','Cartões'],['list','Lista']]
+            const design=section.design||{}
+            const itemCopy=SECTION_ITEM_COPY[section.type]||SECTION_ITEM_COPY.default
+            const layoutUsesColumns=!['timeline','steps','agenda','list','editorial','accordion'].includes(design.layout||designOptions[0][0])
+            const layoutUsesImages=['process','services','press','tattoo-flash','healed-work','studio-team'].includes(section.type)
+            return <article className="cms-layout-custom-section" key={section.id}>
+              <header><div><small>SEÇÃO {String(index+1).padStart(2,'0')}</small><strong>{section.title}</strong></div><div className="cms-layout-custom-section-actions"><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,-1)} disabled={!canChange||saving||index===0} aria-label="Mover seção para cima">↑</button><button type="button" className="cms-editor-cancel" onClick={()=>moveCustomSection(section.id,1)} disabled={!canChange||saving||index===(settings.custom_sections||[]).length-1} aria-label="Mover seção para baixo">↓</button><button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSection(section.id)} disabled={!canChange||saving}>Remover</button></div></header>
+              <details className="cms-layout-custom-section-editor">
+                <summary><span>Conteúdo</span><small>{(section.items||[]).length} itens</small></summary>
+                <div className="cms-layout-custom-section-fields">
+                  <label>Título da seção<input required value={section.title} maxLength={100} onChange={event=>updateCustomSection(section.id,{title:event.target.value})} disabled={!canChange||saving}/></label>
+                  <label>Texto de apresentação<textarea rows="2" maxLength={500} value={section.intro||''} onChange={event=>updateCustomSection(section.id,{intro:event.target.value})} disabled={!canChange||saving}/></label>
+                  <div className="cms-layout-custom-items">
+                    {(section.items||[]).map((item,itemIndex)=><details className="cms-layout-custom-item" key={itemIndex}>
+                      <summary><strong>{item.title||'Novo item '+(itemIndex+1)}</strong><small>Editar informações</small></summary>
+                      <div className="cms-layout-custom-item-fields">
+                        <label>{itemCopy.title}<input required value={item.title||''} maxLength={120} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{title:event.target.value})} disabled={!canChange||saving}/></label>
+                        <label>{itemCopy.description}<textarea rows="3" maxLength={1200} value={item.description||''} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{description:event.target.value})} disabled={!canChange||saving}/></label>
+                        {itemFields.map(([key,label,placeholder])=><label key={key}>{label}<input value={item[key]||''} maxLength={300} placeholder={placeholder} onChange={event=>updateCustomSectionItem(section.id,itemIndex,{[key]:event.target.value})} disabled={!canChange||saving}/></label>)}
+                        {['exhibitions','process','services','press','testimonials','tattoo-flash','tattoo-booking','healed-work','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.image}<input type="url" value={item.image||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{image:event.target.value})} disabled={!canChange||saving}/></label>}
+                        {['exhibitions','press','testimonials','services','tattoo-flash','tattoo-booking','guest-spots','studio-team'].includes(section.type)&&<label>{itemCopy.action}<input type="url" value={item.url||item.booking_url||''} maxLength={500} placeholder="https://…" onChange={event=>updateCustomSectionItem(section.id,itemIndex,{url:event.target.value})} disabled={!canChange||saving}/></label>}
+                        <button type="button" className="cms-editor-cancel" onClick={()=>removeCustomSectionItem(section.id,itemIndex)} disabled={!canChange||saving}>Excluir item</button>
+                      </div>
+                    </details>)}
+                  </div>
+                  <button type="button" className="cms-layout-add-item" onClick={()=>addCustomSectionItem(section.id)} disabled={!canChange||saving||(section.items||[]).length>=20}>+ Adicionar {section.type==='testimonials'?'depoimento':section.type==='studio-team'?'integrante':section.type==='tattoo-flash'?'flash':section.type==='guest-spots'?'data':section.type==='press'?'publicação':'item'}</button>
+                </div>
+              </details>
+              <details className="cms-layout-custom-section-editor cms-layout-custom-section-design">
+                <summary><span>Design da seção</span><small>Layout e apresentação</small></summary>
+                <div className="cms-layout-custom-section-fields">
+                  <p className="cms-layout-design-help">{SECTION_DESIGN_HELP[section.type]}</p>
+                  <label>Estilo de apresentação<select value={design.layout||designOptions[0][0]} onChange={event=>updateCustomSection(section.id,{design:{...design,layout:event.target.value}})} disabled={!canChange||saving}>{designOptions.map(([value,label])=><option value={value} key={value}>{label}</option>)}</select></label>
+                  {layoutUsesColumns&&<label>Organização em colunas<select value={design.columns||'2'} onChange={event=>updateCustomSection(section.id,{design:{...design,columns:event.target.value}})} disabled={!canChange||saving}><option value="1">Uma coluna</option><option value="2">Duas colunas</option><option value="3">Três colunas</option></select></label>}
+                  {layoutUsesImages&&<label>Proporção das imagens<select value={design.image_ratio||'landscape'} onChange={event=>updateCustomSection(section.id,{design:{...design,image_ratio:event.target.value}})} disabled={!canChange||saving}><option value="portrait">Vertical</option><option value="square">Quadrada</option><option value="landscape">Horizontal</option></select></label>}
+                  <label>Ritmo e espaçamento<select value={design.density||'comfortable'} onChange={event=>updateCustomSection(section.id,{design:{...design,density:event.target.value}})} disabled={!canChange||saving}><option value="compact">Compacto</option><option value="comfortable">Confortável</option><option value="spacious">Amplo</option></select></label>
+                </div>
+              </details>
+            </article>
+          })}
         </section>
         <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onMouseEnter={event=>previewPalette(palette,event)} onMouseLeave={hideOptionPreview} onFocus={event=>previewPalette(palette,event)} onBlur={hideOptionPreview} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
-          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onBlur={hideOptionPreview}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onPointerEnter={event=>previewPalette(palette,event)} onPointerLeave={hideOptionPreview} onFocus={event=>previewPalette(palette,event)} onBlur={hideOptionPreview} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onPointerEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onPointerLeave={hideOptionPreview} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onBlur={hideOptionPreview}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><section className="cms-layout-field-group" key={group.id}><header className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></header><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseLeave={hideOptionPreview} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></section>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onPointerLeave={hideOptionPreview} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onBlur={hideOptionPreview} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onMouseEnter={cancelOptionPreviewHide} onMouseMove={cancelOptionPreviewHide} onMouseLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,maxHeight:hoverPreviewPosition.maxHeight||'calc(100vh - 32px)'}}>
+        <aside className="cms-layout-hover-preview cms-layout-hover-preview-floating" aria-label="Prévia temporária da opção" onPointerEnter={cancelOptionPreviewHide} onPointerMove={cancelOptionPreviewHide} onPointerLeave={hideOptionPreview} style={{position:'fixed',left:hoverPreviewPosition.left,top:hoverPreviewPosition.top,width:hoverPreviewPosition.width||'min(380px, calc(100vw - 32px))',maxWidth:'calc(100vw - 32px)',boxSizing:'border-box',zIndex:1000,'--hover-preview-max-height':`${hoverPreviewPosition.maxHeight||window.innerHeight-32}px`}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">ANTES DE APLICAR</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div><button type="button" aria-label="Fechar prévia temporária" onPointerDownCapture={event=>{event.stopPropagation();closeOptionPreview()}} onClickCapture={event=>{event.preventDefault();event.stopPropagation();closeOptionPreview()}}>×</button>
           </header>
-          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame cms-layout-preview-frame-scaled" ref={hoverPreviewViewportRef} data-device={previewDevice}>
-            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia temporária do portfólio" src="/?layout_preview=1" loading="eager" scrolling="yes" style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight,transform:'none',transformOrigin:'top left'}}/>
+          <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
+            <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:390,height:844,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
-          <p className="cms-layout-preview-caption">Prévia interativa em largura de celular: navegue pelo menu e role para explorar. Clique na opção para aplicá-la ao editor.</p>
         </aside>,
         document.body
       )}
@@ -621,7 +735,7 @@ export function CmsLayoutManager(){
         <div className="cms-layout-preset-preview-actions"><button type="button" className="cms-editor-cancel" onClick={cancelPreviewPreset}>Voltar sem escolher</button><button type="button" className="cms-primary-button" onClick={confirmPreviewPreset}>Confirmar este layout <span>✓</span></button></div>
       </div>}
       <div className="cms-layout-preview-devices" role="group" aria-label="Dispositivo da prévia completa">{Object.entries(PREVIEW_DEVICES).map(([key,device])=><button key={key} type="button" className={previewDevice===key?'active':''} aria-pressed={previewDevice===key} onClick={()=>setPreviewDevice(key)}>{device.label}</button>)}</div>
-      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="no" style={{width:previewWidth,height:inlinePreviewDocumentHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
+      <div className="cms-layout-preview-frame cms-layout-preview-frame-inline cms-layout-preview-frame-scaled" ref={inlinePreviewViewportRef} data-device={previewDevice} data-preview-scale={inlinePreviewScale.toFixed(3)} style={{height:inlinePreviewStageHeight}}><div className="cms-layout-preview-stage cms-layout-preview-stage-inline cms-layout-preview-stage-scaled" style={{width:inlinePreviewStageWidth,height:inlinePreviewStageHeight}}><iframe ref={inlinePreviewIframeRef} title={`Prévia completa do portfólio em ${PREVIEW_DEVICES[previewDevice].label}`} src={previewUrl} onLoad={handlePreviewFrameLoad} loading="lazy" scrolling="yes" style={{width:previewWidth,height:previewHeight,transform:`scale(${inlinePreviewScale})`,transformOrigin:'top left'}}/></div></div>
       <p className="cms-layout-preview-caption">Largura ajustada automaticamente ({Math.round(inlinePreviewScale*100)}%). Role para cima e para baixo para percorrer todo o portfólio.</p>
     </section>
     

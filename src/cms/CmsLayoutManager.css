@@ -487,3 +487,164 @@
 /* No editor de layout, as ações pertencem ao fluxo do formulário.
    Não devem ficar fixas sobre as opções nem interceptar sua interação. */
 .cms-layout-page .cms-editor-actions{position:static!important;pointer-events:auto!important}
+
+
+/* A prévia de hover é somente visual: não captura mouse, clique ou rolagem.
+   Toda interação continua no editor; a prévia apenas reflete as mudanças em tempo real. */
+.cms-layout-hover-preview-floating{pointer-events:auto!important;user-select:none;}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{pointer-events:auto!important;cursor:default;}
+.cms-layout-hover-preview-floating iframe{pointer-events:none!important;}
+
+/* The contextual hover card is a passive visual snapshot, never a nested browser. */
+.cms-layout-hover-preview-floating{overflow:hidden!important;overscroll-behavior:none!important;touch-action:none;pointer-events:auto!important}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{overflow:hidden!important;pointer-events:none!important;touch-action:none}
+.cms-layout-hover-preview-floating iframe{pointer-events:none!important;overflow:hidden!important;touch-action:none!important}
+.cms-layout-library-add,
+.cms-layout-custom-section-editor,
+.cms-layout-custom-item,
+.cms-layout-field-group{min-width:0}
+.cms-layout-library-add>summary,
+.cms-layout-custom-section-editor>summary,
+.cms-layout-custom-item>summary,
+.cms-layout-field-group>.cms-layout-group-heading{display:flex;align-items:center;justify-content:space-between;gap:.75rem;list-style:none;cursor:pointer}
+.cms-layout-library-add>summary::-webkit-details-marker,
+.cms-layout-custom-section-editor>summary::-webkit-details-marker,
+.cms-layout-custom-item>summary::-webkit-details-marker,
+.cms-layout-field-group>.cms-layout-group-heading::-webkit-details-marker{display:none}
+.cms-layout-library-add>summary:after,
+.cms-layout-custom-section-editor>summary:after,
+.cms-layout-custom-item>summary:after,
+.cms-layout-field-group>.cms-layout-group-heading:after{content:'＋';margin-left:auto;color:var(--cms-accent,#c9d39a)}
+.cms-layout-library-add[open]>summary:after,
+.cms-layout-custom-section-editor[open]>summary:after,
+.cms-layout-custom-item[open]>summary:after,
+.cms-layout-field-group[open]>.cms-layout-group-heading:after{content:'−'}
+.cms-layout-library-add{padding:.7rem .8rem;border:1px solid var(--cms-border,rgba(255,255,255,.12));border-radius:10px;background:rgba(255,255,255,.02)}
+.cms-layout-library-add>summary{color:var(--cms-text,#f2f0e8);font-size:.8rem;font-weight:650}
+.cms-layout-library-add>summary small,.cms-layout-custom-item>summary small{color:var(--cms-muted,#aaa99f);font-size:.68rem;font-weight:400}
+.cms-layout-library-add[open] .cms-layout-section-template-grid{padding-top:.85rem}
+.cms-layout-custom-item{padding:.7rem;border:1px solid var(--cms-border,rgba(255,255,255,.1));border-radius:9px;background:rgba(255,255,255,.018)}
+.cms-layout-custom-item>summary{color:var(--cms-text,#f2f0e8);font-size:.76rem}
+.cms-layout-custom-item-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;padding-top:.8rem}
+.cms-layout-custom-item-fields label:first-child,.cms-layout-custom-item-fields label:nth-child(2){grid-column:1/-1}
+.cms-layout-custom-section-fields select{width:100%;min-width:0;padding:.65rem .7rem;border:1px solid var(--cms-border,rgba(255,255,255,.14));border-radius:8px;background:#20251f;color:var(--cms-text,#f2f0e8);font:inherit}
+.cms-layout-custom-section-design{border-top:1px solid var(--cms-border,rgba(255,255,255,.09))}
+.cms-layout-field-group{padding:.8rem;border:1px solid var(--cms-border,rgba(255,255,255,.1));border-radius:12px;background:rgba(255,255,255,.018)}
+.cms-layout-field-group>.cms-layout-group-heading{margin:0;border:0;align-items:center}
+.cms-layout-field-group>.cms-layout-group-heading h2{font-size:1.05rem}
+.cms-layout-field-group>.cms-layout-group-heading>div>p:last-child{margin-bottom:0}
+.cms-layout-field-group[open]>.cms-layout-group-heading{padding-bottom:.7rem;border-bottom:1px solid var(--cms-border,rgba(255,255,255,.1))}
+.cms-layout-field-group .cms-layout-group-fields{padding-top:.8rem}
+@media(max-width:560px){.cms-layout-custom-item-fields{grid-template-columns:1fr}.cms-layout-custom-item-fields label:first-child,.cms-layout-custom-item-fields label:nth-child(2){grid-column:auto}}
+
+.cms-layout-hover-preview-floating{width:min(380px,calc(100vw - 32px));overflow:hidden!important}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{height:260px!important;max-height:260px!important;overflow:hidden!important}
+.cms-layout-hover-preview-floating iframe{pointer-events:none!important;transform:none!important;zoom:1!important}
+
+/* The full preview is a true device viewport. Scroll happens inside this iframe,
+   keeping fixed navigation overlays bounded to the simulated screen height. */
+.cms-layout-inline-preview .cms-layout-preview-frame-inline.cms-layout-preview-frame-scaled{
+  overflow:hidden!important;
+  min-height:0!important;
+  max-height:none!important;
+  scrollbar-gutter:auto!important;
+}
+.cms-layout-inline-preview .cms-layout-preview-frame-inline .cms-layout-preview-stage-inline{
+  min-height:0!important;
+  flex:0 0 auto;
+  overflow:visible!important;
+}
+.cms-layout-inline-preview .cms-layout-preview-frame-inline iframe{
+  pointer-events:auto!important;
+  overflow:auto!important;
+}
+
+
+/* Contextual hover preview: a fixed, cropped visual snapshot, never a second browser. */
+.cms-layout-hover-preview-floating{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  max-height:calc(100vh - 32px)!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  display:block;
+  width:100%;
+  height:260px!important;
+  min-height:260px!important;
+  max-height:260px!important;
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+  contain:layout paint;
+}
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  position:relative;
+  display:block;
+  min-height:0!important;
+  overflow:hidden!important;
+  transform-origin:top left;
+}
+.cms-layout-hover-preview-floating iframe{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  display:block!important;
+  pointer-events:none!important;
+  border:0!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+}
+.cms-layout-design-help{
+  grid-column:1/-1;
+  margin:0;
+  color:var(--cms-muted,#aaa99f);
+  font-size:.75rem;
+  line-height:1.5;
+}
+
+/* Keep the passive hover card fully inside short mobile viewports. */
+.cms-layout-hover-preview-floating{
+  min-height:0!important;
+  max-height:var(--hover-preview-max-height,min(440px,calc(100vh - 32px)))!important;
+  overflow:hidden!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{
+  height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
+  min-height:0!important;
+  max-height:min(260px,calc(var(--hover-preview-max-height,440px) - 92px))!important;
+}
+
+
+/* One interaction contract for the contextual snapshot:
+   the card itself never intercepts the editor; only its close control is interactive.
+   The iframe remains a passive image of the mobile viewport. */
+.cms-layout-hover-preview-floating{
+  pointer-events:none!important;
+  user-select:none;
+  touch-action:none;
+  overscroll-behavior:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled,
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+  touch-action:none!important;
+}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading button{
+  pointer-events:auto!important;
+  touch-action:manipulation;
+}
+
+/* The passive hover snapshot catches wheel input at its card boundary, never inside the iframe. */
+.cms-layout-hover-preview-floating,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-heading,
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame,
+.cms-layout-hover-preview-floating .cms-layout-preview-stage-scaled{
+  pointer-events:auto!important;
+}
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+}

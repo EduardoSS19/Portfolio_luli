@@ -98,6 +98,8 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await sendSettings(page, { presentation_mode: 'immersive', navigation_mode: 'sidebar' }, 'navigation')
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'immersive')
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-sidebar/)
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+  await menuTrigger.click()
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
   await menuTrigger.click()
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
@@ -108,6 +110,8 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await sendSettings(page, { presentation_mode: 'masonry', navigation_mode: 'curtain' }, 'navigation')
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'masonry')
   await expect(page.locator('.site-nav')).toHaveClass(/navigation-curtain/)
+  await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
+  await menuTrigger.click()
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'false')
   await page.locator('.nav-overlay-link').first().click()
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
@@ -372,7 +376,7 @@ test('modelos preenchem todas as seções preparadas com exemplos adequados ao t
   await expect(page.locator('[data-preview-example="true"]')).toHaveCount(types.length)
   await expect(page.locator('.portfolio-custom-empty-preview')).toHaveCount(0)
   await expect(page.locator('.portfolio-custom-card h3')).toHaveCount(22)
-  await expect(page.locator('.section-tattoo-flash')).toContainText('Flash disponível')
+  await expect(page.locator('.section-tattoo-flash')).toContainText('Flash disponíveis')
   await expect(page.locator('.section-tattoo-booking')).toContainText('orçamento')
   await expect(page.locator('.section-healed-work')).toContainText('cicatrizada')
   await expect(page.locator('.section-studio-team')).toContainText('Artista residente')
@@ -437,13 +441,239 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
     const iframe = root.querySelector('iframe')
     return {
       availableWidth: frame.clientWidth,
+      availableHeight: frame.clientHeight,
       stageWidth: stage.getBoundingClientRect().width,
+      stageHeight: stage.getBoundingClientRect().height,
       iframeWidth: iframe.getBoundingClientRect().width,
       iframeLayoutWidth: iframe.clientWidth,
+      iframeLayoutHeight: iframe.clientHeight,
       overflowY: getComputedStyle(frame).overflowY,
     }
   })
   expect(Math.abs(geometry.stageWidth - geometry.availableWidth)).toBeLessThanOrEqual(3)
   expect(geometry.iframeLayoutWidth).toBe(1440)
-  expect(geometry.overflowY).toBe('auto')
+  expect(geometry.iframeLayoutHeight).toBe(900)
+  expect(Math.abs(geometry.stageHeight - 900 * geometry.availableWidth / 1440)).toBeLessThanOrEqual(3)
+  expect(geometry.overflowY).toBe('hidden')
+
+  await preview.scrollIntoViewIfNeeded()
+  const previewFrame = page.frameLocator('.cms-layout-inline-preview iframe')
+  await previewFrame.locator('.editorial-menu-trigger').click()
+  await expect(previewFrame.locator('.site-nav')).toHaveClass(/menu-aberto/)
+  const menuGeometry = await preview.locator('iframe').evaluate(iframe => {
+    const menu = iframe.contentDocument.querySelector('.editorial-menu-backdrop')
+    return { menuHeight: menu.getBoundingClientRect().height, viewportHeight: iframe.contentWindow.innerHeight, documentHeight: iframe.contentDocument.documentElement.scrollHeight }
+  })
+  expect(Math.abs(menuGeometry.menuHeight - menuGeometry.viewportHeight)).toBeLessThanOrEqual(2)
+  expect(menuGeometry.documentHeight).toBeGreaterThan(menuGeometry.viewportHeight)
+  await previewFrame.locator('.editorial-menu-trigger').press('Escape')
+  await expect(previewFrame.locator('.site-nav')).not.toHaveClass(/menu-aberto/)
+  await preview.locator('iframe').evaluate(iframe => iframe.contentWindow.scrollTo(0, 360))
+  await expect.poll(() => preview.locator('iframe').evaluate(iframe => iframe.contentWindow.scrollY)).toBeGreaterThan(0)
+})
+
+test('menu lateral permanece fechado na prévia até o visitante clicar para abrir', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { navigation_mode: 'sidebar' }, 'navigation')
+  const nav = page.locator('.site-nav')
+  await expect(nav).toHaveClass(/navigation-sidebar/)
+  await expect(nav).not.toHaveClass(/menu-aberto/)
+  await expect(nav.locator('.editorial-menu-trigger')).toHaveAttribute('aria-expanded', 'false')
+  await nav.locator('.editorial-menu-trigger').click()
+  await expect(nav).toHaveClass(/menu-aberto/)
+})
+
+test('biblioteca de seções mantém os submenus recolhidos e oferece campos e design específicos', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const library = page.locator('.cms-layout-section-library')
+  const addMenu = library.locator('.cms-layout-library-add')
+  await expect(addMenu).not.toHaveAttribute('open', '')
+  await addMenu.locator('summary').click()
+  await library.getByRole('button', { name: /Flash tattoo/ }).click()
+  const section = library.locator('.cms-layout-custom-section').last()
+  const menus = section.locator('details.cms-layout-custom-section-editor')
+  await expect(menus).toHaveCount(2)
+  await expect(menus.nth(0)).not.toHaveAttribute('open', '')
+  await expect(menus.nth(1)).not.toHaveAttribute('open', '')
+  await menus.nth(1).locator('summary').click()
+  await expect(menus.nth(1).getByLabel('Estilo de apresentação')).toHaveValue('flash-grid')
+  await menus.nth(0).locator('summary').click()
+  await section.getByRole('button', { name: '+ Adicionar flash' }).click()
+  await section.locator('.cms-layout-custom-item summary').click()
+  await expect(section.locator('.cms-layout-custom-item').getByPlaceholder('Ex.: Disponível · Peça única')).toBeVisible()
+})
+
+test('modal de hover usa viewport nativo e não recebe interação ou rolagem', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const composition = page.locator('.cms-layout-field-group').first()
+  await composition.locator('summary').click()
+  await composition.locator('.cms-layout-option').first().hover()
+  const modal = page.locator('.cms-layout-hover-preview-floating')
+  await expect(modal).toBeVisible()
+  const behavior = await modal.locator('iframe').evaluate(frame => ({
+    pointerEvents: getComputedStyle(frame).pointerEvents,
+    transform: getComputedStyle(frame).transform,
+    zoom: getComputedStyle(frame).zoom,
+    scrolling: frame.getAttribute('scrolling'),
+    frameHeight: frame.closest('.cms-layout-hover-preview-frame').getBoundingClientRect().height,
+    logicalWidth: frame.contentWindow.innerWidth,
+    scale: Number(frame.closest('.cms-layout-preview-stage-scaled').dataset.previewScale),
+    modalOverflow: getComputedStyle(frame.closest('.cms-layout-hover-preview-floating')).overflow,
+  }))
+  expect(behavior.pointerEvents).toBe('none')
+  expect(behavior.transform).toBe('none')
+  expect(behavior.zoom).toBe('1')
+  expect(behavior.scrolling).toBe('no')
+  expect(behavior.logicalWidth).toBe(390)
+  expect(behavior.scale).toBeGreaterThan(0)
+  expect(behavior.scale).toBeLessThanOrEqual(1)
+  expect(behavior.frameHeight).toBeGreaterThanOrEqual(250)
+  expect(behavior.modalOverflow).toBe('hidden')
+})
+
+test('iframe completo mantém o menu limitado ao viewport do dispositivo', async ({ page }) => {
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const inlineFrame = page.locator('.cms-layout-inline-preview iframe')
+  await page.getByRole('group', { name: 'Dispositivo da prévia completa' }).getByRole('button', { name: 'Celular' }).click()
+  await inlineFrame.scrollIntoViewIfNeeded()
+  await expect.poll(() => inlineFrame.evaluate(frame => Boolean(frame.contentDocument?.querySelector('.site-shell')))).toBe(true)
+  await expect.poll(() => inlineFrame.evaluate(frame => frame.contentWindow.innerWidth)).toBe(390)
+  const portfolio = page.frameLocator('.cms-layout-inline-preview iframe')
+  await portfolio.locator('.editorial-menu-trigger').click()
+  await expect(portfolio.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'false')
+  const bounds = await inlineFrame.evaluate(frame => {
+    const view = frame.contentWindow
+    const backdrop = frame.contentDocument.querySelector('.editorial-menu-backdrop')
+    const panel = frame.contentDocument.querySelector('.editorial-menu-panel')
+    const backdropRect = backdrop.getBoundingClientRect()
+    const panelRect = panel.getBoundingClientRect()
+    return {
+      width: view.innerWidth, height: view.innerHeight,
+      backdropWidth: backdropRect.width, backdropHeight: backdropRect.height,
+      panelWidth: panelRect.width, panelHeight: panelRect.height,
+    }
+  })
+  expect(bounds.width).toBe(390)
+  expect(bounds.backdropWidth).toBeLessThanOrEqual(bounds.width + 1)
+  expect(bounds.backdropHeight).toBeLessThanOrEqual(bounds.height + 1)
+  expect(bounds.panelWidth).toBeLessThanOrEqual(bounds.width + 1)
+  expect(bounds.panelHeight).toBeLessThanOrEqual(bounds.height + 1)
+})
+
+test('campos e submenus de design são específicos por tipo de seção e começam recolhidos', async ({ page }) => {
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const library = page.locator('.cms-layout-section-library')
+  const addMenu = library.locator('.cms-layout-library-add')
+  await addMenu.locator('summary').click()
+  await library.getByRole('button', { name: /Depoimentos/ }).click()
+  const testimonial = library.locator('.cms-layout-custom-section').last()
+  const contentMenu = testimonial.locator('details.cms-layout-custom-section-editor').first()
+  const designMenu = testimonial.locator('details.cms-layout-custom-section-editor').nth(1)
+  await expect(contentMenu).not.toHaveAttribute('open', '')
+  await expect(designMenu).not.toHaveAttribute('open', '')
+  await contentMenu.locator('summary').click()
+  await testimonial.getByRole('button', { name: '+ Adicionar depoimento' }).click()
+  await testimonial.locator('.cms-layout-custom-item summary').click()
+  await expect(testimonial.getByRole('textbox', { name: 'Depoimento', exact: true })).toBeVisible()
+  await expect(testimonial.getByLabel('Texto do depoimento', { exact: true })).toBeVisible()
+  await designMenu.locator('summary').click()
+  await expect(designMenu.getByText(/Dê protagonismo às falas/)).toBeVisible()
+  await expect(designMenu.getByLabel('Estilo de apresentação')).toHaveValue('quotes')
+})
+
+test('layouts espaçosos não deixam um vão exagerado depois do contato', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await sendSettings(page, { section_spacing: 'spacious', show_contact: true }, 'page')
+  const gap = await page.evaluate(() => {
+    const contact = document.querySelector('.secao-contato')
+    const footer = document.querySelector('.rodape')
+    return footer && contact ? footer.getBoundingClientRect().top - contact.getBoundingClientRect().bottom : 0
+  })
+  expect(gap).toBeLessThan(80)
+})
+
+test('prévia de hover foca automaticamente a seção alterada sem permitir navegação manual', async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 })
+  await page.route('**/api/cms/**', async route => {
+    const url = new URL(route.request().url())
+    if (url.pathname.endsWith('/api/cms/layout/')) {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+        settings: {}, permissions: { canView: true, canChange: true },
+      }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ results: [] }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [{ titulo: 'Referência', links: [] }], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  const contentGroup = page.locator('.cms-layout-field-group').nth(1)
+  await contentGroup.locator('summary').click()
+  const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
+  await contactField.locator('.cms-layout-option').first().hover()
+  const modal = page.locator('.cms-layout-hover-preview-floating')
+  await expect(modal).toBeVisible()
+  const frame = modal.locator('iframe')
+  await expect.poll(() => frame.evaluate(element => element.contentWindow.scrollY)).toBeGreaterThan(0)
+  await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('none')
 })

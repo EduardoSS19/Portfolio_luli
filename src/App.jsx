@@ -410,19 +410,43 @@ const PREVIEW_SECTION_EXAMPLES = {
 }
 
 function PortfolioCustomSections({ sections = [], preview = false, examples = null }) {
+  const metaFields = {
+    exhibitions:['venue','location','format'],process:['stage','technique','materials'],services:['format','price','duration'],
+    press:['publication','author','period'],testimonials:['author','role','project'],'tattoo-flash':['size','placement','price','status'],
+    'tattoo-booking':['step','channel','response_time','policy'],'healed-work':['placement','healing_time','period'],
+    'guest-spots':['city','studio','dates'],'studio-team':['role','specialties','instagram','period'],
+  }
+  const labels = {venue:'Espaço',location:'Local',format:'Formato',stage:'Etapa',technique:'Técnica',materials:'Materiais',price:'Investimento',duration:'Prazo',publication:'Publicação',author:'Autoria',role:'Função',project:'Projeto',size:'Tamanho',placement:'Local',status:'Disponibilidade',step:'Etapa',channel:'Contato',response_time:'Retorno',policy:'Orientação',healing_time:'Cicatrização',city:'Cidade',studio:'Estúdio',dates:'Datas',specialties:'Especialidades',instagram:'Instagram',period:'Período'}
   return sections.filter(section => section && section.title && Array.isArray(section.items) && (section.items.length || preview)).map(section => {
     const items = section.items.length ? section.items : (preview ? examples?.[section.type] || PREVIEW_SECTION_EXAMPLES[section.type] || [] : [])
+    const design = section.design || {}
+    const defaultLayouts = {exhibitions:'timeline',process:'steps',services:'cards',press:'list',testimonials:'quotes','tattoo-flash':'flash-grid','tattoo-booking':'steps','healed-work':'gallery','guest-spots':'agenda','studio-team':'team-grid'}
+    const layout = design.layout || defaultLayouts[section.type] || 'cards'
     return (
-      <section className={'secao portfolio-custom-section section-'+section.type} id={section.id} key={section.id} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
+      <section className={'secao portfolio-custom-section section-'+section.type+' section-layout-'+layout+' section-density-'+(design.density||'comfortable')} id={section.id} key={section.id} data-columns={design.columns||'2'} data-image-ratio={design.image_ratio||'landscape'} data-preview-example={preview && !section.items.length ? 'true' : undefined}>
         <header className="secao-cabecalho visivel"><span className="secao-indice">{preview ? 'EXEMPLO DE CONTEÚDO' : 'PORTFÓLIO'}</span><h2>{section.title}</h2><span className="secao-contagem">{String(items.length).padStart(2,'0')} itens</span></header>
         {section.intro && <p className="portfolio-custom-intro">{section.intro}</p>}
         <div className="portfolio-custom-grid">
-          {items.map((item,index)=><article className="portfolio-custom-card" key={section.id+'-'+index}>
-            {item.image && <img src={item.image} alt={item.title||''} loading="lazy" />}
-            <div><h3>{item.title}</h3>{item.period && <small>{item.period}</small>}{item.description && <p>{item.description}</p>}
-              {item.url && <a href={item.url} target="_blank" rel="noreferrer">Saiba mais ↗</a>}
-            </div>
-          </article>)}
+          {items.map((item,index)=>{
+            const meta=(metaFields[section.type]||['period']).filter(key=>item[key])
+            const content=(
+              <>
+                {layout==='before-after'&&<div className="portfolio-custom-before-after">
+                  {item.image_before&&<figure><img src={item.image_before} alt={item.title+' — antes'} loading="lazy"/><figcaption>Antes</figcaption></figure>}
+                  {item.image_after&&<figure><img src={item.image_after} alt={item.title+' — cicatrizado'} loading="lazy"/><figcaption>Depois</figcaption></figure>}
+                </div>}
+                {item.image&&<img src={item.image} alt={item.title||''} loading="lazy"/>}
+                <div><h3>{item.title}</h3>
+                  {meta.map(key=><small className={'portfolio-custom-meta meta-'+key} key={key}><strong>{labels[key]||key}:</strong> {item[key]}</small>)}
+                  {item.description&&<p>{item.description}</p>}
+                  {(item.url||item.booking_url)&&<a href={item.url||item.booking_url} target="_blank" rel="noreferrer">{section.type==='tattoo-booking'?'Solicitar agendamento':section.type==='services'?'Consultar serviço':'Saiba mais'} ↗</a>}
+                </div>
+              </>
+            )
+            return layout==='accordion'
+              ? <details className="portfolio-custom-card portfolio-custom-accordion" key={section.id+'-'+index}><summary><strong>{item.title||'Detalhes'}</strong><span>{meta[0]?item[meta[0]]:''}</span></summary><div className="portfolio-custom-accordion-content">{content}</div></details>
+              : <article className="portfolio-custom-card" key={section.id+'-'+index}>{content}</article>
+          })}
         </div>
       </section>
     )
@@ -504,6 +528,44 @@ export default function App() {
   }, [modoGaleria])
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('layout_preview_compact') !== '1') return undefined
+    // The hover snapshot is passive: allow programmatic focus changes but block
+    // wheel, touch and keyboard scrolling initiated by the visitor.
+    const preventManualScroll = event => {
+      if (event.cancelable) event.preventDefault()
+    }
+    const preventScrollKeys = event => {
+      if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'].includes(event.key)) {
+        event.preventDefault()
+      }
+    }
+    const root = document.documentElement
+    const body = document.body
+    const previousRootOverflow = root.style.overflow
+    const previousBodyOverflow = body.style.overflow
+    root.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    root.style.overscrollBehavior = 'none'
+    body.style.overscrollBehavior = 'none'
+    document.addEventListener('wheel', preventManualScroll, { capture: true, passive: false })
+    document.addEventListener('touchmove', preventManualScroll, { capture: true, passive: false })
+    window.addEventListener('wheel', preventManualScroll, { passive: false })
+    window.addEventListener('touchmove', preventManualScroll, { passive: false })
+    window.addEventListener('keydown', preventScrollKeys)
+    return () => {
+      document.removeEventListener('wheel', preventManualScroll, true)
+      document.removeEventListener('touchmove', preventManualScroll, true)
+      window.removeEventListener('wheel', preventManualScroll)
+      window.removeEventListener('touchmove', preventManualScroll)
+      window.removeEventListener('keydown', preventScrollKeys)
+      root.style.overflow = previousRootOverflow
+      body.style.overflow = previousBodyOverflow
+      root.style.overscrollBehavior = ''
+      body.style.overscrollBehavior = ''
+    }
+  }, [])
+
+  useEffect(() => {
     if (carregando || !new URLSearchParams(window.location.search).has('layout_preview')) return undefined
     const handleLayoutPreviewUpdate = event => {
       if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'cms-layout-preview:update') return
@@ -518,8 +580,11 @@ export default function App() {
       const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
+      const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
-        detail: { open: event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
+        // Só a miniatura passiva abre o menu automaticamente ao comparar estilos.
+        // A prévia completa continua navegável pelo próprio usuário.
+        detail: { open: hoverSnapshot && event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
       }))
 
       // A navegação acontece somente no documento da prévia (iframe).
@@ -536,10 +601,19 @@ export default function App() {
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
                 : null
-      if (selector) {
+      const target = selector ? document.querySelector(selector) : null
+      const targetIsVisible = Boolean(target && target.getClientRects().length)
+      const fallbackTarget = targetIsVisible
+        ? target
+        : focus === 'bio'
+          ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
+          : focus === 'references' || focus === 'contact'
+            ? document.querySelector('#Contato, .rodape')
+            : null
+      if (fallbackTarget) {
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() => {
-            document.querySelector(selector)?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+            fallbackTarget.scrollIntoView({ block: 'start', behavior: hoverSnapshot ? 'instant' : 'smooth' })
           })
         })
       }
@@ -736,6 +810,7 @@ export default function App() {
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
+  const isCompactLayoutPreview = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
   const palettePrefix = tema === 'claro' ? 'light' : 'dark'
   const effectiveColors = {
     color_background: layout[`${palettePrefix}_color_background`],
@@ -774,6 +849,7 @@ export default function App() {
   }
   const layoutAttributes = {
     style: { ...layoutColors, background: effectiveColors.color_background, color: readableText },
+    'data-layout-preview': isLayoutPreview ? 'true' : undefined,
     'data-layout-width': layout.content_width,
     'data-layout-hero-align': layout.hero_alignment,
     'data-layout-hero-size': layout.hero_size,
@@ -835,7 +911,7 @@ export default function App() {
 
   return (
     <div className="site-shell" {...layoutAttributes}>
-      {isLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
+      {isLayoutPreview && !isCompactLayoutPreview && <div className="layout-preview-banner" role="status">PRÉVIA DE LAYOUT · alterações ainda não salvas</div>}
       {previsualizacao && !previsualizacao.category && (
         <div className="preview-mode-banner" role="status">
           Prévia privada · {previsualizacao.titulo} · somente você pode visualizar este rascunho

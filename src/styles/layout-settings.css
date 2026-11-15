@@ -205,3 +205,114 @@
 .site-shell[data-layout-presentation="masonry"] .galeria-grade-global {
   width:min(100% - 2rem,1600px);
 }
+
+/* Section-specific layouts configured in the CMS section designer. */
+.portfolio-custom-section[data-columns="1"] .portfolio-custom-grid{grid-template-columns:minmax(0,1fr)}
+.portfolio-custom-section[data-columns="2"] .portfolio-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.portfolio-custom-section[data-columns="3"] .portfolio-custom-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.portfolio-custom-section[data-image-ratio="portrait"] .portfolio-custom-card>img{aspect-ratio:3/4}
+.portfolio-custom-section[data-image-ratio="square"] .portfolio-custom-card>img{aspect-ratio:1/1}
+.portfolio-custom-section[data-image-ratio="landscape"] .portfolio-custom-card>img{aspect-ratio:16/10}
+.portfolio-custom-section.section-density-compact .portfolio-custom-grid{gap:.65rem}
+.portfolio-custom-section.section-density-compact .portfolio-custom-card{padding:.7rem}
+.portfolio-custom-section.section-density-spacious .portfolio-custom-grid{gap:clamp(1.5rem,3vw,2.8rem)}
+.portfolio-custom-section.section-layout-timeline .portfolio-custom-grid,
+.portfolio-custom-section.section-layout-steps .portfolio-custom-grid,
+.portfolio-custom-section.section-layout-agenda .portfolio-custom-grid{grid-template-columns:minmax(0,1fr);max-width:900px;margin-inline:auto}
+.portfolio-custom-section.section-layout-timeline .portfolio-custom-card,
+.portfolio-custom-section.section-layout-steps .portfolio-custom-card,
+.portfolio-custom-section.section-layout-agenda .portfolio-custom-card{grid-template-columns:minmax(110px,.28fr) minmax(0,1fr);align-items:start;border:0;border-left:2px solid var(--azul-claro);border-radius:0;background:transparent}
+.portfolio-custom-section.section-layout-quotes .portfolio-custom-card{padding:clamp(1.2rem,3vw,2.4rem);border:0;background:color-mix(in srgb,currentColor 5%,transparent)}
+.portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child{grid-column:1/-1;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center}
+.portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child>img{max-height:520px}
+.portfolio-custom-section .portfolio-custom-meta{display:block}
+.portfolio-custom-section .portfolio-custom-meta strong{font-weight:600;color:var(--texto)}
+@media(max-width:760px){
+ .portfolio-custom-section[data-columns="2"] .portfolio-custom-grid,
+ .portfolio-custom-section[data-columns="3"] .portfolio-custom-grid{grid-template-columns:1fr}
+ .portfolio-custom-section.section-layout-featured .portfolio-custom-card:first-child,
+ .portfolio-custom-section.section-layout-timeline .portfolio-custom-card,
+ .portfolio-custom-section.section-layout-steps .portfolio-custom-card,
+ .portfolio-custom-section.section-layout-agenda .portfolio-custom-card{grid-template-columns:minmax(0,1fr)}
+}
+
+/* Prevent excessive dead space after the contact form in spacious layout presets. */
+.site-shell[data-layout-spacing] .secao-contato{padding-block:clamp(1.75rem,3vw,3rem)!important;margin-bottom:0!important}
+.site-shell[data-layout-spacing] .rodape{margin-top:0!important}
+
+.portfolio-custom-section.section-layout-list .portfolio-custom-grid,
+.portfolio-custom-section.section-layout-editorial .portfolio-custom-grid{grid-template-columns:minmax(0,1fr);max-width:960px;margin-inline:auto}
+.portfolio-custom-section.section-layout-list .portfolio-custom-card,
+.portfolio-custom-section.section-layout-editorial .portfolio-custom-card{grid-template-columns:minmax(140px,.34fr) minmax(0,1fr);align-items:center}
+.portfolio-custom-section.section-layout-gallery .portfolio-custom-card,
+.portfolio-custom-section.section-layout-flash-grid .portfolio-custom-card{padding:.35rem;border:0;background:transparent}
+.portfolio-custom-section.section-layout-gallery .portfolio-custom-card>img,
+.portfolio-custom-section.section-layout-flash-grid .portfolio-custom-card>img{max-height:none}
+.portfolio-custom-section.section-layout-masonry .portfolio-custom-grid{display:block;columns:2 280px;column-gap:1rem}
+.portfolio-custom-section.section-layout-masonry .portfolio-custom-card{display:inline-grid;width:100%;margin:0 0 1rem;break-inside:avoid}
+.portfolio-custom-section.section-layout-team-grid .portfolio-custom-card>img{width:clamp(100px,40%,180px);aspect-ratio:1;border-radius:50%;margin-inline:auto}
+.portfolio-custom-section.section-layout-accordion .portfolio-custom-grid{grid-template-columns:minmax(0,1fr);max-width:900px;margin-inline:auto}
+.portfolio-custom-section .portfolio-custom-accordion{display:block;padding:0}
+.portfolio-custom-accordion>summary{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem;cursor:pointer;list-style:none}
+.portfolio-custom-accordion>summary::-webkit-details-marker{display:none}
+.portfolio-custom-accordion>summary:after{content:'＋';color:var(--azul-claro)}
+.portfolio-custom-accordion[open]>summary:after{content:'−'}
+.portfolio-custom-accordion-content{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:0 1rem 1rem}
+.portfolio-custom-before-after{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.portfolio-custom-before-after figure{margin:0;min-width:0}
+.portfolio-custom-before-after img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.portfolio-custom-before-after figcaption{font-size:.7rem;color:var(--layout-text-muted,var(--cor-texto-secundario,#999))}
+@media(max-width:760px){
+ .portfolio-custom-section.section-layout-list .portfolio-custom-card,
+ .portfolio-custom-section.section-layout-editorial .portfolio-custom-card,
+ .portfolio-custom-accordion-content{grid-template-columns:1fr}
+ .portfolio-custom-section.section-layout-masonry .portfolio-custom-grid{columns:1}
+}
+
+/* Preview documents should end at their actual content, not an artificial viewport minimum. */
+.site-shell[data-layout-preview="true"]{min-height:0!important}
+.site-shell[data-layout-preview="true"] .rodape{margin-top:0!important}
+
+
+/* A prévia deve terminar no conteúdo real, sem altura residual após Contato. */
+.site-shell[data-layout-preview="true"]{
+  display:flow-root;
+  min-height:0!important;
+  height:auto!important;
+  padding-bottom:0!important;
+}
+.site-shell[data-layout-preview="true"] #Contato,
+.site-shell[data-layout-preview="true"] .secao-contato{
+  min-height:0!important;
+  height:auto!important;
+  margin-block:clamp(1.5rem,2.5vw,2.5rem) 0!important;
+  padding-block:clamp(1.5rem,3vw,3rem)!important;
+}
+.site-shell[data-layout-preview="true"] .rodape{
+  min-height:0!important;
+  margin-block:0!important;
+}
+.site-shell[data-layout-preview="true"] .controles-flutuantes{
+  position:fixed;
+}
+
+
+/* Keep the preview navigation overlay bounded to the iframe's actual viewport. */
+.site-shell[data-layout-preview="true"] .editorial-menu-backdrop{
+  inset:0!important;
+  width:100%!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-height:100dvh!important;
+  box-sizing:border-box;
+}
+.site-shell[data-layout-preview="true"] .editorial-menu-panel{
+  min-height:0;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.site-shell[data-layout-preview="true"] .editorial-nav.navigation-sidebar .editorial-menu-panel{
+  height:100%;
+  max-height:100%;
+}
