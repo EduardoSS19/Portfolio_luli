@@ -142,6 +142,28 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
+  // The hover iframe must retain the responsive scale calculated for its own
+  // viewport; a CSS transform override previously made it render at 390px and crop.
+  const hoverScaleGeometry = await page.evaluate(() => {
+    const frame = document.querySelector('.cms-layout-hover-preview iframe')
+    const stage = document.querySelector('.cms-layout-hover-preview .cms-layout-preview-stage-scaled')
+    const frameRect = frame.getBoundingClientRect()
+    const stageRect = stage.getBoundingClientRect()
+    const transform = new DOMMatrixReadOnly(getComputedStyle(frame).transform)
+    return {
+      scaleX: transform.a,
+      renderedWidth: frameRect.width,
+      stageWidth: stageRect.width,
+      renderedHeight: frameRect.height,
+      stageHeight: stageRect.height,
+    }
+  })
+  expect(hoverScaleGeometry.scaleX).toBeGreaterThan(0)
+  expect(hoverScaleGeometry.scaleX).toBeLessThan(1)
+  expect(Math.abs(hoverScaleGeometry.renderedWidth - hoverScaleGeometry.stageWidth)).toBeLessThan(1)
+  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(0)
+  expect(hoverScaleGeometry.renderedHeight).toBeLessThanOrEqual(hoverScaleGeometry.stageHeight + 1)
+
   const optionAfterHover = await leftOption.evaluate(element => {
     const rect = element.getBoundingClientRect()
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }

@@ -548,10 +548,13 @@ test('modal de hover usa viewport nativo e não recebe interação ou rolagem', 
     frameHeight: frame.closest('.cms-layout-hover-preview-frame').getBoundingClientRect().height,
     logicalWidth: frame.contentWindow.innerWidth,
     scale: Number(frame.closest('.cms-layout-preview-stage-scaled').dataset.previewScale),
+    renderedWidth: frame.getBoundingClientRect().width,
+    stageWidth: frame.closest('.cms-layout-preview-stage-scaled').getBoundingClientRect().width,
     modalOverflow: getComputedStyle(frame.closest('.cms-layout-hover-preview-floating')).overflow,
   }))
   expect(behavior.pointerEvents).toBe('none')
-  expect(behavior.transform).toBe('none')
+  expect(behavior.transform).not.toBe('none')
+  expect(Math.abs(behavior.renderedWidth - behavior.stageWidth)).toBeLessThan(1)
   expect(behavior.zoom).toBe('1')
   expect(behavior.scrolling).toBe('no')
   expect(behavior.logicalWidth).toBe(390)

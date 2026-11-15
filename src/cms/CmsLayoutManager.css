@@ -539,7 +539,13 @@
 
 .cms-layout-hover-preview-floating{width:min(380px,calc(100vw - 32px));overflow:hidden!important}
 .cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{height:260px!important;max-height:260px!important;overflow:hidden!important}
-.cms-layout-hover-preview-floating iframe{pointer-events:none!important;transform:none!important;zoom:1!important}
+.cms-layout-hover-preview-floating iframe{
+  pointer-events:none!important;
+  /* Preserve the scale computed from the actual card viewport in CmsLayoutManager.jsx.
+     Forcing transform:none here cancels that scale and makes the 390px iframe overflow. */
+  transform-origin:top left!important;
+  zoom:1!important;
+}
 
 /* The full preview is a true device viewport. Scroll happens inside this iframe,
    keeping fixed navigation overlays bounded to the simulated screen height. */
