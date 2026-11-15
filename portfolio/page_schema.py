@@ -12,6 +12,7 @@ def normalize_page_schema(value):
     if not isinstance(value, dict) or value.get("version") != 1:
         return None
     pages = []
+    seen_page_ids, seen_slugs = set(), set()
     source_pages = value.get("pages") if isinstance(value.get("pages"), list) else []
     for page in source_pages[:12]:
         if not isinstance(page, dict):
@@ -21,9 +22,12 @@ def normalize_page_schema(value):
             continue
         if not isinstance(slug, str) or not re.fullmatch(r"[a-z0-9-]{1,48}", slug):
             continue
-        if not isinstance(title, str) or not title.strip():
+        if not isinstance(title, str) or not title.strip() or page_id in seen_page_ids or slug in seen_slugs:
             continue
+        seen_page_ids.add(page_id)
+        seen_slugs.add(slug)
         sections = []
+        seen_section_ids = set()
         source_sections = page.get("sections") if isinstance(page.get("sections"), list) else []
         for section in source_sections[:40]:
             if not isinstance(section, dict):
@@ -31,8 +35,9 @@ def normalize_page_schema(value):
             section_id, section_type = section.get("id"), section.get("type")
             if not isinstance(section_id, str) or not re.fullmatch(r"[a-z0-9-]{1,48}", section_id):
                 continue
-            if not isinstance(section_type, str) or section_type not in PAGE_SECTION_TYPES:
+            if not isinstance(section_type, str) or section_type not in PAGE_SECTION_TYPES or section_id in seen_section_ids:
                 continue
+            seen_section_ids.add(section_id)
             source_settings = section.get("settings") if isinstance(section.get("settings"), dict) else {}
             settings = {}
             for key, limit in PAGE_SETTING_LIMITS.items():

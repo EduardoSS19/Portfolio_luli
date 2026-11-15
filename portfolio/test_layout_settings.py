@@ -32,6 +32,18 @@ class LayoutSettingsTests(SimpleTestCase):
         self.assertNotIn("image_url", normalized["page_schema"]["pages"][0]["sections"][0]["settings"])
         self.assertFalse(is_valid_layout_setting("page_schema", schema))
 
+    def test_composable_page_schema_rejects_duplicate_page_and_section_ids(self):
+        schema = {"version": 1, "pages": [
+            {"id": "home", "slug": "inicio", "title": "Início", "published": True, "sections": [
+                {"id": "opening", "type": "hero", "settings": {}},
+                {"id": "opening", "type": "image", "settings": {}},
+            ]},
+            {"id": "other", "slug": "inicio", "title": "Duplicada", "published": True, "sections": []},
+        ]}
+        normalized = normalize_layout_settings({"page_schema": schema})["page_schema"]
+        self.assertEqual(len(normalized["pages"]), 1)
+        self.assertEqual(len(normalized["pages"][0]["sections"]), 1)
+
     def test_legacy_palette_is_preserved_as_dark_and_light_is_initialized(self):
         legacy = {
             "color_background": "#211815",

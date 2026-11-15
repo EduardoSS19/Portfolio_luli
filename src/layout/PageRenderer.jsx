@@ -4,6 +4,7 @@ import { SecaoCategoria } from '../components/SecaoCategoria.jsx'
 import { GaleriaGrade } from '../components/GaleriaGrade.jsx'
 import { Referencias } from '../components/Referencias.jsx'
 import { Contato } from '../components/Contato.jsx'
+import { Footer } from '../components/Footer.jsx'
 
 const SECTION_TYPES = new Set(['hero','about','gallery','featured-work','rich-text','image','references','contact','tattoo-flash','custom'])
 const text = (value, fallback = '') => typeof value === 'string' ? value : fallback
@@ -13,7 +14,7 @@ function Section({ section, data, preview }) {
   const categories = data.categorias || []
   const works = categories.flatMap(category => (category.obras || []).map(work => ({ ...work, categoria: category })))
   const category = categories.find(item => item.chave === settings.category_key)
-  const custom = (data.layout?.custom_sections || []).find(item => item.id === settings.custom_section_id)
+  const custom = (data.layout?.custom_sections || []).find(item => item.id === settings.custom_section_id) || (section.type === 'tattoo-flash' ? (data.layout?.custom_sections || []).find(item => item.type === 'tattoo-flash') : null)
   const style = { '--section-width': settings.width === 'wide' ? 'min(100% - 3rem, 1600px)' : settings.width === 'narrow' ? 'min(100% - 3rem, 760px)' : 'min(100% - 3rem, 1180px)', '--section-align': settings.align === 'center' ? 'center' : settings.align === 'right' ? 'right' : 'left' }
   const title = text(settings.title, section.type === 'gallery' ? category?.titulo || 'Trabalhos' : '')
   if (!SECTION_TYPES.has(section.type)) return null
@@ -38,6 +39,6 @@ export function PageRenderer({ pages = [], data, preview = false }) {
   return <main className="composer-site" id="topo">
     <nav className="composer-navigation" aria-label="Navegação do portfólio"><a className="composer-brand" href="/">{profile.nome || 'Portfólio'}</a><div>{navigation.map(page=><a key={page.id} href={page.slug === 'inicio' ? '/' : `/${page.slug}`} aria-current={page.id === activePage.id ? 'page' : undefined}>{page.title}</a>)}</div></nav>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview}/>)}
-    <footer className="composer-footer"><span>{profile.nome || 'Portfólio'}</span><a href="#topo">Voltar ao início ↑</a></footer>
+    <Footer nome={profile.nome} instagram={profile.instagram} email={profile.email} redes={data.redes || []}/>
   </main>
 }

@@ -20,7 +20,7 @@ export function CmsPageComposer({value,onChange}) {
   const patchPage=(pageId,patch)=>update(schema.pages.map(page=>page.id===pageId?{...page,...patch}:page))
   const patchSection=(pageId,sectionId,patch)=>update(schema.pages.map(page=>page.id!==pageId?page:{...page,sections:page.sections.map(section=>section.id===sectionId?{...section,...patch}:section)}))
   const patchSettings=(pageId,sectionId,patch)=>update(schema.pages.map(page=>page.id!==pageId?page:{...page,sections:page.sections.map(section=>section.id!==sectionId?section:{...section,settings:{...section.settings,...patch}})}))
-  const addPage=()=>update([...schema.pages,{id:makeId('page'),slug:'nova-pagina',title:'Nova página',published:true,sections:[{id:makeId('hero'),type:'hero',settings:{title:'Nova página',align:'left',width:'wide'}}]}])
+  const addPage=()=>{const id=makeId('page');update([...schema.pages,{id,slug:id,title:'Nova página',published:true,sections:[{id:makeId('hero'),type:'hero',settings:{title:'Nova página',align:'left',width:'wide'}}]}])}
   const addSection=(pageId,type)=>update(schema.pages.map(page=>page.id!==pageId?page:{...page,sections:[...page.sections,{id:makeId(type),type,settings:{title:BLOCKS.find(item=>item[0]===type)?.[1]||'Nova seção',width:'standard'}}]}))
   const moveSection=(pageId,index,delta)=>update(schema.pages.map(page=>{if(page.id!==pageId)return page;const sections=[...page.sections],target=index+delta;if(target<0||target>=sections.length)return page;[sections[index],sections[target]]=[sections[target],sections[index]];return {...page,sections}}))
   const removeSection=(pageId,sectionId)=>update(schema.pages.map(page=>page.id===pageId?{...page,sections:page.sections.filter(section=>section.id!==sectionId)}:page))
