@@ -654,3 +654,8 @@
 .cms-layout-hover-preview-floating iframe{
   pointer-events:none!important;
 }
+
+
+/* Final compact hover-preview test dimensions: 100px less in each axis. */
+.cms-layout-hover-preview-floating{width:min(280px,calc(100vw - 32px))!important;}
+.cms-layout-hover-preview-floating .cms-layout-hover-preview-frame{height:min(160px,calc(var(--hover-preview-max-height,440px) - 92px))!important;min-height:0!important;max-height:min(160px,calc(var(--hover-preview-max-height,440px) - 92px))!important;}
