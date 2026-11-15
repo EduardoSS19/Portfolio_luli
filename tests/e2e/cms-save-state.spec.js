@@ -168,7 +168,7 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   expect(isToRight || isToLeft).toBeTruthy()
 
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-hero-align'))).toBe('left')
-  const hoverFrameBox = await temporaryFrame.boundingBox()
+  const hoverFrameBox = await hoverPreview.locator('.cms-layout-hover-preview-frame').boundingBox()
   await page.mouse.move(hoverFrameBox.x + hoverFrameBox.width / 2, hoverFrameBox.y + hoverFrameBox.height / 2)
   const hoverScrollBefore = await temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)
   await page.mouse.wheel(0, 560)
