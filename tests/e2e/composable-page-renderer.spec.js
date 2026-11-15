@@ -128,3 +128,40 @@ test('conteúdo de flash e referências é preenchido e exibido a partir da pró
   await expect(references).toContainText('Museu de Arte')
   await expect(references).toContainText('Porto Alegre')
 })
+
+test('CMS mantém conteúdo de flash na área Páginas e salva os itens da sessão', async ({ page }) => {
+  let savedPayload = null
+  const initialSchema = {
+    version: 1,
+    pages: [{ id: 'home', slug: 'inicio', title: 'Início', published: true, sections: [
+      { id: 'flash', type: 'tattoo-flash', settings: { title: 'Flash disponíveis' }, items: [] },
+    ] }],
+  }
+  await page.route('**/api/cms/layout/', async route => {
+    if (route.request().method() === 'PATCH') {
+      savedPayload = JSON.parse(route.request().postData() || '{}')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ settings: { page_schema: savedPayload.page_schema } }) })
+    }
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+      settings: { page_schema: initialSchema }, permissions: { canView: true, canChange: true },
+    }) })
+  })
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Páginas/ }).click()
+  await page.locator('.cms-pages-tree-section').getByRole('button', { name: 'Flash de tatuagem' }).click()
+  const editor = page.locator('.cms-pages-items-editor')
+  await expect(editor).toBeVisible()
+  await editor.getByRole('button', { name: /Adicionar item/ }).click()
+  const item = page.locator('.cms-pages-item-card').first()
+  await item.getByLabel('Título').fill('Lua crescente')
+  await item.getByLabel('Descrição').fill('Blackwork autoral')
+  await item.getByLabel('Valor').fill('R$ 450')
+  await item.getByLabel('Disponibilidade').fill('Disponível')
+  await page.getByRole('button', { name: 'Salvar estrutura' }).click()
+  await expect.poll(() => savedPayload?.page_schema?.pages?.[0]?.sections?.[0]?.items?.[0]?.title).toBe('Lua crescente')
+  expect(savedPayload.page_schema.pages[0].sections[0].items[0].price).toBe('R$ 450')
+})
