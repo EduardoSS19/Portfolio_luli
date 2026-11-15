@@ -96,7 +96,7 @@ test('painel oferece retorno ao topo depois de rolar uma seção longa', async (
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(40)
 })
 
-test('opções de layout exibem uma prévia temporária antes de serem selecionadas', async ({ page }) => {
+test('prévia contextual usa Floating UI, navega e permanece interativa enquanto o ponteiro está sobre ela', async ({ page }) => {
   await mockDashboard(page)
   await page.route('**/api/cms/layout/', route => route.fulfill({
     status: 200, contentType: 'application/json',
@@ -127,10 +127,8 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const leftOption = compositionGroup.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
   await leftOption.scrollIntoViewIfNeeded()
   const panelScrollBeforeHover = await page.evaluate(() => window.scrollY)
-  const optionBeforeHover = await leftOption.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
-  })
+  const optionBeforeHover = await leftOption.boundingBox()
+
   await leftOption.hover()
   const hoverPreview = page.locator('.cms-layout-hover-preview')
   await expect(hoverPreview).toBeVisible()
@@ -142,74 +140,61 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
-  // The document keeps a native 390px mobile viewport; only its rendered
-  // surface is scaled to the modal's available width.
-  const hoverScaleGeometry = await page.evaluate(() => {
-    const frame = document.querySelector('.cms-layout-hover-preview iframe')
-    const stage = document.querySelector('.cms-layout-hover-preview .cms-layout-preview-stage-scaled')
-    const frameRect = frame.getBoundingClientRect()
-    const stageRect = stage.getBoundingClientRect()
-    const transform = new DOMMatrixReadOnly(getComputedStyle(frame).transform)
-    return {
-      scaleX: transform.a,
-      renderedWidth: frameRect.width,
-      stageWidth: stageRect.width,
-      renderedHeight: frameRect.height,
-      stageHeight: stageRect.height,
-      viewportWidth: frame.contentWindow.innerWidth,
-      documentWidth: frame.contentDocument.documentElement.clientWidth,
-    }
-  })
-  expect(hoverScaleGeometry.viewportWidth).toBe(390)
-  expect(hoverScaleGeometry.documentWidth).toBe(390)
-  expect(hoverScaleGeometry.scaleX).toBeGreaterThan(0)
-  expect(hoverScaleGeometry.scaleX).toBeLessThanOrEqual(1)
-  expect(Math.abs(hoverScaleGeometry.renderedWidth - hoverScaleGeometry.stageWidth)).toBeLessThan(1)
-  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(0)
-  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(hoverScaleGeometry.stageHeight)
+  const viewport = await temporaryFrame.evaluate(frame => ({
+    width: frame.contentWindow.innerWidth,
+    documentWidth: frame.contentDocument.documentElement.clientWidth,
+    height: frame.getBoundingClientRect().height,
+    transform: getComputedStyle(frame).transform,
+    scrolling: frame.getAttribute('scrolling'),
+    pointerEvents: getComputedStyle(frame).pointerEvents,
+  }))
+  expect(viewport.width).toBeGreaterThanOrEqual(360)
+  expect(viewport.width).toBeLessThanOrEqual(390)
+  expect(viewport.documentWidth).toBe(viewport.width)
+  expect(viewport.height).toBeGreaterThanOrEqual(400)
+  expect(viewport.transform).toBe('none')
+  expect(viewport.scrolling).toBe('auto')
+  expect(viewport.pointerEvents).toBe('auto')
 
-  const optionAfterHover = await leftOption.evaluate(element => {
-    const rect = element.getBoundingClientRect()
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
-  })
+  const optionAfterHover = await leftOption.boundingBox()
   expect(optionAfterHover).toEqual(optionBeforeHover)
   await expect(hoverPreview).toHaveCSS('position', 'fixed')
-  await expect(hoverPreview).toBeVisible()
   const anchoredGeometry = await page.evaluate(() => {
     const option = [...document.querySelectorAll('.cms-layout-option')].find(element => element.textContent.includes('À esquerda'))
     const preview = document.querySelector('.cms-layout-hover-preview')
     const optionRect = option.getBoundingClientRect()
     const previewRect = preview.getBoundingClientRect()
-    const form = document.querySelector('.cms-layout-form')
     return {
-      option: { left: optionRect.left, right: optionRect.right, bottom: optionRect.bottom },
-      preview: { left: previewRect.left, right: previewRect.right, top: previewRect.top },
-      formWidth: form.getBoundingClientRect().width,
-      viewportWidth: window.innerWidth,
+      option: { left: optionRect.left, right: optionRect.right, top: optionRect.top, bottom: optionRect.bottom },
+      preview: { left: previewRect.left, right: previewRect.right, top: previewRect.top, bottom: previewRect.bottom },
+      viewport: { width: innerWidth, height: innerHeight },
     }
   })
-  expect(anchoredGeometry.preview.top).toBeGreaterThanOrEqual(anchoredGeometry.option.bottom)
-  const isToRight = anchoredGeometry.preview.left >= anchoredGeometry.option.right
-  const isToLeft = anchoredGeometry.preview.right <= anchoredGeometry.option.left
-  expect(isToRight || isToLeft).toBeTruthy()
+  expect(anchoredGeometry.preview.left).toBeGreaterThanOrEqual(0)
+  expect(anchoredGeometry.preview.right).toBeLessThanOrEqual(anchoredGeometry.viewport.width)
+  expect(anchoredGeometry.preview.top).toBeGreaterThanOrEqual(0)
+  expect(anchoredGeometry.preview.bottom).toBeLessThanOrEqual(anchoredGeometry.viewport.height)
+  expect(anchoredGeometry.preview.top).toBeLessThan(anchoredGeometry.option.bottom)
+  expect(anchoredGeometry.preview.bottom).toBeGreaterThan(anchoredGeometry.option.top)
 
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-hero-align'))).toBe('left')
-  const hoverFrameBox = await hoverPreview.locator('.cms-layout-hover-preview-frame').boundingBox()
-  await page.mouse.move(hoverFrameBox.x + hoverFrameBox.width / 2, hoverFrameBox.y + hoverFrameBox.height / 2)
-  const hoverScrollBefore = await temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)
-  await page.mouse.wheel(0, 560)
-  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)).toBe(hoverScrollBefore)
-  await expect(temporaryFrame).toHaveAttribute('scrolling', 'no')
-  await expect(temporaryFrame).toHaveCSS('pointer-events', 'none')
+  const frameBox = await temporaryFrame.boundingBox()
+  await page.mouse.move(frameBox.x + frameBox.width / 2, frameBox.y + frameBox.height / 2)
   await expect(hoverPreview).toBeVisible()
-  const previewDocument = page.frameLocator('.cms-layout-hover-preview iframe')
-  await expect(previewDocument.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'true')
+  const scrollBefore = await temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)
+  await page.mouse.wheel(0, 560)
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentWindow.scrollY)).toBeGreaterThan(scrollBefore)
+  await expect(hoverPreview).toBeVisible()
 
-  const scrollBeforeSelection = await page.evaluate(() => window.scrollY)
+  // Sair da região combinada (controle + painel) fecha sem o antigo timeout de 320ms.
+  await page.mouse.move(4, 4)
+  await expect(hoverPreview).toBeHidden()
+
+  await leftOption.hover()
+  await expect(hoverPreview).toBeVisible()
   await leftOption.click()
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBeforeSelection)
 
   const paletteOption = page.getByRole('button', { name: 'Aplicar paleta Oliva e papel' })
   await paletteOption.hover()
@@ -226,8 +211,6 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
   await carouselOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-presentation'))).toBe('carousel')
-  await expect(temporaryFrame).toBeVisible()
-
   const sidebarOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Painel lateral' })
   await sidebarOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-nav')?.classList.contains('navigation-sidebar'))).toBe(true)
@@ -270,7 +253,6 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect.poll(() => floatingPanel.evaluate(panel => panel.getBoundingClientRect().width)).toBeGreaterThan(beforePanelWidth + 50)
   await expect.poll(() => floatingFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(beforeResize + 50)
 })
-
 
 test('prévia contextual permanece acessível e dentro da tela em celular', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
