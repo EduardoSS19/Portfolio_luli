@@ -127,3 +127,53 @@
 .mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,3),minmax(0,1fr))}
 .mode-brutalist .composer-gallery .obras-lista{grid-template-columns:repeat(var(--composer-gallery-columns,2),minmax(0,1fr))}
 @media(max-width:760px){.mode-masonry .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.mode-brutalist .composer-gallery .obras-lista{grid-template-columns:1fr}}
+
+/* Bespoke art directions for the new specialist templates. */
+.mode-museum .composer-hero{min-height:68svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid var(--linha)}
+.mode-museum .composer-hero h1{max-width:10ch;font:400 clamp(4rem,12vw,11rem)/.82 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.07em}
+.mode-museum .composer-gallery header{display:grid;grid-template-columns:1fr auto;align-items:end;gap:1rem 2rem;padding-bottom:1rem;border-bottom:1px solid var(--linha)}
+.mode-museum .composer-gallery header>span{grid-column:1/-1;font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.18em}
+.mode-museum .composer-gallery header h2{max-width:12ch;font-size:clamp(3rem,7vw,7rem)}
+.mode-museum .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(1rem,2vw,2rem);align-items:start}
+.mode-museum .composer-gallery .obras-lista>.obra{grid-column:span 5}
+.mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:span 7}
+.mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:min(66vh,740px);min-height:300px}
+.mode-museum .composer-gallery .obras-lista>.obra:nth-child(even) .obra-galeria{height:min(48vh,560px)}
+.mode-museum .composer-gallery .obras-lista>.obra .obra-texto{padding:.9rem 0}
+.mode-cinematic .composer-hero{position:relative;min-height:100svh;justify-content:flex-end;padding-bottom:clamp(4rem,12vh,10rem);background:radial-gradient(ellipse at 72% 38%,rgba(190,155,112,.22),transparent 42%),linear-gradient(120deg,rgba(2,10,15,.15),rgba(2,10,15,.8))}
+.mode-cinematic .composer-hero h1{max-width:9ch;font-size:clamp(4rem,14vw,13rem);line-height:.78}
+.mode-cinematic .composer-hero p{max-width:38ch}
+.mode-cinematic .composer-gallery .obras-lista{display:flex!important;gap:1rem;overflow-x:auto;padding:1rem 0 3rem;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain}
+.mode-cinematic .composer-gallery .obras-lista>.obra{flex:0 0 min(82vw,1000px);scroll-snap-align:center}
+.mode-cinematic .composer-gallery .obras-lista>.obra .obra-galeria{height:min(82vh,900px);min-height:380px}
+.mode-cinematic .composer-gallery .obras-lista>.obra .obra-texto{display:flex;align-items:baseline;justify-content:space-between;gap:2rem;padding:1rem 0}
+.mode-swiss .composer-hero{min-height:72svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid var(--linha)}
+.mode-swiss .composer-hero h1{max-width:11ch;font:700 clamp(4rem,12vw,10rem)/.82 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.09em}
+.mode-swiss .composer-section{position:relative}
+.mode-swiss .composer-gallery header{display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,.4fr);align-items:end;gap:1rem;padding-bottom:1.2rem;border-bottom:2px solid currentColor}
+.mode-swiss .composer-gallery header>span{grid-column:1/-1;font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.14em}
+.mode-swiss .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr));gap:1px;background:var(--linha);border:1px solid var(--linha)}
+.mode-swiss .composer-gallery .obras-lista>.obra{grid-column:span 4;background:var(--azul-escuro);padding:.7rem}
+.mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:span 8}
+.mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(220px,34vw,520px)}
+.mode-swiss .composer-gallery .obras-lista>.obra .obra-texto h3{font:600 .9rem var(--portfolio-body-font,sans-serif);letter-spacing:-.02em}
+.mode-tattoo-book .composer-hero{min-height:64svh;align-items:flex-start;justify-content:flex-end;border-bottom:1px solid rgba(216,196,164,.25)}
+.mode-tattoo-book .composer-hero h1{max-width:10ch;font:600 clamp(3.5rem,10vw,9rem)/.84 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.065em}
+.mode-tattoo-book .composer-gallery .obras-lista,.mode-tattoo-book .composer-custom-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.8rem,2vw,1.5rem)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra,.mode-tattoo-book .composer-custom-grid article{padding:.65rem;border:1px solid rgba(216,196,164,.32);background:rgba(216,196,164,.035)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-galeria{height:auto;aspect-ratio:1;min-height:0}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-texto{padding:.8rem .25rem}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-texto h3,.mode-tattoo-book .composer-custom-grid h3{font:500 1rem var(--portfolio-heading-font,Georgia,serif)}
+.mode-tattoo-book .composer-custom-grid img{aspect-ratio:1;object-fit:cover}
+.mode-tattoo-book .composer-custom-grid small{display:block;margin-top:.3rem;color:var(--layout-muted);font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.04em}
+@media(max-width:760px){
+ .mode-museum .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mode-museum .composer-gallery .obras-lista>.obra,.mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:span 1}
+ .mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:48vh;min-height:260px}
+ .mode-cinematic .composer-gallery .obras-lista>.obra{flex-basis:88vw}
+ .mode-cinematic .composer-gallery .obras-lista>.obra .obra-galeria{height:68vh;min-height:300px}
+ .mode-swiss .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mode-swiss .composer-gallery .obras-lista>.obra,.mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:span 1}
+ .mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:42vh}
+ .mode-tattoo-book .composer-gallery .obras-lista,.mode-tattoo-book .composer-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
