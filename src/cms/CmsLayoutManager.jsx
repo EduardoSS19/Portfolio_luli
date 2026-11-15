@@ -429,7 +429,11 @@ export function CmsLayoutManager(){
     const dismissFromWorkspaceGesture=event=>{
       if(ignoreWorkspaceScrollRef.current)return
       const preview=document.querySelector('.cms-layout-hover-preview')
-      if(preview&&(event.target===preview||preview.contains(event.target)))return
+      if(preview&&(event.target===preview||preview.contains(event.target))){
+        // Wheel/touch over the passive snapshot must not scroll the CMS behind it.
+        if((event.type==='wheel'||event.type==='touchmove')&&event.cancelable)event.preventDefault()
+        return
+      }
       cancelOptionPreviewHide()
       suppressOptionPreviewRef.current=hoveredOption
       setHoverPreviewMounted(false)
@@ -437,11 +441,13 @@ export function CmsLayoutManager(){
     }
     // O scrollIntoView do navegador/Playwright ao alcançar outra opção não é
     // uma intenção de fechar a prévia. Fechamos apenas em gestos explícitos.
-    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    window.addEventListener('wheel',dismissFromWorkspaceGesture,{capture:true,passive:false})
     window.addEventListener('touchstart',dismissFromWorkspaceGesture,{capture:true,passive:true})
+    window.addEventListener('touchmove',dismissFromWorkspaceGesture,{capture:true,passive:false})
     return()=>{
       window.removeEventListener('wheel',dismissFromWorkspaceGesture,true)
       window.removeEventListener('touchstart',dismissFromWorkspaceGesture,true)
+      window.removeEventListener('touchmove',dismissFromWorkspaceGesture,true)
     }
   },[hoverPreviewMounted,hoveredOption])
   const hideOptionPreview=(event)=>{
