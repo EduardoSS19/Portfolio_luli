@@ -186,7 +186,7 @@ export function CmsLayoutManager(){
   // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
   // nunca o viewport CSS do site dentro do iframe.
   const hoverDevice=PREVIEW_DEVICES[previewDevice]
-  const hoverModalWidth=Math.min(760,Math.max(220,window.innerWidth-32))
+  const hoverModalWidth=Math.min(680,Math.max(220,window.innerWidth-32))
   const hoverPreviewScale=Math.min(1,Math.max(.2,(hoverModalWidth-24)/hoverDevice.width))
   const hoverStageWidth=hoverDevice.width*hoverPreviewScale
   const hoverStageHeight=hoverDevice.height*hoverPreviewScale
@@ -205,7 +205,7 @@ export function CmsLayoutManager(){
     ],
     whileElementsMounted:autoUpdate
   })
-  const hoverInteraction=useHover(hoverFloating.context,{delay:0,handleClose:safePolygon({buffer:1})})
+  const hoverInteraction=useHover(hoverFloating.context,{delay:{open:0,close:120}})
   const {getReferenceProps,getFloatingProps}=useInteractions([hoverInteraction])
   const ignoreWorkspaceScrollRef=useRef(false)
   const optionScrollBeforeInteractionRef=useRef(null)
@@ -610,7 +610,7 @@ export function CmsLayoutManager(){
           className="cms-layout-hover-preview cms-layout-hover-preview-floating"
           aria-label="Prévia temporária da opção"
           data-device={hoverDevice.label.toLowerCase()}
-          style={{...hoverFloating.floatingStyles,width:`min(760px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
+          style={{...hoverFloating.floatingStyles,width:`min(680px, calc(100vw - 32px))`,boxSizing:'border-box',zIndex:2147483000}}>
           <header className="cms-layout-hover-preview-heading">
             <div><p className="cms-eyebrow">PRÉVIA DA ALTERAÇÃO · {hoverDevice.label.toUpperCase()}</p><strong>{hoveredOption.label}</strong><small>{hoveredOption.detail}</small></div>
             <button type="button" aria-label="Fechar prévia temporária" onClick={closeOptionPreview}>×</button>
