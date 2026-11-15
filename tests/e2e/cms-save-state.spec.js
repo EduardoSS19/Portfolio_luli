@@ -142,7 +142,8 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
   await expect(leftOption.locator('input')).not.toBeChecked()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.getBoundingClientRect().width)).toBeGreaterThan(300)
 
-  // The hover iframe uses the card's real viewport width without a transform.
+  // The document keeps a native 390px mobile viewport; only its rendered
+  // surface is scaled to the modal's available width.
   const hoverScaleGeometry = await page.evaluate(() => {
     const frame = document.querySelector('.cms-layout-hover-preview iframe')
     const stage = document.querySelector('.cms-layout-hover-preview .cms-layout-preview-stage-scaled')
@@ -155,12 +156,17 @@ test('opções de layout exibem uma prévia temporária antes de serem seleciona
       stageWidth: stageRect.width,
       renderedHeight: frameRect.height,
       stageHeight: stageRect.height,
+      viewportWidth: frame.contentWindow.innerWidth,
+      documentWidth: frame.contentDocument.documentElement.clientWidth,
     }
   })
-  expect(hoverScaleGeometry.scaleX).toBe(1)
+  expect(hoverScaleGeometry.viewportWidth).toBe(390)
+  expect(hoverScaleGeometry.documentWidth).toBe(390)
+  expect(hoverScaleGeometry.scaleX).toBeGreaterThan(0)
+  expect(hoverScaleGeometry.scaleX).toBeLessThanOrEqual(1)
   expect(Math.abs(hoverScaleGeometry.renderedWidth - hoverScaleGeometry.stageWidth)).toBeLessThan(1)
   expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(0)
-  expect(hoverScaleGeometry.renderedHeight).toBeLessThanOrEqual(hoverScaleGeometry.stageHeight + 1)
+  expect(hoverScaleGeometry.renderedHeight).toBeGreaterThan(hoverScaleGeometry.stageHeight)
 
   const optionAfterHover = await leftOption.evaluate(element => {
     const rect = element.getBoundingClientRect()
