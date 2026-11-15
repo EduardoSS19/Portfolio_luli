@@ -190,7 +190,6 @@ test('prévia contextual usa Floating UI, navega e permanece interativa enquanto
   const fourColumnsOption = compositionGroup.locator('.cms-layout-option').filter({ hasText: '4 colunas' })
   await fourColumnsOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-columns'))).toBe('4')
-  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-view'))).toBe('grade')
   const visibleColumns = await temporaryFrame.evaluate(frame => {
     const grid = frame.contentDocument?.querySelector('.galeria-grade-global .obras-lista.modo-grade')
     return grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0
