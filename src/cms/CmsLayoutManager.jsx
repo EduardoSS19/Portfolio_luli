@@ -201,14 +201,14 @@ export function CmsLayoutManager(){
   const inlinePreviewScale=inlinePreviewSize.width>0?Math.min(1,inlinePreviewSize.width/previewWidth):1
   const inlinePreviewStageWidth=previewWidth*inlinePreviewScale
   const inlinePreviewStageHeight=previewHeight*inlinePreviewScale
-  // A prévia contextual mostra um recorte mobile nativo, sem escala/zoom.
-  // O iframe usa a largura real do cartão e um viewport curto para caber no modal.
+  // Mantém o viewport lógico mobile em 390px e reduz a pintura para a
+  // largura útil do cartão. Assim media queries e medidas em vw são calculadas
+  // como num telefone, sem deixar o iframe ultrapassar horizontalmente o modal.
   const hoverPreviewStageWidth=hoverPreviewSize.width||358
-  // Render the hover snapshot at the card's real CSS viewport width. Scaling a
-  // fixed 390px iframe made the frame geometry look correct while its page
-  // typography/media-query layout still appeared magnified in the narrow card.
-  const hoverPreviewScale=1
+  const hoverPreviewScale=Math.min(1,hoverPreviewStageWidth/390)
   const hoverPreviewStageHeight=260
+  const hoverPreviewDocumentWidth=390
+  const hoverPreviewDocumentHeight=844
   const startPreviewDrag=event=>{
     if(event.button!==0||event.target.closest('button'))return
     const rect=event.currentTarget.closest('.cms-layout-preview-panel').getBoundingClientRect()
@@ -723,7 +723,7 @@ export function CmsLayoutManager(){
           </header>
           <div className="cms-layout-preview-frame cms-layout-hover-preview-frame" ref={hoverPreviewViewportRef} data-device="mobile">
             <div className="cms-layout-preview-stage cms-layout-preview-stage-scaled" data-preview-scale={hoverPreviewScale.toFixed(3)} style={{width:hoverPreviewStageWidth,height:hoverPreviewStageHeight}}>
-              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:'100%',height:844,transform:'none',transformOrigin:'top left',pointerEvents:'none'}}/>
+              <iframe ref={hoverPreviewIframeRef} title="Prévia visual temporária do portfólio" src="/?layout_preview=1&layout_preview_compact=1" loading="eager" scrolling="no" tabIndex={-1} style={{width:hoverPreviewDocumentWidth,height:hoverPreviewDocumentHeight,transform:`scale(${hoverPreviewScale})`,transformOrigin:'top left',pointerEvents:'none'}}/>
             </div>
           </div>
         </aside>,
