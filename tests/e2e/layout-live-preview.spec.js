@@ -633,7 +633,7 @@ test('campos e submenus de design são específicos por tipo de seção e começ
   await testimonial.getByRole('button', { name: '+ Adicionar depoimento' }).click()
   await testimonial.locator('.cms-layout-custom-item summary').click()
   await expect(testimonial.getByRole('textbox', { name: 'Depoimento', exact: true })).toBeVisible()
-  await expect(testimonial.getByLabel('Descrição', { exact: true })).toBeVisible()
+  await expect(testimonial.getByLabel('Texto do depoimento', { exact: true })).toBeVisible()
   await designMenu.locator('summary').click()
   await expect(designMenu.getByText(/Dê protagonismo às falas/)).toBeVisible()
   await expect(designMenu.getByLabel('Estilo de apresentação')).toHaveValue('quotes')
