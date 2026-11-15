@@ -185,6 +185,18 @@ test('prévia contextual usa Floating UI, navega e permanece interativa enquanto
   expect(anchoredGeometry.preview.bottom).toBeGreaterThan(anchoredGeometry.option.top)
 
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-hero-align'))).toBe('left')
+
+  // O hover deve aplicar quatro colunas no viewport desktop real, não numa página mobile ampliada.
+  const fourColumnsOption = compositionGroup.locator('.cms-layout-option').filter({ hasText: '4 colunas' })
+  await fourColumnsOption.hover()
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-columns'))).toBe('4')
+  await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-view'))).toBe('grade')
+  const visibleColumns = await temporaryFrame.evaluate(frame => {
+    const grid = frame.contentDocument?.querySelector('.galeria-grade-global .obras-lista.modo-grade')
+    return grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0
+  })
+  expect(visibleColumns).toBe(4)
+  await leftOption.hover()
   const frameBox = await temporaryFrame.boundingBox()
   await page.mouse.move(frameBox.x + frameBox.width / 2, frameBox.y + frameBox.height / 2)
   await expect(hoverPreview).toBeVisible()
