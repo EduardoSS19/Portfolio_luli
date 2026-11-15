@@ -72,7 +72,7 @@ test('conteúdo complementar só habilita salvar quando há mudanças', async ({
   })
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Conteúdo/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Sessões/ }).click()
   const saveButton = page.getByRole('button', { name: 'Adicionar item' })
   await expect(saveButton).toBeDisabled()
   await expect(page.locator('.cms-save-state.compact')).toContainText('Preencha os campos')
@@ -119,8 +119,9 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   }))
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Layout')
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
 
   const compositionGroup = page.locator('.cms-layout-field-group').first()
   await compositionGroup.locator('summary').click()
@@ -210,6 +211,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect(leftOption.locator('input')).toBeChecked()
   await expect(hoverPreview).toBeHidden()
 
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Identidade/ }).click()
   const paletteOption = page.getByRole('button', { name: 'Aplicar paleta Oliva e papel' })
   await paletteOption.hover()
   await expect(hoverPreview).toBeVisible()
@@ -220,6 +222,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Fundo')
 
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Experiência/ }).click()
   const experienceGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Experiência do visitante' }) })
   await experienceGroup.locator('summary').click()
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
@@ -231,6 +234,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.editorial-menu-backdrop')?.getAttribute('aria-hidden'))).toBe('false')
   await expect(sidebarOption.locator('input')).not.toBeChecked()
 
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /^Conteúdo/ }).click()
   const contentGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Conteúdo e seções' }) })
   await contentGroup.locator('summary').click()
   const hideReferencesOption = contentGroup.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
@@ -281,7 +285,8 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   }))
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
   const compositionGroup = page.locator('.cms-layout-field-group').first()
   await compositionGroup.locator('summary').click()
   const option = compositionGroup.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
