@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { autoUpdate, flip, offset, shift, size, useFloating, useHover, useInteractions } from '@floating-ui/react'
+import { autoUpdate, flip, offset, shift, size, useFloating } from '@floating-ui/react'
 import './CmsLayoutManager.css'
+import { CmsPageComposer } from './CmsPageComposer.jsx'
 
 const DEFAULTS = {
   content_width:'standard', hero_alignment:'center', hero_size:'large',
@@ -201,6 +202,7 @@ export function CmsLayoutManager(){
   const [inlinePreviewSize,setInlinePreviewSize]=useState({width:0,height:0})
   const [hoverPreviewMounted,setHoverPreviewMounted]=useState(false)
   const [hoveredOption,setHoveredOption]=useState(null)
+  const hoverCloseTimerRef=useRef(null)
   const hoverPreviewIframeRef=useRef(null)
   // O hover simula o viewport do dispositivo atual; a escala afeta apenas a moldura,
   // nunca o viewport CSS do site dentro do iframe.
@@ -224,8 +226,6 @@ export function CmsLayoutManager(){
     ],
     whileElementsMounted:autoUpdate
   })
-  const hoverInteraction=useHover(hoverFloating.context,{delay:{open:0,close:120}})
-  const {getReferenceProps,getFloatingProps}=useInteractions([hoverInteraction])
   const ignoreWorkspaceScrollRef=useRef(false)
   const optionScrollBeforeInteractionRef=useRef(null)
   const previewViewportRef=useRef(null)
@@ -443,7 +443,15 @@ export function CmsLayoutManager(){
     }
   },[settings,previewFocus,previewMode,hoveredOption,hoverPreviewMounted])
 
-  const closeOptionPreview=()=>{setHoverPreviewMounted(false);setHoveredOption(null)}
+  const closeOptionPreview=()=>{if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current);hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)}
+  const scheduleOptionPreviewClose=(event)=>{
+    if(event?.relatedTarget?.closest?.('.cms-layout-option'))return
+    if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
+    // Atravessar o pequeno espaço entre opções não deve desmontar o preview
+    // antes do próximo onPointerEnter/onMouseEnter. Ao sair para o iframe,
+    // a prévia continua fechando após esse breve intervalo.
+    hoverCloseTimerRef.current=window.setTimeout(()=>{hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)},80)
+  }
   const hideOptionPreview=(event)=>{
     const floating=document.querySelector('.cms-layout-hover-preview')
     if(event?.relatedTarget&&(event.currentTarget?.contains?.(event.relatedTarget)||floating?.contains(event.relatedTarget)))return
@@ -451,6 +459,8 @@ export function CmsLayoutManager(){
     setHoveredOption(null)
   }
   const showOptionPreview=(name,value,label,detail,event,patch={})=>{
+    if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
+    hoverCloseTimerRef.current=null
     if(event?.currentTarget)hoverFloating.refs.setReference(event.currentTarget)
     setHoveredOption({name,value,label,detail,patch})
     setHoverPreviewMounted(true)
@@ -545,6 +555,7 @@ export function CmsLayoutManager(){
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
+        <CmsPageComposer value={settings.page_schema} onChange={page_schema=>setSettings(current=>({...current,page_schema}))}/>
         <section className="cms-layout-presets" ref={presetSectionRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 4 apresentações</span></div>
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
@@ -619,17 +630,17 @@ export function CmsLayoutManager(){
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
           <p className="cms-layout-active-theme">Editando as cores do tema {editingTheme==='dark'?'escuro':'claro'}.</p>
-          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} {...getReferenceProps({onPointerEnter:event=>previewPalette(palette,event),onFocus:event=>previewPalette(palette,event),onBlur:hideOptionPreview})} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
-          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} {...getReferenceProps({onPointerEnter:event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event),onFocus:event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event),onBlur:hideOptionPreview})}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
+          <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onPointerEnter={event=>previewPalette(palette,event)} onMouseEnter={event=>previewPalette(palette,event)} onFocus={event=>previewPalette(palette,event)} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
+          <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onPointerEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} {...getReferenceProps({onPointerEnter:event=>showOptionPreview(field.name,value,label,detail,event),onFocus:event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)},onBlur:hideOptionPreview})} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onPointerLeave={scheduleOptionPreviewClose} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>
       </form>
       {hoverPreviewMounted&&hoveredOption&&createPortal(
-        <aside ref={hoverFloating.refs.setFloating} {...getFloatingProps({onBlur:hideOptionPreview})}
+        <aside ref={hoverFloating.refs.setFloating} onBlur={hideOptionPreview}
           className="cms-layout-hover-preview cms-layout-hover-preview-floating"
           aria-label="Prévia temporária da opção"
           data-device={hoverDevice.label.toLowerCase()}

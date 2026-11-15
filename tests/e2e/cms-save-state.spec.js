@@ -220,7 +220,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect(hoverPreview).toBeVisible()
   await expect(hoverPreview).toContainText('Fundo')
 
-  const experienceGroup = page.locator('.cms-layout-field-group').nth(2)
+  const experienceGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Experiência do visitante' }) })
   await experienceGroup.locator('summary').click()
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
   await carouselOption.hover()
@@ -231,7 +231,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.editorial-menu-backdrop')?.getAttribute('aria-hidden'))).toBe('false')
   await expect(sidebarOption.locator('input')).not.toBeChecked()
 
-  const contentGroup = page.locator('.cms-layout-field-group').nth(1)
+  const contentGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Conteúdo e seções' }) })
   await contentGroup.locator('summary').click()
   const hideReferencesOption = contentGroup.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
   await hideReferencesOption.hover()
@@ -333,7 +333,7 @@ test('modelos prontos e biblioteca de seções permitem configurar conteúdo esp
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
   await inlinePreview.getByRole('button', { name: 'Próximo modelo' }).click()
-  await expect(inlinePreview).toContainText('7 de 7')
+  await expect(inlinePreview).toContainText('7 de 20')
   await inlinePreview.getByRole('button', { name: 'Modelo anterior' }).click()
   await expect(inlinePreview).toContainText('Tatuador(a)')
   await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
