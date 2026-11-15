@@ -578,8 +578,10 @@ test('iframe completo mantém o menu limitado ao viewport do dispositivo', async
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
   const inlineFrame = page.locator('.cms-layout-inline-preview iframe')
+  await page.getByRole('group', { name: 'Dispositivo da prévia completa' }).getByRole('button', { name: 'Celular' }).click()
   await inlineFrame.scrollIntoViewIfNeeded()
   await expect.poll(() => inlineFrame.evaluate(frame => Boolean(frame.contentDocument?.querySelector('.site-shell')))).toBe(true)
+  await expect.poll(() => inlineFrame.evaluate(frame => frame.contentWindow.innerWidth)).toBe(390)
   const portfolio = page.frameLocator('.cms-layout-inline-preview iframe')
   await portfolio.locator('.editorial-menu-trigger').click()
   await expect(portfolio.locator('.editorial-menu-backdrop')).toHaveAttribute('aria-hidden', 'false')
@@ -595,6 +597,7 @@ test('iframe completo mantém o menu limitado ao viewport do dispositivo', async
       panelWidth: panelRect.width, panelHeight: panelRect.height,
     }
   })
+  expect(bounds.width).toBe(390)
   expect(bounds.backdropWidth).toBeLessThanOrEqual(bounds.width + 1)
   expect(bounds.backdropHeight).toBeLessThanOrEqual(bounds.height + 1)
   expect(bounds.panelWidth).toBeLessThanOrEqual(bounds.width + 1)
