@@ -14,7 +14,7 @@ const DEFAULT_SCHEMA = {version:1,pages:[{id:'home',slug:'inicio',title:'Início
   {id:'works',type:'gallery',settings:{title:'Trabalhos selecionados',width:'wide'}},
   {id:'contact',type:'contact',settings:{title:'Vamos conversar?'}}
 ]}]}
-const defaults = type => ({hero:{title:'Sua apresentação',eyebrow:'PORTFÓLIO AUTORAL',body:''},about:{title:'Sobre',show_image:true,show_bio:true},gallery:{title:'Trabalhos selecionados',layout:'editorial',width:'wide'},'featured-work':{title:'Obra em destaque'},'rich-text':{title:'Texto editorial',body:''},image:{title:'Imagem',image_url:'',alt:'',caption:'',ratio:'landscape'},'tattoo-flash':{title:'Flash disponíveis'},references:{title:'Referências'},contact:{title:'Contato'}}[type]||{})
+const defaults = type => ({hero:{title:'Sua apresentação',eyebrow:'PORTFÓLIO AUTORAL',body:''},about:{title:'Sobre',show_image:true,show_bio:true},gallery:{title:'Trabalhos selecionados',layout:'editorial'},'featured-work':{title:'Obra em destaque'},'rich-text':{title:'Texto editorial',body:''},image:{title:'Imagem',image_url:'',alt:'',caption:'',ratio:'landscape'},'tattoo-flash':{title:'Flash disponíveis'},references:{title:'Referências'},contact:{title:'Contato'}}[type]||{})
 const label = type => BLOCKS.find(item=>item[0]===type)?.[1]||type
 
 function Field({label,children,wide=false}) { return <label className={'cms-page-field'+(wide?' wide':'')}><span>{label}</span>{children}</label> }
