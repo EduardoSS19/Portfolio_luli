@@ -17,7 +17,7 @@ function Section({ section, data, preview }) {
   const custom = (data.layout?.custom_sections || []).find(item => item.id === settings.custom_section_id) || (section.type === 'tattoo-flash' ? (data.layout?.custom_sections || []).find(item => item.type === 'tattoo-flash') : null)
   const items = Array.isArray(section.items) ? section.items : (custom?.items || [])
   const contentWidth=settings.width||data.layout?.content_width||'standard'
-  const sectionAlignment=settings.align||data.layout?.hero_alignment||'left'
+  const sectionAlignment=settings.align||(section.type==='hero'?data.layout?.hero_alignment:'left')||'left'
   const style = { '--section-width': contentWidth === 'wide' ? 'min(100% - 3rem, 1600px)' : contentWidth === 'compact' || contentWidth === 'narrow' ? 'min(100% - 3rem, 760px)' : 'min(100% - 3rem, 1180px)', '--section-align': sectionAlignment === 'center' ? 'center' : sectionAlignment === 'right' ? 'right' : 'left' }
   const title = text(settings.title, section.type === 'gallery' ? category?.titulo || 'Trabalhos' : '')
   if (!SECTION_TYPES.has(section.type)) return null
