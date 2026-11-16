@@ -601,18 +601,33 @@ export default function App() {
       // Querying before the commit can capture a stale/hidden section and make the
       // contextual preview appear to ignore the selected option.
       if (selector || focus === 'bio' || focus === 'references' || focus === 'contact') {
+        const focusPreviewTarget = () => {
+          const target = selector ? document.querySelector(selector) : null
+          const visibleTarget = target && target.getClientRects().length ? target : null
+          const fallbackTarget = visibleTarget
+            || (focus === 'bio'
+              ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
+              : focus === 'references' || focus === 'contact'
+                ? document.querySelector('#Contato, .rodape')
+                : null)
+          if (!fallbackTarget) return
+          if (!hoverSnapshot) {
+            fallbackTarget.scrollIntoView({ block: 'start', behavior: 'smooth' })
+            return
+          }
+          // O hover é uma comparação instantânea: calcula o deslocamento no
+          // documento do iframe e aplica-o diretamente ao elemento rolável.
+          // Isso evita depender do scrollIntoView durante commits concorrentes
+          // de conteúdo/layout dentro da prévia compacta.
+          const scrollingElement = document.scrollingElement || document.documentElement
+          const targetTop = fallbackTarget.getBoundingClientRect().top + scrollingElement.scrollTop
+          const maxScroll = Math.max(0, scrollingElement.scrollHeight - window.innerHeight)
+          const nextScrollTop = Math.max(0, Math.min(targetTop, maxScroll))
+          scrollingElement.scrollTop = nextScrollTop
+          window.scrollTo(0, nextScrollTop)
+        }
         window.requestAnimationFrame(() => {
-          window.requestAnimationFrame(() => {
-            const target = selector ? document.querySelector(selector) : null
-            const visibleTarget = target && target.getClientRects().length ? target : null
-            const fallbackTarget = visibleTarget
-              || (focus === 'bio'
-                ? document.querySelector('.galeria-grade-global, .secao:not(.sobre-secao):not(.secao-contato)')
-                : focus === 'references' || focus === 'contact'
-                  ? document.querySelector('#Contato, .rodape')
-                  : null)
-            fallbackTarget?.scrollIntoView({ block: 'start', behavior: hoverSnapshot ? 'instant' : 'smooth' })
-          })
+          window.requestAnimationFrame(focusPreviewTarget)
         })
       }
     }
