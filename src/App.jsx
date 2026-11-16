@@ -52,7 +52,9 @@ const LAYOUT_PREVIEW_CHOICES = {
   section_spacing: ['compact', 'comfortable', 'spacious'],
   gallery_columns: ['2', '3', '4'],
   default_gallery_view: ['lista', 'grade'],
-  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
+  presentation_mode: ['editorial', 'lista', 'grade', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
+  gallery_view_count: ['1', '2'],
+  gallery_secondary_mode: ['editorial', 'lista', 'grade', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
   navigation_mode: ['curtain', 'dropdown', 'sidebar', 'rail', 'dock', 'index'],
   heading_font: ['fraunces', 'playfair', 'space-grotesk', 'cormorant', 'archivo-black'],
   body_font: ['dm-sans', 'manrope', 'ibm-plex', 'lora', 'source-sans'],
@@ -567,8 +569,8 @@ export default function App() {
         const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
         return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, previewSectionExamples: demo.sectionExamples, marca: demo.marca } : {}), layout: nextLayout }
       })
-      const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
-      if (previewMode) setModoGaleria(previewMode)
+      const previewMode = event.data.previewMode
+      if (['lista', 'grade'].includes(previewMode)) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       const navigationPreview = {
