@@ -661,6 +661,9 @@ test('prévia de hover foca a seção alterada e permite navegação no viewport
   await expect(modal).toBeVisible()
   const frame = modal.locator('iframe')
   await expect.poll(() => frame.evaluate(element => element.contentDocument?.readyState ?? 'loading')).toBe('complete')
-  await expect.poll(() => frame.evaluate(element => element.contentWindow?.scrollY ?? -1)).toBeGreaterThan(0)
+  await expect.poll(() => frame.evaluate(element => {
+    const document = element.contentDocument
+    return document?.scrollingElement?.scrollTop ?? -1
+  })).toBeGreaterThan(0)
   await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('auto')
 })
