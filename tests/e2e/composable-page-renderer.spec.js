@@ -62,6 +62,29 @@ test('menu cortina abre e fecha sem sobrepor permanentemente a página', async (
   await expect(page.locator('.composer-rich-text h2')).toHaveText('Sobre a artista')
 })
 
+test('prévia contextual pode mostrar a segunda experiência sem alterar a escolha principal', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: [], referencias: [], frames: [], redes: [],
+      sobre: { nome: 'Artista', frase: 'Portfólio', bio: '', email: '', instagram: '', formulario: '' },
+      layout: { page_schema: pageSchema, presentation_mode: 'masonry', gallery_view_count: '2', gallery_secondary_mode: 'carousel', navigation_mode: 'dock' },
+    }),
+  }))
+  await page.goto('/?layout_preview=1&layout_preview_compact=1', { waitUntil: 'domcontentloaded' })
+  const site=page.locator('.composer-site')
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
+  await page.evaluate(() => window.postMessage({
+    type: 'cms-layout-preview:update',
+    settings: { presentation_mode: 'masonry', gallery_view_count: '2', gallery_secondary_mode: 'carousel', navigation_mode: 'dock' },
+    previewMode: 'carousel', focus: 'gallery', animatePreview: true,
+  }, window.location.origin))
+  await expect(site).toHaveAttribute('data-gallery-mode','carousel')
+  const switcher=page.locator('.composer-gallery-view-switcher')
+  await expect(switcher.getByRole('button',{name:'Carrossel horizontal'})).toHaveAttribute('aria-pressed','true')
+  await expect(switcher.getByRole('button',{name:'Mosaico irregular'})).toHaveAttribute('aria-pressed','false')
+})
+
 test('galeria usa a apresentação escolhida e só oferece alternância quando duas experiências foram habilitadas', async ({ page }) => {
   await openComposablePortfolio(page, 'masonry', 'dock', '1', 'carousel')
   const site=page.locator('.composer-site')
