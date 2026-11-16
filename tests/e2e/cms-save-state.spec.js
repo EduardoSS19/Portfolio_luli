@@ -124,7 +124,6 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
 
   const compositionGroup = page.locator('.cms-layout-field-group').first()
-  await compositionGroup.locator('summary').click()
   const leftOption = compositionGroup.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
   await leftOption.scrollIntoViewIfNeeded()
   const panelScrollBeforeHover = await page.evaluate(() => window.scrollY)
@@ -224,7 +223,6 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
 
   await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Experiência/ }).click()
   const experienceGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Experiência do visitante' }) })
-  await experienceGroup.locator('summary').click()
   const carouselOption = experienceGroup.locator('.cms-layout-option').filter({ hasText: 'Carrossel horizontal' })
   await carouselOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-presentation'))).toBe('carousel')
@@ -236,7 +234,6 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
 
   await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /^Conteúdo/ }).click()
   const contentGroup = page.locator('.cms-layout-field-group').filter({ has: page.getByRole('heading', { name: 'Conteúdo e seções' }) })
-  await contentGroup.locator('summary').click()
   const hideReferencesOption = contentGroup.locator('.cms-layout-option').filter({ hasText: 'Ocultar referências' })
   await hideReferencesOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-show-references'))).toBe('false')
@@ -288,7 +285,6 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
   const compositionGroup = page.locator('.cms-layout-field-group').first()
-  await compositionGroup.locator('summary').click()
   const option = compositionGroup.locator('.cms-layout-option').filter({ hasText: 'À esquerda' })
   await option.scrollIntoViewIfNeeded()
   await option.locator('input').focus()
