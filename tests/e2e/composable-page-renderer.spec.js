@@ -58,7 +58,6 @@ test('a navegação inclui âncoras das seções da página atual e pode focá-l
 })
 
 test('a prévia contextual aplica e abre o novo modo de navegação no próprio iframe', async ({ page }) => {
-  await page.goto('/?layout_preview=1&layout_preview_compact=1', { waitUntil: 'domcontentloaded' })
   await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({
@@ -67,6 +66,7 @@ test('a prévia contextual aplica e abre o novo modo de navegação no próprio 
       layout: { page_schema: pageSchema, navigation_mode: 'curtain' },
     }),
   }))
+  await page.goto('/?layout_preview=1&layout_preview_compact=1', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.composer-navigation')).toBeVisible()
   await page.evaluate(() => window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', { detail: { open: true, mode: 'sidebar' } })))
   await expect(page.locator('.composer-navigation')).toHaveClass(/nav-style-sidebar/)
@@ -145,7 +145,7 @@ test('layout rail e dock mantêm links visíveis e responsivos', async ({ page }
     const nav = page.locator('.composer-navigation')
     await expect(nav).toHaveClass(new RegExp('nav-style-' + mode))
     await expect(nav.locator('.composer-navigation-links')).toBeVisible()
-    await expect(nav.locator('.composer-navigation-links a')).toHaveCount(2)
+    await expect(nav.locator('.composer-page-link')).toHaveCount(2)
     await expect(nav.getByRole('button')).toHaveCount(0)
     await page.setViewportSize({ width: 390, height: 844 })
     await expect(nav.locator('.composer-navigation-links')).toBeVisible()
