@@ -571,11 +571,17 @@ export default function App() {
       if (previewMode) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
-      window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', {
+      const navigationPreview = {
         // O hover preview abre o menu no próprio iframe ao comparar a navegação.
         // A prévia completa continua navegável pelo próprio usuário.
         detail: { open: hoverSnapshot && event.data.focus === 'navigation', mode: safeSettings.navigation_mode || 'curtain' },
-      }))
+      }
+      const applyNavigationPreview = () => window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', navigationPreview))
+      applyNavigationPreview()
+      // Sincroniza novamente após o commit do layout no React. Assim a navegação
+      // contextual não depende da ordem entre a atualização do estado e o listener
+      // do componente Nav durante trocas rápidas de opção no editor.
+      window.requestAnimationFrame(() => window.requestAnimationFrame(applyNavigationPreview))
 
       // A navegação acontece somente no documento da prévia (iframe).
       // Nunca envia foco/scroll para a página externa do CMS.
