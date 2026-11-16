@@ -441,14 +441,18 @@ export function CmsLayoutManager(){
 
   const closeOptionPreview=()=>{if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current);hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)}
   const scheduleOptionPreviewClose=(event)=>{
-    if(event?.relatedTarget?.closest?.('.cms-layout-option'))return
+    // Sempre cancela qualquer fechamento pendente antes de decidir se a
+    // próxima opção mantém a prévia aberta. Sem isso, um timer antigo pode
+    // desmontar o iframe depois que outra opção já começou a ser exibida.
     if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
-    // Atravessar o pequeno espaço entre opções não deve desmontar o preview
-    // antes do próximo onPointerEnter/onMouseEnter. Ao sair para o iframe,
-    // a prévia continua fechando após esse breve intervalo.
+    hoverCloseTimerRef.current=null
+    if(event?.relatedTarget?.closest?.('.cms-layout-option'))return
+    // Ao sair para fora das opções, fecha após o breve intervalo de transição.
     hoverCloseTimerRef.current=window.setTimeout(()=>{hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)},80)
   }
   const hideOptionPreview=(event)=>{
+    if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
+    hoverCloseTimerRef.current=null
     const floating=document.querySelector('.cms-layout-hover-preview')
     if(event?.relatedTarget&&(event.currentTarget?.contains?.(event.relatedTarget)||floating?.contains(event.relatedTarget)))return
     setHoverPreviewMounted(false)
