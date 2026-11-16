@@ -355,6 +355,12 @@ export function CmsLayoutManager(){
   const previewUrl='/?layout_preview=1&layout_preview_live=1'
   const hoverPreviewState=()=>{
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
+    if(hoveredOption.name==='preset')return {
+      settings:{...settings,...(hoveredOption.patch||{})},
+      focus:'page',
+      previewMode:hoveredOption.patch?.default_gallery_view||previewMode,
+      animatePreview:true,
+    }
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
     const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
     const focus=['gallery_columns','default_gallery_view','presentation_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
@@ -568,14 +574,14 @@ export function CmsLayoutManager(){
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 13 linguagens visuais · 6 navegações</span></div>
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
           <div className="cms-layout-preset-grid">
-            {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
+            {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id} onPointerEnter={event=>showOptionPreview('preset',preset.id,preset.title,preset.description,event,buildPresetSettings(settings,preset))} onMouseEnter={event=>showOptionPreview('preset',preset.id,preset.title,preset.description,event,buildPresetSettings(settings,preset))} onPointerLeave={scheduleOptionPreviewClose}>
               <div className={'cms-layout-preset-art preset-'+preset.id+' mode-'+preset.settings.presentation_mode+' nav-'+preset.settings.navigation_mode} aria-hidden="true">
                 <div className="cms-layout-preset-mock-nav"><i/><i/><i/><i/></div>
                 <div className="cms-layout-preset-mock-hero"><small>{preset.kind.split('·')[0].trim()}</small><b>{preset.title}</b><i/></div>
                 <div className="cms-layout-preset-mock-content"><div className="cms-layout-preset-mock-image"/><div className="cms-layout-preset-mock-copy"><i/><i/><i/></div><div className="cms-layout-preset-mock-sections">{preset.sections.slice(0,4).map(type=><i key={type}>{SECTION_TEMPLATES.find(item=>item.type===type)?.label}</i>)}</div></div>
               </div>
               <div className="cms-layout-preset-copy"><small>{preset.kind}</small><strong>{preset.title}</strong><p>{preset.description}</p><div className="cms-layout-preset-tags"><span>{({editorial:'Editorial',carousel:'Carrossel',immersive:'Imersivo',masonry:'Mosaico',filmstrip:'Película',timeline:'Linha do tempo',stack:'Camadas',spotlight:'Destaque',brutalist:'Brutalista',museum:'Museu',cinematic:'Cinemático',swiss:'Grid suíço','tattoo-book':'Flashbook'})[preset.settings.presentation_mode]}</span><span>{({curtain:'Cortina',dropdown:'Dropdown',sidebar:'Lateral',rail:'Trilho',dock:'Dock',index:'Índice'})[preset.settings.navigation_mode]}</span></div></div>
-              <button type="button" className="cms-layout-preset-apply" onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
+              <button type="button" className="cms-layout-preset-apply" onFocus={event=>showOptionPreview('preset',preset.id,preset.title,preset.description,event,buildPresetSettings(settings,preset))} onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
             </article>)}
           </div>
         </section>}
