@@ -45,6 +45,35 @@ async function openComposablePortfolio(page, presentation_mode = 'carousel', nav
   await expect(page.locator('.composer-hero h1')).toHaveText('Luli Becker')
 }
 
+test('a navegação inclui âncoras das seções da página atual e pode focá-las', async ({ page }) => {
+  await openComposablePortfolio(page, 'editorial', 'curtain')
+  const nav = page.locator('.composer-navigation')
+  await nav.getByRole('button', { name: 'Abrir navegação' }).click()
+  const flashLink = nav.locator('.composer-section-link').filter({ hasText: 'Flash disponíveis' })
+  await expect(flashLink).toHaveCount(1)
+  await flashLink.click()
+  await expect(page).toHaveURL(/#flash$/)
+  await expect(page.locator('#flash')).toBeInViewport()
+  await expect(nav).not.toHaveClass(/is-open/)
+})
+
+test('a prévia contextual aplica e abre o novo modo de navegação no próprio iframe', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: [], referencias: [], frames: [], redes: [],
+      sobre: { nome: 'Artista', frase: 'Portfólio', bio: '', email: '', instagram: '', formulario: '' },
+      layout: { page_schema: pageSchema, navigation_mode: 'curtain' },
+    }),
+  }))
+  await page.goto('/?layout_preview=1&layout_preview_compact=1', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.composer-navigation')).toBeVisible()
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('cms-layout-preview:navigation', { detail: { open: true, mode: 'sidebar' } })))
+  await expect(page.locator('.composer-navigation')).toHaveClass(/nav-style-sidebar/)
+  await expect(page.locator('.composer-navigation')).toHaveClass(/is-open/)
+  await expect(page.locator('.composer-navigation-links')).toHaveAttribute('aria-hidden', 'false')
+})
+
 test('menu cortina abre e fecha sem sobrepor permanentemente a página', async ({ page }) => {
   await openComposablePortfolio(page, 'carousel', 'curtain')
   const nav = page.locator('.composer-navigation')
@@ -54,7 +83,7 @@ test('menu cortina abre e fecha sem sobrepor permanentemente a página', async (
   await trigger.click()
   await expect(nav).toHaveClass(/is-open/)
   await expect(nav.locator('.composer-navigation-links')).toHaveAttribute('aria-hidden', 'false')
-  await expect(nav.locator('.composer-navigation-links a')).toHaveCount(2)
+  await expect(nav.locator('.composer-page-link')).toHaveCount(2)
   await nav.locator('.composer-navigation-links a').filter({ hasText: 'Sobre' }).click()
   await expect(page).toHaveURL(/\/sobre$/)
   await expect(page.locator('.composer-rich-text h2')).toHaveText('Sobre a artista')
@@ -105,7 +134,7 @@ test('navegações dropdown, lateral e índice são controles acessíveis e inte
     await trigger.click()
     await expect(nav).toHaveClass(/is-open/)
     await expect(nav.locator('.composer-navigation-links')).toHaveAttribute('aria-hidden', 'false')
-    await expect(nav.locator('.composer-navigation-links a')).toHaveCount(2)
+    await expect(nav.locator('.composer-page-link')).toHaveCount(2)
     await expect(nav.locator('.composer-navigation-links a').first()).toBeVisible()
   }
 })
@@ -116,7 +145,7 @@ test('layout rail e dock mantêm links visíveis e responsivos', async ({ page }
     const nav = page.locator('.composer-navigation')
     await expect(nav).toHaveClass(new RegExp('nav-style-' + mode))
     await expect(nav.locator('.composer-navigation-links')).toBeVisible()
-    await expect(nav.locator('.composer-navigation-links a')).toHaveCount(2)
+    await expect(nav.locator('.composer-page-link')).toHaveCount(2)
     await expect(nav.getByRole('button')).toHaveCount(0)
     await page.setViewportSize({ width: 390, height: 844 })
     await expect(nav.locator('.composer-navigation-links')).toBeVisible()
