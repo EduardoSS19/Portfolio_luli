@@ -70,15 +70,15 @@ function PortfolioNavigation({ pages, activePage, profile, mode }) {
 }
 
 export function PageRenderer({ pages = [], data, preview = false }) {
+  const mode=data.layout?.presentation_mode||'editorial'
+  const [activeGalleryMode,setActiveGalleryMode]=useState(mode)
+  useEffect(()=>setActiveGalleryMode(mode),[mode])
+  const navigationMode=data.layout?.navigation_mode||'curtain'
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
   const publishedPages = pages.filter(page => page.published !== false)
   const activePage = publishedPages.find(page => page.slug === path) || (!path ? publishedPages.find(page => page.slug === 'inicio') || publishedPages[0] : null)
   if (!activePage) return <main className="composer-site composer-not-found"><h1>Esta página não existe.</h1><a href="/">Voltar ao início</a></main>
   const profile = data.sobre || {}
-  const mode=data.layout?.presentation_mode||'editorial'
-  const [activeGalleryMode,setActiveGalleryMode]=useState(mode)
-  useEffect(()=>setActiveGalleryMode(mode),[mode])
-  const navigationMode=data.layout?.navigation_mode||'curtain'
   return <main className={"composer-site mode-"+activeGalleryMode+" nav-"+navigationMode+" spacing-"+(data.layout?.section_spacing||"comfortable")+" width-"+(data.layout?.content_width||"standard")} data-gallery-mode={activeGalleryMode} style={{"--composer-gallery-columns":data.layout?.gallery_columns||"3"}} id="topo">
     <PortfolioNavigation pages={publishedPages} activePage={activePage} profile={profile} mode={navigationMode}/>
     {(activePage.sections || []).map(section=><Section key={section.id} section={section} data={data} preview={preview} galleryMode={activeGalleryMode} onGalleryModeChange={setActiveGalleryMode}/>)}
