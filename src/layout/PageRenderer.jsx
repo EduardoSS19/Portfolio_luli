@@ -70,7 +70,7 @@ function PortfolioNavigation({ pages, activePage, profile, mode }) {
 }
 
 export function PageRenderer({ pages = [], data, preview = false }) {
-  const mode=data.layout?.presentation_mode||'editorial'
+  const mode=data.layout?.preview_gallery_mode||data.layout?.presentation_mode||'editorial'
   const [activeGalleryMode,setActiveGalleryMode]=useState(mode)
   useEffect(()=>setActiveGalleryMode(mode),[mode])
   const navigationMode=data.layout?.navigation_mode||'curtain'
