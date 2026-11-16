@@ -15,7 +15,7 @@ const pageSchema = {
   ],
 }
 
-async function openComposablePortfolio(page, presentation_mode = 'carousel', navigation_mode = 'curtain') {
+async function openComposablePortfolio(page, presentation_mode = 'carousel', navigation_mode = 'curtain', gallery_view_count = '1', gallery_secondary_mode = 'masonry') {
   await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -30,6 +30,8 @@ async function openComposablePortfolio(page, presentation_mode = 'carousel', nav
       layout: {
         page_schema: pageSchema,
         presentation_mode,
+        gallery_view_count,
+        gallery_secondary_mode,
         navigation_mode,
         default_theme: 'escuro',
         dark_color_background: '#061522',
@@ -58,6 +60,26 @@ test('menu cortina abre e fecha sem sobrepor permanentemente a página', async (
   await nav.locator('.composer-navigation-links a').filter({ hasText: 'Sobre' }).click()
   await expect(page).toHaveURL(/\/sobre$/)
   await expect(page.locator('.composer-rich-text h2')).toHaveText('Sobre a artista')
+})
+
+test('galeria usa a apresentação escolhida e só oferece alternância quando duas experiências foram habilitadas', async ({ page }) => {
+  await openComposablePortfolio(page, 'masonry', 'dock', '1', 'carousel')
+  const site=page.locator('.composer-site')
+  const gallery=page.locator('.composer-gallery')
+  const works=gallery.locator('.obras-lista').first()
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
+  await expect(gallery.locator('.composer-gallery-view-switcher')).toHaveCount(0)
+  await expect.poll(()=>works.evaluate(node=>getComputedStyle(node).display)).toBe('grid')
+
+  await openComposablePortfolio(page, 'masonry', 'dock', '2', 'carousel')
+  const switcher=page.locator('.composer-gallery-view-switcher')
+  await expect(switcher.getByRole('button',{name:'Mosaico irregular'})).toHaveAttribute('aria-pressed','true')
+  await switcher.getByRole('button',{name:'Carrossel horizontal'}).click()
+  await expect(site).toHaveAttribute('data-gallery-mode','carousel')
+  await expect(switcher.getByRole('button',{name:'Carrossel horizontal'})).toHaveAttribute('aria-pressed','true')
+  await expect.poll(()=>works.evaluate(node=>getComputedStyle(node).display)).toBe('flex')
+  await switcher.getByRole('button',{name:'Mosaico irregular'}).click()
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
 })
 
 test('os modos de galeria alteram a composição real dos cards', async ({ page }) => {
