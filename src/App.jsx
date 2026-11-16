@@ -594,7 +594,7 @@ export default function App() {
       const focus = event.data.focus
       const selector = focus === 'hero' ? '.hero'
         : focus === 'gallery'
-          ? (previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
+          ? (document.querySelector('.composer-gallery') ? '.composer-gallery' : previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
           : focus === 'bio' ? '.sobre-secao'
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
