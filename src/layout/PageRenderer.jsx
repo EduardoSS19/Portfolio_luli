@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Sobre } from '../components/Sobre.jsx'
 import { SecaoCategoria } from '../components/SecaoCategoria.jsx'
 import { GaleriaGrade } from '../components/GaleriaGrade.jsx'
@@ -35,20 +35,40 @@ function Section({ section, data, preview }) {
 
 function PortfolioNavigation({ pages, activePage, profile, mode }) {
   const [open,setOpen]=useState(false)
-  const expandable=['curtain','dropdown','sidebar','index'].includes(mode)
-  useEffect(()=>{if(!open)return undefined;const closeOnEscape=event=>{if(event.key==='Escape')setOpen(false)};window.addEventListener('keydown',closeOnEscape);return()=>window.removeEventListener('keydown',closeOnEscape)},[open])
-  const label=mode==='curtain'?'Abrir navegação':mode==='sidebar'?'Abrir índice lateral':mode==='index'?'Abrir índice de capítulos':'Abrir menu'
-  return <nav className={"composer-navigation nav-style-"+mode+(open?' is-open':'')} aria-label="Navegação do portfólio">
+  const [previewNavigationMode,setPreviewNavigationMode]=useState(null)
+  const previewMenuAutoOpenRef=useRef(false)
+  const effectiveMode=previewNavigationMode||mode
+  const expandable=['curtain','dropdown','sidebar','index'].includes(effectiveMode)
+  useEffect(()=>{
+    const handlePreviewNavigation=event=>{
+      const requestedMode=event.detail?.mode
+      if(['curtain','dropdown','sidebar','rail','dock','index'].includes(requestedMode))setPreviewNavigationMode(requestedMode)
+      if(event.detail?.open&&!['rail','dock'].includes(requestedMode)){
+        previewMenuAutoOpenRef.current=true
+        setOpen(true)
+      }else if(previewMenuAutoOpenRef.current||['rail','dock'].includes(requestedMode)){
+        previewMenuAutoOpenRef.current=false
+        setOpen(false)
+      }
+    }
+    window.addEventListener('cms-layout-preview:navigation',handlePreviewNavigation)
+    return()=>window.removeEventListener('cms-layout-preview:navigation',handlePreviewNavigation)
+  },[])
+  useEffect(()=>{if(!open)return undefined;const closeOnEscape=event=>{if(event.key==='Escape'){setOpen(false);previewMenuAutoOpenRef.current=false}};window.addEventListener('keydown',closeOnEscape);return()=>window.removeEventListener('keydown',closeOnEscape)},[open])
+  const sectionLabel=section=>section.settings?.title||({
+    hero:'Apresentação',about:'Sobre',gallery:'Trabalhos','featured-work':'Obra em destaque','rich-text':'Texto editorial',image:'Imagem',references:'Referências',contact:'Contato','tattoo-flash':'Flash tattoo',custom:'Coleção',
+  }[section.type]||'Seção')
+  return <nav className={`composer-navigation nav-style-${effectiveMode}${open?' is-open':''}`} aria-label="Navegação do portfólio">
     <div className="composer-navigation-bar">
       <a className="composer-brand" href="/">{profile.nome||'Portfólio'}</a>
-      {expandable&&<button type="button" className="composer-navigation-toggle" aria-expanded={open} aria-label={open?'Fechar navegação':label} onClick={()=>setOpen(value=>!value)}><span>{open?'Fechar':'Explorar'}</span><i aria-hidden="true">{open?'×':'＋'}</i></button>}
+      {expandable&&<button type="button" className="composer-navigation-toggle" aria-expanded={open} aria-label={open?'Fechar navegação':effectiveMode==='curtain'?'Abrir navegação':effectiveMode==='sidebar'?'Abrir índice lateral':effectiveMode==='index'?'Abrir índice de capítulos':'Abrir menu'} onClick={()=>{previewMenuAutoOpenRef.current=false;setOpen(value=>!value)}}><span>{open?'Fechar':'Explorar'}</span><i aria-hidden="true">{open?'×':'＋'}</i></button>}
     </div>
     <div className="composer-navigation-links" aria-hidden={expandable&&!open}>
-      {pages.map((page,index)=><a key={page.id} href={page.slug==='inicio'?'/':`/${page.slug}`} aria-current={page.id===activePage.id?'page':undefined} onClick={()=>setOpen(false)}><span className="composer-navigation-number">{String(index+1).padStart(2,'0')}</span>{page.title}</a>)}
+      {pages.map((page,index)=><a className="composer-page-link" key={page.id} href={page.slug==='inicio'?'/':`/${page.slug}`} aria-current={page.id===activePage.id?'page':undefined} onClick={()=>{previewMenuAutoOpenRef.current=false;setOpen(false)}}><span className="composer-navigation-number">{String(index+1).padStart(2,'0')}</span>{page.title}</a>)}
+      {(activePage.sections||[]).map((section,index)=><a className="composer-section-link" key={section.id} href={`#${section.id}`} aria-label={`Ir para ${sectionLabel(section)}`} onClick={()=>{previewMenuAutoOpenRef.current=false;setOpen(false)}}><span className="composer-navigation-number">§{String(index+1).padStart(2,'0')}</span>{sectionLabel(section)}</a>)}
     </div>
   </nav>
 }
-
 export function PageRenderer({ pages = [], data, preview = false }) {
   const path = window.location.pathname.replace(/^\/+|\/+$/g, '')
   const publishedPages = pages.filter(page => page.published !== false)
