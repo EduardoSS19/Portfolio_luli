@@ -1011,16 +1011,6 @@ export default function App() {
         >
           <span aria-hidden="true">↑</span>
         </button>
-        <button
-          type="button"
-          className="alternar-modo-flutuante"
-          aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}
-          title={modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}
-          onClick={() => trocarModoGaleria(modoGaleria === 'lista' ? 'grade' : 'lista')}
-        >
-          <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
-          <span>{modoGaleria === 'lista' ? 'Grade' : 'Lista'}</span>
-        </button>
       </div>
     </div>
   )
