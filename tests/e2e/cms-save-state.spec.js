@@ -304,6 +304,29 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await expect(option.locator('input')).toBeChecked()
 })
 
+test('hover de um modelo mostra sua prévia real antes de abrir a comparação completa', async ({ page }) => {
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ settings: { presentation_mode: 'editorial', navigation_mode: 'curtain', default_gallery_view: 'lista' }, permissions: { canChange: true } }),
+  }))
+  await page.route('**/api/portfolio/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: null, marca: '', layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  const tattooPreset = page.locator('.cms-layout-preset-card').filter({ hasText: 'Tatuador(a)' })
+  await tattooPreset.hover()
+  const hoverPreview = page.locator('.cms-layout-hover-preview')
+  await expect(hoverPreview).toBeVisible()
+  await expect(hoverPreview).toContainText('Tatuador(a)')
+  const frame = hoverPreview.locator('iframe')
+  await expect.poll(() => frame.evaluate(element => element.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-presentation'))).toBe('carousel')
+  await expect.poll(() => frame.evaluate(element => element.contentDocument?.querySelector('.site-nav')?.classList.contains('navigation-dropdown'))).toBe(true)
+  await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
+})
+
 test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
