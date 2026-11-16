@@ -326,6 +326,30 @@ test('CMS permite oferecer uma ou duas experiências de galeria e salva a segund
   await expect(page.locator('.cms-save-state')).toContainText(/Tudo salvo|Personalização salva/)
 })
 
+test('modelos de uma experiência mantêm uma segunda opção válida caso o artista habilite a alternância depois', async ({ page }) => {
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ settings: { presentation_mode: 'editorial', gallery_view_count: '1', gallery_secondary_mode: 'carousel' }, permissions: { canChange: true } }),
+  }))
+  await page.route('**/api/portfolio/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: null, marca: '', layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  const preset=page.locator('.cms-layout-preset-card').filter({hasText:'Monografia horizontal'})
+  await preset.getByRole('button',{name:/Visualizar modelo/}).click()
+  await page.locator('.cms-layout-inline-preview').getByRole('button',{name:'Confirmar este layout'}).click()
+  await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
+  const countField=page.locator('.cms-layout-field').filter({hasText:'Quantidade de experiências de galeria'})
+  await countField.getByLabel('Duas experiências').check()
+  const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
+  const selected=await secondField.locator('input:checked').inputValue()
+  expect(selected).not.toBe('carousel')
+  await expect(secondField.getByLabel('Carrossel horizontal')).toHaveCount(0)
+})
+
 test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
