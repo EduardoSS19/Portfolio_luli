@@ -620,11 +620,22 @@ export default function App() {
           // Isso evita depender do scrollIntoView durante commits concorrentes
           // de conteúdo/layout dentro da prévia compacta.
           const scrollingElement = document.scrollingElement || document.documentElement
-          const targetTop = fallbackTarget.getBoundingClientRect().top + scrollingElement.scrollTop
-          const maxScroll = Math.max(0, scrollingElement.scrollHeight - window.innerHeight)
+          const targetTop = fallbackTarget.getBoundingClientRect().top + Math.max(window.scrollY, scrollingElement.scrollTop, document.body?.scrollTop || 0)
+          // Chromium can report the root element's scrollHeight before body
+          // overflow has propagated after a React layout commit. Use the
+          // largest document extent so the target is not clamped back to zero.
+          const documentHeight = Math.max(
+            scrollingElement.scrollHeight || 0,
+            document.documentElement.scrollHeight || 0,
+            document.body?.scrollHeight || 0,
+          )
+          const viewportHeight = window.visualViewport?.height || window.innerHeight
+          const maxScroll = Math.max(0, documentHeight - viewportHeight)
           const nextScrollTop = Math.max(0, Math.min(targetTop, maxScroll))
           scrollingElement.scrollTop = nextScrollTop
-          window.scrollTo(0, nextScrollTop)
+          if (document.documentElement !== scrollingElement) document.documentElement.scrollTop = nextScrollTop
+          if (document.body && document.body !== scrollingElement) document.body.scrollTop = nextScrollTop
+          window.scrollTo({ top: nextScrollTop, left: 0, behavior: 'instant' })
         }
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(focusPreviewTarget)
