@@ -564,8 +564,11 @@ export default function App() {
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
       if (!safeSettings) return
       const previewRoute = new URLSearchParams(window.location.search).has('layout_preview')
+      const previewGalleryMode = LAYOUT_PREVIEW_CHOICES.presentation_mode.includes(event.data.previewMode)
+        ? event.data.previewMode
+        : safeSettings.presentation_mode
       setConteudo(current => {
-        const nextLayout = { ...current.layout, ...safeSettings }
+        const nextLayout = { ...current.layout, ...safeSettings, ...(previewRoute && previewGalleryMode ? { preview_gallery_mode: previewGalleryMode } : {}) }
         const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
         return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, previewSectionExamples: demo.sectionExamples, marca: demo.marca } : {}), layout: nextLayout }
       })
