@@ -360,5 +360,7 @@ test('modelos prontos alteram somente a direção visual e não criam conteúdo 
   await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
   await page.getByRole('button',{name:'Salvar personalização'}).click()
   await expect.poll(()=>savedSettings?.presentation_mode).toBe('carousel')
+  expect(savedSettings.gallery_view_count).toBe('2')
+  expect(savedSettings.gallery_secondary_mode).toBe('tattoo-book')
   expect(savedSettings.custom_sections).toEqual([])
 })
