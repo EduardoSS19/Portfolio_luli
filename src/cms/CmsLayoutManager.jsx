@@ -378,8 +378,8 @@ export function CmsLayoutManager(){
   const hoverPreviewState=()=>{
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
-    const nextMode=hoveredOption.name==='presentation_mode'?hoveredOption.value:(nextSettings.presentation_mode||previewMode)
-    const focus=['gallery_columns','presentation_mode','presentation_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
+    const nextMode=['presentation_mode','gallery_secondary_mode'].includes(hoveredOption.name)?hoveredOption.value:(nextSettings.presentation_mode||previewMode)
+    const focus=['gallery_columns','presentation_mode','gallery_view_count','gallery_secondary_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
     return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -525,7 +525,7 @@ export function CmsLayoutManager(){
     const scrollBeforeInteraction=optionScrollBeforeInteractionRef.current
     optionScrollBeforeInteractionRef.current=null
     const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name
-    setSettings(current=>({...current,[key]:value}))
+    setSettings(current=>{const next={...current,[key]:value};if(name==='presentation_mode'&&next.gallery_secondary_mode===value)next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([mode])=>mode!==value)?.[0]||'carousel';return next})
     // Selecting an already-visible radio must not jump the whole CMS page.
     if(scrollBeforeInteraction!==null){
       window.requestAnimationFrame(()=>window.scrollTo({top:scrollBeforeInteraction,behavior:'instant'}))
@@ -533,7 +533,7 @@ export function CmsLayoutManager(){
     closeOptionPreview()
     if(name==='presentation_mode')setPreviewMode(value)
     const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','presentation_mode','presentation_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
+    const focus=['gallery_columns','presentation_mode','gallery_view_count','gallery_secondary_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
     setPreviewFocus(focus)
     setError('');setNotice('')
   }
