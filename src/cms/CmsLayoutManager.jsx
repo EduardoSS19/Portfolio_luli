@@ -161,7 +161,11 @@ const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, 
 function buildPresetSettings(base,preset){
   // Modelos definem somente a direção visual. Conteúdo e sessões são criados
   // exclusivamente na área Páginas, nunca como exemplos injetados pelo Layout.
-  return {...base,...preset.settings}
+  const next={...base,...preset.settings}
+  if(!GALLERY_VIEW_OPTIONS.some(([value])=>value===next.gallery_secondary_mode)||next.gallery_secondary_mode===next.presentation_mode){
+    next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([value])=>value!==next.presentation_mode)?.[0]||'carousel'
+  }
+  return next
 }
 
 function normalizeLayoutSettings(raw={}) {
@@ -525,7 +529,7 @@ export function CmsLayoutManager(){
     const scrollBeforeInteraction=optionScrollBeforeInteractionRef.current
     optionScrollBeforeInteractionRef.current=null
     const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name
-    setSettings(current=>{const next={...current,[key]:value};if(name==='presentation_mode'&&next.gallery_secondary_mode===value)next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([mode])=>mode!==value)?.[0]||'carousel';return next})
+    setSettings(current=>{const next={...current,[key]:value};if((name==='presentation_mode'||name==='gallery_view_count')&&next.gallery_secondary_mode===next.presentation_mode)next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([mode])=>mode!==next.presentation_mode)?.[0]||'carousel';return next})
     // Selecting an already-visible radio must not jump the whole CMS page.
     if(scrollBeforeInteraction!==null){
       window.requestAnimationFrame(()=>window.scrollTo({top:scrollBeforeInteraction,behavior:'instant'}))
