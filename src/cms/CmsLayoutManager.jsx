@@ -172,6 +172,7 @@ function accessibleColor(foreground,background,minimum=4.5){
 }
 
 export function CmsLayoutManager(){
+  const [activeWorkspace,setActiveWorkspace]=useState('models')
   const [settings,setSettings]=useState(DEFAULTS),[saved,setSaved]=useState(DEFAULTS),[canChange,setCanChange]=useState(false)
   const [loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
   const [previewOpen,setPreviewOpen]=useState(false)
@@ -440,14 +441,18 @@ export function CmsLayoutManager(){
 
   const closeOptionPreview=()=>{if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current);hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)}
   const scheduleOptionPreviewClose=(event)=>{
-    if(event?.relatedTarget?.closest?.('.cms-layout-option'))return
+    // Sempre cancela qualquer fechamento pendente antes de decidir se a
+    // próxima opção mantém a prévia aberta. Sem isso, um timer antigo pode
+    // desmontar o iframe depois que outra opção já começou a ser exibida.
     if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
-    // Atravessar o pequeno espaço entre opções não deve desmontar o preview
-    // antes do próximo onPointerEnter/onMouseEnter. Ao sair para o iframe,
-    // a prévia continua fechando após esse breve intervalo.
+    hoverCloseTimerRef.current=null
+    if(event?.relatedTarget?.closest?.('.cms-layout-option'))return
+    // Ao sair para fora das opções, fecha após o breve intervalo de transição.
     hoverCloseTimerRef.current=window.setTimeout(()=>{hoverCloseTimerRef.current=null;setHoverPreviewMounted(false);setHoveredOption(null)},80)
   }
   const hideOptionPreview=(event)=>{
+    if(hoverCloseTimerRef.current)window.clearTimeout(hoverCloseTimerRef.current)
+    hoverCloseTimerRef.current=null
     const floating=document.querySelector('.cms-layout-hover-preview')
     if(event?.relatedTarget&&(event.currentTarget?.contains?.(event.relatedTarget)||floating?.contains(event.relatedTarget)))return
     setHoverPreviewMounted(false)
@@ -549,8 +554,17 @@ export function CmsLayoutManager(){
     <div className="cms-layout-intro"><span className="cms-layout-intro-mark" aria-hidden="true">✳</span><div><strong>Experimente sem medo</strong><p>As mudanças aparecem na prévia e ficam apenas neste editor até você salvar. Testar combinações não altera o site publicado.</p></div></div>
     <div className={"cms-layout-workspace"+(hoverPreviewMounted&&hoveredOption?" has-hover-preview":"")}>
       <form className="cms-layout-form" onSubmit={save}>
+        <nav className="cms-layout-workspace-nav" aria-label="Seções de aparência">
+          {[
+            ['models','Modelos','Escolha o ponto de partida'],
+            ['identity','Identidade','Cores e tipografia'],
+            ['composition','Composição','Estrutura e espaçamento'],
+            ['experience','Experiência','Navegação e galerias'],
+            ['content','Conteúdo','Elementos exibidos'],
+          ].map(([id,label,description])=><button key={id} type="button" className={activeWorkspace===id?'active':''} aria-current={activeWorkspace===id?'page':undefined} onClick={()=>setActiveWorkspace(id)}><strong>{label}</strong><small>{description}</small></button>)}
+        </nav>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
-        <section className="cms-layout-presets" ref={presetSectionRef}>
+        {activeWorkspace === 'models' && <section className="cms-layout-presets" ref={presetSectionRef}>
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 13 linguagens visuais · 6 navegações</span></div>
           <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
           <div className="cms-layout-preset-grid">
@@ -564,8 +578,8 @@ export function CmsLayoutManager(){
               <button type="button" className="cms-layout-preset-apply" onClick={()=>previewLayoutPreset(preset)} disabled={!canChange||saving}>Visualizar modelo <span>→</span></button>
             </article>)}
           </div>
-        </section>
-        <section className="cms-layout-color-panel">
+        </section>}
+        {activeWorkspace === 'identity' && <section className="cms-layout-color-panel">
           <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">IDENTIDADE VISUAL</p><h2>Cores do portfólio</h2></div><span className="cms-layout-color-chip" style={{background:settings[colorKey('color_accent')]}}/></div>
           <p className="cms-layout-help">Cada tema tem sua própria identidade. Alterar o claro não modifica o escuro, e vice-versa.</p>
           <div className="cms-layout-theme-tabs" role="group" aria-label="Tema que está sendo editado"><button type="button" className={editingTheme==='dark'?'active':''} aria-pressed={editingTheme==='dark'} onClick={()=>setEditingTheme('dark')}>Tema escuro</button><button type="button" className={editingTheme==='light'?'active':''} aria-pressed={editingTheme==='light'} onClick={()=>setEditingTheme('light')}>Tema claro</button></div>
@@ -573,8 +587,8 @@ export function CmsLayoutManager(){
           <div className="cms-layout-palettes">{PALETTES.map(palette=><button type="button" className={'cms-layout-palette'+(paletteIsActive(palette)?' selected':'')} key={palette.name} onPointerEnter={event=>previewPalette(palette,event)} onMouseEnter={event=>previewPalette(palette,event)} onFocus={event=>previewPalette(palette,event)} onClick={()=>applyPalette(palette)} aria-pressed={paletteIsActive(palette)} aria-label={'Aplicar paleta '+palette.name}><span className="cms-layout-palette-swatches">{(editingTheme==='dark'?palette.darkColors:palette.lightColors).map(color=><i key={color} style={{background:color}}/>)}</span><strong>{palette.name}</strong></button>)}</div>
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onPointerEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
-        </section>
-        <div className="cms-layout-fields">{FIELD_GROUPS.map(group=><details className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onPointerLeave={scheduleOptionPreviewClose} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
+        </section>}
+        <div className="cms-layout-fields">{FIELD_GROUPS.filter(group => activeWorkspace === 'identity' ? group.id === 'typography' : group.id === activeWorkspace).map(group=><details open className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onPointerLeave={scheduleOptionPreviewClose} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>

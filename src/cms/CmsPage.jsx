@@ -516,15 +516,30 @@ export function CmsPage() {
         </a>
         <div className="cms-sidebar-label">ESPAÇO DE TRABALHO</div>
         <nav className="cms-nav" aria-label="Menu do painel">
-          <button className={isOverview ? 'active' : ''} onClick={() => setSection('overview')}><span>◫</span> Visão geral</button>
-          <button className={isLibrary ? 'active' : ''} onClick={() => { setSelectedWork(null); setCreatingWork(false); setSection('library') }}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
-          <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
-          <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil</button>
-          <button className={isLayout ? 'active' : ''} onClick={() => setSection('layout')}><span>▧</span> Layout</button>
-          <button className={isPages ? 'active' : ''} onClick={() => setSection('pages')}><span>☷</span> Páginas</button>
-          <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Conteúdo</button>
-          <button className={isMedia ? 'active' : ''} onClick={() => setSection('media')}><span>▧</span> Mídias</button>
-          <button className={isAnalytics ? 'active' : ''} onClick={() => setSection('analytics')}><span>◷</span> Estatísticas</button>
+          <div className="cms-nav-group">
+            <span className="cms-nav-group-label">PAINEL</span>
+            <button className={isOverview ? 'active' : ''} onClick={() => setSection('overview')}><span>◫</span> Visão geral</button>
+          </div>
+          <div className="cms-nav-group">
+            <span className="cms-nav-group-label">CONTEÚDO</span>
+            <button className={isLibrary ? 'active' : ''} onClick={() => { setSelectedWork(null); setCreatingWork(false); setSection('library') }}><span>▦</span> Obras <span className="cms-nav-count">{formatNumber(overview?.works?.total)}</span></button>
+            <button className={isCategories ? 'active' : ''} onClick={() => setSection('categories')}><span>▤</span> Categorias</button>
+            <button className={isPages ? 'active' : ''} onClick={() => setSection('pages')}><span>☷</span> Páginas</button>
+            <button className={isContent ? 'active' : ''} onClick={() => setSection('content')}><span>↗</span> Sessões</button>
+            <button className={isMedia ? 'active' : ''} onClick={() => setSection('media')}><span>▧</span> Mídias</button>
+          </div>
+          <div className="cms-nav-group">
+            <span className="cms-nav-group-label">APARÊNCIA</span>
+            <button className={isLayout ? 'active' : ''} onClick={() => setSection('layout')}><span>▧</span> Design do site</button>
+          </div>
+          <div className="cms-nav-group">
+            <span className="cms-nav-group-label">ARTISTA</span>
+            <button className={isProfile ? 'active' : ''} onClick={() => setSection('profile')}><span>◉</span> Perfil e presença</button>
+          </div>
+          <div className="cms-nav-group">
+            <span className="cms-nav-group-label">DESEMPENHO</span>
+            <button className={isAnalytics ? 'active' : ''} onClick={() => setSection('analytics')}><span>◷</span> Estatísticas</button>
+          </div>
         </nav>
         <div className="cms-sidebar-bottom">
           <span className="cms-online-dot" />

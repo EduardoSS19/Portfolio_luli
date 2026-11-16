@@ -1798,3 +1798,16 @@
 .cms-category-animation-step{display:grid;place-items:center;width:42px;height:42px;padding:0!important;border:1px solid var(--cms-line,rgba(255,255,255,.16))!important;border-radius:9px!important;color:var(--cms-text,#f0eee6)!important;background:var(--cms-panel-2,#20211d)!important;font-size:20px!important}
 .cms-category-animation-step:disabled{opacity:.28!important}
 @media(max-width:560px){.cms-category-animation-select-row{grid-template-columns:40px minmax(0,1fr) 40px;gap:.4rem}.cms-category-animation-step{width:40px;height:42px}}
+
+
+/* CMS information architecture: grouped primary navigation */
+.cms-nav{gap:16px}
+.cms-nav-group{display:grid;gap:4px}
+.cms-nav-group-label{padding:0 12px 3px;color:var(--cms-muted);font-size:9px;font-weight:700;letter-spacing:1.5px}
+.cms-nav-group button{width:100%}
+@media(max-width:700px){
+  .cms-nav{display:flex;align-items:stretch;gap:10px;overflow-x:auto;overflow-y:hidden;padding-bottom:3px;scrollbar-width:thin}
+  .cms-nav-group{display:flex;flex:0 0 auto;align-items:center;gap:5px}
+  .cms-nav-group-label{display:none}
+  .cms-nav-group button{white-space:nowrap;flex:0 0 auto}
+}

@@ -418,7 +418,7 @@ test('prévia fixa reduz a largura do viewport lógico e mantém rolagem vertica
   }))
 
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   const preview = page.locator('.cms-layout-inline-preview')
   await expect(preview).toBeVisible()
   // Mantém a área de teste dentro do viewport de cada projeto (desktop e iPhone),
@@ -483,7 +483,7 @@ test('menu lateral permanece fechado na prévia até o visitante clicar para abr
   await expect(nav).toHaveClass(/menu-aberto/)
 })
 
-test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async ({ page }) => {
+test('Design do site não contém cadastro de conteúdo ou sessões de exemplo', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 })
   await page.route('**/api/cms/**', async route => {
     const url = new URL(route.request().url())
@@ -499,9 +499,15 @@ test('Layout não contém cadastro de conteúdo ou sessões de exemplo', async (
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  const workspaces = page.getByRole('navigation', { name: 'Seções de aparência' })
   await expect(page.locator('.cms-layout-presets')).toBeVisible()
+  await expect(page.locator('.cms-layout-color-panel')).toHaveCount(0)
+  await workspaces.getByRole('button', { name: /Identidade/ }).click()
   await expect(page.locator('.cms-layout-color-panel')).toBeVisible()
+  await expect(page.locator('.cms-layout-presets')).toHaveCount(0)
+  await workspaces.getByRole('button', { name: /Modelos/ }).click()
+  await expect(page.locator('.cms-layout-presets')).toBeVisible()
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await expect(page.locator('.cms-layout-custom-section')).toHaveCount(0)
   await expect(page.locator('.cms-nav').getByRole('button', { name: /Páginas/ })).toBeVisible()
@@ -523,9 +529,9 @@ test('modal de hover representa o viewport desktop e mantém interação', async
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /Composição/ }).click()
   const composition = page.locator('.cms-layout-field-group').first()
-  await composition.locator('summary').click()
   await composition.locator('.cms-layout-option').first().hover()
   const modal = page.locator('.cms-layout-hover-preview-floating')
   await expect(modal).toBeVisible()
@@ -567,7 +573,7 @@ test('iframe completo mantém o menu limitado ao viewport do dispositivo', async
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   const inlineFrame = page.locator('.cms-layout-inline-preview iframe')
   await page.getByRole('group', { name: 'Dispositivo da prévia completa' }).getByRole('button', { name: 'Celular' }).click()
   await inlineFrame.scrollIntoViewIfNeeded()
@@ -611,7 +617,7 @@ test('o editor de conteúdo fica na área Páginas, separado do Layout', async (
     body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
   await page.locator('.cms-nav').getByRole('button', { name: /Páginas/ }).click()
   await expect(page.locator('.cms-pages-workspace')).toBeVisible()
@@ -646,14 +652,32 @@ test('prévia de hover foca a seção alterada e permite navegação no viewport
     body: JSON.stringify({ categorias: [], referencias: [{ titulo: 'Referência', links: [] }], frames: [], redes: [], sobre: { nome: 'Luli' }, layout: {} }),
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
-  await page.locator('.cms-nav').getByRole('button', { name: /Layout/ }).click()
-  const contentGroup = page.locator('.cms-layout-field-group').nth(2)
-  await contentGroup.locator('summary').click()
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /^Conteúdo/ }).click()
+  const contentGroup = page.locator('.cms-layout-field-group').first()
   const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
+  // Aguarda o sinal de prontidão da própria aplicação. O readyState "complete"
+  // também espera imagens externas, que não fazem parte da inicialização do preview.
+  await page.evaluate(() => {
+    window.__hoverPreviewReady = false
+    window.addEventListener('message', event => {
+      if (event.origin === window.location.origin && event.data?.type === 'cms-layout-preview:ready') {
+        window.__hoverPreviewReady = true
+      }
+    })
+  })
   await contactField.locator('.cms-layout-option').first().hover()
   const modal = page.locator('.cms-layout-hover-preview-floating')
   await expect(modal).toBeVisible()
   const frame = modal.locator('iframe')
-  await expect.poll(() => frame.evaluate(element => element.contentWindow.scrollY)).toBeGreaterThan(0)
+  await expect.poll(() => page.evaluate(() => window.__hoverPreviewReady)).toBe(true)
+  await expect.poll(() => frame.evaluate(element => {
+    const shell = element.contentDocument?.querySelector('.site-shell')
+    return shell ? getComputedStyle(shell).overflow : 'missing'
+  })).toBe('visible')
+  await expect.poll(() => frame.evaluate(element => {
+    const document = element.contentDocument
+    return document?.scrollingElement?.scrollTop ?? -1
+  })).toBeGreaterThan(0)
   await expect.poll(() => frame.evaluate(element => getComputedStyle(element).pointerEvents)).toBe('auto')
 })
