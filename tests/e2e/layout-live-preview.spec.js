@@ -656,11 +656,21 @@ test('prévia de hover foca a seção alterada e permite navegação no viewport
   await page.getByRole('navigation', { name: 'Seções de aparência' }).getByRole('button', { name: /^Conteúdo/ }).click()
   const contentGroup = page.locator('.cms-layout-field-group').first()
   const contactField = contentGroup.locator('fieldset').filter({ hasText: 'Seção de contato' })
+  // Aguarda o sinal de prontidão da própria aplicação. O readyState "complete"
+  // também espera imagens externas, que não fazem parte da inicialização do preview.
+  await page.evaluate(() => {
+    window.__hoverPreviewReady = false
+    window.addEventListener('message', event => {
+      if (event.origin === window.location.origin && event.data?.type === 'cms-layout-preview:ready') {
+        window.__hoverPreviewReady = true
+      }
+    })
+  })
   await contactField.locator('.cms-layout-option').first().hover()
   const modal = page.locator('.cms-layout-hover-preview-floating')
   await expect(modal).toBeVisible()
   const frame = modal.locator('iframe')
-  await expect.poll(() => frame.evaluate(element => element.contentDocument?.readyState ?? 'loading')).toBe('complete')
+  await expect.poll(() => page.evaluate(() => window.__hoverPreviewReady)).toBe(true)
   await expect.poll(() => frame.evaluate(element => {
     const document = element.contentDocument
     return document?.scrollingElement?.scrollTop ?? -1
