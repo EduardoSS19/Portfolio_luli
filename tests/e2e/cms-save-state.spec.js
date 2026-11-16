@@ -316,6 +316,7 @@ test('CMS permite oferecer uma ou duas experiências de galeria e salva a segund
   await page.locator('.cms-nav').getByRole('button',{name:/Design do site/}).click()
   await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
   const countField=page.locator('.cms-layout-field').filter({hasText:'Quantidade de experiências de galeria'})
+  await expect(countField.getByLabel('Uma experiência')).toBeChecked()
   await countField.getByLabel('Duas experiências').check()
   const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
   await expect(secondField).toBeVisible()
@@ -330,7 +331,7 @@ test('modelos de uma experiência mantêm uma segunda opção válida caso o art
   await mockDashboard(page)
   await page.route('**/api/cms/layout/', route => route.fulfill({
     status: 200, contentType: 'application/json',
-    body: JSON.stringify({ settings: { presentation_mode: 'editorial', gallery_view_count: '1', gallery_secondary_mode: 'carousel' }, permissions: { canChange: true } }),
+    body: JSON.stringify({ settings: { presentation_mode: 'editorial', gallery_view_count: '2', gallery_secondary_mode: 'filmstrip' }, permissions: { canChange: true } }),
   }))
   await page.route('**/api/portfolio/', route => route.fulfill({
     status: 200, contentType: 'application/json',
