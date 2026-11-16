@@ -177,3 +177,22 @@
  .mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:42vh}
  .mode-tattoo-book .composer-gallery .obras-lista,.mode-tattoo-book .composer-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* User-selected gallery exploration modes: grid/list are peers, never an implicit switch. */
+.mode-grade .composer-gallery .obras-lista{display:grid!important;grid-template-columns:repeat(var(--composer-gallery-columns,3),minmax(0,1fr));gap:clamp(.8rem,2vw,1.8rem);align-items:start}
+.mode-grade .composer-gallery .obras-lista>.obra{min-width:0}
+.mode-grade .composer-gallery .obras-lista>.obra .obra-galeria{aspect-ratio:4/5;min-height:0}
+.mode-lista .composer-gallery .obras-lista{display:grid!important;grid-template-columns:minmax(0,1fr);gap:clamp(2rem,5vw,5rem)}
+.mode-lista .composer-gallery .obras-lista>.obra{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(15rem,.85fr);align-items:center;gap:clamp(1rem,3vw,3rem)}
+.mode-lista .composer-gallery .obras-lista>.obra .obra-galeria{min-height:320px}
+.composer-gallery-view-switcher{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem}
+.composer-gallery-view-switcher button{appearance:none;border:1px solid var(--linha);border-radius:999px;padding:.65rem 1rem;background:transparent;color:inherit;font:inherit;font-size:.78rem;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.composer-gallery-view-switcher button[aria-pressed=true]{background:var(--texto);border-color:var(--texto);color:var(--azul-escuro)}
+.composer-gallery-view-switcher button:focus-visible{outline:2px solid var(--layout-accent,var(--azul-claro));outline-offset:3px}
+@media(max-width:760px){
+ .mode-grade .composer-gallery .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .mode-lista .composer-gallery .obras-lista>.obra{grid-template-columns:minmax(0,1fr);gap:.8rem}
+ .mode-lista .composer-gallery .obras-lista>.obra .obra-galeria{min-height:0}
+ .composer-gallery-view-switcher{gap:.4rem}
+ .composer-gallery-view-switcher button{padding:.6rem .8rem;font-size:.72rem}
+}
