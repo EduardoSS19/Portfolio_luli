@@ -161,8 +161,8 @@ const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, 
 function buildPresetSettings(base,preset){
   // Modelos definem somente a direção visual. Conteúdo e sessões são criados
   // exclusivamente na área Páginas, nunca como exemplos injetados pelo Layout.
-  const next={...base,...preset.settings}
-  if(!GALLERY_VIEW_OPTIONS.some(([value])=>value===next.gallery_secondary_mode)||next.gallery_secondary_mode===next.presentation_mode){
+  const next={...base,...preset.settings, gallery_view_count:preset.settings.gallery_view_count==='2'?'2':'1'}
+  if(!preset.settings.gallery_secondary_mode||!GALLERY_VIEW_OPTIONS.some(([value])=>value===next.gallery_secondary_mode)||next.gallery_secondary_mode===next.presentation_mode){
     next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([value])=>value!==next.presentation_mode)?.[0]||'carousel'
   }
   return next
