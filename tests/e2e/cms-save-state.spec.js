@@ -304,6 +304,28 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await expect(option.locator('input')).toBeChecked()
 })
 
+test('CMS permite oferecer uma ou duas experiências de galeria e salva a segunda escolha', async ({ page }) => {
+  let savedSettings=null
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/',async route=>{
+    if(route.request().method()==='PATCH')savedSettings=route.request().postDataJSON()
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({settings:savedSettings||{presentation_mode:'editorial',gallery_view_count:'1',gallery_secondary_mode:'carousel'},permissions:{canChange:true}})})
+  })
+  await page.route('**/api/portfolio/',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
+  await page.goto('/painel',{waitUntil:'domcontentloaded'})
+  await page.locator('.cms-nav').getByRole('button',{name:/Design do site/}).click()
+  await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
+  const countField=page.locator('.cms-layout-field').filter({hasText:'Quantidade de experiências de galeria'})
+  await countField.getByLabel('Duas experiências').check()
+  const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
+  await expect(secondField).toBeVisible()
+  await secondField.getByLabel('Carrossel horizontal').check()
+  await page.getByRole('button',{name:'Salvar personalização'}).click()
+  await expect.poll(()=>savedSettings?.gallery_view_count).toBe('2')
+  expect(savedSettings.gallery_secondary_mode).toBe('carousel')
+  await expect(page.locator('.cms-save-state')).toContainText(/Tudo salvo|Personalização salva/)
+})
+
 test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
