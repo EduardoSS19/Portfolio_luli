@@ -280,6 +280,10 @@
   min-height:0!important;
   height:auto!important;
   padding-bottom:0!important;
+  /* O site normal usa overflow:clip para conter efeitos decorativos. Na prévia,
+     isso pode cortar a área rolável do documento e impedir o foco em seções
+     mais abaixo (especialmente dentro do iframe compacto de hover). */
+  overflow:visible!important;
 }
 .site-shell[data-layout-preview="true"] #Contato,
 .site-shell[data-layout-preview="true"] .secao-contato{
