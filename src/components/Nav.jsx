@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGaleria, aoTrocarModo, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, tema, aoTrocarTema, showLegacyGalleryToggle = false, modoGaleria = 'lista', aoTrocarModo, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
   const effectiveNavigationMode = previewNavigationMode || navigationMode
@@ -96,7 +96,7 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
   }
 
   function alternarModoGaleria() {
-    aoTrocarModo(modoGaleria === 'lista' ? 'grade' : 'lista')
+    aoTrocarModo?.(modoGaleria === 'lista' ? 'grade' : 'lista')
     setMenuAberto(false)
   }
 
@@ -156,10 +156,10 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, modoGa
               <span aria-hidden="true">{tema === 'escuro' ? '☼' : '☾'}</span>
               <span>{tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}</span>
             </button>
-            <button type="button" className="editorial-menu-control" onClick={alternarModoGaleria} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
+            {showLegacyGalleryToggle && <button type="button" className="editorial-menu-control" onClick={alternarModoGaleria} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
               <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
               <span>{modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}</span>
-            </button>
+            </button>}
           </div>
           <div className="editorial-menu-footer">
             <span>{fraseArtista || 'PORTFÓLIO AUTORAL'}</span>

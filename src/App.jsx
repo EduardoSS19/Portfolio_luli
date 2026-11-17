@@ -20,7 +20,7 @@ const DEFAULT_LAYOUT_SETTINGS = {
   hero_alignment: 'center',
   hero_size: 'large',
   section_spacing: 'comfortable',
-  gallery_columns: '3',
+  gallery_columns: '2',
   default_gallery_view: 'lista',
   presentation_mode: 'editorial',
   navigation_mode: 'curtain',
@@ -52,7 +52,9 @@ const LAYOUT_PREVIEW_CHOICES = {
   section_spacing: ['compact', 'comfortable', 'spacious'],
   gallery_columns: ['2', '3', '4'],
   default_gallery_view: ['lista', 'grade'],
-  presentation_mode: ['editorial', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
+  presentation_mode: ['editorial', 'lista', 'grade', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
+  gallery_view_count: ['1', '2'],
+  gallery_secondary_mode: ['editorial', 'lista', 'grade', 'carousel', 'immersive', 'masonry', 'filmstrip', 'timeline', 'stack', 'spotlight', 'brutalist', 'museum', 'cinematic', 'swiss', 'tattoo-book'],
   navigation_mode: ['curtain', 'dropdown', 'sidebar', 'rail', 'dock', 'index'],
   heading_font: ['fraunces', 'playfair', 'space-grotesk', 'cormorant', 'archivo-black'],
   body_font: ['dm-sans', 'manrope', 'ibm-plex', 'lora', 'source-sans'],
@@ -85,7 +87,13 @@ function parseLayoutPreview(raw) {
             if (typeof source[key] === 'string' && source[key].length <= 5000 && (!['cta_url','image_url'].includes(key) || safeUrl(source[key]))) settings[key] = source[key]
           })
           ;['show_description','show_image','show_bio'].forEach(key => { if (typeof source[key] === 'boolean') settings[key] = source[key] })
-          return {id:section.id,type:section.type,settings}
+          const items = Array.isArray(section.items) ? section.items.slice(0,30).filter(item => item && typeof item.title === 'string' && item.title.trim()).map(item => {
+            const clean = {title:item.title.slice(0,120)}
+            ;['description','period','venue','location','size','placement','price','status'].forEach(key => { if (typeof item[key] === 'string') clean[key] = item[key].slice(0,1200) })
+            ;['image_url','link_url'].forEach(key => { if (typeof item[key] === 'string' && safeUrl(item[key])) clean[key] = item[key].slice(0,500) })
+            return clean
+          }) : undefined
+          return {id:section.id,type:section.type,settings,...(items ? {items} : {})}
         })
       }))
       if (pages.length) safe.page_schema = {version:1,pages}
@@ -151,15 +159,15 @@ const LAYOUT_PREVIEW_DEMO = {
 }
 
 
-function getLayoutPreviewDemo(layout = {}) {
+function getLayoutPreviewDemo(layout = {}, previewPresetId = null) {
   const sections = layout.custom_sections || []
   const sectionTypes = sections.map(section => section.type)
-  const preset = ['editorial-current','visual-artist','illustrator','photographer','designer','tattoo-artist','tattoo-studio']
+  const preset = previewPresetId || ['editorial-current','visual-artist','illustrator','photographer','photo-filmstrip','designer','tattoo-artist','tattoo-flashbook','tattoo-studio','museum-gallery','brutalist-type']
     .find(id => sections.some(section => String(section.id).includes('preset-' + id + '-')))
-  const isTattoo = preset === 'tattoo-artist' || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
+  const isTattoo = ['tattoo-artist','tattoo-flashbook','tattoo-studio'].includes(preset) || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
   const isStudio = preset === 'tattoo-studio' || sectionTypes.includes('studio-team')
-  const isPhoto = preset === 'photographer' || (!preset && layout.presentation_mode === 'immersive')
-  const isDesign = preset === 'designer' || (!preset && layout.presentation_mode === 'carousel' && layout.default_theme === 'claro')
+  const isPhoto = ['photographer','photo-filmstrip'].includes(preset) || (!preset && ['immersive','filmstrip'].includes(layout.presentation_mode))
+  const isDesign = ['designer','brutalist-type'].includes(preset) || (!preset && ['carousel','swiss','brutalist'].includes(layout.presentation_mode) && layout.default_theme === 'claro')
   const isIllustration = preset === 'illustrator' || (!preset && layout.presentation_mode === 'masonry' && layout.default_theme === 'claro')
 
   const profiles = {
@@ -287,7 +295,7 @@ function getLayoutPreviewDemo(layout = {}) {
     ],
   }
 
-  const variant = isStudio ? 'studio' : isTattoo ? 'tattoo' : isPhoto ? 'photo' : isDesign ? 'design' : isIllustration ? 'illustration' : preset === 'visual-artist' ? 'visual' : 'editorial'
+  const variant = isStudio ? 'studio' : isTattoo ? 'tattoo' : isPhoto ? 'photo' : isDesign ? 'design' : isIllustration ? 'illustration' : ['visual-artist','museum-gallery'].includes(preset) ? 'visual' : 'editorial'
   const profile = profiles[variant]
   const works = artwork[variant]
   const categoryNames = {
@@ -562,13 +570,16 @@ export default function App() {
       const safeSettings = parseLayoutPreview(JSON.stringify(event.data.settings || {}))
       if (!safeSettings) return
       const previewRoute = new URLSearchParams(window.location.search).has('layout_preview')
+      const previewGalleryMode = LAYOUT_PREVIEW_CHOICES.presentation_mode.includes(event.data.previewMode)
+        ? event.data.previewMode
+        : safeSettings.presentation_mode
       setConteudo(current => {
-        const nextLayout = { ...current.layout, ...safeSettings }
-        const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
+        const nextLayout = { ...current.layout, ...safeSettings, ...(previewRoute && previewGalleryMode ? { preview_gallery_mode: previewGalleryMode } : {}) }
+        const demo = previewRoute ? getLayoutPreviewDemo(nextLayout, event.data.previewPresetId) : null
         return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, previewSectionExamples: demo.sectionExamples, marca: demo.marca } : {}), layout: nextLayout }
       })
-      const previewMode = ['lista', 'grade'].includes(event.data.previewMode) ? event.data.previewMode : safeSettings.default_gallery_view
-      if (previewMode) setModoGaleria(previewMode)
+      const previewMode = event.data.previewMode
+      if (['lista', 'grade'].includes(previewMode)) setModoGaleria(previewMode)
       if (safeSettings.default_theme) setTema(safeSettings.default_theme)
       const hoverSnapshot = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
       const navigationPreview = {
@@ -592,7 +603,7 @@ export default function App() {
       const focus = event.data.focus
       const selector = focus === 'hero' ? '.hero'
         : focus === 'gallery'
-          ? (previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
+          ? (document.querySelector('.composer-gallery') ? '.composer-gallery' : previewMode === 'grade' ? '.galeria-grade-global' : '.secao:not(.sobre-secao):not(.secao-contato)')
           : focus === 'bio' ? '.sobre-secao'
             : focus === 'references' ? '#Referências'
               : focus === 'contact' ? '#Contato'
@@ -833,6 +844,7 @@ export default function App() {
 
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
+  const isLegacyLuliPortfolio = sobre.nome?.trim().toLocaleLowerCase('pt-BR') === 'luli becker' && !layout.page_schema?.version
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
   const isCompactLayoutPreview = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
   const palettePrefix = tema === 'claro' ? 'light' : 'dark'
@@ -966,6 +978,7 @@ export default function App() {
         categoriaAtiva={secaoAtiva}
         animando={animando}
         aoSelecionar={selecionarCategoria}
+        showLegacyGalleryToggle={isLegacyLuliPortfolio}
         modoGaleria={modoGaleria}
         aoTrocarModo={trocarModoGaleria}
         tema={tema}
@@ -996,6 +1009,16 @@ export default function App() {
       {layout.show_contact !== false && <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />}
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
+        {isLegacyLuliPortfolio && <button
+          type="button"
+          className="alternar-modo-flutuante"
+          aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}
+          title={modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}
+          onClick={() => trocarModoGaleria(modoGaleria === 'lista' ? 'grade' : 'lista')}
+        >
+          <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
+          <span>{modoGaleria === 'lista' ? 'Grade' : 'Lista'}</span>
+        </button>}
         <button
           type="button"
           className={`voltar-topo ${mostrarVoltarTopo ? 'visivel' : ''}`}
@@ -1005,16 +1028,6 @@ export default function App() {
           aria-hidden={!mostrarVoltarTopo}
         >
           <span aria-hidden="true">↑</span>
-        </button>
-        <button
-          type="button"
-          className="alternar-modo-flutuante"
-          aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}
-          title={modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}
-          onClick={() => trocarModoGaleria(modoGaleria === 'lista' ? 'grade' : 'lista')}
-        >
-          <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
-          <span>{modoGaleria === 'lista' ? 'Grade' : 'Lista'}</span>
         </button>
       </div>
     </div>

@@ -103,7 +103,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
     body: JSON.stringify({
       settings: {
         content_width: 'standard', hero_alignment: 'center', hero_size: 'large',
-        section_spacing: 'comfortable', gallery_columns: '3', default_gallery_view: 'lista',
+        section_spacing: 'comfortable', gallery_columns: '3', presentation_mode: 'masonry', default_gallery_view: 'lista',
         default_theme: 'escuro', dark_color_background: '#061522', dark_color_surface: '#0b2943',
         dark_color_text: '#eff7ff', dark_color_muted: '#a9bdcc', dark_color_accent: '#93c8f2',
         light_color_background: '#f5f2eb', light_color_surface: '#ffffff', light_color_text: '#24231f',
@@ -193,8 +193,8 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await fourColumnsOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-columns'))).toBe('4')
   const visibleColumns = await temporaryFrame.evaluate(frame => {
-    const grid = frame.contentDocument?.querySelector('.galeria-grade-global .obras-lista.modo-grade')
-    return grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0
+    const grid = frame.contentDocument?.querySelector('.secao:not(.sobre-secao) .obras-lista')
+    return grid ? Number(getComputedStyle(grid).columnCount) : 0
   })
   expect(visibleColumns).toBe(4)
   // O painel é apenas uma prévia contextual: passar o ponteiro para ele não deve
@@ -304,6 +304,54 @@ test('prévia contextual permanece acessível e dentro da tela em celular', asyn
   await expect(option.locator('input')).toBeChecked()
 })
 
+test('CMS permite oferecer uma ou duas experiências de galeria e salva a segunda escolha', async ({ page }) => {
+  let savedSettings=null
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/',async route=>{
+    if(route.request().method()==='PATCH')savedSettings=route.request().postDataJSON()
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({settings:savedSettings||{presentation_mode:'editorial',gallery_view_count:'1',gallery_secondary_mode:'carousel'},permissions:{canChange:true}})})
+  })
+  await page.route('**/api/portfolio/',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
+  await page.goto('/painel',{waitUntil:'domcontentloaded'})
+  await page.locator('.cms-nav').getByRole('button',{name:/Design do site/}).click()
+  await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
+  const countField=page.locator('.cms-layout-field').filter({hasText:'Quantidade de experiências de galeria'})
+  await expect(countField.getByLabel('Uma experiência')).toBeChecked()
+  await countField.getByLabel('Duas experiências').check()
+  const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
+  await expect(secondField).toBeVisible()
+  await secondField.getByLabel('Carrossel horizontal').check()
+  await page.getByRole('button',{name:'Salvar personalização'}).click()
+  await expect.poll(()=>savedSettings?.gallery_view_count).toBe('2')
+  expect(savedSettings.gallery_secondary_mode).toBe('carousel')
+  await expect(page.locator('.cms-save-state')).toContainText(/Tudo salvo|Personalização salva/)
+})
+
+test('modelos de uma experiência mantêm uma segunda opção válida caso o artista habilite a alternância depois', async ({ page }) => {
+  await mockDashboard(page)
+  await page.route('**/api/cms/layout/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ settings: { presentation_mode: 'editorial', gallery_view_count: '2', gallery_secondary_mode: 'filmstrip' }, permissions: { canChange: true } }),
+  }))
+  await page.route('**/api/portfolio/', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ categorias: [], referencias: [], frames: [], redes: [], sobre: null, marca: '', layout: {} }),
+  }))
+  await page.goto('/painel', { waitUntil: 'domcontentloaded' })
+  await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
+  const preset=page.locator('.cms-layout-preset-card').filter({hasText:'Caderno autoral'})
+  await preset.getByRole('button',{name:/Visualizar modelo/}).click()
+  await page.locator('.cms-layout-inline-preview').getByRole('button',{name:'Confirmar este layout'}).click()
+  await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
+  const countField=page.locator('.cms-layout-field').filter({hasText:'Quantidade de experiências de galeria'})
+  await countField.getByLabel('Duas experiências').check()
+  const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
+  const selected=await secondField.locator('input:checked').inputValue()
+  expect(selected).not.toBe('editorial')
+  await expect(secondField.getByLabel('Carrossel horizontal')).toHaveCount(1)
+  await expect(secondField.getByLabel('Filme contínuo')).toHaveCount(1)
+})
+
 test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
   let savedSettings = null
   await mockDashboard(page)
@@ -326,10 +374,16 @@ test('modelos prontos alteram somente a direção visual e não criam conteúdo 
   await page.route('**/api/portfolio/', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
   await page.goto('/painel',{waitUntil:'domcontentloaded'})
   await page.locator('.cms-nav').getByRole('button',{name:/Design do site/}).click()
-  const tattooPreset = page.locator('.cms-layout-preset-card').filter({ hasText: 'Tatuador(a)' })
+  await expect(page.locator('.cms-layout-preset-card')).toHaveCount(11)
+  const tattooPreset = page.locator('.cms-layout-preset-card').filter({ hasText: 'Caderno de flashes' })
   await tattooPreset.getByRole('button', { name: /Visualizar modelo/ }).click()
   const inlinePreview = page.locator('.cms-layout-inline-preview')
-  await expect(inlinePreview).toContainText('Tatuador(a)')
+  await expect(inlinePreview).toContainText('Caderno de flashes')
+  // The full-width iframe at the bottom must receive the same selected preset,
+  // not merely update the heading outside the iframe.
+  const fullPreview = page.frameLocator('iframe[title^="Prévia completa do portfólio"]')
+  await expect(fullPreview.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'tattoo-book')
+  await expect(fullPreview.locator('.hero h1')).toContainText('Maya Reis')
   await expect(inlinePreview.getByRole('button', { name: 'Confirmar este layout' })).toBeVisible()
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
@@ -337,6 +391,8 @@ test('modelos prontos alteram somente a direção visual e não criam conteúdo 
   await inlinePreview.getByRole('button', { name: 'Confirmar este layout' }).click()
   await expect(page.locator('.cms-save-state')).toContainText('Alterações ainda não salvas')
   await page.getByRole('button',{name:'Salvar personalização'}).click()
-  await expect.poll(()=>savedSettings?.presentation_mode).toBe('carousel')
+  await expect.poll(()=>savedSettings?.presentation_mode).toBe('tattoo-book')
+  expect(savedSettings.gallery_view_count).toBe('1')
+  expect(savedSettings.gallery_secondary_mode).not.toBe('tattoo-book')
   expect(savedSettings.custom_sections).toEqual([])
 })

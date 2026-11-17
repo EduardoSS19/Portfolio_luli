@@ -5,20 +5,38 @@ import './CmsLayoutManager.css'
 
 const DEFAULTS = {
   content_width:'standard', hero_alignment:'center', hero_size:'large',
-  section_spacing:'comfortable', gallery_columns:'3', default_gallery_view:'lista', presentation_mode:'editorial', navigation_mode:'curtain', default_theme:'escuro',
+  section_spacing:'comfortable', gallery_columns:'2', presentation_mode:'editorial', gallery_view_count:'1', gallery_secondary_mode:'carousel', navigation_mode:'curtain', default_theme:'escuro',
   heading_font:'fraunces', body_font:'dm-sans', navigation_font:'space-grotesk',
   dark_color_background:'#061522', dark_color_surface:'#0b2943', dark_color_text:'#eff7ff', dark_color_muted:'#a9bdcc', dark_color_accent:'#93c8f2',
   light_color_background:'#f5f2eb', light_color_surface:'#ffffff', light_color_text:'#24231f', light_color_muted:'#77746c', light_color_accent:'#657c62',
   show_bio_image:true, show_bio:true, show_references:true, show_contact:true, custom_sections:[],
 }
+const GALLERY_VIEW_OPTIONS = [
+  ['editorial','Editorial','Leitura vertical tradicional'],
+  ['lista','Lista editorial','Obras em sequência com espaço para contexto'],
+  ['grade','Grade visual','Acervo em composição modular'],
+  ['carousel','Carrossel horizontal','Percorra projetos lateralmente'],
+  ['immersive','Imersivo','Obras em painéis grandes'],
+  ['masonry','Mosaico irregular','Mural com alturas variadas'],
+  ['filmstrip','Filme contínuo','Uma tira horizontal de obras, como créditos visuais'],
+  ['timeline','Linha do tempo','Projetos em sequência cronológica horizontal'],
+  ['stack','Cartas empilhadas','Cartões grandes que se sobrepõem durante a rolagem'],
+  ['spotlight','Obra em destaque','Uma obra protagonista por tela, com texto em painel'],
+  ['brutalist','Brutalista','Tipografia monumental, grid assimétrico e contraste gráfico intenso'],
+  ['museum','Museu contemporâneo','Obras curatoriais em escala monumental e ritmo de catálogo'],
+  ['cinematic','Cinematográfico','Abertura em tela cheia e sequência visual panorâmica'],
+  ['swiss','Grid suíço','Sistema tipográfico modular e composição rigorosa'],
+  ['tattoo-book','Flashbook','Catálogo de flashes com linguagem de estúdio e disponibilidade'],
+]
 const FIELDS = [
   {group:'composition',name:'content_width',title:'Largura do conteúdo',description:'Define quanto espaço o conteúdo ocupa em telas maiores.',options:[['compact','Enxuto','Mais foco e respiro lateral'],['standard','Equilibrado','Proporção atual'],['wide','Amplo','Mais espaço para imagens']]},
   {group:'composition',name:'hero_alignment',title:'Alinhamento da apresentação',description:'Escolha como o nome e a frase aparecem no topo.',options:[['center','Centralizado','Composição simétrica'],['left','À esquerda','Composição editorial']]},
   {group:'composition',name:'hero_size',title:'Altura da apresentação',description:'Controla o espaço reservado ao cabeçalho inicial.',options:[['compact','Compacta','Chega mais rápido ao conteúdo'],['large','Expandida','Dá destaque à identidade']]},
   {group:'composition',name:'section_spacing',title:'Espaçamento entre seções',description:'Ajusta o ritmo vertical entre as partes do portfólio.',options:[['compact','Compacto','Mais conteúdo na tela'],['comfortable','Confortável','Equilíbrio e respiro'],['spacious','Generoso','Mais espaço entre projetos']]},
-  {group:'composition',name:'gallery_columns',title:'Colunas da grade',description:'Número de colunas em telas grandes. Em celulares, a grade continua adaptável.',options:[['2','2 colunas','Imagens maiores'],['3','3 colunas','Equilíbrio'],['4','4 colunas','Visão panorâmica']]},
-  {group:'composition',name:'default_gallery_view',title:'Visualização inicial',description:'Como o visitante encontra as obras ao abrir o portfólio.',options:[['lista','Lista editorial','Mais espaço para contexto'],['grade','Grade visual','Acervo em composição única']]},
-  {group:'experience',name:'presentation_mode',title:'Forma de explorar as obras',description:'Escolha um comportamento de galeria independente da grade/lista.',options:[['editorial','Editorial','Leitura vertical tradicional'],['carousel','Carrossel horizontal','Percorra projetos lateralmente'],['immersive','Imersivo','Obras em painéis grandes'],['masonry','Mosaico irregular','Mural com alturas variadas'],['filmstrip','Filme contínuo','Uma tira horizontal de obras, como créditos visuais'],['timeline','Linha do tempo','Projetos em sequência cronológica horizontal'],['stack','Cartas empilhadas','Cartões grandes que se sobrepõem durante a rolagem'],['spotlight','Obra em destaque','Uma obra protagonista por tela, com texto em painel'],['brutalist','Brutalista','Tipografia monumental, grid assimétrico e contraste gráfico intenso'],['museum','Museu contemporâneo','Obras curatoriais em escala monumental e ritmo de catálogo'],['cinematic','Cinematográfico','Abertura em tela cheia e sequência visual panorâmica'],['swiss','Grid suíço','Sistema tipográfico modular e composição rigorosa'],['tattoo-book','Flashbook','Catálogo de flashes com linguagem de estúdio e disponibilidade']]},
+  {group:'composition',name:'gallery_columns',title:'Colunas do mosaico',description:'Controla a quantidade de colunas nos modelos que usam composição em grade ou mosaico.',options:[['2','2 colunas','Imagens maiores'],['3','3 colunas','Equilíbrio'],['4','4 colunas','Visão panorâmica']]},
+  {group:'experience',name:'presentation_mode',title:'Forma principal de explorar as obras',description:'Escolha a experiência inicial da galeria. Grade e lista são apenas duas possibilidades entre vários formatos.',options:GALLERY_VIEW_OPTIONS},
+  {group:'experience',name:'gallery_view_count',title:'Quantidade de experiências de galeria',description:'Ofereça uma única apresentação ou permita que o visitante alterne entre duas experiências escolhidas por você.',options:[['1','Uma experiência','O visitante explora as obras de uma única maneira.'],['2','Duas experiências','O visitante pode alternar entre dois formatos de galeria.']]},
+  {group:'experience',name:'gallery_secondary_mode',title:'Segunda forma de explorar',description:'Escolha a experiência alternativa. O seletor público só aparece quando duas experiências estão habilitadas.',options:GALLERY_VIEW_OPTIONS},
   {group:'experience',name:'navigation_mode',title:'Estilo de navegação',description:'A navegação pode ser uma camada, uma lista persistente ou um índice editorial.',options:[['curtain','Cortina','Menu imersivo em tela cheia'],['dropdown','Dropdown','Painel compacto no canto'],['sidebar','Painel lateral','Gaveta que entra pela lateral'],['rail','Trilho numerado','Índice vertical sempre visível na margem'],['dock','Dock flutuante','Navegação horizontal fixa na base'],['index','Índice editorial','Mapa de capítulos em tela cheia, tipográfico']]},
   {group:'experience',name:'default_theme',title:'Tema inicial',description:'O visitante ainda poderá alternar entre claro e escuro.',options:[['escuro','Escuro','Apresentação imersiva'],['claro','Claro','Apresentação luminosa']]},
   {group:'typography',name:'heading_font',title:'Fonte dos títulos',description:'A fonte que dá personalidade ao nome da artista e aos títulos de seção.',options:[['fraunces','Fraunces','Expressiva, contemporânea e editorial'],['playfair','Playfair Display','Clássica, elegante e contrastada'],['space-grotesk','Space Grotesk','Geométrica e moderna'],['cormorant','Cormorant Garamond','Artística, delicada e literária'],['archivo-black','Archivo Black','Impactante, pesada e brutalista']]},
@@ -31,26 +49,72 @@ const FIELDS = [
 ]
 
 const LAYOUT_PRESETS = [
-  {id:'editorial-current',title:'Editorial contemporâneo',kind:'Modelo atual · portfólio autoral',description:'Preserva o editorial atual: leitura vertical, obras em lista e menu em cortina.',sections:['exhibitions','process'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'standard',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'lista',presentation_mode:'editorial',navigation_mode:'curtain',default_theme:'escuro'}},
-  {id:'visual-artist',title:'Artista visual',kind:'Artes visuais · pintura · escultura',description:'Mosaico irregular para séries e obras de diferentes formatos, com menu em cortina.',sections:['exhibitions','process','services'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'masonry',navigation_mode:'curtain',default_theme:'escuro'}},
-  {id:'illustrator',title:'Ilustração e desenho',kind:'Ilustração · quadrinhos · gravura',description:'Mosaico de ilustrações com alturas variadas e menu dropdown compacto.',sections:['process','services'],settings:{show_bio:false,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'masonry',navigation_mode:'dropdown',default_theme:'claro'}},
-  {id:'photographer',title:'Fotografia',kind:'Fotografia · imagem · editorial',description:'Apresentação imersiva em painéis largos, com navegação lateral que não compete com as fotos.',sections:['exhibitions','services'],settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'immersive',navigation_mode:'sidebar',default_theme:'escuro'}},
-  {id:'designer',title:'Design e direção de arte',kind:'Design · branding · 3D · motion',description:'Carrossel horizontal para percorrer cases, com menu dropdown e leitura de contexto.',sections:['process','services','press','testimonials'],settings:{show_bio:false,show_bio_image:false,show_references:true,show_contact:true,content_width:'standard',hero_alignment:'left',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'lista',presentation_mode:'carousel',navigation_mode:'dropdown',default_theme:'claro'}},
-  {id:'tattoo-artist',title:'Tatuador(a)',kind:'Tatuagem · flash · trabalhos cicatrizados',description:'Carrossel de flash e trabalhos em destaque, com acesso rápido ao menu de agendamento.',sections:['tattoo-flash','tattoo-booking','healed-work','guest-spots'],settings:{show_bio:false,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'carousel',navigation_mode:'dropdown',default_theme:'escuro'}},
-  {id:'tattoo-studio',title:'Estúdio de tatuagem',kind:'Estúdio · equipe · agenda',description:'Mosaico de trabalhos, equipe e especialidades, com painel lateral para navegação do estúdio.',sections:['studio-team','tattoo-flash','tattoo-booking','healed-work','guest-spots'],settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'masonry',navigation_mode:'sidebar',default_theme:'escuro'}},
-  {id:'museum-gallery',title:'Galeria de museu',kind:'Belas-artes · acervo · exposições',description:'Uma galeria silenciosa, com obras grandes, respiro generoso e leitura de catálogo — referência em galerias contemporâneas e no formato Tocuyo da Fabrik.',sections:['exhibitions','process','press'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'museum',navigation_mode:'sidebar',default_theme:'claro'}},
-  {id:'photo-masonry',title:'Mosaico fotográfico',kind:'Fotografia · editorial · arquivo visual',description:'Grade assimétrica e image-first, inspirada em portfólios como o de Levon Biss: as imagens conduzem a navegação, sem molduras competindo com elas.',sections:['exhibitions','services'],settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'4',default_gallery_view:'grade',presentation_mode:'masonry',navigation_mode:'dropdown',default_theme:'escuro'}},
-  {id:'swiss-grid',title:'Grid suíço',kind:'Design gráfico · identidade · tipografia',description:'Composição rigorosa, alinhamento à esquerda e ritmo modular, baseada na tradição do International Typographic Style e em estúdios como a Pentagram.',sections:['process','services','press'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'swiss',navigation_mode:'dropdown',default_theme:'claro'}},
-  {id:'brutalist-type',title:'Brutalista tipográfico',kind:'Direção de arte · experimental · autoral',description:'Nome em primeiro plano, contraste forte e navegação mínima. Direção expressiva inspirada em portfolios premiados do Readymag e na linguagem de pôsteres editoriais.',sections:['process','press','testimonials'],settings:{show_bio:false,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'lista',presentation_mode:'brutalist',navigation_mode:'dropdown',default_theme:'escuro'}},
-  {id:'cinematic-fullbleed',title:'Cinemático imersivo',kind:'Fotografia · vídeo · imagem em grande escala',description:'Abertura dramática e painéis visuais largos, na linha de portfólios de fotografia documental como Chris Burkard: impacto primeiro, contexto depois.',sections:['exhibitions','process','services'],settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'cinematic',navigation_mode:'curtain',default_theme:'escuro'}},
-  {id:'horizontal-monograph',title:'Monografia horizontal',kind:'Fotografia · arte contemporânea · séries',description:'Navegação lateral em ritmo de livro de artista, com séries tratadas como capítulos e imagens em sequência — abordagem editorial inspirada em fotolivros e portfolios de autor.',sections:['exhibitions','process','press'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'lista',presentation_mode:'carousel',navigation_mode:'sidebar',default_theme:'claro'}},
-  {id:'illustration-studio',title:'Estúdio de ilustração',kind:'Ilustração · personagens · editorial',description:'Galeria viva para personagens, capas e campanhas, com mosaico de formatos e áreas claras para processo, clientes e encomendas — inspirado em portfolios editoriais de ilustradores.',sections:['process','services','press','testimonials'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'masonry',navigation_mode:'dropdown',default_theme:'claro'}},
-  {id:'tattoo-flashbook',title:'Flashbook de tatuagem',kind:'Tatuagem · flash · reservas',description:'Vitrine de flashes em mosaico, com informações de disponibilidade e caminho direto para reserva. Referência na apresentação visual de estúdios como Pasha Ink.',sections:['tattoo-flash','healed-work','tattoo-booking','guest-spots'],settings:{show_bio:true,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'tattoo-book',navigation_mode:'dropdown',default_theme:'escuro'}},
-  {id:'museum-rail',title:'Museu com trilho',kind:'Arte contemporânea · acervo · curadoria',description:'Índice vertical numerado sempre visível, obras protagonistas e tipografia literária. O menu deixa de ser um botão e vira orientação espacial.',sections:['exhibitions','process','press'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'spotlight',navigation_mode:'rail',heading_font:'cormorant',body_font:'lora',navigation_font:'ibm-plex-mono',default_theme:'claro'}},
-  {id:'photo-filmstrip',title:'Fotografia em película',kind:'Fotografia · editorial · séries',description:'Uma faixa horizontal de imagens que se percorre como uma película, com dock flutuante na base e tipografia geométrica.',sections:['exhibitions','process','services'],settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'filmstrip',navigation_mode:'dock',heading_font:'space-grotesk',body_font:'manrope',navigation_font:'ibm-plex-mono',default_theme:'escuro'}},
-  {id:'editorial-index',title:'Índice de capítulos',kind:'Arte · pesquisa · portfólio autoral',description:'A navegação vira um índice editorial em tela inteira; a galeria usa uma linha do tempo horizontal para explorar séries e projetos.',sections:['exhibitions','process','press','testimonials'],settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'lista',presentation_mode:'timeline',navigation_mode:'index',heading_font:'playfair',body_font:'source-sans',navigation_font:'space-grotesk',default_theme:'claro'}},
-  {id:'brutalist-stack',title:'Brutalismo em camadas',kind:'Direção de arte · design · experimental',description:'Cartões monumentais empilhados durante a rolagem, com navegação em dock e títulos de impacto.',sections:['process','services','press'],settings:{show_bio:false,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',default_gallery_view:'grade',presentation_mode:'stack',navigation_mode:'dock',heading_font:'archivo-black',body_font:'ibm-plex',navigation_font:'ibm-plex-mono',default_theme:'escuro'}},
-  {id:'tattoo-index',title:'Tattoo index',kind:'Tatuagem · flash · agenda · guest spots',description:'Índice de navegação lateral e flashes em película: um catálogo visual de peças, cicatrizados e datas de atendimento.',sections:['tattoo-flash','healed-work','tattoo-booking','guest-spots'],settings:{show_bio:true,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',default_gallery_view:'grade',presentation_mode:'filmstrip',navigation_mode:'rail',heading_font:'space-grotesk',body_font:'dm-sans',navigation_font:'ibm-plex-mono',default_theme:'escuro'}},
+  {
+    id:'editorial-current',title:'Caderno autoral',kind:'Portfólio independente · múltiplas linguagens',
+    description:'Um portfólio de leitura editorial: abertura tipográfica, capítulos bem separados e obras apresentadas em sequência. Ponto de partida versátil, sem impor uma grade.',
+    sections:['exhibitions','process','press'],
+    settings:{show_bio:true,show_references:true,show_contact:true,content_width:'standard',hero_alignment:'center',hero_size:'large',section_spacing:'comfortable',gallery_columns:'3',presentation_mode:'editorial',gallery_view_count:'1',navigation_mode:'curtain',default_theme:'escuro',heading_font:'fraunces',body_font:'dm-sans',navigation_font:'space-grotesk'}
+  },
+  {
+    id:'visual-artist',title:'Ateliê / obra em série',kind:'Artes visuais · pintura · escultura · cerâmica',
+    description:'Um ateliê digital que valoriza séries, estudos e peças de formatos diferentes. Composição assimétrica, espaço generoso e leitura de processo ao lado da obra.',
+    sections:['exhibitions','process','services'],
+    settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'masonry',gallery_view_count:'1',navigation_mode:'rail',default_theme:'escuro',heading_font:'cormorant',body_font:'lora',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'illustrator',title:'Narrativa ilustrada',kind:'Ilustração · desenho · quadrinhos · concept art',
+    description:'Uma sequência de pranchas e capítulos visuais: capas, personagens, estudos e bastidores aparecem como páginas de um caderno ilustrado, não como um catálogo genérico.',
+    sections:['process','services','press'],
+    settings:{show_bio:true,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'stack',gallery_view_count:'1',navigation_mode:'index',default_theme:'claro',heading_font:'fraunces',body_font:'manrope',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'photographer',title:'Ensaio fotográfico',kind:'Fotografia · documental · retrato · editorial',
+    description:'A fotografia ocupa o primeiro plano em imagens amplas e sequências contemplativas. O texto entra como legenda e contexto, sem disputar atenção com as imagens.',
+    sections:['exhibitions','process','services'],
+    settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'immersive',gallery_view_count:'1',navigation_mode:'sidebar',default_theme:'escuro',heading_font:'cormorant',body_font:'lora',navigation_font:'dm-sans'}
+  },
+  {
+    id:'photo-filmstrip',title:'Fotolivro / arquivo',kind:'Fotografia · séries · viagem · arquivo',
+    description:'Uma experiência de fotolivro: imagens percorridas lateralmente, sequência contínua e orientação discreta. Ideal para ensaios, viagens e projetos organizados em séries.',
+    sections:['exhibitions','process','press'],
+    settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',presentation_mode:'filmstrip',gallery_view_count:'1',navigation_mode:'dock',default_theme:'escuro',heading_font:'space-grotesk',body_font:'manrope',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'designer',title:'Estudo de caso / design',kind:'Design · branding · direção de arte · 3D · motion',
+    description:'Projetos tratados como sistemas: hierarquia tipográfica rigorosa, alinhamentos modulares e espaço para explicar desafio, conceito, entregáveis e resultado.',
+    sections:['process','services','press','testimonials'],
+    settings:{show_bio:true,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',presentation_mode:'swiss',gallery_view_count:'1',navigation_mode:'index',default_theme:'claro',heading_font:'space-grotesk',body_font:'ibm-plex',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'tattoo-artist',title:'Tatuador(a) · portfólio',kind:'Tatuagem autoral · flash · projetos personalizados',
+    description:'Portfólio de tatuagem com carrossel de trabalhos, espaço para projetos personalizados e acesso direto às informações de orçamento e agenda. Recupera a proposta anterior sem confundir catálogo de flashes com portfólio completo.',
+    sections:['tattoo-flash','tattoo-booking','healed-work','guest-spots'],
+    settings:{show_bio:false,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',presentation_mode:'carousel',gallery_view_count:'1',navigation_mode:'dropdown',default_theme:'escuro',heading_font:'space-grotesk',body_font:'dm-sans',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'tattoo-flashbook',title:'Caderno de flashes',kind:'Tatuagem · desenhos autorais · catálogo e reservas',
+    description:'Um catálogo editorial de desenhos disponíveis: cada flash ganha espaço, identificação clara, técnica, tamanho e disponibilidade, com um caminho simples para consultar e reservar.',
+    sections:['tattoo-flash','healed-work','tattoo-booking','guest-spots'],
+    settings:{show_bio:true,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',presentation_mode:'tattoo-book',gallery_view_count:'1',navigation_mode:'dropdown',default_theme:'escuro',heading_font:'cormorant',body_font:'dm-sans',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'tattoo-studio',title:'Estúdio / agenda',kind:'Estúdio de tatuagem · equipe · guest artists',
+    description:'A identidade do estúdio vem antes do catálogo: apresentação da equipe, estilos atendidos, trabalhos cicatrizados, artistas convidados e acesso rápido à agenda.',
+    sections:['studio-team','healed-work','tattoo-flash','tattoo-booking','guest-spots'],
+    settings:{show_bio:true,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'center',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'spotlight',gallery_view_count:'1',navigation_mode:'sidebar',default_theme:'escuro',heading_font:'space-grotesk',body_font:'manrope',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'museum-gallery',title:'Acervo / exposição',kind:'Galeria · coletivo · curadoria · instituição',
+    description:'Uma experiência de exposição: escala de obra, legendas curatoriais, intervalos generosos e navegação silenciosa. Pensada para coleções e mostras, não para uma vitrine comercial.',
+    sections:['exhibitions','process','press'],
+    settings:{show_bio:true,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'museum',gallery_view_count:'1',navigation_mode:'rail',default_theme:'claro',heading_font:'cormorant',body_font:'lora',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'brutalist-type',title:'Pôster / experimental',kind:'Direção de arte · tipografia · projetos experimentais',
+    description:'Uma linguagem gráfica de alto impacto: títulos monumentais, cortes assimétricos e ritmo de cartaz. Para trabalhos que pedem presença e não uma galeria neutra.',
+    sections:['process','press','testimonials'],
+    settings:{show_bio:false,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'large',section_spacing:'spacious',gallery_columns:'2',presentation_mode:'brutalist',gallery_view_count:'1',navigation_mode:'dropdown',default_theme:'claro',heading_font:'archivo-black',body_font:'ibm-plex',navigation_font:'ibm-plex-mono'}
+  },
 ]
 
 const SECTION_TEMPLATES = [
@@ -143,11 +207,19 @@ const PREVIEW_DEVICES = { desktop: { label:'Desktop', width:1440, height:900 }, 
 function buildPresetSettings(base,preset){
   // Modelos definem somente a direção visual. Conteúdo e sessões são criados
   // exclusivamente na área Páginas, nunca como exemplos injetados pelo Layout.
-  return {...base,...preset.settings}
+  const next={...base,...preset.settings, gallery_view_count:preset.settings.gallery_view_count==='2'?'2':'1'}
+  if(!preset.settings.gallery_secondary_mode||!GALLERY_VIEW_OPTIONS.some(([value])=>value===next.gallery_secondary_mode)||next.gallery_secondary_mode===next.presentation_mode){
+    next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([value])=>value!==next.presentation_mode)?.[0]||'carousel'
+  }
+  return next
 }
 
 function normalizeLayoutSettings(raw={}) {
   const next={...DEFAULTS,...raw}
+  next.gallery_view_count=next.gallery_view_count==='2'?'2':'1'
+  if(!GALLERY_VIEW_OPTIONS.some(([value])=>value===next.gallery_secondary_mode)||next.gallery_secondary_mode===next.presentation_mode){
+    next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([value])=>value!==next.presentation_mode)?.[0]||'carousel'
+  }
   next.custom_sections=(Array.isArray(next.custom_sections)?next.custom_sections:[]).map(section=>({
     ...section,
     design:{
@@ -190,7 +262,7 @@ export function CmsLayoutManager(){
   const [previewDevice,setPreviewDevice]=useState('desktop')
   const [previewCanvasBackground,setPreviewCanvasBackground]=useState(DEFAULTS.dark_color_background)
   const [previewFocus,setPreviewFocus]=useState('page')
-  const [previewMode,setPreviewMode]=useState(DEFAULTS.default_gallery_view)
+  const [previewMode,setPreviewMode]=useState(DEFAULTS.presentation_mode)
   const [editingTheme,setEditingTheme]=useState('dark')
   const [previewContainerSize,setPreviewContainerSize]=useState({width:0,height:0})
   const [previewDocumentHeight,setPreviewDocumentHeight]=useState(PREVIEW_DEVICES.desktop.height)
@@ -347,7 +419,7 @@ export function CmsLayoutManager(){
     let active=true
     fetch('/api/cms/layout/',{credentials:'same-origin',headers:{Accept:'application/json'},cache:'no-store'})
       .then(async response=>{const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(response.status===403?'Sua conta não tem permissão para acessar o layout.':'Não foi possível carregar as opções de layout.');return data})
-      .then(data=>{if(!active)return;const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setPreviewMode(next.default_gallery_view);setCanChange(Boolean(data.permissions?.canChange))})
+      .then(data=>{if(!active)return;const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setPreviewMode(next.presentation_mode);setCanChange(Boolean(data.permissions?.canChange))})
       .catch(err=>{if(active)setError(err.message)}).finally(()=>{if(active)setLoading(false)})
     return()=>{active=false}
   },[])
@@ -356,8 +428,8 @@ export function CmsLayoutManager(){
   const hoverPreviewState=()=>{
     if(!hoveredOption)return {settings,focus:previewFocus,previewMode,animatePreview:false}
     const nextSettings={...settings,[hoveredOption.name]:hoveredOption.value,...(hoveredOption.patch||{})}
-    const nextMode=hoveredOption.name==='default_gallery_view'?hoveredOption.value:hoveredOption.name==='gallery_columns'?'grade':previewMode
-    const focus=['gallery_columns','default_gallery_view','presentation_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
+    const nextMode=['presentation_mode','gallery_secondary_mode'].includes(hoveredOption.name)?hoveredOption.value:(nextSettings.presentation_mode||previewMode)
+    const focus=['gallery_columns','presentation_mode','gallery_view_count','gallery_secondary_mode'].includes(hoveredOption.name)?'gallery':['hero_alignment','hero_size'].includes(hoveredOption.name)?'hero':['show_bio','show_bio_image'].includes(hoveredOption.name)?'bio':hoveredOption.name==='show_references'?'references':hoveredOption.name==='show_contact'?'contact':hoveredOption.name==='navigation_mode'?'navigation':'page'
     return {settings:nextSettings,focus,previewMode:nextMode,animatePreview:true}
   }
   const sendPreviewUpdate=(target,override)=>{
@@ -366,7 +438,7 @@ export function CmsLayoutManager(){
   }
   const previewingPreset=LAYOUT_PRESETS.find(preset=>preset.id===previewingPresetId)||null
   const previewingPresetSettings=previewingPreset?buildPresetSettings(settings,previewingPreset):settings
-  const inlinePreviewPayload=previewingPreset?{settings:previewingPresetSettings,focus:'page',previewMode:previewingPreset.settings.default_gallery_view,animatePreview:true}:{settings,focus:previewFocus,previewMode,animatePreview:false}
+  const inlinePreviewPayload=previewingPreset?{settings:previewingPresetSettings,focus:'page',previewMode:previewingPreset.settings.presentation_mode,previewPresetId:previewingPreset.id,animatePreview:true}:{settings,focus:previewFocus,previewMode,animatePreview:false}
   const inlinePreviewTheme=previewingPreset?.settings.default_theme||settings.default_theme||'escuro'
   const inlinePreviewThemeBackground=settings[`${inlinePreviewTheme==='claro'?'light':'dark'}_color_background`]||DEFAULTS.dark_color_background
   useEffect(()=>{setPreviewCanvasBackground(inlinePreviewThemeBackground)},[inlinePreviewThemeBackground,inlinePreviewTheme,previewingPresetId])
@@ -388,7 +460,7 @@ export function CmsLayoutManager(){
     if(!preset)return
     const nextSettings=buildPresetSettings(settings,preset)
     setSettings(nextSettings)
-    setPreviewMode(preset.settings.default_gallery_view)
+    setPreviewMode(preset.settings.presentation_mode)
     setPreviewFocus('page')
     setPreviewingPresetId(null)
     setNotice('Modelo “'+preset.title+'” selecionado. Agora você pode ajustar as opções abaixo; nada foi publicado ainda.')
@@ -410,8 +482,15 @@ export function CmsLayoutManager(){
     }
     window.addEventListener('message',handlePreviewReady)
     sendPreviewUpdate(floatingWindow)
-    sendPreviewUpdate(inlineWindow,inlinePreviewPayload)
-    return()=>window.removeEventListener('message',handlePreviewReady)
+    // O iframe inferior pode hidratar depois do efeito do CMS (especialmente com
+    // loading="lazy"). Reentrega a mesma versão do payload até o app filho
+    // responder ao handshake, sem depender de um único postMessage no timing exato.
+    const deliverInlinePreview=()=>sendPreviewUpdate(inlineWindow,inlinePreviewPayload)
+    const inlineRetries=[0,100,300,700].map(delay=>window.setTimeout(deliverInlinePreview,delay))
+    return()=>{
+      window.removeEventListener('message',handlePreviewReady)
+      inlineRetries.forEach(timer=>window.clearTimeout(timer))
+    }
   },[settings,previewFocus,previewMode,previewOpen,previewingPresetId])
 
   // A simulação de hover é isolada do preview final. O iframe pode concluir
@@ -498,21 +577,20 @@ export function CmsLayoutManager(){
   }
   const updateCustomSectionItem=(sectionId,index,patch)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.map((item,itemIndex)=>itemIndex===index?{...item,...patch}:item)}:section)}))
   const removeCustomSectionItem=(sectionId,index)=>setSettings(current=>({...current,custom_sections:(current.custom_sections||[]).map(section=>section.id===sectionId?{...section,items:section.items.filter((_,itemIndex)=>itemIndex!==index)}:section)}))
-  const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.default_gallery_view);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
+  const applyLayoutPreset=preset=>{setSettings(current=>buildPresetSettings(current,preset));setPreviewMode(preset.settings.presentation_mode);setPreviewingPresetId(null);setError('');setNotice('Modelo “'+preset.title+'” selecionado. Ajuste as opções e salve quando estiver pronto.')}
   const change=(name,value)=>{
     const scrollBeforeInteraction=optionScrollBeforeInteractionRef.current
     optionScrollBeforeInteractionRef.current=null
     const key=COLOR_FIELDS.some(([field])=>field===name)?colorKey(name):name
-    setSettings(current=>({...current,[key]:value}))
+    setSettings(current=>{const next={...current,[key]:value};if((name==='presentation_mode'||name==='gallery_view_count')&&next.gallery_secondary_mode===next.presentation_mode)next.gallery_secondary_mode=GALLERY_VIEW_OPTIONS.find(([mode])=>mode!==next.presentation_mode)?.[0]||'carousel';return next})
     // Selecting an already-visible radio must not jump the whole CMS page.
     if(scrollBeforeInteraction!==null){
       window.requestAnimationFrame(()=>window.scrollTo({top:scrollBeforeInteraction,behavior:'instant'}))
     }
     closeOptionPreview()
-    if(name==='default_gallery_view')setPreviewMode(value)
-    else if(name==='gallery_columns')setPreviewMode('grade')
+    if(name==='presentation_mode')setPreviewMode(value)
     const hasBio=(name==='show_bio'?value:settings.show_bio)!==false||(name==='show_bio_image'?value:settings.show_bio_image)!==false
-    const focus=['gallery_columns','default_gallery_view','presentation_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
+    const focus=['gallery_columns','presentation_mode','gallery_view_count','gallery_secondary_mode','content_width','section_spacing'].includes(name)?'gallery':['hero_alignment','hero_size'].includes(name)?'hero':['show_bio','show_bio_image'].includes(name)?(hasBio?'bio':'page'):name==='show_references'?(value?'references':'page'):name==='show_contact'?(value?'contact':'page'):name==='navigation_mode'?'navigation':'page'
     setPreviewFocus(focus)
     setError('');setNotice('')
   }
@@ -544,8 +622,8 @@ export function CmsLayoutManager(){
       const next=normalizeLayoutSettings(data.settings||{});setSettings(next);setSaved(next);setNotice('Personalização salva. As configurações foram aplicadas ao portfólio.')
     }catch(err){setError(err.message||'Não foi possível salvar.')}finally{setSaving(false)}
   }
-  const discard=()=>{setSettings(saved);setPreviewMode(saved.default_gallery_view);setError('');setNotice('Alterações descartadas.')}
-  const reset=()=>{setSettings(DEFAULTS);setPreviewMode(DEFAULTS.default_gallery_view);setError('');setNotice('')}
+  const discard=()=>{setSettings(saved);setPreviewMode(saved.presentation_mode);setError('');setNotice('Alterações descartadas.')}
+  const reset=()=>{setSettings(DEFAULTS);setPreviewMode(DEFAULTS.presentation_mode);setError('');setNotice('')}
   if(loading)return <div className="cms-loading">Carregando opções de layout…</div>
   return <section className="cms-layout-page">
     <header className="cms-library-heading"><div><p className="cms-eyebrow">APARÊNCIA DO PORTFÓLIO</p><h1>Layout<span>.</span></h1><p>Personalize a composição e as cores vendo o resultado antes de salvar.</p></div>
@@ -565,8 +643,8 @@ export function CmsLayoutManager(){
         </nav>
         <div className="cms-save-state" role="status" aria-live="polite"><span className="cms-save-state-dot"/>{hasChanges?'Alterações ainda não salvas':'Tudo salvo'}</div>
         {activeWorkspace === 'models' && <section className="cms-layout-presets" ref={presetSectionRef}>
-          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · 13 linguagens visuais · 6 navegações</span></div>
-          <p className="cms-layout-help">Os modelos mudam a forma de explorar as obras e o comportamento do menu — não apenas as seções. Depois, ajuste apresentação, cores e conteúdo. Nada é publicado até salvar.</p>
+          <div className="cms-layout-section-heading"><div><p className="cms-eyebrow">PONTO DE PARTIDA</p><h2>Modelos de portfólio</h2></div><span className="cms-layout-preset-count">{LAYOUT_PRESETS.length} modelos · {GALLERY_VIEW_OPTIONS.length} formas de galeria · 6 navegações</span></div>
+          <p className="cms-layout-help">Cada modelo parte de uma direção artística própria: composição, tipografia, ritmo, galeria e navegação. Escolha o ponto de partida e personalize o restante. Nada é publicado até salvar.</p>
           <div className="cms-layout-preset-grid">
             {LAYOUT_PRESETS.map(preset=><article className="cms-layout-preset-card" key={preset.id}>
               <div className={'cms-layout-preset-art preset-'+preset.id+' mode-'+preset.settings.presentation_mode+' nav-'+preset.settings.navigation_mode} aria-hidden="true">
@@ -588,7 +666,7 @@ export function CmsLayoutManager(){
           <div className="cms-layout-colors">{COLOR_FIELDS.map(([name,label,detail])=><label className="cms-layout-color-field" key={name} onPointerEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onMouseEnter={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)} onFocus={event=>showOptionPreview(colorKey(name),settings[colorKey(name)],label,detail,event)}><span><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-color-input"><input type="color" value={settings[colorKey(name)]} onChange={event=>change(name,event.target.value)} disabled={!canChange||saving} aria-label={label+' — tema '+(editingTheme==='dark'?'escuro':'claro')}/><code>{settings[colorKey(name)].toUpperCase()}</code></span></label>)}</div>
           <div className={'cms-layout-contrast '+(contrast>=4.5?'good':'warning')} role="status"><span>{contrast>=4.5?'✓':'!'}</span><div><strong>{contrast>=4.5?'Contraste automático ativo':'Verifique a combinação de cores'}</strong><small>{'Menor contraste após o ajuste automático: '+contrast.toFixed(2)+':1. Texto principal, secundário e destaques são corrigidos separadamente para cada superfície.'}</small></div></div>
         </section>}
-        <div className="cms-layout-fields">{FIELD_GROUPS.filter(group => activeWorkspace === 'identity' ? group.id === 'typography' : group.id === activeWorkspace).map(group=><details open className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onPointerLeave={scheduleOptionPreviewClose} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
+        <div className="cms-layout-fields">{FIELD_GROUPS.filter(group => activeWorkspace === 'identity' ? group.id === 'typography' : group.id === activeWorkspace).map(group=><details open className="cms-layout-field-group" key={group.id}><summary className="cms-layout-group-heading"><div><p className="cms-eyebrow">PERSONALIZAÇÃO</p><h2>{group.title}</h2><p>{group.description}</p></div></summary><div className="cms-layout-group-fields">{FIELDS.filter(field=>field.group===group.id && (field.name!=='gallery_secondary_mode'||settings.gallery_view_count==='2')).map(field=><fieldset className="cms-layout-field" key={field.name} disabled={!canChange||saving}><legend>{field.title}</legend><p>{field.description}</p><div className="cms-layout-options">{field.options.filter(([value])=>field.name!=='gallery_secondary_mode'||value!==settings.presentation_mode).map(([value,label,detail])=><label className={'cms-layout-option'+(settings[field.name]===value?' selected':'')} key={value} onMouseDown={()=>{optionScrollBeforeInteractionRef.current=window.scrollY}} onPointerEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onMouseEnter={event=>showOptionPreview(field.name,value,label,detail,event)} onFocus={event=>{ignoreWorkspaceScrollRef.current=true;window.requestAnimationFrame(()=>{ignoreWorkspaceScrollRef.current=false});showOptionPreview(field.name,value,label,detail,event)}} onPointerLeave={scheduleOptionPreviewClose} onClick={hideOptionPreview}><input type="radio" name={field.name} value={value} checked={settings[field.name]===value} onChange={()=>change(field.name,value)}/><span className="cms-layout-option-copy"><strong>{label}</strong><small>{detail}</small></span><span className="cms-layout-option-check" aria-hidden="true">✓</span></label>)}</div></fieldset>)}</div></details>)}
         </div>
         {error&&<div className="cms-editor-message error" role="alert">{error}</div>}{notice&&<div className="cms-editor-message success" role="status">{notice}</div>}
         <div className="cms-editor-actions"><span>{canChange?'Salvar aplica as escolhas ao portfólio público.':'Você tem acesso de leitura às opções de layout.'}</span><div className="cms-editor-save-actions"><button className="cms-editor-cancel" type="button" onClick={discard} disabled={!hasChanges||saving}>Descartar</button><button className="cms-editor-cancel" type="button" onClick={reset} disabled={!canChange||saving||!hasChanges}>Restaurar padrão</button><button className="cms-primary-button" type="submit" disabled={!canChange||saving||!hasChanges}>{saving?'Salvando…':'Salvar personalização'} <span>↗</span></button></div></div>

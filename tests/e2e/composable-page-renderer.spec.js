@@ -15,7 +15,7 @@ const pageSchema = {
   ],
 }
 
-async function openComposablePortfolio(page, presentation_mode = 'carousel', navigation_mode = 'curtain') {
+async function openComposablePortfolio(page, presentation_mode = 'carousel', navigation_mode = 'curtain', gallery_view_count = '1', gallery_secondary_mode = 'masonry') {
   await page.route('**/api/portfolio/**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -30,6 +30,8 @@ async function openComposablePortfolio(page, presentation_mode = 'carousel', nav
       layout: {
         page_schema: pageSchema,
         presentation_mode,
+        gallery_view_count,
+        gallery_secondary_mode,
         navigation_mode,
         default_theme: 'escuro',
         dark_color_background: '#061522',
@@ -58,6 +60,73 @@ test('menu cortina abre e fecha sem sobrepor permanentemente a página', async (
   await nav.locator('.composer-navigation-links a').filter({ hasText: 'Sobre' }).click()
   await expect(page).toHaveURL(/\/sobre$/)
   await expect(page.locator('.composer-rich-text h2')).toHaveText('Sobre a artista')
+})
+
+test('prévia contextual pode mostrar a segunda experiência sem alterar a escolha principal', async ({ page }) => {
+  await page.route('**/api/portfolio/**', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({
+      categorias: [], referencias: [], frames: [], redes: [],
+      sobre: { nome: 'Artista', frase: 'Portfólio', bio: '', email: '', instagram: '', formulario: '' },
+      layout: { page_schema: pageSchema, presentation_mode: 'masonry', gallery_view_count: '2', gallery_secondary_mode: 'carousel', navigation_mode: 'dock' },
+    }),
+  }))
+  await page.goto('/?layout_preview=1&layout_preview_compact=1', { waitUntil: 'domcontentloaded' })
+  const site=page.locator('.composer-site')
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
+  await page.evaluate(() => window.postMessage({
+    type: 'cms-layout-preview:update',
+    settings: { presentation_mode: 'masonry', gallery_view_count: '2', gallery_secondary_mode: 'carousel', navigation_mode: 'dock' },
+    previewMode: 'carousel', focus: 'gallery', animatePreview: true,
+  }, window.location.origin))
+  await expect(site).toHaveAttribute('data-gallery-mode','carousel')
+  const switcher=page.locator('.composer-gallery-view-switcher')
+  await expect(switcher.getByRole('button',{name:'Carrossel horizontal'})).toHaveAttribute('aria-pressed','true')
+  await expect(switcher.getByRole('button',{name:'Mosaico irregular'})).toHaveAttribute('aria-pressed','false')
+})
+
+test('galeria usa a apresentação escolhida e só oferece alternância quando duas experiências foram habilitadas', async ({ page }) => {
+  await openComposablePortfolio(page, 'masonry', 'dock', '1', 'carousel')
+  const site=page.locator('.composer-site')
+  const gallery=page.locator('.composer-gallery')
+  const works=gallery.locator('.obras-lista').first()
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
+  await expect(gallery.locator('.composer-gallery-view-switcher')).toHaveCount(0)
+  await expect.poll(()=>works.evaluate(node=>getComputedStyle(node).display)).toBe('grid')
+
+  await openComposablePortfolio(page, 'masonry', 'dock', '2', 'carousel')
+  const switcher=page.locator('.composer-gallery-view-switcher')
+  await expect(switcher.getByRole('button',{name:'Mosaico irregular'})).toHaveAttribute('aria-pressed','true')
+  await switcher.getByRole('button',{name:'Carrossel horizontal'}).click()
+  await expect(site).toHaveAttribute('data-gallery-mode','carousel')
+  await expect(switcher.getByRole('button',{name:'Carrossel horizontal'})).toHaveAttribute('aria-pressed','true')
+  await expect.poll(()=>works.evaluate(node=>getComputedStyle(node).display)).toBe('flex')
+  await switcher.getByRole('button',{name:'Mosaico irregular'}).click()
+  await expect(site).toHaveAttribute('data-gallery-mode','masonry')
+})
+
+test('títulos longos cabem nos modelos suíço, flashbook, spotlight e brutalista', async ({ page }) => {
+  const cases=['swiss','tattoo-book','spotlight','brutalist']
+  for (const mode of cases) {
+    await openComposablePortfolio(page, mode, 'dock')
+    const heading=page.locator('.composer-hero h1')
+    await heading.evaluate(node=>{node.textContent='ESTÚDIO DE DESIGN E EXPERIMENTAÇÃO VISUAL'})
+    const metrics=await heading.evaluate(node=>({scrollWidth:node.scrollWidth,clientWidth:node.clientWidth,scrollHeight:node.scrollHeight,rectHeight:node.getBoundingClientRect().height}))
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth+1)
+    expect(metrics.rectHeight).toBeGreaterThan(40)
+  }
+})
+
+test('mosaico irregular usa proporções e alturas realmente diferentes', async ({ page }) => {
+  await openComposablePortfolio(page, 'masonry', 'dock')
+  const cards=page.locator('.composer-gallery .obras-lista>.obra')
+  const metrics=await cards.evaluateAll(nodes=>nodes.map(node=>{
+    const style=getComputedStyle(node)
+    return {columns:style.gridColumnEnd,rows:style.gridRowEnd,height:Math.round(node.getBoundingClientRect().height)}
+  }))
+  expect(new Set(metrics.map(item=>item.columns)).size).toBeGreaterThan(1)
+  expect(new Set(metrics.map(item=>item.rows)).size).toBeGreaterThan(1)
+  expect(Math.max(...metrics.map(item=>item.height))-Math.min(...metrics.map(item=>item.height))).toBeGreaterThan(80)
 })
 
 test('os modos de galeria alteram a composição real dos cards', async ({ page }) => {

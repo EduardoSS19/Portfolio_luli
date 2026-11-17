@@ -25,10 +25,10 @@ async function openLiveLayoutPreview(page) {
   await expect.poll(() => page.evaluate(() => Boolean(window.__cmsPreviewReady))).toBe(true)
 }
 
-async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false) {
-  await page.evaluate(({ settings, focus, previewMode, animatePreview }) => {
-    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview }, window.location.origin)
-  }, { settings, focus, previewMode, animatePreview })
+async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false, previewPresetId) {
+  await page.evaluate(({ settings, focus, previewMode, animatePreview, previewPresetId }) => {
+    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview, previewPresetId }, window.location.origin)
+  }, { settings, focus, previewMode, animatePreview, previewPresetId })
 }
 
 test('preview inicial é um portfólio completo com perfil, imagens, obras, trajetória e redes', async ({ page }) => {
@@ -42,6 +42,29 @@ test('preview inicial é um portfólio completo com perfil, imagens, obras, traj
   await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
   await expect(page.locator('.rodape-links a')).toHaveCount(4)
   await expect(page.locator('#Contato form')).toBeVisible()
+})
+
+test('a prévia demonstra o perfil correspondente ao modelo escolhido', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+
+  await sendSettings(page, { presentation_mode: 'tattoo-book', navigation_mode: 'dropdown' }, 'page', 'tattoo-book', true, 'tattoo-flashbook')
+  await expect(page.locator('.hero h1')).toHaveText('Maya Reis')
+  await expect(page.locator('.hero p')).toContainText('Tatuagem autoral')
+
+  await sendSettings(page, { presentation_mode: 'filmstrip', navigation_mode: 'dock' }, 'page', 'filmstrip', true, 'photo-filmstrip')
+  await expect(page.locator('.hero h1')).toHaveText('Clara Nogueira')
+  await expect(page.locator('.hero p')).toContainText('Fotografia')
+
+  await sendSettings(page, { presentation_mode: 'museum', navigation_mode: 'rail' }, 'page', 'museum', true, 'museum-gallery')
+  await expect(page.locator('.hero h1')).toHaveText('Marina Azevedo')
+  await expect(page.locator('.hero p')).toContainText('Artista visual')
+})
+
+test('controles globais de grade/lista não aparecem para artistas novos', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.alternar-modo-flutuante')).toHaveCount(0)
+  await page.locator('.editorial-menu-trigger').click()
+  await expect(page.locator('.editorial-menu-control').filter({ hasText: /Ver em grade|Ver em lista/ })).toHaveCount(0)
 })
 
 test('formulário do preview simula envio sem chamar nenhum serviço externo', async ({ page }) => {
@@ -117,10 +140,35 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
 })
 
+test('modelos especializados mantêm linguagens próprias no renderizador legado', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await page.setViewportSize({ width: 1280, height: 900 })
+
+  const cases = [
+    ['masonry', 'block'],
+    ['swiss', 'grid'],
+    ['museum', 'grid'],
+    ['brutalist', 'grid'],
+    ['tattoo-book', 'grid'],
+  ]
+  for (const [mode, expectedDisplay] of cases) {
+    await sendSettings(page, { presentation_mode: mode }, 'page')
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', mode)
+    const layout = await page.locator('.secao:not(.sobre-secao) .obras-lista').first().evaluate(element => ({
+      display: getComputedStyle(element).display,
+      columns: getComputedStyle(element).columnCount,
+      gridColumns: getComputedStyle(element).gridTemplateColumns,
+    }))
+    expect(layout.display, mode).toBe(expectedDisplay)
+    if (mode === 'masonry') expect(Number(layout.columns), mode).toBeGreaterThanOrEqual(2)
+    if (['swiss','museum','brutalist','tattoo-book'].includes(mode)) expect(layout.gridColumns, mode).not.toBe('none')
+  }
+})
+
 test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, {
-    default_gallery_view: 'grade',
+    presentation_mode: 'grade',
     custom_sections: [{
       id: 'custom-processo',
       type: 'process',
@@ -145,12 +193,12 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
 
-  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
+  await sendSettings(page, { presentation_mode: 'grade', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
   await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
-  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
+  await sendSettings(page, { presentation_mode: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
@@ -160,13 +208,13 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
 test('texto, legendas, cartões e destaques recebem cores com contraste AA', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, {
-    default_gallery_view: 'grade',
+    presentation_mode: 'grade',
     dark_color_background: '#777777',
     dark_color_surface: '#888888',
     dark_color_text: '#808080',
     dark_color_muted: '#858585',
     dark_color_accent: '#777777',
-  }, 'page')
+  }, 'page', 'grade')
   await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toBeVisible()
 
   const ratios = await page.locator('.site-shell').evaluate(shell => {
@@ -196,7 +244,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
   await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toHaveCSS('color', 'rgb(255, 255, 255)')
 
   await sendSettings(page, {
-    default_gallery_view: 'lista',
+    presentation_mode: 'lista',
     dark_color_background: '#777777',
     dark_color_surface: '#888888',
     dark_color_text: '#888888',
