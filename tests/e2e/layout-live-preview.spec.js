@@ -168,7 +168,7 @@ test('modelos especializados mantêm linguagens próprias no renderizador legado
 test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, {
-    default_gallery_view: 'grade',
+    presentation_mode: 'grade',
     custom_sections: [{
       id: 'custom-processo',
       type: 'process',
@@ -193,12 +193,12 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
   await openLiveLayoutPreview(page)
   const initialNavigation = await page.evaluate(() => performance.getEntriesByType('navigation')[0].type)
 
-  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '4' }, 'gallery', 'grade')
+  await sendSettings(page, { presentation_mode: 'grade', gallery_columns: '4' }, 'gallery', 'grade')
   await expect(page.locator('.galeria-grade-global')).toBeVisible()
   await expect(page.locator('.galeria-grade-global .obra.modo-grade')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '4')
 
-  await sendSettings(page, { default_gallery_view: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
+  await sendSettings(page, { presentation_mode: 'lista', gallery_columns: '2' }, 'gallery', 'lista')
   await expect(page.locator('.galeria-grade-global')).toHaveCount(0)
   await expect(page.locator('.secao:not(.sobre-secao) .obra')).toHaveCount(8)
   await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-gallery-columns', '2')
@@ -208,13 +208,13 @@ test('preview muda automaticamente entre grade e lista sem recarregar o iframe',
 test('texto, legendas, cartões e destaques recebem cores com contraste AA', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, {
-    default_gallery_view: 'grade',
+    presentation_mode: 'grade',
     dark_color_background: '#777777',
     dark_color_surface: '#888888',
     dark_color_text: '#808080',
     dark_color_muted: '#858585',
     dark_color_accent: '#777777',
-  }, 'page')
+  }, 'page', 'grade')
   await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toBeVisible()
 
   const ratios = await page.locator('.site-shell').evaluate(shell => {
@@ -244,7 +244,7 @@ test('texto, legendas, cartões e destaques recebem cores com contraste AA', asy
   await expect(page.locator('.galeria-grade-global .obra-texto h3').first()).toHaveCSS('color', 'rgb(255, 255, 255)')
 
   await sendSettings(page, {
-    default_gallery_view: 'lista',
+    presentation_mode: 'lista',
     dark_color_background: '#777777',
     dark_color_surface: '#888888',
     dark_color_text: '#888888',
