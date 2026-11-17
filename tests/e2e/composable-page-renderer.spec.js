@@ -105,6 +105,18 @@ test('galeria usa a apresentação escolhida e só oferece alternância quando d
   await expect(site).toHaveAttribute('data-gallery-mode','masonry')
 })
 
+test('títulos longos cabem nos modelos suíço, flashbook, spotlight e brutalista', async ({ page }) => {
+  const cases=['swiss','tattoo-book','spotlight','brutalist']
+  for (const mode of cases) {
+    await openComposablePortfolio(page, mode, 'dock')
+    const heading=page.locator('.composer-hero h1')
+    await heading.evaluate(node=>{node.textContent='ESTÚDIO DE DESIGN E EXPERIMENTAÇÃO VISUAL'})
+    const metrics=await heading.evaluate(node=>({scrollWidth:node.scrollWidth,clientWidth:node.clientWidth,scrollHeight:node.scrollHeight,rectHeight:node.getBoundingClientRect().height}))
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth+1)
+    expect(metrics.rectHeight).toBeGreaterThan(40)
+  }
+})
+
 test('mosaico irregular usa proporções e alturas realmente diferentes', async ({ page }) => {
   await openComposablePortfolio(page, 'masonry', 'dock')
   const cards=page.locator('.composer-gallery .obras-lista>.obra')
