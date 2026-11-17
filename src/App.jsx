@@ -20,7 +20,7 @@ const DEFAULT_LAYOUT_SETTINGS = {
   hero_alignment: 'center',
   hero_size: 'large',
   section_spacing: 'comfortable',
-  gallery_columns: '3',
+  gallery_columns: '2',
   default_gallery_view: 'lista',
   presentation_mode: 'editorial',
   navigation_mode: 'curtain',
