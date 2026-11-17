@@ -432,7 +432,7 @@ export function CmsLayoutManager(){
   }
   const previewingPreset=LAYOUT_PRESETS.find(preset=>preset.id===previewingPresetId)||null
   const previewingPresetSettings=previewingPreset?buildPresetSettings(settings,previewingPreset):settings
-  const inlinePreviewPayload=previewingPreset?{settings:previewingPresetSettings,focus:'page',previewMode:previewingPreset.settings.presentation_mode,animatePreview:true}:{settings,focus:previewFocus,previewMode,animatePreview:false}
+  const inlinePreviewPayload=previewingPreset?{settings:previewingPresetSettings,focus:'page',previewMode:previewingPreset.settings.presentation_mode,previewPresetId:previewingPreset.id,animatePreview:true}:{settings,focus:previewFocus,previewMode,animatePreview:false}
   const inlinePreviewTheme=previewingPreset?.settings.default_theme||settings.default_theme||'escuro'
   const inlinePreviewThemeBackground=settings[`${inlinePreviewTheme==='claro'?'light':'dark'}_color_background`]||DEFAULTS.dark_color_background
   useEffect(()=>{setPreviewCanvasBackground(inlinePreviewThemeBackground)},[inlinePreviewThemeBackground,inlinePreviewTheme,previewingPresetId])
