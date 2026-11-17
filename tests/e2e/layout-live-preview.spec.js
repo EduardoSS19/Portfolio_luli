@@ -117,6 +117,31 @@ test('modelos alteram a apresentação e a navegação sem recarregar a prévia'
   await expect(menuBackdrop).toHaveAttribute('aria-hidden', 'true')
 })
 
+test('modelos especializados mantêm linguagens próprias no renderizador legado', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await page.setViewportSize({ width: 1280, height: 900 })
+
+  const cases = [
+    ['masonry', 'block'],
+    ['swiss', 'grid'],
+    ['museum', 'grid'],
+    ['brutalist', 'grid'],
+    ['tattoo-book', 'grid'],
+  ]
+  for (const [mode, expectedDisplay] of cases) {
+    await sendSettings(page, { presentation_mode: mode }, 'page')
+    await expect(page.locator('.site-shell')).toHaveAttribute('data-layout-presentation', mode)
+    const layout = await page.locator('.secao:not(.sobre-secao) .obras-lista').first().evaluate(element => ({
+      display: getComputedStyle(element).display,
+      columns: getComputedStyle(element).columnCount,
+      gridColumns: getComputedStyle(element).gridTemplateColumns,
+    }))
+    expect(layout.display, mode).toBe(expectedDisplay)
+    if (mode === 'masonry') expect(Number(layout.columns), mode).toBeGreaterThanOrEqual(2)
+    if (['swiss','museum','brutalist','tattoo-book'].includes(mode)) expect(layout.gridColumns, mode).not.toBe('none')
+  }
+})
+
 test('menu navega até seções personalizadas tanto na grade quanto na lista', async ({ page }) => {
   await openLiveLayoutPreview(page)
   await sendSettings(page, {
