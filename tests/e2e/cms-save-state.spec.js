@@ -339,7 +339,7 @@ test('modelos de uma experiência mantêm uma segunda opção válida caso o art
   }))
   await page.goto('/painel', { waitUntil: 'domcontentloaded' })
   await page.locator('.cms-nav').getByRole('button', { name: /Design do site/ }).click()
-  const preset=page.locator('.cms-layout-preset-card').filter({hasText:'Monografia horizontal'})
+  const preset=page.locator('.cms-layout-preset-card').filter({hasText:'Caderno autoral'})
   await preset.getByRole('button',{name:/Visualizar modelo/}).click()
   await page.locator('.cms-layout-inline-preview').getByRole('button',{name:'Confirmar este layout'}).click()
   await page.getByRole('navigation',{name:'Seções de aparência'}).getByRole('button',{name:/Experiência/}).click()
@@ -347,7 +347,7 @@ test('modelos de uma experiência mantêm uma segunda opção válida caso o art
   await countField.getByLabel('Duas experiências').check()
   const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
   const selected=await secondField.locator('input:checked').inputValue()
-  expect(selected).not.toBe('carousel')
+  expect(selected).not.toBe('editorial')
   await expect(secondField.getByLabel('Carrossel horizontal')).toHaveCount(0)
 })
 
