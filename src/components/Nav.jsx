@@ -11,7 +11,7 @@ function tipoDeAnimacao(categoria) {
   return 'inicio'
 }
 
-export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, tema, aoTrocarTema, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
+export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, tema, aoTrocarTema, showLegacyGalleryToggle = false, modoGaleria = 'lista', aoTrocarModo, navigationMode = 'curtain', nomeArtista = '', fraseArtista = '' }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const [previewNavigationMode, setPreviewNavigationMode] = useState(null)
   const effectiveNavigationMode = previewNavigationMode || navigationMode
@@ -95,6 +95,11 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, tema, 
     if (evento.target === evento.currentTarget) setMenuAberto(false)
   }
 
+  function alternarModoGaleria() {
+    aoTrocarModo?.(modoGaleria === 'lista' ? 'grade' : 'lista')
+    setMenuAberto(false)
+  }
+
   const navigationItems = categorias.map((cat,indice)=><button type="button" key={cat.titulo} className={'nav-persistent-link'+(cat.titulo===categoriaAtiva?' ativo':'')} aria-current={cat.titulo===categoriaAtiva?'location':undefined} title={cat.titulo} aria-label={cat.titulo} onClick={()=>selecionar(cat.titulo)}><span>{String(indice+1).padStart(2,'0')}</span><strong>{cat.titulo}</strong></button>)
   return (
     <nav className={`site-nav editorial-nav navigation-${effectiveNavigationMode} ${menuAberto ? 'menu-aberto' : ''}`} aria-label="Navegação principal">
@@ -151,6 +156,10 @@ export function Nav({ categorias, categoriaAtiva, animando, aoSelecionar, tema, 
               <span aria-hidden="true">{tema === 'escuro' ? '☼' : '☾'}</span>
               <span>{tema === 'escuro' ? 'Tema claro' : 'Tema escuro'}</span>
             </button>
+            {showLegacyGalleryToggle && <button type="button" className="editorial-menu-control" onClick={alternarModoGaleria} aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}>
+              <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
+              <span>{modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}</span>
+            </button>}
           </div>
           <div className="editorial-menu-footer">
             <span>{fraseArtista || 'PORTFÓLIO AUTORAL'}</span>
