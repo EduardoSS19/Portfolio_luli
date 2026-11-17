@@ -1486,3 +1486,86 @@
   .site-shell[data-layout-presentation="carousel"] .obras-lista,
   .site-shell[data-layout-presentation="immersive"] .obras-lista { scroll-behavior:auto; }
 }
+
+
+/* Distinct art directions for the legacy renderer as well as the page composer.
+   Presets must not collapse into the same default list when a portfolio has no
+   composed page schema yet. */
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obras-lista{
+  display:block;
+  columns:3 260px;
+  column-gap:clamp(.8rem,1.8vw,1.6rem);
+}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra{
+  display:inline-block;
+  width:100%;
+  margin:0 0 clamp(.8rem,1.8vw,1.6rem);
+  break-inside:avoid;
+  vertical-align:top;
+}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra-galeria{height:auto;min-height:0}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra:nth-child(4n+1) .obra-galeria{aspect-ratio:4/5}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra:nth-child(4n+2) .obra-galeria{aspect-ratio:1/1}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra:nth-child(4n+3) .obra-galeria{aspect-ratio:3/4}
+.site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra:nth-child(4n) .obra-galeria{aspect-ratio:5/4}
+
+.site-shell[data-layout-presentation="swiss"] .hero{min-height:72svh;align-items:flex-start;justify-content:flex-end;text-align:left;border-bottom:2px solid currentColor}
+.site-shell[data-layout-presentation="swiss"] .hero h1{max-width:10ch;font:700 clamp(4rem,12vw,10rem)/.82 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.09em}
+.site-shell[data-layout-presentation="swiss"] .secao-cabecalho{display:grid;grid-template-columns:1fr auto;align-items:end;gap:.7rem 1.5rem;border-bottom:2px solid currentColor;padding-bottom:1rem}
+.site-shell[data-layout-presentation="swiss"] .secao-indice{grid-column:1/-1;font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.16em}
+.site-shell[data-layout-presentation="swiss"] .secao-cabecalho h2{max-width:12ch;font-size:clamp(2.4rem,6vw,6rem);letter-spacing:-.07em}
+.site-shell[data-layout-presentation="swiss"] .obras-lista{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2px;background:var(--linha);border:1px solid var(--linha)}
+.site-shell[data-layout-presentation="swiss"] .obra{grid-column:span 4;min-width:0;padding:.7rem;background:var(--layout-page-background,var(--azul-escuro))}
+.site-shell[data-layout-presentation="swiss"] .obra:nth-child(3n+1){grid-column:span 8}
+.site-shell[data-layout-presentation="swiss"] .obra-galeria{height:clamp(230px,34vw,520px);overflow:hidden}
+.site-shell[data-layout-presentation="swiss"] .obra-texto h3{font:600 .92rem var(--portfolio-body-font,sans-serif);letter-spacing:-.02em}
+
+.site-shell[data-layout-presentation="museum"] .hero{min-height:68svh;align-items:flex-start;justify-content:flex-end;text-align:left;border-bottom:1px solid var(--linha)}
+.site-shell[data-layout-presentation="museum"] .hero h1{max-width:9ch;font:400 clamp(4rem,12vw,11rem)/.82 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.075em}
+.site-shell[data-layout-presentation="museum"] .secao-cabecalho{display:grid;grid-template-columns:1fr auto;align-items:end;gap:.8rem 2rem;padding-bottom:1.2rem;border-bottom:1px solid currentColor}
+.site-shell[data-layout-presentation="museum"] .secao-indice{grid-column:1/-1;font:.68rem var(--portfolio-navigation-font,monospace);letter-spacing:.18em}
+.site-shell[data-layout-presentation="museum"] .secao-cabecalho h2{max-width:11ch;font:400 clamp(2.8rem,7vw,7rem)/.9 var(--portfolio-heading-font,Georgia,serif)}
+.site-shell[data-layout-presentation="museum"] .obras-lista{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:start;gap:clamp(1rem,2vw,2rem)}
+.site-shell[data-layout-presentation="museum"] .obra{grid-column:span 5;min-width:0}
+.site-shell[data-layout-presentation="museum"] .obra:nth-child(4n+1){grid-column:span 7}
+.site-shell[data-layout-presentation="museum"] .obra-galeria{height:min(66vh,740px);min-height:300px;overflow:hidden}
+.site-shell[data-layout-presentation="museum"] .obra:nth-child(even) .obra-galeria{height:min(48vh,560px)}
+.site-shell[data-layout-presentation="museum"] .obra-texto{padding:.9rem 0}
+
+.site-shell[data-layout-presentation="brutalist"] .hero{min-height:96svh;align-items:flex-start;justify-content:center;text-align:left;border-bottom:3px solid currentColor}
+.site-shell[data-layout-presentation="brutalist"] .hero h1{max-width:9ch;font:900 clamp(4rem,17vw,15rem)/.76 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.095em;text-transform:uppercase}
+.site-shell[data-layout-presentation="brutalist"] .hero-kicker{font:700 .72rem var(--portfolio-navigation-font,monospace);letter-spacing:.2em}
+.site-shell[data-layout-presentation="brutalist"] .secao-cabecalho h2{font:900 clamp(2.8rem,9vw,8rem)/.82 var(--portfolio-heading-font,Arial,sans-serif);letter-spacing:-.085em;text-transform:uppercase}
+.site-shell[data-layout-presentation="brutalist"] .obras-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.site-shell[data-layout-presentation="brutalist"] .obra{min-width:0;border:2px solid currentColor;padding:.5rem;box-shadow:7px 7px 0 currentColor}
+.site-shell[data-layout-presentation="brutalist"] .obra:nth-child(odd){transform:translateY(2rem)}
+.site-shell[data-layout-presentation="brutalist"] .obra-galeria{height:clamp(260px,42vw,620px);overflow:hidden}
+.site-shell[data-layout-presentation="brutalist"] .obra-texto{padding:.8rem .4rem}
+
+.site-shell[data-layout-presentation="tattoo-book"] .hero{min-height:64svh;align-items:flex-start;justify-content:flex-end;text-align:left;border-bottom:1px solid rgba(216,196,164,.3)}
+.site-shell[data-layout-presentation="tattoo-book"] .hero h1{max-width:10ch;font:600 clamp(3.5rem,10vw,9rem)/.84 var(--portfolio-heading-font,Georgia,serif);letter-spacing:-.065em}
+.site-shell[data-layout-presentation="tattoo-book"] .secao-cabecalho{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;border-bottom:1px solid rgba(216,196,164,.35);padding-bottom:.8rem}
+.site-shell[data-layout-presentation="tattoo-book"] .secao-indice{font: .68rem var(--portfolio-navigation-font,monospace);letter-spacing:.12em}
+.site-shell[data-layout-presentation="tattoo-book"] .obras-lista{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.7rem,1.8vw,1.4rem)}
+.site-shell[data-layout-presentation="tattoo-book"] .obra{min-width:0;padding:.6rem;border:1px solid rgba(216,196,164,.35);background:rgba(216,196,164,.035)}
+.site-shell[data-layout-presentation="tattoo-book"] .obra-galeria{height:auto;aspect-ratio:1;min-height:0;overflow:hidden}
+.site-shell[data-layout-presentation="tattoo-book"] .obra-texto{padding:.8rem .2rem .25rem}
+
+@media(max-width:760px){
+  .site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obras-lista{columns:2 145px;column-gap:.55rem}
+  .site-shell[data-layout-presentation="masonry"] .secao:not(.sobre-secao) .obra{margin-bottom:.55rem}
+  .site-shell[data-layout-presentation="swiss"] .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .site-shell[data-layout-presentation="swiss"] .obra,.site-shell[data-layout-presentation="swiss"] .obra:nth-child(3n+1){grid-column:span 1}
+  .site-shell[data-layout-presentation="swiss"] .obra-galeria{height:clamp(190px,58vw,360px)}
+  .site-shell[data-layout-presentation="museum"] .obras-lista{grid-template-columns:1fr}
+  .site-shell[data-layout-presentation="museum"] .obra,.site-shell[data-layout-presentation="museum"] .obra:nth-child(4n+1){grid-column:1}
+  .site-shell[data-layout-presentation="museum"] .obra-galeria,.site-shell[data-layout-presentation="museum"] .obra:nth-child(even) .obra-galeria{height:62vh;min-height:280px}
+  .site-shell[data-layout-presentation="brutalist"] .obras-lista{grid-template-columns:1fr}
+  .site-shell[data-layout-presentation="brutalist"] .obra:nth-child(odd){transform:none}
+  .site-shell[data-layout-presentation="tattoo-book"] .obras-lista{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+  .site-shell[data-layout-presentation="tattoo-book"] .obra{padding:.4rem}
+  .site-shell[data-layout-presentation="tattoo-book"] .obra-texto{padding:.6rem .1rem}
+}
+@media(max-width:380px){
+  .site-shell[data-layout-presentation="tattoo-book"] .obras-lista{grid-template-columns:1fr}
+}
