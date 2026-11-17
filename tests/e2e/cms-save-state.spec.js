@@ -373,6 +373,7 @@ test('modelos prontos alteram somente a direção visual e não criam conteúdo 
   await page.route('**/api/portfolio/', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({categorias:[],referencias:[],frames:[],redes:[],sobre:null,marca:'',layout:{}})}))
   await page.goto('/painel',{waitUntil:'domcontentloaded'})
   await page.locator('.cms-nav').getByRole('button',{name:/Design do site/}).click()
+  await expect(page.locator('.cms-layout-preset-card')).toHaveCount(10)
   const tattooPreset = page.locator('.cms-layout-preset-card').filter({ hasText: 'Flashbook' })
   await tattooPreset.getByRole('button', { name: /Visualizar modelo/ }).click()
   const inlinePreview = page.locator('.cms-layout-inline-preview')
