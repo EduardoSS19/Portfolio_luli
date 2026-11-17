@@ -838,6 +838,7 @@ export default function App() {
 
   const modoDiagnosticoGrade = new URLSearchParams(window.location.search).get('grade-debug') === '1'
   const layout = conteudo.layout || DEFAULT_LAYOUT_SETTINGS
+  const isLegacyLuliPortfolio = sobre.nome?.trim().toLocaleLowerCase('pt-BR') === 'luli becker' && !layout.page_schema?.version
   const isLayoutPreview = new URLSearchParams(window.location.search).has('layout_preview')
   const isCompactLayoutPreview = new URLSearchParams(window.location.search).get('layout_preview_compact') === '1'
   const palettePrefix = tema === 'claro' ? 'light' : 'dark'
@@ -971,6 +972,9 @@ export default function App() {
         categoriaAtiva={secaoAtiva}
         animando={animando}
         aoSelecionar={selecionarCategoria}
+        showLegacyGalleryToggle={isLegacyLuliPortfolio}
+        modoGaleria={modoGaleria}
+        aoTrocarModo={trocarModoGaleria}
         tema={tema}
         aoTrocarTema={() => setTema(atual => { const next=atual === 'escuro' ? 'claro' : 'escuro'; const prefix=next==='claro'?'light':'dark'; const background=layout[`${prefix}_color_background`]|| (next==='claro'?'#f5f2eb':'#061522'); window.parent.postMessage({type:'cms-layout-preview:theme',theme:next,background},window.location.origin); return next })}
         navigationMode={layout.navigation_mode || 'curtain'}
@@ -999,6 +1003,16 @@ export default function App() {
       {layout.show_contact !== false && <Contato endpoint={sobre.formulario} email={sobre.email} demoMode={isLayoutPreview} />}
       <Footer nome={sobre.nome} instagram={sobre.instagram} email={sobre.email} redes={conteudo.redes} />
       <div className="controles-flutuantes" role="group" aria-label="Controles de visualização">
+        {isLegacyLuliPortfolio && <button
+          type="button"
+          className="alternar-modo-flutuante"
+          aria-label={modoGaleria === 'lista' ? 'Alternar para visualização em grade' : 'Alternar para visualização em lista'}
+          title={modoGaleria === 'lista' ? 'Ver em grade' : 'Ver em lista'}
+          onClick={() => trocarModoGaleria(modoGaleria === 'lista' ? 'grade' : 'lista')}
+        >
+          <span aria-hidden="true">{modoGaleria === 'lista' ? '▦' : '☷'}</span>
+          <span>{modoGaleria === 'lista' ? 'Grade' : 'Lista'}</span>
+        </button>}
         <button
           type="button"
           className={`voltar-topo ${mostrarVoltarTopo ? 'visivel' : ''}`}
