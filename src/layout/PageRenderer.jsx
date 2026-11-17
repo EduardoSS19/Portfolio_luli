@@ -14,7 +14,8 @@ function Section({ section, data, preview, galleryMode, onGalleryModeChange }) {
   const works = categories.flatMap(category => (category.obras || []).map(work => ({ ...work, categoria: category })))
   const category = categories.find(item => item.chave === settings.category_key)
   const custom = (data.layout?.custom_sections || []).find(item => item.id === settings.custom_section_id) || (section.type === 'tattoo-flash' ? (data.layout?.custom_sections || []).find(item => item.type === 'tattoo-flash') : null)
-  const items = Array.isArray(section.items) ? section.items : (custom?.items || [])
+  const savedItems = Array.isArray(section.items) ? section.items : []
+  const items = savedItems.length ? savedItems : custom?.items?.length ? custom.items : preview ? (data.previewSectionExamples?.[section.type] || []) : []
   const contentWidth=settings.width||data.layout?.content_width||'standard'
   const sectionAlignment=settings.align||(section.type==='hero'?data.layout?.hero_alignment:'left')||'left'
   const style = { '--section-width': contentWidth === 'wide' ? 'min(100% - 3rem, 1600px)' : contentWidth === 'compact' || contentWidth === 'narrow' ? 'min(100% - 3rem, 760px)' : 'min(100% - 3rem, 1180px)', '--section-align': sectionAlignment === 'center' ? 'center' : sectionAlignment === 'right' ? 'right' : 'left' }
