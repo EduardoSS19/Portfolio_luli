@@ -26,7 +26,7 @@ async function openLiveLayoutPreview(page) {
 }
 
 async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false, previewPresetId) {
-  await page.evaluate(({ settings, focus, previewMode, animatePreview }) => {
+  await page.evaluate(({ settings, focus, previewMode, animatePreview, previewPresetId }) => {
     window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview, previewPresetId }, window.location.origin)
   }, { settings, focus, previewMode, animatePreview, previewPresetId })
 }
