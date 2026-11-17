@@ -378,6 +378,11 @@ test('modelos prontos alteram somente a direção visual e não criam conteúdo 
   await tattooPreset.getByRole('button', { name: /Visualizar modelo/ }).click()
   const inlinePreview = page.locator('.cms-layout-inline-preview')
   await expect(inlinePreview).toContainText('Caderno de flashes')
+  // The full-width iframe at the bottom must receive the same selected preset,
+  // not merely update the heading outside the iframe.
+  const fullPreview = page.frameLocator('iframe[title^="Prévia completa do portfólio"]')
+  await expect(fullPreview.locator('.site-shell')).toHaveAttribute('data-layout-presentation', 'tattoo-book')
+  await expect(fullPreview.locator('.hero h1')).toContainText('Maya Reis')
   await expect(inlinePreview.getByRole('button', { name: 'Confirmar este layout' })).toBeVisible()
   await expect(page.locator('.cms-save-state')).toContainText('Tudo salvo')
   await expect(page.locator('.cms-layout-section-library')).toHaveCount(0)
