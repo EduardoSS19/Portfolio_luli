@@ -348,7 +348,8 @@ test('modelos de uma experiência mantêm uma segunda opção válida caso o art
   const secondField=page.locator('.cms-layout-field').filter({hasText:'Segunda forma de explorar'})
   const selected=await secondField.locator('input:checked').inputValue()
   expect(selected).not.toBe('editorial')
-  await expect(secondField.getByLabel('Carrossel horizontal')).toHaveCount(0)
+  await expect(secondField.getByLabel('Carrossel horizontal')).toHaveCount(1)
+  await expect(secondField.getByLabel('Filme contínuo')).toHaveCount(1)
 })
 
 test('modelos prontos alteram somente a direção visual e não criam conteúdo de exemplo', async ({ page }) => {
