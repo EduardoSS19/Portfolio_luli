@@ -153,15 +153,15 @@ const LAYOUT_PREVIEW_DEMO = {
 }
 
 
-function getLayoutPreviewDemo(layout = {}) {
+function getLayoutPreviewDemo(layout = {}, previewPresetId = null) {
   const sections = layout.custom_sections || []
   const sectionTypes = sections.map(section => section.type)
-  const preset = ['editorial-current','visual-artist','illustrator','photographer','designer','tattoo-artist','tattoo-studio']
+  const preset = previewPresetId || ['editorial-current','visual-artist','illustrator','photographer','photo-filmstrip','designer','tattoo-flashbook','tattoo-studio','museum-gallery','brutalist-type']
     .find(id => sections.some(section => String(section.id).includes('preset-' + id + '-')))
-  const isTattoo = preset === 'tattoo-artist' || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
+  const isTattoo = ['tattoo-flashbook','tattoo-studio'].includes(preset) || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
   const isStudio = preset === 'tattoo-studio' || sectionTypes.includes('studio-team')
-  const isPhoto = preset === 'photographer' || (!preset && layout.presentation_mode === 'immersive')
-  const isDesign = preset === 'designer' || (!preset && layout.presentation_mode === 'carousel' && layout.default_theme === 'claro')
+  const isPhoto = ['photographer','photo-filmstrip'].includes(preset) || (!preset && ['immersive','filmstrip'].includes(layout.presentation_mode))
+  const isDesign = ['designer','brutalist-type'].includes(preset) || (!preset && ['carousel','swiss','brutalist'].includes(layout.presentation_mode) && layout.default_theme === 'claro')
   const isIllustration = preset === 'illustrator' || (!preset && layout.presentation_mode === 'masonry' && layout.default_theme === 'claro')
 
   const profiles = {
@@ -289,7 +289,7 @@ function getLayoutPreviewDemo(layout = {}) {
     ],
   }
 
-  const variant = isStudio ? 'studio' : isTattoo ? 'tattoo' : isPhoto ? 'photo' : isDesign ? 'design' : isIllustration ? 'illustration' : preset === 'visual-artist' ? 'visual' : 'editorial'
+  const variant = isStudio ? 'studio' : isTattoo ? 'tattoo' : isPhoto ? 'photo' : isDesign ? 'design' : isIllustration ? 'illustration' : ['visual-artist','museum-gallery'].includes(preset) ? 'visual' : 'editorial'
   const profile = profiles[variant]
   const works = artwork[variant]
   const categoryNames = {
@@ -569,7 +569,7 @@ export default function App() {
         : safeSettings.presentation_mode
       setConteudo(current => {
         const nextLayout = { ...current.layout, ...safeSettings, ...(previewRoute && previewGalleryMode ? { preview_gallery_mode: previewGalleryMode } : {}) }
-        const demo = previewRoute ? getLayoutPreviewDemo(nextLayout) : null
+        const demo = previewRoute ? getLayoutPreviewDemo(nextLayout, event.data.previewPresetId) : null
         return { ...current, ...(demo ? { categorias: demo.categorias, referencias: demo.referencias, frames: demo.frames, redes: demo.redes, sobre: demo.sobre, previewSectionExamples: demo.sectionExamples, marca: demo.marca } : {}), layout: nextLayout }
       })
       const previewMode = event.data.previewMode
