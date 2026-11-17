@@ -25,10 +25,10 @@ async function openLiveLayoutPreview(page) {
   await expect.poll(() => page.evaluate(() => Boolean(window.__cmsPreviewReady))).toBe(true)
 }
 
-async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false) {
+async function sendSettings(page, settings, focus = 'page', previewMode, animatePreview = false, previewPresetId) {
   await page.evaluate(({ settings, focus, previewMode, animatePreview }) => {
-    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview }, window.location.origin)
-  }, { settings, focus, previewMode, animatePreview })
+    window.postMessage({ type: 'cms-layout-preview:update', settings, focus, previewMode, animatePreview, previewPresetId }, window.location.origin)
+  }, { settings, focus, previewMode, animatePreview, previewPresetId })
 }
 
 test('preview inicial é um portfólio completo com perfil, imagens, obras, trajetória e redes', async ({ page }) => {
@@ -42,6 +42,22 @@ test('preview inicial é um portfólio completo com perfil, imagens, obras, traj
   await expect(page.locator('#Referências .referencia-item')).toHaveCount(3)
   await expect(page.locator('.rodape-links a')).toHaveCount(4)
   await expect(page.locator('#Contato form')).toBeVisible()
+})
+
+test('a prévia demonstra o perfil correspondente ao modelo escolhido', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+
+  await sendSettings(page, { presentation_mode: 'tattoo-book', navigation_mode: 'dropdown' }, 'page', 'tattoo-book', true, 'tattoo-flashbook')
+  await expect(page.locator('.hero h1')).toHaveText('Maya Reis')
+  await expect(page.locator('.hero p')).toContainText('Tatuagem autoral')
+
+  await sendSettings(page, { presentation_mode: 'filmstrip', navigation_mode: 'dock' }, 'page', 'filmstrip', true, 'photo-filmstrip')
+  await expect(page.locator('.hero h1')).toHaveText('Clara Nogueira')
+  await expect(page.locator('.hero p')).toContainText('Fotografia')
+
+  await sendSettings(page, { presentation_mode: 'museum', navigation_mode: 'rail' }, 'page', 'museum', true, 'museum-gallery')
+  await expect(page.locator('.hero h1')).toHaveText('Marina Azevedo')
+  await expect(page.locator('.hero p')).toContainText('Artista visual')
 })
 
 test('formulário do preview simula envio sem chamar nenhum serviço externo', async ({ page }) => {
