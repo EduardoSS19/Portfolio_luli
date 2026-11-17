@@ -417,3 +417,65 @@
   .mode-tattoo-book .composer-custom-grid{grid-template-columns:1fr}
   .mode-tattoo-book .composer-hero h1{font-size:clamp(2.8rem,14vw,4.5rem)}
 }
+
+
+/* Títulos longos: preservar a composição sem deixar o texto escapar do hero. */
+.composer-hero h1{
+  box-sizing:border-box;
+  width:100%;
+  max-width:min(100%,13ch);
+  min-width:0;
+  overflow-wrap:break-word;
+  word-break:normal;
+  hyphens:auto;
+  text-wrap:balance;
+}
+.mode-swiss .composer-hero h1{
+  max-width:min(100%,12ch);
+  font-size:clamp(2.8rem,8.2vw,7.6rem);
+  line-height:.9;
+  letter-spacing:-.075em;
+}
+.mode-tattoo-book .composer-hero h1{
+  max-width:min(100%,10ch);
+  font-size:clamp(2.8rem,8.5vw,7.2rem);
+  line-height:.94;
+  letter-spacing:-.045em;
+}
+.mode-spotlight .composer-hero h1{
+  max-width:min(100%,11ch);
+  font-size:clamp(3rem,9vw,8rem);
+  line-height:.9;
+  letter-spacing:-.065em;
+}
+.mode-brutalist .composer-hero h1{
+  max-width:min(100%,9ch);
+  width:100%;
+  font-size:clamp(2.8rem,10vw,9rem);
+  line-height:.84;
+  letter-spacing:-.075em;
+  overflow-wrap:anywhere;
+}
+@media(max-width:760px){
+  .composer-hero h1{max-width:min(100%,11ch);font-size:clamp(2.7rem,13vw,5.8rem)}
+  .mode-swiss .composer-hero h1,
+  .mode-tattoo-book .composer-hero h1,
+  .mode-spotlight .composer-hero h1{font-size:clamp(2.65rem,12vw,5.5rem)}
+  .mode-brutalist .composer-hero h1{font-size:clamp(2.7rem,13vw,6rem)}
+}
+
+/* Garante que os spans assimétricos do mosaico vençam as regras-base da galeria. */
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+1){grid-column:span 8!important;grid-row:span 76!important}
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+2){grid-column:span 4!important;grid-row:span 48!important}
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+3){grid-column:span 5!important;grid-row:span 54!important}
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+4){grid-column:span 7!important;grid-row:span 68!important}
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+5){grid-column:span 4!important;grid-row:span 46!important}
+.mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n){grid-column:span 8!important;grid-row:span 64!important}
+@media(max-width:760px){
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+1){grid-column:span 4!important;grid-row:span 58!important}
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+2){grid-column:span 2!important;grid-row:span 38!important}
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+3){grid-column:span 3!important;grid-row:span 42!important}
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+4){grid-column:span 3!important;grid-row:span 52!important}
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n+5){grid-column:span 2!important;grid-row:span 36!important}
+  .mode-masonry .composer-gallery .secao .obras-lista>.obra:nth-child(6n){grid-column:span 4!important;grid-row:span 48!important}
+}
