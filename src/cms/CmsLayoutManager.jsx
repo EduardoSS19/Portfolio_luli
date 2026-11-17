@@ -5,7 +5,7 @@ import './CmsLayoutManager.css'
 
 const DEFAULTS = {
   content_width:'standard', hero_alignment:'center', hero_size:'large',
-  section_spacing:'comfortable', gallery_columns:'3', presentation_mode:'editorial', gallery_view_count:'1', gallery_secondary_mode:'carousel', navigation_mode:'curtain', default_theme:'escuro',
+  section_spacing:'comfortable', gallery_columns:'2', presentation_mode:'editorial', gallery_view_count:'1', gallery_secondary_mode:'carousel', navigation_mode:'curtain', default_theme:'escuro',
   heading_font:'fraunces', body_font:'dm-sans', navigation_font:'space-grotesk',
   dark_color_background:'#061522', dark_color_surface:'#0b2943', dark_color_text:'#eff7ff', dark_color_muted:'#a9bdcc', dark_color_accent:'#93c8f2',
   light_color_background:'#f5f2eb', light_color_surface:'#ffffff', light_color_text:'#24231f', light_color_muted:'#77746c', light_color_accent:'#657c62',
