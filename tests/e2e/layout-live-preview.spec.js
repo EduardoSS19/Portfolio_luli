@@ -60,6 +60,13 @@ test('a prévia demonstra o perfil correspondente ao modelo escolhido', async ({
   await expect(page.locator('.hero p')).toContainText('Artista visual')
 })
 
+test('controles globais de grade/lista não aparecem para artistas novos', async ({ page }) => {
+  await openLiveLayoutPreview(page)
+  await expect(page.locator('.alternar-modo-flutuante')).toHaveCount(0)
+  await page.locator('.editorial-menu-trigger').click()
+  await expect(page.locator('.editorial-menu-control').filter({ hasText: /Ver em grade|Ver em lista/ })).toHaveCount(0)
+})
+
 test('formulário do preview simula envio sem chamar nenhum serviço externo', async ({ page }) => {
   let contactRequests = 0
   await page.route('**/api/contact/**', route => {
