@@ -105,6 +105,18 @@ test('galeria usa a apresentação escolhida e só oferece alternância quando d
   await expect(site).toHaveAttribute('data-gallery-mode','masonry')
 })
 
+test('mosaico irregular usa proporções e alturas realmente diferentes', async ({ page }) => {
+  await openComposablePortfolio(page, 'masonry', 'dock')
+  const cards=page.locator('.composer-gallery .obras-lista>.obra')
+  const metrics=await cards.evaluateAll(nodes=>nodes.map(node=>{
+    const style=getComputedStyle(node)
+    return {columns:style.gridColumnEnd,rows:style.gridRowEnd,height:Math.round(node.getBoundingClientRect().height)}
+  }))
+  expect(new Set(metrics.map(item=>item.columns)).size).toBeGreaterThan(1)
+  expect(new Set(metrics.map(item=>item.rows)).size).toBeGreaterThan(1)
+  expect(Math.max(...metrics.map(item=>item.height))-Math.min(...metrics.map(item=>item.height))).toBeGreaterThan(80)
+})
+
 test('os modos de galeria alteram a composição real dos cards', async ({ page }) => {
   const cases = [
     ['carousel', 'flex', 'x'],
