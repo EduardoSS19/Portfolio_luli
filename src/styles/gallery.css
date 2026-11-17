@@ -1569,3 +1569,7 @@
 @media(max-width:380px){
   .site-shell[data-layout-presentation="tattoo-book"] .obras-lista{grid-template-columns:1fr}
 }
+
+.site-shell[data-layout-presentation="masonry"][data-layout-gallery-columns="2"] .secao:not(.sobre-secao) .obras-lista{columns:2 260px}
+.site-shell[data-layout-presentation="masonry"][data-layout-gallery-columns="3"] .secao:not(.sobre-secao) .obras-lista{columns:3 260px}
+.site-shell[data-layout-presentation="masonry"][data-layout-gallery-columns="4"] .secao:not(.sobre-secao) .obras-lista{columns:4 220px}
