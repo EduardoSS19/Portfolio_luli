@@ -971,8 +971,6 @@ export default function App() {
         categoriaAtiva={secaoAtiva}
         animando={animando}
         aoSelecionar={selecionarCategoria}
-        modoGaleria={modoGaleria}
-        aoTrocarModo={trocarModoGaleria}
         tema={tema}
         aoTrocarTema={() => setTema(atual => { const next=atual === 'escuro' ? 'claro' : 'escuro'; const prefix=next==='claro'?'light':'dark'; const background=layout[`${prefix}_color_background`]|| (next==='claro'?'#f5f2eb':'#061522'); window.parent.postMessage({type:'cms-layout-preview:theme',theme:next,background},window.location.origin); return next })}
         navigationMode={layout.navigation_mode || 'curtain'}
