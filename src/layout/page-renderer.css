@@ -196,3 +196,53 @@
  .composer-gallery-view-switcher{gap:.4rem}
  .composer-gallery-view-switcher button{padding:.6rem .8rem;font-size:.72rem}
 }
+
+
+/* Gallery quality pass: protect artwork scale and remove cramped columns. */
+.mode-masonry .composer-gallery .obras-lista{
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,max(280px,calc(100% / var(--composer-gallery-columns,2)))),1fr));
+  column-gap:clamp(1rem,2.4vw,2rem);
+  row-gap:clamp(1.4rem,3vw,2.8rem);
+}
+.mode-masonry .composer-gallery .obras-lista>.obra{min-width:0;width:100%}
+.mode-masonry .composer-gallery .obras-lista>.obra .obra-galeria{width:100%;aspect-ratio:4/5;min-height:300px}
+.mode-swiss .composer-gallery .obras-lista{grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(.5rem,1.2vw,1rem)}
+.mode-swiss .composer-gallery .obras-lista>.obra{grid-column:span 6;padding:clamp(.65rem,1.2vw,1rem)}
+.mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:span 6}
+.mode-swiss .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(300px,42vw,620px);min-height:300px}
+.mode-museum .composer-gallery .obras-lista{gap:clamp(1rem,2.2vw,2rem)}
+.mode-museum .composer-gallery .obras-lista>.obra,
+.mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:span 6}
+.mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(320px,48vw,680px);min-height:320px}
+.mode-tattoo-book .composer-gallery .obras-lista,
+.mode-tattoo-book .composer-custom-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(1rem,2.2vw,1.8rem)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra{padding:clamp(.7rem,1.4vw,1.1rem)}
+.mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-galeria{width:100%;aspect-ratio:1;min-height:0}
+.mode-stack .composer-gallery .obras-lista>.obra{width:100%;min-width:0;min-height:0;margin-bottom:clamp(3rem,8vh,7rem)}
+.mode-stack .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(420px,72vh,820px);min-height:360px}
+.mode-spotlight .composer-gallery .obras-lista>.obra{width:100%;min-width:0;min-height:0}
+.mode-spotlight .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(480px,78vh,920px);min-height:380px}
+.mode-filmstrip .composer-gallery .obras-lista>.obra{flex-basis:min(78vw,860px);min-width:0}
+.mode-filmstrip .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(380px,66vh,760px);min-height:320px}
+@media(max-width:760px){
+  .mode-swiss .composer-gallery .obras-lista{grid-template-columns:1fr}
+  .mode-swiss .composer-gallery .obras-lista>.obra,
+  .mode-swiss .composer-gallery .obras-lista>.obra:nth-child(3n+1){grid-column:1}
+  .mode-museum .composer-gallery .obras-lista{grid-template-columns:1fr}
+  .mode-museum .composer-gallery .obras-lista>.obra,
+  .mode-museum .composer-gallery .obras-lista>.obra:nth-child(4n+1){grid-column:1}
+  .mode-museum .composer-gallery .obras-lista>.obra .obra-galeria{height:clamp(320px,62vh,620px)}
+  .mode-tattoo-book .composer-gallery .obras-lista,
+  .mode-tattoo-book .composer-custom-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-galeria{min-height:0}
+  .mode-stack .composer-gallery .obras-lista>.obra .obra-galeria{height:58vh;min-height:340px}
+  .mode-spotlight .composer-gallery .obras-lista>.obra .obra-galeria{height:66vh;min-height:340px}
+  .mode-filmstrip .composer-gallery .obras-lista>.obra{flex-basis:88vw}
+}
+@media(max-width:480px){
+  .mode-masonry .composer-gallery .obras-lista,
+  .mode-grade .composer-gallery .obras-lista{grid-template-columns:1fr}
+  .mode-tattoo-book .composer-gallery .obras-lista,
+  .mode-tattoo-book .composer-custom-grid{grid-template-columns:1fr}
+  .mode-tattoo-book .composer-gallery .obras-lista>.obra .obra-galeria{aspect-ratio:1;max-height:520px}
+}
