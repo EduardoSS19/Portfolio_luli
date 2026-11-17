@@ -103,7 +103,7 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
     body: JSON.stringify({
       settings: {
         content_width: 'standard', hero_alignment: 'center', hero_size: 'large',
-        section_spacing: 'comfortable', gallery_columns: '3', default_gallery_view: 'lista',
+        section_spacing: 'comfortable', gallery_columns: '3', presentation_mode: 'masonry', default_gallery_view: 'lista',
         default_theme: 'escuro', dark_color_background: '#061522', dark_color_surface: '#0b2943',
         dark_color_text: '#eff7ff', dark_color_muted: '#a9bdcc', dark_color_accent: '#93c8f2',
         light_color_background: '#f5f2eb', light_color_surface: '#ffffff', light_color_text: '#24231f',
@@ -193,8 +193,8 @@ test('prévia contextual usa Floating UI, respeita a largura reduzida e fecha ao
   await fourColumnsOption.hover()
   await expect.poll(() => temporaryFrame.evaluate(frame => frame.contentDocument?.querySelector('.site-shell')?.getAttribute('data-layout-gallery-columns'))).toBe('4')
   const visibleColumns = await temporaryFrame.evaluate(frame => {
-    const grid = frame.contentDocument?.querySelector('.galeria-grade-global .obras-lista.modo-grade')
-    return grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0
+    const grid = frame.contentDocument?.querySelector('.secao:not(.sobre-secao) .obras-lista')
+    return grid ? Number(getComputedStyle(grid).columnCount) : 0
   })
   expect(visibleColumns).toBe(4)
   // O painel é apenas uma prévia contextual: passar o ponteiro para ele não deve
