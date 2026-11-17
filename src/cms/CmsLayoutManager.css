@@ -827,3 +827,20 @@
 .cms-layout-workspace-nav button:focus-visible{outline:2px solid var(--cms-focus,#b6c58d);outline-offset:2px}
 @media(max-width:760px){.cms-layout-workspace-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.cms-layout-workspace-nav button{padding:10px}}
 @media(max-width:420px){.cms-layout-workspace-nav{grid-template-columns:1fr 1fr}.cms-layout-workspace-nav button small{font-size:9px}}
+
+/* Preset thumbnails: each card previews its composition, not only its palette. */
+.cms-layout-preset-art.preset-editorial-current .cms-layout-preset-mock-content{grid-template-columns:1.1fr .9fr}
+.cms-layout-preset-art.preset-editorial-current .cms-layout-preset-mock-image{min-height:72px;border-radius:0;background:linear-gradient(145deg,#7f8b83,#c6bda8 52%,#394d50)}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-content{display:block;position:relative;min-height:82px}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-image{position:absolute;left:4%;top:0;width:62%;height:78px;min-height:0;transform:rotate(-4deg);box-shadow:10px 7px 0 rgba(65,54,44,.16)}
+.cms-layout-preset-art.preset-illustrator .cms-layout-preset-mock-copy{position:absolute;right:0;bottom:0;width:36%;display:flex;flex-direction:column}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-content{display:flex;gap:4px;overflow:hidden}
+.cms-layout-preset-art.preset-photo-filmstrip .cms-layout-preset-mock-image{flex:0 0 72%;min-height:72px;border-radius:0}
+.cms-layout-preset-art.preset-tattoo-flashbook .cms-layout-preset-mock-content{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.cms-layout-preset-art.preset-tattoo-flashbook .cms-layout-preset-mock-image{min-height:58px;border-radius:50% 50% 2px 2px}
+.cms-layout-preset-art.preset-tattoo-studio .cms-layout-preset-mock-content{grid-template-columns:.7fr 1.3fr}
+.cms-layout-preset-art.preset-tattoo-studio .cms-layout-preset-mock-copy{display:flex;flex-direction:column}
+.cms-layout-preset-art.preset-museum-gallery .cms-layout-preset-mock-content{display:block}
+.cms-layout-preset-art.preset-museum-gallery .cms-layout-preset-mock-image{min-height:90px;border-radius:0}
+.cms-layout-preset-art.preset-brutalist-type .cms-layout-preset-mock-content{grid-template-columns:1fr 1fr}
+.cms-layout-preset-art.preset-brutalist-type .cms-layout-preset-mock-image{border:2px solid currentColor;border-radius:0}
