@@ -26,7 +26,7 @@ function Section({ section, data, preview, galleryMode, onGalleryModeChange }) {
     const secondaryMode=data.layout?.gallery_secondary_mode
     const hasAlternate=data.layout?.gallery_view_count==='2'&&secondaryMode&&secondaryMode!==data.layout?.presentation_mode
     const modeLabel=mode=>({
-      editorial:'Editorial',lista:'Lista editorial',grade:'Grade visual',carousel:'Carrossel horizontal',immersive:'Imersivo',masonry:'Mosaico irregular',filmstrip:'Filme contínuo',timeline:'Linha do tempo',stack:'Cartas empilhadas',spotlight:'Obra em destaque',brutalist:'Brutalista',museum:'Museu contemporâneo',cinematic:'Cinematográfico',swiss:'Grid suíço','tattoo-book':'Flashbook',
+      editorial:'Editorial',lista:'Lista editorial',grade:'Grade visual',carousel:'Carrossel horizontal',immersive:'Imersivo',masonry:'Mosaico irregular',filmstrip:'Filme contínuo',timeline:'Linha do tempo',stack:'Cartas empilhadas',spotlight:'Obra em destaque',brutalist:'Brutalista',museum:'Museu contemporâneo',cinematic:'Cinematográfico',swiss:'Grid suíço','tattoo-book':'Catálogo de flashes',
     }[mode]||'Visualização')
     const viewMode=galleryMode||data.layout?.presentation_mode||'editorial'
     const viewProps={modoVisualizacao:viewMode==='grade'?'grade':'lista'}
