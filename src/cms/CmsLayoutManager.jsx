@@ -86,8 +86,14 @@ const LAYOUT_PRESETS = [
     settings:{show_bio:true,show_bio_image:false,show_references:true,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',presentation_mode:'swiss',gallery_view_count:'1',navigation_mode:'index',default_theme:'claro',heading_font:'space-grotesk',body_font:'ibm-plex',navigation_font:'ibm-plex-mono'}
   },
   {
-    id:'tattoo-flashbook',title:'Flashbook',kind:'Tatuagem · flash · desenhos autorais · reservas',
-    description:'Um catálogo de flashes com linguagem de caderno de estúdio: peças organizadas, detalhes legíveis e caminho claro para consultar disponibilidade e reservar.',
+    id:'tattoo-artist',title:'Tatuador(a) · portfólio',kind:'Tatuagem autoral · flash · projetos personalizados',
+    description:'Portfólio de tatuagem com carrossel de trabalhos, espaço para projetos personalizados e acesso direto às informações de orçamento e agenda. Recupera a proposta anterior sem confundir catálogo de flashes com portfólio completo.',
+    sections:['tattoo-flash','tattoo-booking','healed-work','guest-spots'],
+    settings:{show_bio:false,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'compact',gallery_columns:'3',presentation_mode:'carousel',gallery_view_count:'1',navigation_mode:'dropdown',default_theme:'escuro',heading_font:'space-grotesk',body_font:'dm-sans',navigation_font:'ibm-plex-mono'}
+  },
+  {
+    id:'tattoo-flashbook',title:'Caderno de flashes',kind:'Tatuagem · desenhos autorais · catálogo e reservas',
+    description:'Um catálogo editorial de desenhos disponíveis: cada flash ganha espaço, identificação clara, técnica, tamanho e disponibilidade, com um caminho simples para consultar e reservar.',
     sections:['tattoo-flash','healed-work','tattoo-booking','guest-spots'],
     settings:{show_bio:true,show_bio_image:false,show_references:false,show_contact:true,content_width:'wide',hero_alignment:'left',hero_size:'compact',section_spacing:'comfortable',gallery_columns:'3',presentation_mode:'tattoo-book',gallery_view_count:'1',navigation_mode:'dropdown',default_theme:'escuro',heading_font:'cormorant',body_font:'dm-sans',navigation_font:'ibm-plex-mono'}
   },
@@ -476,8 +482,15 @@ export function CmsLayoutManager(){
     }
     window.addEventListener('message',handlePreviewReady)
     sendPreviewUpdate(floatingWindow)
-    sendPreviewUpdate(inlineWindow,inlinePreviewPayload)
-    return()=>window.removeEventListener('message',handlePreviewReady)
+    // O iframe inferior pode hidratar depois do efeito do CMS (especialmente com
+    // loading="lazy"). Reentrega a mesma versão do payload até o app filho
+    // responder ao handshake, sem depender de um único postMessage no timing exato.
+    const deliverInlinePreview=()=>sendPreviewUpdate(inlineWindow,inlinePreviewPayload)
+    const inlineRetries=[0,100,300,700].map(delay=>window.setTimeout(deliverInlinePreview,delay))
+    return()=>{
+      window.removeEventListener('message',handlePreviewReady)
+      inlineRetries.forEach(timer=>window.clearTimeout(timer))
+    }
   },[settings,previewFocus,previewMode,previewOpen,previewingPresetId])
 
   // A simulação de hover é isolada do preview final. O iframe pode concluir
