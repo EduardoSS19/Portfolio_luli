@@ -87,7 +87,13 @@ function parseLayoutPreview(raw) {
             if (typeof source[key] === 'string' && source[key].length <= 5000 && (!['cta_url','image_url'].includes(key) || safeUrl(source[key]))) settings[key] = source[key]
           })
           ;['show_description','show_image','show_bio'].forEach(key => { if (typeof source[key] === 'boolean') settings[key] = source[key] })
-          return {id:section.id,type:section.type,settings}
+          const items = Array.isArray(section.items) ? section.items.slice(0,30).filter(item => item && typeof item.title === 'string' && item.title.trim()).map(item => {
+            const clean = {title:item.title.slice(0,120)}
+            ;['description','period','venue','location','size','placement','price','status'].forEach(key => { if (typeof item[key] === 'string') clean[key] = item[key].slice(0,1200) })
+            ;['image_url','link_url'].forEach(key => { if (typeof item[key] === 'string' && safeUrl(item[key])) clean[key] = item[key].slice(0,500) })
+            return clean
+          }) : undefined
+          return {id:section.id,type:section.type,settings,...(items ? {items} : {})}
         })
       }))
       if (pages.length) safe.page_schema = {version:1,pages}
@@ -156,9 +162,9 @@ const LAYOUT_PREVIEW_DEMO = {
 function getLayoutPreviewDemo(layout = {}, previewPresetId = null) {
   const sections = layout.custom_sections || []
   const sectionTypes = sections.map(section => section.type)
-  const preset = previewPresetId || ['editorial-current','visual-artist','illustrator','photographer','photo-filmstrip','designer','tattoo-flashbook','tattoo-studio','museum-gallery','brutalist-type']
+  const preset = previewPresetId || ['editorial-current','visual-artist','illustrator','photographer','photo-filmstrip','designer','tattoo-artist','tattoo-flashbook','tattoo-studio','museum-gallery','brutalist-type']
     .find(id => sections.some(section => String(section.id).includes('preset-' + id + '-')))
-  const isTattoo = ['tattoo-flashbook','tattoo-studio'].includes(preset) || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
+  const isTattoo = ['tattoo-artist','tattoo-flashbook','tattoo-studio'].includes(preset) || sectionTypes.includes('tattoo-flash') || sectionTypes.includes('tattoo-booking') || sectionTypes.includes('healed-work')
   const isStudio = preset === 'tattoo-studio' || sectionTypes.includes('studio-team')
   const isPhoto = ['photographer','photo-filmstrip'].includes(preset) || (!preset && ['immersive','filmstrip'].includes(layout.presentation_mode))
   const isDesign = ['designer','brutalist-type'].includes(preset) || (!preset && ['carousel','swiss','brutalist'].includes(layout.presentation_mode) && layout.default_theme === 'claro')
