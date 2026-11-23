@@ -42,7 +42,7 @@ export function StudioHome() {
         return response.json()
       })
       .then(payload => {
-        if (!Array.isArray(payload.results) || !payload.results.length) return
+        if (!Array.isArray(payload.results)) return
         setCatalog(payload.results.map((item, index) => ({
           id: item.slug,
           number: String(index + 1).padStart(2, '0'),
@@ -83,7 +83,7 @@ export function StudioHome() {
 
     <section className="studio-models" id="modelos">
       <div className="studio-section-heading"><div><p className="studio-section-label">02 / A CASA DOS MODELOS</p><h2>Uma estrutura.<br/><em>Muitas possibilidades.</em></h2></div><p>Estes são alguns caminhos de composição disponíveis na arquitetura do CMS. Não são temas fechados: são pontos de partida que podem ser combinados, reorganizados e transformados.</p></div>
-      <div className="studio-model-grid">{catalog.map((item, index) => <article className="studio-model-card" key={item.id}>
+      <div className="studio-model-grid">{catalog.length ? catalog.map((item, index) => <article className="studio-model-card" key={item.id}>
         <ModelArtwork shape={item.shape} index={index}/>
         <div className="studio-model-info"><div className="studio-model-overline"><span>{item.number} / {item.kind}</span><span>EXPERIÊNCIA</span></div><h3>{item.name}</h3><p>{item.description}</p><div className="studio-tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div></div>
       </article>)}</div>
