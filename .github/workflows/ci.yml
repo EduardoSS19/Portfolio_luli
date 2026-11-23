@@ -45,6 +45,7 @@ jobs:
           filters: |
             backend:
               - 'portfolio/**/*.py'
+              - 'studio_catalog/**/*.py'
               - 'config/**/*.py'
               - 'manage.py'
               - 'requirements*.txt'

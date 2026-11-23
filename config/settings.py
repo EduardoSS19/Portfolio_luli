@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "cloudinary_storage",
     "cloudinary",
     "portfolio.apps.PortfolioConfig",
+    "studio_catalog.apps.StudioCatalogConfig",
 ]
 
 MIDDLEWARE = [
