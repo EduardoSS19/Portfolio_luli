@@ -10,6 +10,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", healthcheck, name="healthcheck"),
     path("api/", include("portfolio.urls")),
+    path("api/studio/", include("studio_catalog.urls")),
     path("painel", frontend, name="cms-frontend"),
     path("painel/", frontend, name="cms-frontend-slash"),
     path("", frontend, name="frontend"),
