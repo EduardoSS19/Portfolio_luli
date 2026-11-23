@@ -14,6 +14,7 @@ import { trackAnalyticsEvent } from './utils/analytics.js'
 import { CmsPage } from './cms/CmsPage.jsx'
 import { PageRenderer } from './layout/PageRenderer.jsx'
 import { StudioHome } from './studio/StudioHome.jsx'
+import { StudioManager } from './studio/StudioManager.jsx'
 import './layout/page-renderer.css'
 
 const DEFAULT_LAYOUT_SETTINGS = {
@@ -675,7 +676,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (window.location.pathname === '/studio' || window.location.pathname === '/studio/') {
+    if (['/studio', '/studio/', '/studio/painel', '/studio/painel/'].includes(window.location.pathname)) {
       setCarregando(false)
       return undefined
     }
@@ -826,6 +827,10 @@ export default function App() {
 
   if (window.location.pathname === '/studio' || window.location.pathname === '/studio/') {
     return <StudioHome />
+  }
+
+  if (window.location.pathname === '/studio/painel' || window.location.pathname === '/studio/painel/') {
+    return <StudioManager />
   }
 
   if (window.location.pathname === '/painel' || window.location.pathname === '/painel/') {
