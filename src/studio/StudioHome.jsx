@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './StudioHome.css'
 
 const experiences = [
@@ -24,14 +24,41 @@ const modules = [
   ['Contato', 'Canais e conversas'],
 ]
 
-function ModelArtwork({ shape }) {
+function ModelArtwork({ shape, index }) {
   return <div className={'studio-model-art studio-model-art-' + shape} aria-hidden="true">
     <span className="art-block art-block-one" /><span className="art-block art-block-two" /><span className="art-block art-block-three" />
-    <span className="art-line" /><span className="art-caption">COMPOSIÇÃO / 0{experiences.findIndex(item => item.shape === shape) + 1}</span>
+    <span className="art-line" /><span className="art-caption">COMPOSIÇÃO / {String(index + 1).padStart(2, '0')}</span>
   </div>
 }
 
 export function StudioHome() {
+  const [catalog, setCatalog] = useState(experiences)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch('/api/studio/templates/', { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error(`Catálogo respondeu ${response.status}`)
+        return response.json()
+      })
+      .then(payload => {
+        if (!Array.isArray(payload.results) || !payload.results.length) return
+        setCatalog(payload.results.map((item, index) => ({
+          id: item.slug,
+          number: String(index + 1).padStart(2, '0'),
+          name: item.title,
+          kind: item.kind,
+          description: item.description,
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          shape: item.previewShape || 'editorial',
+        })))
+      })
+      .catch(error => {
+        if (error.name !== 'AbortError') console.warn('Não foi possível carregar o catálogo do estúdio.', error)
+      })
+    return () => controller.abort()
+  }, [])
+
   return <main className="studio-home">
     <header className="studio-nav">
       <a className="studio-wordmark" href="/studio" aria-label="Estúdio, início"><span className="studio-mark">◎</span> ESTÚDIO<span className="studio-wordmark-dot">.</span></a>
@@ -56,11 +83,11 @@ export function StudioHome() {
 
     <section className="studio-models" id="modelos">
       <div className="studio-section-heading"><div><p className="studio-section-label">02 / A CASA DOS MODELOS</p><h2>Uma estrutura.<br/><em>Muitas possibilidades.</em></h2></div><p>Estes são alguns caminhos de composição disponíveis na arquitetura do CMS. Não são temas fechados: são pontos de partida que podem ser combinados, reorganizados e transformados.</p></div>
-      <div className="studio-model-grid">{experiences.map(item => <article className="studio-model-card" key={item.id}>
-        <ModelArtwork shape={item.shape}/>
+      <div className="studio-model-grid">{catalog.map((item, index) => <article className="studio-model-card" key={item.id}>
+        <ModelArtwork shape={item.shape} index={index}/>
         <div className="studio-model-info"><div className="studio-model-overline"><span>{item.number} / {item.kind}</span><span>EXPERIÊNCIA</span></div><h3>{item.name}</h3><p>{item.description}</p><div className="studio-tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div></div>
       </article>)}</div>
-      <p className="studio-model-note">O catálogo é uma amostra da linguagem do sistema. A próxima etapa é conectá-lo ao cadastro de modelos do CMS, para que novas experiências publicadas no painel apareçam aqui sem alterações no código.</p>
+      <p className="studio-model-note">Os modelos exibidos são carregados do catálogo publicado do estúdio. Novas experiências podem ser cadastradas, reorganizadas e publicadas sem alterar esta página.</p>
     </section>
 
     <section className="studio-principles" id="construcao">
