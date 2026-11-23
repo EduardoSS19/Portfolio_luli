@@ -86,7 +86,7 @@ export function StudioHome() {
       <div className="studio-model-grid">{catalog.length ? catalog.map((item, index) => <article className="studio-model-card" key={item.id}>
         <ModelArtwork shape={item.shape} index={index}/>
         <div className="studio-model-info"><div className="studio-model-overline"><span>{item.number} / {item.kind}</span><span>EXPERIÊNCIA</span></div><h3>{item.name}</h3><p>{item.description}</p><div className="studio-tags">{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div></div>
-      </article>)}</div>
+      </article>) : <p className="studio-model-note">Estamos preparando novas experiências para este catálogo. Volte em breve.</p>}</div>
       <p className="studio-model-note">Os modelos exibidos são carregados do catálogo publicado do estúdio. Novas experiências podem ser cadastradas, reorganizadas e publicadas sem alterar esta página.</p>
     </section>
 
