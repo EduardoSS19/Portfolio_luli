@@ -13,6 +13,7 @@ import { Contato } from './components/Contato.jsx'
 import { trackAnalyticsEvent } from './utils/analytics.js'
 import { CmsPage } from './cms/CmsPage.jsx'
 import { PageRenderer } from './layout/PageRenderer.jsx'
+import { StudioHome } from './studio/StudioHome.jsx'
 import './layout/page-renderer.css'
 
 const DEFAULT_LAYOUT_SETTINGS = {
@@ -674,6 +675,11 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (window.location.pathname === '/studio' || window.location.pathname === '/studio/') {
+      setCarregando(false)
+      return undefined
+    }
+
     if (window.location.pathname === '/painel' || window.location.pathname === '/painel/') {
       setCarregando(false)
       return undefined
@@ -816,6 +822,10 @@ export default function App() {
       return
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (window.location.pathname === '/studio' || window.location.pathname === '/studio/') {
+    return <StudioHome />
   }
 
   if (window.location.pathname === '/painel' || window.location.pathname === '/painel/') {
