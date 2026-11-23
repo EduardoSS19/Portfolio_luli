@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import migrations, models
 
 
@@ -42,7 +43,7 @@ class Migration(migrations.Migration):
                 ("kind", models.CharField(blank=True, max_length=60, verbose_name="categoria")),
                 ("description", models.TextField(verbose_name="descrição")),
                 ("presentation_mode", models.CharField(max_length=40, verbose_name="modo de apresentação")),
-                ("preview_shape", models.CharField(default="editorial", max_length=40, validators=[models.RegexValidator(r"^[a-z0-9-]+$", "Use apenas letras minúsculas, números e hífens.")], verbose_name="forma da prévia")),
+                ("preview_shape", models.CharField(default="editorial", max_length=40, validators=[RegexValidator(r"^[a-z0-9-]+$", "Use apenas letras minúsculas, números e hífens.")], verbose_name="forma da prévia")),
                 ("tags", models.JSONField(blank=True, default=list, verbose_name="características")),
                 ("layout_config", models.JSONField(blank=True, default=dict, verbose_name="configuração inicial de layout")),
                 ("position", models.PositiveIntegerField(default=0, verbose_name="ordem")),
